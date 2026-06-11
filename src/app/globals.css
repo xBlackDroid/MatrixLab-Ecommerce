@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de marca MatrixLab Intelligence.
+ * No cambiar sin aprobación de branding.
+ */
+@theme {
+  --color-ml-bg: #0b0f19;
+  --color-ml-violet: #b197fc;
+  --color-ml-cyan: #4dceff;
+  --color-ml-coral: #ff8787;
+  --color-ml-gray: #343a40;
+  --color-ml-white: #f8f9fa;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  --shadow-glow-violet: 0 0 24px 0 rgba(177, 151, 252, 0.35);
+  --shadow-glow-cyan: 0 0 24px 0 rgba(77, 206, 255, 0.3);
+
+  --animate-float: float 7s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ml-bg);
+  color: var(--color-ml-white);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: rgba(177, 151, 252, 0.4);
+  color: var(--color-ml-white);
+}
+
+/* Paneles glassmorphism del laboratorio */
+.glass {
+  background: rgba(248, 249, 250, 0.04);
+  border: 1px solid rgba(248, 249, 250, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.glass-strong {
+  background: rgba(11, 15, 25, 0.78);
+  border: 1px solid rgba(177, 151, 252, 0.25);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.text-gradient {
+  background: linear-gradient(100deg, #b197fc 0%, #4dceff 60%, #b197fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.grid-overlay {
+  background-image: linear-gradient(
+      rgba(177, 151, 252, 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(177, 151, 252, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Scrollbar discreto acorde al laboratorio */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(177, 151, 252, 0.35) transparent;
+}
