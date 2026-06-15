@@ -29,4 +29,10 @@ export const whatsappMessages = {
     `Hola MatrixLab, quiero personalizar este producto: ${name}`,
   quoteDesign: () =>
     "Hola MatrixLab, quiero cotizar una pieza personalizada del laboratorio.",
+  designHelp: () =>
+    "Hola MatrixLab, estoy diseñando en el laboratorio y necesito ayuda para preparar mi archivo.",
+  sheetHelp: () =>
+    "Hola MatrixLab, quiero ayuda para armar mi planilla de stickers o imanes.",
+  laserQuote: () =>
+    "Hola MatrixLab, quiero cotizar un grabado personalizado del laboratorio láser.",
 } as const;

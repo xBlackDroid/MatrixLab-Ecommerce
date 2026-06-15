@@ -16,10 +16,12 @@ import {
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
 import { hashSessionId, readSessionId } from "@/lib/security/session";
-import { sanitizeMultiline } from "@/lib/security/sanitize";
+import { sanitizeMultiline, sanitizeText } from "@/lib/security/sanitize";
 import {
   DESIGN_JSON_MAX_BYTES,
+  DESIGN_JSON_MAX_BYTES_V2,
   DesignerSaveSchema,
+  DesignSaveV2Schema,
   PREVIEW_MAX_BYTES,
 } from "@/lib/validation/designer";
 import { UuidSchema } from "@/lib/validation/store";
@@ -88,7 +90,46 @@ export async function GET(request: NextRequest, context: RouteContext) {
   });
 }
 
-/** Guarda coordenadas, notas y preview compuesta del diseño. */
+/**
+ * Genera y sube una preview compuesta (dataURL del canvas) a storage privado.
+ * Re-encodea con sharp a webp para neutralizar payloads. Devuelve la ruta o
+ * undefined (la preview es opcional y nunca tira el guardado).
+ */
+async function buildPreviewPath(
+  sessionId: string,
+  designId: string,
+  dataUrl: string,
+): Promise<string | undefined> {
+  const match = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(
+    dataUrl,
+  );
+  if (!match || dataUrl.length > PREVIEW_MAX_BYTES) return undefined;
+  try {
+    const sharp = (await import("sharp")).default;
+    const inputBuffer = Buffer.from(match[2]!, "base64");
+    const safePreview = await sharp(inputBuffer)
+      .resize({ width: 1000, height: 1200, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+    const path = `${hashSessionId(sessionId)}/${designId}/preview-${nanoid(8)}.webp`;
+    const uploaded = await uploadToBucket({
+      bucket: BUCKETS.designPreviews,
+      path,
+      body: safePreview,
+      contentType: "image/webp",
+    });
+    if (uploaded.ok) return path;
+  } catch {
+    // Preview inválida: se ignora.
+  }
+  return undefined;
+}
+
+/**
+ * Guarda un diseño. Acepta el formato v1 (single-asset) por compatibilidad o
+ * el formato v2 (prenda multi-imagen / planilla / láser). El backend revalida
+ * todos los límites: nunca confía en el cliente.
+ */
 export async function PATCH(request: NextRequest, context: RouteContext) {
   const ip = getClientIp(request);
   const limit = checkRateLimit(`designs:${ip}`, RATE_LIMITS.designs);
@@ -103,10 +144,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   const { id } = await context.params;
   const idParsed = UuidSchema.safeParse(id);
   const body = await readJsonBody(request);
-  const parsed = DesignerSaveSchema.safeParse(body);
-  if (!idParsed.success || !parsed.success) {
-    return jsonError("Datos inválidos.", 400);
-  }
+  if (!idParsed.success) return jsonError("Datos inválidos.", 400);
 
   const design = await findOwnedDesign(idParsed.data, sessionId);
   if (!design) return jsonError("Diseño no encontrado.", 404);
@@ -114,71 +152,100 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     return jsonError("Este diseño ya está ligado a un pedido.", 409);
   }
 
-  // El JSON de diseño tiene tamaño máximo estricto.
-  if (
-    parsed.data.designJson &&
-    JSON.stringify(parsed.data.designJson).length > DESIGN_JSON_MAX_BYTES
-  ) {
+  const client = requireServiceClient();
+
+  // ---- v1: single-asset (compatibilidad con diseños existentes) ----------
+  const v1 = DesignerSaveSchema.safeParse(body);
+  if (v1.success) {
+    if (
+      v1.data.designJson &&
+      JSON.stringify(v1.data.designJson).length > DESIGN_JSON_MAX_BYTES
+    ) {
+      return jsonError("El diseño es demasiado complejo.", 400);
+    }
+    const previewPath = v1.data.previewDataUrl
+      ? await buildPreviewPath(sessionId, design.id, v1.data.previewDataUrl)
+      : undefined;
+    const { error } = await client
+      .from("design_projects")
+      .update({
+        product_type: v1.data.productType,
+        product_id: v1.data.productId,
+        variant_id: v1.data.variantId ?? null,
+        base_color: v1.data.baseColor ?? null,
+        selected_size: v1.data.selectedSize ?? null,
+        print_zone: v1.data.printZone,
+        position_x: v1.data.positionX,
+        position_y: v1.data.positionY,
+        scale: v1.data.scale,
+        rotation: v1.data.rotation,
+        customer_notes: v1.data.customerNotes
+          ? sanitizeMultiline(v1.data.customerNotes, 500)
+          : null,
+        design_json: v1.data.designJson ?? null,
+        ...(previewPath ? { preview_url: previewPath } : {}),
+      })
+      .eq("id", design.id)
+      .eq("session_id", sessionId);
+    if (error) {
+      return jsonError("No pudimos guardar tu diseño. Intenta de nuevo.", 500);
+    }
+    return NextResponse.json({ ok: true, designId: design.id });
+  }
+
+  // ---- v2: prendas multi-imagen, planillas y láser -----------------------
+  const v2 = DesignSaveV2Schema.safeParse(body);
+  if (!v2.success) return jsonError("Datos inválidos.", 400);
+  const payload = v2.data;
+
+  if (JSON.stringify(payload.designJson).length > DESIGN_JSON_MAX_BYTES_V2) {
     return jsonError("El diseño es demasiado complejo.", 400);
   }
 
-  const client = requireServiceClient();
+  // Sanitiza el texto del láser antes de persistir (defensa en profundidad).
+  let designJson: Record<string, unknown> = payload.designJson as Record<
+    string,
+    unknown
+  >;
+  if (payload.designerType === "laser") {
+    designJson = {
+      ...payload.designJson,
+      elements: payload.designJson.elements.map((el) =>
+        el.type === "text"
+          ? { ...el, text: sanitizeText(el.text, 40) }
+          : el,
+      ),
+    };
+  }
 
-  // Preview compuesta opcional (dataURL del canvas) → re-encode seguro webp.
-  let previewPath: string | undefined;
-  const dataUrl = parsed.data.previewDataUrl;
-  if (dataUrl) {
-    const match = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(
-      dataUrl,
-    );
-    if (!match || dataUrl.length > PREVIEW_MAX_BYTES) {
-      return jsonError("La preview no es válida.", 400);
-    }
-    try {
-      const sharp = (await import("sharp")).default;
-      const inputBuffer = Buffer.from(match[2]!, "base64");
-      const safePreview = await sharp(inputBuffer)
-        .resize({ width: 900, height: 900, fit: "inside", withoutEnlargement: true })
-        .webp({ quality: 82 })
-        .toBuffer();
-      const path = `${hashSessionId(sessionId)}/${design.id}/preview-${nanoid(8)}.webp`;
-      const uploaded = await uploadToBucket({
-        bucket: BUCKETS.designPreviews,
-        path,
-        body: safePreview,
-        contentType: "image/webp",
-      });
-      if (uploaded.ok) previewPath = path;
-    } catch {
-      // Preview inválida: se ignora, el diseño se guarda sin ella.
-    }
+  const previewPath = payload.previewDataUrl
+    ? await buildPreviewPath(sessionId, design.id, payload.previewDataUrl)
+    : undefined;
+
+  const updates: Record<string, unknown> = {
+    product_type: payload.productType,
+    product_id: payload.productId,
+    variant_id: payload.variantId ?? null,
+    designer_type: payload.designerType,
+    customer_notes: payload.customerNotes
+      ? sanitizeMultiline(payload.customerNotes, 500)
+      : null,
+    design_json: designJson,
+    ...(previewPath ? { preview_url: previewPath } : {}),
+  };
+  if (payload.designerType === "garment") {
+    updates.base_color = payload.colorId;
+    updates.selected_size = payload.size;
+    updates.profile = payload.profile;
   }
 
   const { error } = await client
     .from("design_projects")
-    .update({
-      product_type: parsed.data.productType,
-      product_id: parsed.data.productId,
-      variant_id: parsed.data.variantId ?? null,
-      base_color: parsed.data.baseColor ?? null,
-      selected_size: parsed.data.selectedSize ?? null,
-      print_zone: parsed.data.printZone,
-      position_x: parsed.data.positionX,
-      position_y: parsed.data.positionY,
-      scale: parsed.data.scale,
-      rotation: parsed.data.rotation,
-      customer_notes: parsed.data.customerNotes
-        ? sanitizeMultiline(parsed.data.customerNotes, 500)
-        : null,
-      design_json: parsed.data.designJson ?? null,
-      ...(previewPath ? { preview_url: previewPath } : {}),
-    })
+    .update(updates)
     .eq("id", design.id)
     .eq("session_id", sessionId);
-
   if (error) {
     return jsonError("No pudimos guardar tu diseño. Intenta de nuevo.", 500);
   }
-
   return NextResponse.json({ ok: true, designId: design.id });
 }

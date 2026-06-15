@@ -4,6 +4,7 @@ import { getAnonClient } from "@/lib/db/client";
 import { getServiceClient } from "@/lib/db/admin";
 import type {
   CategoryRow,
+  DesignerProductType,
   ProductRow,
   ProductVariantRow,
   ProductWithVariants,
@@ -191,16 +192,22 @@ export async function getRelatedProducts(
   return all.filter((p) => p.id !== product.id).slice(0, limit);
 }
 
-/** Mapa handle de producto → tipo del diseñador (para CTA "Personalizar"). */
-export const DESIGNER_PRODUCT_HANDLES: Record<string, "playera" | "gorra" | "tote"> = {
+/**
+ * Mapa handle de producto base → tipo del diseñador (para el CTA
+ * "Personalizar en el laboratorio" en la página de producto). El mapa
+ * inverso (tipo → handle) vive en lib/designer/product-catalog.ts.
+ */
+export const DESIGNER_PRODUCT_HANDLES: Record<string, DesignerProductType> = {
   "playera-personalizada": "playera",
+  "sudadera-personalizada": "sudadera",
   "gorra-personalizada": "gorra",
+  "gorra-trucker-personalizada": "gorra-trucker",
+  "gorra-clasica-personalizada": "gorra-clasica",
   "tote-bag-personalizada": "tote",
+  "planilla-stickers": "stickers-planilla",
+  "planilla-imanes": "imanes-planilla",
+  "grabado-laser-personalizado": "laser",
 };
 
-/** Producto base que usa el diseñador para cada tipo. */
-export const DESIGNER_TYPE_TO_HANDLE: Record<"playera" | "gorra" | "tote", string> = {
-  playera: "playera-personalizada",
-  gorra: "gorra-personalizada",
-  tote: "tote-bag-personalizada",
-};
+// Re-export del mapa tipo → handle (fuente: product-catalog).
+export { DESIGNER_TYPE_TO_HANDLE } from "@/lib/designer/product-catalog";

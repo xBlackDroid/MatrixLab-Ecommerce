@@ -1,0 +1,539 @@
+"use client";
+
+import { useCallback, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+import { nanoid } from "nanoid";
+import { toast } from "sonner";
+import { emitCartUpdated } from "@/components/store/CartBadge";
+import DesignerCTA from "@/components/designer/DesignerCTA";
+import FreeLayoutSheet from "@/components/designer/sheets/FreeLayoutSheet";
+import RepeatLayoutSheet from "@/components/designer/sheets/RepeatLayoutSheet";
+import SheetDisclaimer from "@/components/designer/sheets/SheetDisclaimer";
+import {
+  clampToPrintable,
+  computeRepeatPlacements,
+  findSlot,
+  type RectCm,
+} from "@/components/designer/sheets/CollisionEngine";
+import { exportStagePreview } from "@/lib/designer/exportPreview";
+import { getCatalogEntry } from "@/lib/designer/product-catalog";
+import {
+  DEFAULT_PIECE_CM,
+  LETTER_CM,
+  MAX_FREE_IMAGES,
+  MIN_SPACING_CM,
+  PRINTABLE_AREA_CM,
+  REPEAT_MAX_CM,
+  REPEAT_MIN_CM,
+} from "@/lib/designer/sheet-config";
+import {
+  validateDesignFile,
+  validateImageDimensions,
+} from "@/lib/designer/validation";
+import type { DesignerProductType, ProductWithVariants } from "@/lib/db/types";
+import type Konva from "konva";
+import type { SheetPiece } from "@/lib/designer/types";
+
+const SheetCanvas = dynamic(
+  () => import("@/components/designer/sheets/SheetCanvas"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex aspect-[3/4] w-full items-center justify-center">
+        <Loader2 className="h-9 w-9 animate-spin text-ml-violet" aria-hidden />
+      </div>
+    ),
+  },
+);
+
+type Shape = "square" | "circle" | "rectangle";
+
+interface RepeatBase {
+  assetId: string;
+  localUrl: string;
+  remoteUrl?: string;
+  image: HTMLImageElement;
+  naturalWidth: number;
+  naturalHeight: number;
+}
+
+interface SheetDesignerProps {
+  productType: DesignerProductType;
+  product: ProductWithVariants;
+}
+
+const AREA = PRINTABLE_AREA_CM;
+
+export default function SheetDesigner({
+  productType,
+  product,
+}: SheetDesignerProps) {
+  const entry = getCatalogEntry(productType);
+  const sheetType = entry.sheetType ?? "stickers";
+  const mode = entry.sheetMode ?? "free";
+
+  const [designId, setDesignId] = useState<string | null>(null);
+  const [pieces, setPieces] = useState<SheetPiece[]>([]);
+  const [images, setImages] = useState<Record<string, HTMLImageElement>>({});
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const [repeatBase, setRepeatBase] = useState<RepeatBase | null>(null);
+  const [shape, setShape] = useState<Shape>("square");
+  const [pieceW, setPieceW] = useState(DEFAULT_PIECE_CM);
+  const [pieceH, setPieceH] = useState(DEFAULT_PIECE_CM);
+
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [notes, setNotes] = useState("");
+
+  const stageRef = useRef<Konva.Stage | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const objectUrls = useRef<string[]>([]);
+
+  const customVariant = useMemo(() => {
+    const variants = product.variants ?? [];
+    return (
+      variants.find((v) => v.sku?.endsWith("-CUSTOM")) ?? variants[0] ?? null
+    );
+  }, [product.variants]);
+
+  const placements = useMemo(
+    () =>
+      mode === "repeat" && repeatBase
+        ? computeRepeatPlacements(pieceW, pieceH, AREA, MIN_SPACING_CM)
+        : [],
+    [mode, repeatBase, pieceW, pieceH],
+  );
+
+  const markDirty = useCallback(() => setSaved(false), []);
+
+  const ensureDesign = useCallback(async (): Promise<string | null> => {
+    if (designId) return designId;
+    try {
+      const res = await fetch("/api/designs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productType,
+          productId: product.id,
+          ...(customVariant ? { variantId: customVariant.id } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.designId) {
+        toast.error(data?.error ?? "No pudimos iniciar tu planilla.");
+        return null;
+      }
+      setDesignId(data.designId as string);
+      return data.designId as string;
+    } catch {
+      toast.error("Sin conexión. Intenta de nuevo.");
+      return null;
+    }
+  }, [designId, productType, product.id, customVariant]);
+
+  async function uploadFile(file: File): Promise<{
+    assetId: string;
+    remoteUrl?: string;
+    localUrl: string;
+    img: HTMLImageElement;
+  } | null> {
+    const validation = validateDesignFile(file);
+    if (!validation.ok) {
+      toast.error(validation.error);
+      return null;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    objectUrls.current.push(objectUrl);
+    const img = await new Promise<HTMLImageElement | null>((resolve) => {
+      const image = new window.Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => resolve(null);
+      image.src = objectUrl;
+    });
+    if (!img) {
+      toast.error("No pudimos leer la imagen.");
+      return null;
+    }
+    const dims = validateImageDimensions(img.width, img.height);
+    if (!dims.ok) {
+      toast.error(dims.error);
+      return null;
+    }
+    const id = await ensureDesign();
+    if (!id) return null;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("designProjectId", id);
+    const res = await fetch("/api/uploads/design-assets", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+      toast.error(data?.error ?? "No pudimos subir tu archivo.");
+      return null;
+    }
+    return {
+      assetId: data.assetId as string,
+      remoteUrl: data.signedUrl as string | undefined,
+      localUrl: objectUrl,
+      img,
+    };
+  }
+
+  async function handleFreeUpload(file: File) {
+    if (pieces.length >= MAX_FREE_IMAGES) {
+      toast.error("Alcanzaste el máximo de 7 imágenes.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const uploaded = await uploadFile(file);
+      if (!uploaded) return;
+      const ratio = uploaded.img.height / uploaded.img.width;
+      const widthCm = DEFAULT_PIECE_CM;
+      const heightCm = Math.round(DEFAULT_PIECE_CM * ratio * 10) / 10;
+      const others: RectCm[] = pieces.map((p) => ({
+        xCm: p.xCm,
+        yCm: p.yCm,
+        widthCm: p.widthCm,
+        heightCm: p.heightCm,
+      }));
+      const slot = findSlot(widthCm, heightCm, others, AREA, MIN_SPACING_CM);
+      if (!slot) {
+        toast.error(
+          "Esta pieza ya no cabe con la separación mínima. Reduce tamaño o elimina otra pieza.",
+        );
+        return;
+      }
+      const localId = nanoid(8);
+      setImages((prev) => ({ ...prev, [localId]: uploaded.img }));
+      setPieces((prev) => [
+        ...prev,
+        {
+          id: localId,
+          assetId: uploaded.assetId,
+          localUrl: uploaded.localUrl,
+          remoteUrl: uploaded.remoteUrl,
+          naturalWidth: uploaded.img.width,
+          naturalHeight: uploaded.img.height,
+          xCm: slot.xCm,
+          yCm: slot.yCm,
+          widthCm,
+          heightCm,
+          rotation: 0,
+          fileName: file.name,
+        },
+      ]);
+      setSelectedId(localId);
+      markDirty();
+      toast.success("Imagen agregada a la planilla");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleRepeatUpload(file: File) {
+    setUploading(true);
+    try {
+      const uploaded = await uploadFile(file);
+      if (!uploaded) return;
+      setRepeatBase({
+        assetId: uploaded.assetId,
+        localUrl: uploaded.localUrl,
+        remoteUrl: uploaded.remoteUrl,
+        image: uploaded.img,
+        naturalWidth: uploaded.img.width,
+        naturalHeight: uploaded.img.height,
+      });
+      markDirty();
+      toast.success("Imagen lista para repetir");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function movePiece(id: string, xCm: number, yCm: number) {
+    setPieces((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, xCm, yCm } : p)),
+    );
+    markDirty();
+  }
+
+  function deletePiece(id: string) {
+    setPieces((prev) => prev.filter((p) => p.id !== id));
+    if (selectedId === id) setSelectedId(null);
+    markDirty();
+  }
+
+  function resizePiece(id: string, widthCm: number) {
+    setPieces((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        const ratio = p.naturalHeight / p.naturalWidth;
+        const heightCm = Math.round(widthCm * ratio * 10) / 10;
+        const clamped = clampToPrintable(
+          { xCm: p.xCm, yCm: p.yCm, widthCm, heightCm },
+          AREA,
+        );
+        return { ...p, widthCm, heightCm, xCm: clamped.xCm, yCm: clamped.yCm };
+      }),
+    );
+    markDirty();
+  }
+
+  function changeShape(next: Shape) {
+    setShape(next);
+    if (next !== "rectangle") setPieceH(pieceW);
+    markDirty();
+  }
+
+  function changeSize(w: number, h: number) {
+    setPieceW(w);
+    setPieceH(shape === "rectangle" ? h : w);
+    markDirty();
+  }
+
+  function buildDesignJson() {
+    if (mode === "free") {
+      return {
+        version: 1 as const,
+        designerType: "sheet" as const,
+        sheetType,
+        mode: "free" as const,
+        unit: "cm" as const,
+        page: { format: "letter" as const, widthCm: LETTER_CM.width, heightCm: LETTER_CM.height },
+        printableArea: AREA,
+        minSpacingCm: MIN_SPACING_CM,
+        assets: pieces.map((p) => ({
+          assetId: p.assetId,
+          url: p.remoteUrl,
+          xCm: p.xCm,
+          yCm: p.yCm,
+          widthCm: p.widthCm,
+          heightCm: p.heightCm,
+          rotation: p.rotation,
+          shape: "custom" as const,
+        })),
+      };
+    }
+    return {
+      version: 1 as const,
+      designerType: "sheet" as const,
+      sheetType,
+      mode: "repeat" as const,
+      unit: "cm" as const,
+      page: { format: "letter" as const, widthCm: LETTER_CM.width, heightCm: LETTER_CM.height },
+      printableArea: AREA,
+      minSpacingCm: MIN_SPACING_CM,
+      baseAssetId: repeatBase?.assetId,
+      shape,
+      pieceSizeCm: { width: pieceW, height: pieceH },
+      count: placements.length,
+      placements,
+    };
+  }
+
+  const hasContent = mode === "free" ? pieces.length > 0 : Boolean(repeatBase);
+
+  async function saveDesign(showToast = true): Promise<string | null> {
+    if (!hasContent) {
+      toast.error("Agrega al menos una imagen para guardar tu planilla.");
+      return null;
+    }
+    const id = await ensureDesign();
+    if (!id) return null;
+    setSaving(true);
+    try {
+      const previewDataUrl = stageRef.current
+        ? exportStagePreview(stageRef.current)
+        : null;
+      const res = await fetch(`/api/designs/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          designerType: "sheet",
+          productType,
+          productId: product.id,
+          ...(customVariant ? { variantId: customVariant.id } : {}),
+          ...(notes.trim() ? { customerNotes: notes.trim() } : {}),
+          designJson: buildDesignJson(),
+          ...(previewDataUrl ? { previewDataUrl } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        toast.error(data?.error ?? "No pudimos guardar tu planilla.");
+        return null;
+      }
+      setSaved(true);
+      if (showToast) toast.success("Planilla guardada correctamente");
+      return id;
+    } catch {
+      toast.error("Sin conexión. Intenta de nuevo.");
+      return null;
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleAddToCart() {
+    if (!customVariant) {
+      toast.error("Este producto no está disponible por ahora.");
+      return;
+    }
+    setAddingToCart(true);
+    try {
+      const id = await saveDesign(false);
+      if (!id) return;
+      const res = await fetch("/api/cart/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product.id,
+          variantId: customVariant.id,
+          quantity: 1,
+          designProjectId: id,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        toast.error(data?.error ?? "No pudimos agregarla al carrito.");
+        return;
+      }
+      emitCartUpdated();
+      toast.success("¡Tu planilla está en el carrito!", {
+        action: {
+          label: "Ver carrito",
+          onClick: () => {
+            window.location.href = "/tienda/carrito";
+          },
+        },
+      });
+    } finally {
+      setAddingToCart(false);
+    }
+  }
+
+  function triggerUpload() {
+    fileInputRef.current?.click();
+  }
+
+  return (
+    <>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="glass-strong relative overflow-hidden rounded-3xl p-3 sm:p-5">
+          <SheetCanvas
+            mode={mode}
+            pageCm={{ width: LETTER_CM.width, height: LETTER_CM.height }}
+            printableCm={AREA}
+            spacingCm={MIN_SPACING_CM}
+            pieces={pieces}
+            images={images}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onMove={movePiece}
+            onCollision={() =>
+              toast.error(
+                "Esta pieza ya no cabe con la separación mínima. Reduce tamaño o elimina otra pieza.",
+              )
+            }
+            repeatImage={repeatBase?.image ?? null}
+            repeatShape={shape}
+            repeatSizeCm={{ width: pieceW, height: pieceH }}
+            repeatPlacements={placements}
+            onStageReady={(s) => {
+              stageRef.current = s;
+            }}
+          />
+        </section>
+
+        <aside className="flex flex-col gap-5">
+          <div className="glass rounded-2xl p-5">
+            {mode === "free" ? (
+              <FreeLayoutSheet
+                pieces={pieces}
+                selectedId={selectedId}
+                uploading={uploading}
+                maxImages={MAX_FREE_IMAGES}
+                minPieceCm={REPEAT_MIN_CM}
+                maxPieceCm={REPEAT_MAX_CM}
+                onUploadClick={triggerUpload}
+                onSelect={setSelectedId}
+                onDelete={deletePiece}
+                onResize={resizePiece}
+              />
+            ) : (
+              <RepeatLayoutSheet
+                hasImage={Boolean(repeatBase)}
+                previewUrl={repeatBase?.localUrl ?? null}
+                uploading={uploading}
+                shape={shape}
+                widthCm={pieceW}
+                heightCm={pieceH}
+                count={placements.length}
+                minCm={REPEAT_MIN_CM}
+                maxCm={REPEAT_MAX_CM}
+                onUploadClick={triggerUpload}
+                onShapeChange={changeShape}
+                onSizeChange={changeSize}
+              />
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (mode === "free") handleFreeUpload(file);
+                  else handleRepeatUpload(file);
+                }
+                e.target.value = "";
+              }}
+            />
+          </div>
+
+          <div className="glass rounded-2xl p-5">
+            <label
+              htmlFor="sheet-notes"
+              className="mb-1.5 block text-sm font-medium text-ml-white/70"
+            >
+              Notas para el laboratorio (opcional)
+            </label>
+            <textarea
+              id="sheet-notes"
+              rows={3}
+              maxLength={500}
+              value={notes}
+              onChange={(e) => {
+                setNotes(e.target.value);
+                markDirty();
+              }}
+              placeholder="Cuéntanos cualquier detalle de tu planilla…"
+              className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-ml-white outline-none transition placeholder:text-ml-white/35 focus:border-ml-cyan"
+            />
+          </div>
+
+          <DesignerCTA
+            canSave={hasContent && !uploading}
+            canAddToCart={hasContent && !uploading}
+            saving={saving}
+            addingToCart={addingToCart}
+            saved={saved}
+            designId={designId}
+            onSave={() => saveDesign(true)}
+            onAddToCart={handleAddToCart}
+          />
+        </aside>
+      </div>
+
+      <SheetDisclaimer />
+    </>
+  );
+}

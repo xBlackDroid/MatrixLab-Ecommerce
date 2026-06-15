@@ -18,6 +18,7 @@ import {
   SESSION_COOKIE,
   sessionCookieOptions,
 } from "@/lib/security/session";
+import { getCatalogEntry } from "@/lib/designer/product-catalog";
 import { DesignerCreateSchema } from "@/lib/validation/designer";
 
 export const runtime = "nodejs";
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
       product_type: parsed.data.productType,
       product_id: parsed.data.productId,
       variant_id: parsed.data.variantId ?? null,
+      designer_type: getCatalogEntry(parsed.data.productType).kind,
       status: "draft",
     })
     .select("id")

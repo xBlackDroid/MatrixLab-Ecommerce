@@ -3,7 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Clock, MessageCircle, Minus, Plus, Wand2 } from "lucide-react";
-import type { ProductVariantRow, ProductWithVariants } from "@/lib/db/types";
+import type {
+  DesignerProductType,
+  ProductVariantRow,
+  ProductWithVariants,
+} from "@/lib/db/types";
 import { cn, formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 import AddToCartButton from "@/components/store/AddToCartButton";
@@ -15,7 +19,7 @@ import InventoryBadge, {
 interface ProductOptionsProps {
   product: ProductWithVariants;
   /** Tipo de diseñador si este producto se personaliza en el laboratorio. */
-  designerType: "playera" | "gorra" | "tote" | null;
+  designerType: DesignerProductType | null;
 }
 
 /** Selección de variantes + cantidad + acciones de compra. */

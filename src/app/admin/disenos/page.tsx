@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { TriangleAlert } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import DesignProjectCard, {
+  type AdminDesignAsset,
   type AdminDesignView,
 } from "@/components/admin/DesignProjectCard";
 import { getServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl } from "@/lib/db/storage";
-import type { DesignProjectRow } from "@/lib/db/types";
+import type { DesignProjectRow, UploadedAssetRow } from "@/lib/db/types";
 import { requireAdminPage } from "@/lib/security/admin-auth";
 
 export const metadata: Metadata = {
@@ -27,24 +28,59 @@ export default async function AdminDisenosPage() {
       .select("*, orders(order_number)")
       .neq("status", "draft")
       .order("updated_at", { ascending: false })
-      .limit(60);
+      .limit(80);
 
     const designs = (data ?? []) as Array<
       DesignProjectRow & { orders: { order_number: string } | null }
     >;
 
-    // URLs firmadas de corta duración para preview y archivo original.
+    // Archivos originales por diseño (v2 puede tener varios).
+    const ids = designs.map((d) => d.id);
+    const assetsByDesign = new Map<string, UploadedAssetRow[]>();
+    if (ids.length > 0) {
+      const { data: assetData } = await client
+        .from("uploaded_assets")
+        .select("*")
+        .in("design_project_id", ids);
+      for (const asset of (assetData ?? []) as UploadedAssetRow[]) {
+        const list = assetsByDesign.get(asset.design_project_id) ?? [];
+        list.push(asset);
+        assetsByDesign.set(asset.design_project_id, list);
+      }
+    }
+
     views = await Promise.all(
       designs.map(async (row) => {
         const { orders, ...design } = row;
-        const [previewSignedUrl, originalSignedUrl] = await Promise.all([
+        const rawAssets = assetsByDesign.get(design.id) ?? [];
+        const [previewSignedUrl, assets] = await Promise.all([
           createSignedUrl(BUCKETS.designPreviews, design.preview_url, 3600),
-          createSignedUrl(BUCKETS.designAssets, design.uploaded_asset_url, 3600),
+          Promise.all(
+            rawAssets.map(async (asset) => ({
+              id: asset.id,
+              fileName: asset.original_file_name,
+              signedUrl: await createSignedUrl(
+                BUCKETS.designAssets,
+                asset.original_file_url,
+                3600,
+              ),
+            })),
+          ),
         ]);
+        // Respaldo: si no hay assets en la tabla, usa el del diseño (v1).
+        const fallbackOriginal =
+          assets.length === 0
+            ? await createSignedUrl(
+                BUCKETS.designAssets,
+                design.uploaded_asset_url,
+                3600,
+              )
+            : null;
         return {
           design: design as DesignProjectRow,
           previewSignedUrl,
-          originalSignedUrl,
+          assets: assets as AdminDesignAsset[],
+          fallbackOriginalUrl: fallbackOriginal,
           orderNumber: orders?.order_number ?? null,
         };
       }),
@@ -54,7 +90,7 @@ export default async function AdminDisenosPage() {
   return (
     <AdminLayout
       title="Diseños personalizados"
-      description="Previews, archivos originales, coordenadas y estados de producción."
+      description="Prendas, planillas y láser: previews, archivos originales, datos de producción y estados."
     >
       {!client ? (
         <div className="glass flex items-start gap-3 rounded-2xl p-6 text-sm text-ml-coral">

@@ -68,3 +68,75 @@ export interface UploadedDesignAsset {
   height: number;
   fileName: string;
 }
+
+/**
+ * Imagen colocada en un lienzo del diseñador v2 (prenda multi-imagen, hoja
+ * o láser). `localUrl` es el objectURL del archivo subido (evita "tainted
+ * canvas" al exportar la preview); `assetId` es el id del archivo en
+ * uploaded_assets (lo autoritativo para producción).
+ */
+export interface PlacedAsset {
+  /** Id local único en el editor. */
+  id: string;
+  /** Id del archivo en uploaded_assets (storage seguro). */
+  assetId: string;
+  /** objectURL para render/preview sin contaminar el canvas. */
+  localUrl: string;
+  /** URL firmada (opcional, referencia que puede expirar). */
+  remoteUrl?: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  /** Centro del asset en coords del lienzo (px). */
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+  fileName: string;
+}
+
+/** Elemento de imagen en el editor láser. */
+export interface LaserImageElement {
+  id: string;
+  type: "image";
+  assetId: string;
+  localUrl: string;
+  remoteUrl?: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+}
+
+/** Elemento de texto en el editor láser. */
+export interface LaserTextElement {
+  id: string;
+  type: "text";
+  text: string;
+  fontId: string;
+  fontFamily: string;
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+  fontSize: number;
+}
+
+export type LaserEditorElement = LaserImageElement | LaserTextElement;
+
+/** Pieza en una planilla (stickers/imanes). Coordenadas en cm (esquina sup-izq). */
+export interface SheetPiece {
+  id: string;
+  assetId: string;
+  localUrl: string;
+  remoteUrl?: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  xCm: number;
+  yCm: number;
+  widthCm: number;
+  heightCm: number;
+  rotation: number;
+  fileName: string;
+}

@@ -1,89 +1,122 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ShoppingBag, Shirt, Sparkles, Wand2 } from "lucide-react";
+import {
+  ArrowRight,
+  LayoutGrid,
+  Repeat,
+  Shirt,
+  ShoppingBag,
+  Sparkles,
+  Wand2,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+import { listLabEntries } from "@/lib/designer/product-catalog";
+import type { DesignerBadge } from "@/lib/designer/product-catalog";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Diseñador T-Shirt Lab",
+  title: "Laboratorio de diseño",
   description:
-    "Sube tu imagen, acomódala y crea una pieza personalizada lista para producir. Playeras, gorras y tote bags desde el laboratorio creativo MatrixLab.",
+    "Diseña prendas, planillas de stickers e imanes y grabados láser desde el laboratorio creativo MatrixLab. Sube tu imagen, acomódala y crea una pieza lista para producir.",
   openGraph: {
-    title: "Diseñador T-Shirt Lab | Tienda MatrixLab",
+    title: "Laboratorio de diseño | Tienda MatrixLab",
     description:
-      "Crea prendas y accesorios textiles personalizados desde el laboratorio interactivo.",
+      "Prendas, planillas y láser: crea tu pieza personalizada desde el laboratorio interactivo.",
   },
 };
 
 export const revalidate = 3600;
 
-const PRODUCTS = [
-  {
-    type: "playera",
-    label: "Playera",
-    description: "Algodón suave, frente y espalda personalizables.",
-    icon: Shirt,
-  },
-  {
-    type: "gorra",
-    label: "Gorra",
-    description: "Estructurada, con tu diseño al frente.",
-    icon: Sparkles,
-  },
-  {
-    type: "tote",
-    label: "Tote bag",
-    description: "Resistente y reutilizable, lista para tu arte.",
-    icon: ShoppingBag,
-  },
-];
+const ICONS: Record<string, LucideIcon> = {
+  shirt: Shirt,
+  hoodie: Shirt,
+  cap: Sparkles,
+  bag: ShoppingBag,
+  grid: LayoutGrid,
+  repeat: Repeat,
+  laser: Zap,
+};
 
-export default function DisenadorLandingPage() {
+const BADGE_STYLES: Record<DesignerBadge, string> = {
+  Prendas: "border-ml-violet/40 bg-ml-violet/10 text-ml-violet",
+  Planillas: "border-ml-cyan/40 bg-ml-cyan/10 text-ml-cyan",
+  Láser: "border-ml-coral/40 bg-ml-coral/10 text-ml-coral",
+};
+
+export default function LabHomePage() {
+  const entries = listLabEntries();
+
   return (
     <div className="relative overflow-hidden">
       <div className="grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute -top-32 right-1/4 h-96 w-96 rounded-full bg-ml-cyan/10 blur-3xl" />
 
-      <div className="relative mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-24">
-        <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
-          <Wand2 className="h-4 w-4" aria-hidden />
-          T-Shirt Lab
-        </span>
-        <h1 className="mt-6 text-4xl font-bold sm:text-5xl">
-          Diseña <span className="text-gradient">en el laboratorio</span>
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-lg text-ml-white/70">
-          Sube tu imagen, acomódala y crea una pieza personalizada lista para
-          producir.
-        </p>
-        <p className="mt-2 text-sm text-ml-white/50">
-          Usa imágenes PNG de buena calidad para mejores resultados.
-        </p>
-
-        <div className="mt-12 grid gap-5 sm:grid-cols-3">
-          {PRODUCTS.map((item) => (
-            <Link
-              key={item.type}
-              href={`/tienda/disenador/${item.type}`}
-              className="group glass flex flex-col items-center gap-4 rounded-3xl p-8 transition hover:-translate-y-1 hover:border-ml-cyan/50 hover:shadow-glow-cyan"
-            >
-              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-ml-violet/15 text-ml-violet transition group-hover:bg-ml-cyan/15 group-hover:text-ml-cyan">
-                <item.icon className="h-8 w-8" aria-hidden />
-              </span>
-              <div>
-                <h2 className="text-xl font-bold">{item.label}</h2>
-                <p className="mt-1.5 text-sm text-ml-white/60">
-                  {item.description}
-                </p>
-              </div>
-              <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-ml-cyan">
-                Empezar a diseñar
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden />
-              </span>
-            </Link>
-          ))}
+      <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="text-center">
+          <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
+            <Wand2 className="h-4 w-4" aria-hidden />
+            Laboratorio MatrixLab
+          </span>
+          <h1 className="mt-6 text-4xl font-bold sm:text-5xl">
+            Diseña <span className="text-gradient">en el laboratorio</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-ml-white/70">
+            Elige tu lienzo: prendas, planillas de stickers e imanes o grabado
+            láser. Sube tu imagen, acomódala y crea una pieza lista para
+            producir.
+          </p>
         </div>
 
-        <p className="mt-10 text-sm text-ml-white/50">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {entries.map((entry) => {
+            const Icon = ICONS[entry.iconKey] ?? Wand2;
+            return (
+              <Link
+                key={entry.id}
+                href={`/tienda/disenador/${entry.id}`}
+                className="group glass flex flex-col gap-4 rounded-3xl p-7 transition hover:-translate-y-1 hover:border-ml-violet/40 hover:shadow-glow-violet"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ml-violet/15 text-ml-violet transition group-hover:bg-ml-cyan/15 group-hover:text-ml-cyan">
+                    <Icon className="h-6 w-6" aria-hidden />
+                  </span>
+                  <div className="flex gap-1.5">
+                    {entry.isNew && (
+                      <span className="rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-[11px] font-semibold text-ml-white/70">
+                        Nuevo
+                      </span>
+                    )}
+                    <span
+                      className={cn(
+                        "rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                        BADGE_STYLES[entry.badge],
+                      )}
+                    >
+                      {entry.badge}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold">{entry.publicName}</h2>
+                  <p className="mt-1.5 text-sm text-ml-white/60">
+                    {entry.shortDescription}
+                  </p>
+                </div>
+                <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-ml-cyan">
+                  Abrir laboratorio
+                  <ArrowRight
+                    className="h-4 w-4 transition group-hover:translate-x-1"
+                    aria-hidden
+                  />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <p className="mt-10 text-center text-sm text-ml-white/50">
           ¿Tienes una idea más compleja?{" "}
           <a
             href={buildWhatsAppUrl(whatsappMessages.quoteDesign())}

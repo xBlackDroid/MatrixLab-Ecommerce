@@ -46,7 +46,35 @@ export const ORDER_STATUSES = [
 
 export const CATEGORY_STATUSES = ["activa", "oculta"] as const;
 
+/** Tipos del diseñador v1 (legado). No ampliar. */
 export const PRODUCT_TYPES = ["playera", "gorra", "tote"] as const;
+
+/** Catálogo completo del Laboratorio (Etapa 2). Superconjunto de PRODUCT_TYPES. */
+export const DESIGNER_PRODUCT_TYPES = [
+  "playera",
+  "sudadera",
+  "gorra",
+  "gorra-trucker",
+  "gorra-clasica",
+  "tote",
+  "stickers-planilla",
+  "stickers-repeticion",
+  "imanes-planilla",
+  "imanes-repeticion",
+  "laser",
+] as const;
+
+export const DESIGNER_KINDS = ["garment", "sheet", "laser"] as const;
+
+export const GARMENT_PROFILES = ["nino", "mujer", "hombre"] as const;
+
+export const GARMENT_SIZES = ["CH", "M", "G", "EG"] as const;
+
+export const SHEET_TYPES = ["stickers", "imanes"] as const;
+
+export const SHEET_MODES = ["free", "repeat"] as const;
+
+export const SHEET_SHAPES = ["square", "circle", "rectangle"] as const;
 
 export const PRINT_ZONES = ["front", "back", "center"] as const;
 

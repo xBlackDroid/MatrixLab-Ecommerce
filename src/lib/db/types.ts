@@ -44,7 +44,31 @@ export type DesignProjectStatus =
   | "in_production"
   | "completed";
 
+/** Tipos del diseñador v1 (legado). NO ampliar: el mockup v1 depende de él. */
 export type ProductTypeId = "playera" | "gorra" | "tote";
+
+/**
+ * Catálogo completo de tipos del Laboratorio (Etapa 2). Superconjunto de
+ * ProductTypeId, por lo que los diseños v1 siguen siendo válidos.
+ */
+export type DesignerProductType =
+  | "playera"
+  | "sudadera"
+  | "gorra"
+  | "gorra-trucker"
+  | "gorra-clasica"
+  | "tote"
+  | "stickers-planilla"
+  | "stickers-repeticion"
+  | "imanes-planilla"
+  | "imanes-repeticion"
+  | "laser";
+
+/** Familia de diseñador: define qué editor se monta. */
+export type DesignerKind = "garment" | "sheet" | "laser";
+
+/** Perfil de talla para prendas (afecta área máxima de impresión). */
+export type GarmentProfile = "nino" | "mujer" | "hombre";
 
 export type PrintZone = "front" | "back" | "center";
 
@@ -162,7 +186,8 @@ export interface OrderItemRow {
 export interface DesignProjectRow {
   id: string;
   session_id: string;
-  product_type: ProductTypeId;
+  /** Amplio (Etapa 2). Los diseños v1 siguen cayendo dentro de este tipo. */
+  product_type: DesignerProductType;
   product_id: string | null;
   variant_id: string | null;
   base_color: string | null;
@@ -179,6 +204,9 @@ export interface DesignProjectRow {
   status: DesignProjectStatus;
   cart_id: string | null;
   order_id: string | null;
+  /** Columnas aditivas Etapa 2 (migración 0004). Nullables para diseños v1. */
+  designer_type: DesignerKind | null;
+  profile: GarmentProfile | null;
   created_at: string;
   updated_at: string;
 }
