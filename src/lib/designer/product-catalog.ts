@@ -85,6 +85,8 @@ export const DESIGNER_CATALOG: Record<
     usesProfileSize: false,
     iconKey: "cap",
     order: 3,
+    // Se accede desde la card pública "Gorras" (/tienda/disenador/gorras).
+    hiddenFromLab: true,
   },
   "gorra-clasica": {
     id: "gorra-clasica",
@@ -99,6 +101,8 @@ export const DESIGNER_CATALOG: Record<
     usesProfileSize: false,
     iconKey: "cap",
     order: 4,
+    // Se accede desde la card pública "Gorras" (/tienda/disenador/gorras).
+    hiddenFromLab: true,
   },
   tote: {
     id: "tote",
@@ -137,7 +141,7 @@ export const DESIGNER_CATALOG: Record<
     label: "Planilla de stickers",
     publicName: "Planilla de stickers",
     shortDescription:
-      "Sube hasta 7 imágenes y arma tu planilla tamaño carta con libertad y control.",
+      "Sube hasta 7 imágenes y arma tu hoja carta con libertad y control.",
     badge: "Planillas",
     isNew: true,
     baseHandle: "planilla-stickers",
@@ -150,10 +154,10 @@ export const DESIGNER_CATALOG: Record<
   "stickers-repeticion": {
     id: "stickers-repeticion",
     kind: "sheet",
-    label: "Stickers en repetición",
-    publicName: "Stickers en repetición",
+    label: "Sticker Grid Automático",
+    publicName: "Sticker Grid Automático",
     shortDescription:
-      "Sube una imagen, elige forma y tamaño, y llenamos automáticamente tu hoja carta.",
+      "Sube una imagen, elige forma y tamaño, y el laboratorio llena tu hoja carta automáticamente.",
     badge: "Planillas",
     isNew: true,
     baseHandle: "planilla-stickers",
@@ -169,7 +173,7 @@ export const DESIGNER_CATALOG: Record<
     label: "Planilla de imanes",
     publicName: "Planilla de imanes",
     shortDescription:
-      "Crea una planilla de imanes personalizados en hoja carta con tus imágenes favoritas.",
+      "Crea una hoja carta de imanes personalizados con tus imágenes favoritas.",
     badge: "Planillas",
     isNew: true,
     baseHandle: "planilla-imanes",
@@ -179,21 +183,24 @@ export const DESIGNER_CATALOG: Record<
     iconKey: "grid",
     order: 8,
   },
+  // Legado: los imanes se trabajan públicamente desde "Planilla de imanes".
+  // La ruta sigue viva (redirige a imanes-planilla) pero no se promociona.
   "imanes-repeticion": {
     id: "imanes-repeticion",
     kind: "sheet",
-    label: "Imanes en repetición",
-    publicName: "Imanes en repetición",
+    label: "Imanes (repetición, legado)",
+    publicName: "Planilla de imanes",
     shortDescription:
-      "Repite una imagen en formato cuadrado, circular o rectangular para producir imanes por hoja.",
+      "Crea una hoja carta de imanes personalizados con tus imágenes favoritas.",
     badge: "Planillas",
-    isNew: true,
+    isNew: false,
     baseHandle: "planilla-imanes",
     usesProfileSize: false,
     sheetType: "imanes",
     sheetMode: "repeat",
     iconKey: "repeat",
     order: 9,
+    hiddenFromLab: true,
   },
   laser: {
     id: "laser",
@@ -234,3 +241,133 @@ export function listLabEntries(): DesignerCatalogEntry[] {
 export const DESIGNER_TYPE_TO_HANDLE = Object.fromEntries(
   Object.values(DESIGNER_CATALOG).map((entry) => [entry.id, entry.baseHandle]),
 ) as Record<DesignerProductType, string>;
+
+// ===========================================================================
+// Bloques curados de la home del Laboratorio (/tienda/disenador).
+// Separan claramente Prendas, Planillas y Láser. "Gorras" es UNA sola card
+// pública que entra a /tienda/disenador/gorras (selector trucker/clásica).
+// ===========================================================================
+
+export interface LabCard {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  iconKey: DesignerCatalogEntry["iconKey"];
+  badge: DesignerBadge;
+  isNew?: boolean;
+}
+
+export interface LabBlock {
+  id: string;
+  title: string;
+  description: string;
+  badge: DesignerBadge;
+  cards: LabCard[];
+}
+
+export const LAB_BLOCKS: LabBlock[] = [
+  {
+    id: "prendas",
+    title: "Prendas y accesorios textiles",
+    description:
+      "Sube tu imagen, acomódala y crea una prenda lista para producir.",
+    badge: "Prendas",
+    cards: [
+      {
+        id: "playera",
+        title: "Playeras",
+        description:
+          "Playera personalizada con acabado premium para una pieza única o por volumen.",
+        href: "/tienda/disenador/playera",
+        iconKey: "shirt",
+        badge: "Prendas",
+      },
+      {
+        id: "sudadera",
+        title: "Sudaderas",
+        description:
+          "Sudadera personalizada con acabado premium para eventos, marcas y equipos.",
+        href: "/tienda/disenador/sudadera",
+        iconKey: "hoodie",
+        badge: "Prendas",
+        isNew: true,
+      },
+      {
+        id: "gorras",
+        title: "Gorras",
+        description:
+          "Diseña tu gorra trucker o clásica ajustable con acabado premium.",
+        href: "/tienda/disenador/gorras",
+        iconKey: "cap",
+        badge: "Prendas",
+        isNew: true,
+      },
+      {
+        id: "tote",
+        title: "Tote bags",
+        description:
+          "Tote bag personalizada para regalos, eventos, marcas y experiencias.",
+        href: "/tienda/disenador/tote",
+        iconKey: "bag",
+        badge: "Prendas",
+      },
+    ],
+  },
+  {
+    id: "planillas",
+    title: "Planillas creativas",
+    description:
+      "Arma tu hoja carta de stickers o imanes, a tu manera o de forma automática.",
+    badge: "Planillas",
+    cards: [
+      {
+        id: "stickers-planilla",
+        title: "Planilla de stickers",
+        description:
+          "Sube hasta 7 imágenes y arma tu hoja carta con libertad y control.",
+        href: "/tienda/disenador/stickers-planilla",
+        iconKey: "grid",
+        badge: "Planillas",
+      },
+      {
+        id: "sticker-grid",
+        title: "Sticker Grid Automático",
+        description:
+          "Sube una imagen, elige forma y tamaño, y el laboratorio llena tu hoja carta automáticamente.",
+        href: "/tienda/disenador/stickers-repeticion",
+        iconKey: "repeat",
+        badge: "Planillas",
+        isNew: true,
+      },
+      {
+        id: "imanes-planilla",
+        title: "Planilla de imanes",
+        description:
+          "Crea una hoja carta de imanes personalizados con tus imágenes favoritas.",
+        href: "/tienda/disenador/imanes-planilla",
+        iconKey: "grid",
+        badge: "Planillas",
+      },
+    ],
+  },
+  {
+    id: "laser",
+    title: "Laboratorio láser",
+    description:
+      "Diseña grabados sobre plantillas como termos, tazas, tags, llaveros y acrílicos.",
+    badge: "Láser",
+    cards: [
+      {
+        id: "laser",
+        title: "Laboratorio láser",
+        description:
+          "Elige una plantilla, sube tu imagen o agrega texto y crea tu grabado.",
+        href: "/tienda/disenador/laser",
+        iconKey: "laser",
+        badge: "Láser",
+        isNew: true,
+      },
+    ],
+  },
+];

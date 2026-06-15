@@ -4,15 +4,19 @@ import { Circle, Ellipse, Group, Line, Path, Rect } from "react-konva";
 import type { MockupKey } from "@/lib/designer/product-views";
 
 /**
- * Mockups vectoriales del Laboratorio (Etapa 2).
+ * Mockups vectoriales del Laboratorio (Etapa 2) — siluetas realistas.
  *
- * Son siluetas premium con gradiente y sombras suaves: más realistas que el
- * dibujo plano de Etapa 1, sin depender de imágenes externas.
+ * Premium, simétricas (coordenadas espejeadas) con gradiente y sombras suaves.
+ * No dependen de imágenes externas.
  *
  * CÓMO USAR MOCKUPS REALES: cuando existan PNG por color, declara
- *   mockupByColor en src/lib/designer/product-views.ts y el lienzo
- *   (MultiAssetCanvas) usará la imagen en vez de este vector. No se borra
- *   este fallback: sigue cubriendo colores sin foto.
+ *   `mockupByColor` en src/lib/designer/product-views.ts y el lienzo usará la
+ *   imagen en vez de este vector. Rutas sugeridas:
+ *     public/images/products/playeras/mockups/<color>-front.png
+ *     public/images/products/sudaderas/mockups/<color>-front.png
+ *     public/images/products/gorras/trucker/mockups/<color>.png
+ *     public/images/products/gorras/clasica/mockups/<color>.png
+ *   Este fallback vectorial se conserva para colores sin foto.
  */
 
 export interface MockupColor {
@@ -26,155 +30,178 @@ interface MockupProps {
   color: MockupColor;
 }
 
-function grad(color: MockupColor, from: { x: number; y: number }, to: { x: number; y: number }) {
+function grad(
+  color: MockupColor,
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+) {
   return {
     fillLinearGradientStartPoint: from,
     fillLinearGradientEndPoint: to,
-    fillLinearGradientColorStops: [0, color.hex, 1, color.shadowHex] as (string | number)[],
+    fillLinearGradientColorStops: [0, color.hex, 1, color.shadowHex] as (
+      | string
+      | number
+    )[],
   };
 }
 
+const SOFT_SHADOW = {
+  shadowColor: "#000000",
+  shadowBlur: 26,
+  shadowOpacity: 0.45,
+  shadowOffsetY: 14,
+} as const;
+
+/* ----------------------------- Playera ----------------------------------- */
 function Playera({ side, color }: { side: "front" | "back"; color: MockupColor }) {
   return (
     <Group listening={false}>
+      {/* Mangas (debajo del cuerpo) */}
+      <Path data="M170 158 C140 162 112 184 98 214 C112 226 132 234 150 236 C156 214 160 186 172 166 Z" {...grad(color, { x: 100, y: 160 }, { x: 170, y: 236 })} />
+      <Path data="M350 158 C380 162 408 184 422 214 C408 226 388 234 370 236 C364 214 360 186 348 166 Z" {...grad(color, { x: 420, y: 160 }, { x: 350, y: 236 })} />
+      {/* Cuerpo */}
       <Path
-        data="M260 92 C236 92 218 99 205 109 L122 137 C113 140 108 149 111 158 L132 222 C135 231 144 236 153 233 L182 224 L182 488 C182 501 192 511 205 511 L315 511 C328 511 338 501 338 488 L338 224 L367 233 C376 236 385 231 388 222 L409 158 C412 149 407 140 398 137 L315 109 C302 99 284 92 260 92 Z"
-        {...grad(color, { x: 140, y: 100 }, { x: 400, y: 520 })}
-        shadowColor="#000000"
-        shadowBlur={28}
-        shadowOpacity={0.5}
-        shadowOffsetY={14}
+        data="M150 210 C150 180 172 160 210 156 L310 156 C348 160 370 180 370 210 L376 532 Q378 544 366 544 L154 544 Q142 544 144 532 Z"
+        {...grad(color, { x: 150, y: 160 }, { x: 380, y: 545 })}
+        {...SOFT_SHADOW}
       />
       {/* Volumen lateral */}
-      <Path data="M182 230 L182 488 C182 501 192 511 205 511 L216 511 C204 420 202 320 207 226 Z" fill="#000000" opacity={0.1} />
-      <Path data="M338 230 L338 488 C338 501 328 511 315 511 L304 511 C316 420 318 320 313 226 Z" fill="#000000" opacity={0.1} />
+      <Path data="M150 216 L156 540 L170 540 C161 430 159 320 163 222 Z" fill="#000000" opacity={0.07} />
+      <Path data="M370 216 L364 540 L350 540 C359 430 361 320 357 222 Z" fill="#000000" opacity={0.07} />
+      {/* Costuras de manga */}
+      <Path data="M172 166 C160 186 156 214 150 236" stroke={color.shadowHex} strokeWidth={2} opacity={0.5} />
+      <Path data="M348 166 C360 186 364 214 370 236" stroke={color.shadowHex} strokeWidth={2} opacity={0.5} />
+      {/* Cuello redondo */}
       {side === "front" ? (
         <>
-          <Path data="M218 97 C228 117 292 117 302 97 C290 110 230 110 218 97 Z" fill={color.shadowHex} />
-          <Path data="M216 95 C230 119 290 119 304 95" stroke={color.shadowHex} strokeWidth={5} lineCap="round" />
+          <Path data="M206 156 C224 182 296 182 314 156 C300 170 220 170 206 156 Z" fill={color.shadowHex} />
+          <Path data="M204 155 C224 184 296 184 316 155" stroke={color.shadowHex} strokeWidth={6} lineCap="round" />
         </>
       ) : (
-        <Path data="M214 96 C232 110 288 110 306 96 C296 104 224 104 214 96 Z" fill={color.shadowHex} opacity={0.7} />
+        <>
+          <Path data="M210 156 C228 168 292 168 310 156 C296 164 224 164 210 156 Z" fill={color.shadowHex} opacity={0.75} />
+          <Path data="M208 156 C228 170 292 170 312 156" stroke={color.shadowHex} strokeWidth={5} lineCap="round" />
+        </>
       )}
-      <Line points={[182, 226, 158, 232]} stroke={color.shadowHex} strokeWidth={2} opacity={0.7} />
-      <Line points={[338, 226, 362, 232]} stroke={color.shadowHex} strokeWidth={2} opacity={0.7} />
     </Group>
   );
 }
 
+/* ----------------------------- Sudadera ---------------------------------- */
 function Sudadera({ side, color }: { side: "front" | "back"; color: MockupColor }) {
   return (
     <Group listening={false}>
-      {/* Capucha (detrás del cuerpo) */}
+      {/* Mangas largas */}
+      <Path data="M176 182 C146 196 128 240 126 300 L130 470 C130 500 150 516 178 510 C172 460 172 320 180 200 Z" {...grad(color, { x: 120, y: 200 }, { x: 180, y: 510 })} />
+      <Path data="M364 182 C394 196 412 240 414 300 L410 470 C410 500 390 516 362 510 C368 460 368 320 360 200 Z" {...grad(color, { x: 420, y: 200 }, { x: 360, y: 510 })} />
+      {/* Puños */}
+      <Rect x={126} y={494} width={54} height={22} cornerRadius={5} fill="#000000" opacity={0.14} />
+      <Rect x={360} y={494} width={54} height={22} cornerRadius={5} fill="#000000" opacity={0.14} />
+      {/* Cuerpo */}
       <Path
-        data="M205 120 C220 86 320 86 335 120 C322 150 218 150 205 120 Z"
-        {...grad(color, { x: 205, y: 90 }, { x: 335, y: 150 })}
-        shadowColor="#000000"
-        shadowBlur={16}
-        shadowOpacity={0.35}
+        data="M156 230 C156 198 180 176 220 172 L320 172 C360 176 384 198 384 230 L392 560 Q394 574 380 574 L160 574 Q146 574 148 560 Z"
+        {...grad(color, { x: 150, y: 180 }, { x: 390, y: 575 })}
+        {...SOFT_SHADOW}
       />
-      {/* Cuerpo más ancho */}
-      <Path
-        data="M270 118 C244 118 224 126 210 138 L120 170 C111 173 106 182 109 191 L132 256 C135 265 144 270 153 267 L186 256 L186 506 C186 520 196 530 210 530 L330 530 C344 530 354 520 354 506 L354 256 L387 267 C396 270 405 265 408 256 L431 191 C434 182 429 173 420 170 L330 138 C316 126 296 118 270 118 Z"
-        {...grad(color, { x: 130, y: 130 }, { x: 420, y: 540 })}
-        shadowColor="#000000"
-        shadowBlur={30}
-        shadowOpacity={0.5}
-        shadowOffsetY={16}
-      />
-      {/* Puños y ribete inferior (rib) */}
-      <Rect x={186} y={512} width={168} height={18} cornerRadius={4} fill="#000000" opacity={0.12} />
-      <Path data="M150 262 L186 256 L186 280 L150 286 Z" fill="#000000" opacity={0.12} />
-      <Path data="M390 262 L354 256 L354 280 L390 286 Z" fill="#000000" opacity={0.12} />
+      {/* Ribete inferior */}
+      <Rect x={156} y={556} width={228} height={18} cornerRadius={4} fill="#000000" opacity={0.13} />
       {side === "front" ? (
         <>
-          {/* Cuello redondo */}
-          <Path data="M226 122 C238 142 302 142 314 122 C302 134 238 134 226 122 Z" fill={color.shadowHex} />
           {/* Bolsillo canguro */}
-          <Path data="M214 396 L326 396 L318 462 L222 462 Z" fill="#000000" opacity={0.1} />
-          <Line points={[214, 396, 326, 396]} stroke={color.shadowHex} strokeWidth={2} opacity={0.6} />
+          <Path data="M198 430 L342 430 L330 502 L210 502 Z" fill="#000000" opacity={0.1} />
+          <Line points={[198, 430, 342, 430]} stroke={color.shadowHex} strokeWidth={2} opacity={0.55} />
+          <Line points={[210, 502, 222, 462]} stroke={color.shadowHex} strokeWidth={2} opacity={0.4} />
+          <Line points={[330, 502, 318, 462]} stroke={color.shadowHex} strokeWidth={2} opacity={0.4} />
+          {/* Capucha */}
+          <Path data="M214 176 C214 138 326 138 326 176 C326 198 300 208 270 208 C240 208 214 198 214 176 Z" {...grad(color, { x: 214, y: 138 }, { x: 326, y: 208 })} />
+          <Path data="M232 178 C232 156 308 156 308 178 C308 194 290 202 270 202 C250 202 232 194 232 178 Z" fill={color.shadowHex} />
+          {/* Cordones */}
+          <Line points={[259, 202, 257, 250]} stroke={color.shadowHex} strokeWidth={4} lineCap="round" />
+          <Line points={[283, 202, 285, 250]} stroke={color.shadowHex} strokeWidth={4} lineCap="round" />
+          <Circle x={257} y={252} radius={4} fill={color.shadowHex} />
+          <Circle x={285} y={252} radius={4} fill={color.shadowHex} />
         </>
       ) : (
-        <Path data="M224 120 C240 132 300 132 316 120 C304 128 236 128 224 120 Z" fill={color.shadowHex} opacity={0.7} />
+        <Path data="M218 172 C220 140 320 140 322 172 C300 186 240 186 218 172 Z" {...grad(color, { x: 218, y: 140 }, { x: 322, y: 186 })} />
       )}
     </Group>
   );
 }
 
+/* --------------------------- Gorra trucker ------------------------------- */
 function GorraTrucker({ color }: { color: MockupColor }) {
   return (
     <Group listening={false}>
       {/* Copa */}
       <Path
-        data="M118 268 C118 162 182 106 260 106 C338 106 402 162 402 268 L402 286 L118 286 Z"
+        data="M120 270 C120 168 184 110 260 110 C336 110 400 168 400 270 L400 286 L120 286 Z"
         {...grad(color, { x: 140, y: 110 }, { x: 380, y: 290 })}
-        shadowColor="#000000"
-        shadowBlur={26}
-        shadowOpacity={0.5}
-        shadowOffsetY={12}
+        {...SOFT_SHADOW}
       />
+      {/* Panel frontal visible (más claro) */}
+      <Path data="M186 150 C210 132 310 132 334 150 L342 282 L178 282 Z" fill="#F8F9FA" opacity={0.16} />
+      <Path data="M186 150 C210 132 310 132 334 150" stroke={color.shadowHex} strokeWidth={2} opacity={0.4} />
+      {/* Malla lateral sugerida */}
+      {[148, 160, 172].map((x) => (
+        <Line key={`l${x}`} points={[x, 168, x, 280]} stroke={color.shadowHex} strokeWidth={1.5} opacity={0.22} />
+      ))}
+      {[348, 360, 372].map((x) => (
+        <Line key={`r${x}`} points={[x, 168, x, 280]} stroke={color.shadowHex} strokeWidth={1.5} opacity={0.22} />
+      ))}
+      {/* Costura central y botón */}
+      <Line points={[260, 116, 260, 282]} stroke={color.shadowHex} strokeWidth={2} opacity={0.4} />
       <Circle x={260} y={108} radius={7} fill={color.shadowHex} />
-      <Line points={[190, 130, 186, 284]} stroke={color.shadowHex} strokeWidth={2} opacity={0.6} />
-      <Line points={[330, 130, 334, 284]} stroke={color.shadowHex} strokeWidth={2} opacity={0.6} />
-      {/* Visera plana de trucker */}
+      {/* Visera plana */}
       <Path
-        data="M112 284 C170 312 350 312 408 284 C430 298 444 318 446 340 C360 380 160 380 74 340 C76 318 90 298 112 284 Z"
-        {...grad(color, { x: 260, y: 284 }, { x: 260, y: 380 })}
-        shadowColor="#000000"
-        shadowBlur={18}
-        shadowOpacity={0.4}
-        shadowOffsetY={10}
-      />
-      <Path data="M112 284 C170 312 350 312 408 284" stroke={color.shadowHex} strokeWidth={3} opacity={0.8} />
-    </Group>
-  );
-}
-
-function GorraClasica({ color }: { color: MockupColor }) {
-  return (
-    <Group listening={false}>
-      {/* Copa curva 6 paneles */}
-      <Path
-        data="M124 276 C124 176 184 116 260 116 C336 116 396 176 396 276 C340 296 180 296 124 276 Z"
-        {...grad(color, { x: 150, y: 120 }, { x: 380, y: 290 })}
-        shadowColor="#000000"
-        shadowBlur={26}
-        shadowOpacity={0.5}
-        shadowOffsetY={12}
-      />
-      <Circle x={260} y={120} radius={6} fill={color.shadowHex} />
-      <Line points={[260, 124, 260, 286]} stroke={color.shadowHex} strokeWidth={2} opacity={0.5} />
-      <Line points={[200, 134, 176, 282]} stroke={color.shadowHex} strokeWidth={2} opacity={0.45} />
-      <Line points={[320, 134, 344, 282]} stroke={color.shadowHex} strokeWidth={2} opacity={0.45} />
-      {/* Eyelets */}
-      <Circle x={228} y={196} radius={3} fill={color.shadowHex} opacity={0.6} />
-      <Circle x={292} y={196} radius={3} fill={color.shadowHex} opacity={0.6} />
-      {/* Visera curva */}
-      <Path
-        data="M130 282 C180 300 340 300 390 282 C412 300 420 326 408 350 C350 384 170 384 112 350 C100 326 108 300 130 282 Z"
-        {...grad(color, { x: 260, y: 282 }, { x: 260, y: 384 })}
+        data="M112 286 C170 312 350 312 408 286 C432 300 446 322 446 344 C360 384 160 384 74 344 C76 322 92 300 112 286 Z"
+        {...grad(color, { x: 260, y: 286 }, { x: 260, y: 384 })}
         shadowColor="#000000"
         shadowBlur={16}
         shadowOpacity={0.4}
-        shadowOffsetY={8}
+        shadowOffsetY={10}
       />
-      <Path data="M130 282 C180 300 340 300 390 282" stroke={color.shadowHex} strokeWidth={3} opacity={0.75} />
+      <Path data="M112 286 C170 312 350 312 408 286" stroke={color.shadowHex} strokeWidth={3} opacity={0.8} />
     </Group>
   );
 }
 
+/* --------------------------- Gorra clásica ------------------------------- */
+function GorraClasica({ color }: { color: MockupColor }) {
+  return (
+    <Group listening={false}>
+      {/* Copa curva */}
+      <Path
+        data="M124 280 C124 178 186 116 260 116 C334 116 396 178 396 280 C340 300 180 300 124 280 Z"
+        {...grad(color, { x: 150, y: 120 }, { x: 380, y: 290 })}
+        {...SOFT_SHADOW}
+      />
+      {/* Paneles */}
+      <Line points={[260, 122, 260, 288]} stroke={color.shadowHex} strokeWidth={2} opacity={0.45} />
+      <Path data="M212 132 C196 186 186 240 188 286" stroke={color.shadowHex} strokeWidth={2} opacity={0.4} />
+      <Path data="M308 132 C324 186 334 240 332 286" stroke={color.shadowHex} strokeWidth={2} opacity={0.4} />
+      {/* Ojales y botón */}
+      <Circle x={228} y={198} radius={3} fill={color.shadowHex} opacity={0.6} />
+      <Circle x={292} y={198} radius={3} fill={color.shadowHex} opacity={0.6} />
+      <Circle x={260} y={120} radius={6} fill={color.shadowHex} />
+      {/* Visera curva */}
+      <Path
+        data="M132 286 C182 304 338 304 388 286 C414 304 422 332 408 356 C350 390 170 390 112 356 C98 332 106 304 132 286 Z"
+        {...grad(color, { x: 260, y: 286 }, { x: 260, y: 388 })}
+        shadowColor="#000000"
+        shadowBlur={16}
+        shadowOpacity={0.4}
+        shadowOffsetY={9}
+      />
+      <Path data="M132 286 C182 304 338 304 388 286" stroke={color.shadowHex} strokeWidth={3} opacity={0.75} />
+    </Group>
+  );
+}
+
+/* ------------------------------- Tote ------------------------------------ */
 function Tote({ color }: { color: MockupColor }) {
   return (
     <Group listening={false}>
-      <Path
-        data="M196 218 C196 124 240 100 260 100 C280 100 324 124 324 218"
-        stroke={color.shadowHex}
-        strokeWidth={16}
-        lineCap="round"
-        shadowColor="#000000"
-        shadowBlur={10}
-        shadowOpacity={0.3}
-      />
+      <Path data="M196 218 C196 124 240 100 260 100 C280 100 324 124 324 218" stroke={color.shadowHex} strokeWidth={16} lineCap="round" shadowColor="#000000" shadowBlur={10} shadowOpacity={0.3} />
       <Rect
         x={140}
         y={214}
@@ -182,10 +209,7 @@ function Tote({ color }: { color: MockupColor }) {
         height={346}
         cornerRadius={10}
         {...grad(color, { x: 150, y: 220 }, { x: 380, y: 560 })}
-        shadowColor="#000000"
-        shadowBlur={26}
-        shadowOpacity={0.5}
-        shadowOffsetY={14}
+        {...SOFT_SHADOW}
       />
       <Line points={[148, 238, 372, 238]} stroke={color.shadowHex} strokeWidth={2} dash={[6, 5]} opacity={0.8} />
       <Rect x={140} y={214} width={16} height={346} cornerRadius={10} fill="#000000" opacity={0.1} />
