@@ -8,7 +8,11 @@ import GarmentMockup, {
   type MockupColor,
 } from "@/components/designer/mockups/GarmentMockups";
 import PrintAreaOverlay from "@/components/designer/PrintAreaOverlay";
-import type { MockupKey } from "@/lib/designer/product-views";
+import {
+  getMockupSrc,
+  type GarmentProfileVisual,
+  type MockupKey,
+} from "@/lib/designer/product-views";
 import type { PlacedAsset, SafeArea } from "@/lib/designer/types";
 
 /**
@@ -30,6 +34,8 @@ export interface AssetTransform {
 interface MultiAssetCanvasProps {
   stage: { width: number; height: number };
   mockupKey: MockupKey;
+  colorId: string;
+  profile?: GarmentProfileVisual;
   color: MockupColor;
   side: "front" | "back";
   safeArea: SafeArea;
@@ -45,6 +51,8 @@ interface MultiAssetCanvasProps {
 export default function MultiAssetCanvas({
   stage,
   mockupKey,
+  colorId,
+  profile,
   color,
   side,
   safeArea,
@@ -80,6 +88,25 @@ export default function MultiAssetCanvas({
     transformer.nodes(node ? [node] : []);
     transformer.getLayer()?.batchDraw();
   }, [selectedId, side, assets]);
+
+  // Intenta cargar el PNG real del color; si no existe, usa el mockup vectorial.
+  const mockupSrc = getMockupSrc(mockupKey, side, colorId);
+  const [mockupImage, setMockupImage] = useState<HTMLImageElement | null>(null);
+  useEffect(() => {
+    let active = true;
+    setMockupImage(null);
+    const img = new window.Image();
+    img.onload = () => {
+      if (active) setMockupImage(img);
+    };
+    img.onerror = () => {
+      if (active) setMockupImage(null);
+    };
+    img.src = mockupSrc;
+    return () => {
+      active = false;
+    };
+  }, [mockupSrc]);
 
   function commit(asset: PlacedAsset, node: Konva.Image) {
     let rotation = node.rotation() % 360;
@@ -123,7 +150,23 @@ export default function MultiAssetCanvas({
             fillLinearGradientColorStops={[0, "#111626", 1, "#0B0F19"]}
           />
           <FloorShadow stageWidth={stage.width} stageHeight={stage.height} />
-          <GarmentMockup mockupKey={mockupKey} side={side} color={color} />
+          {mockupImage ? (
+            <KonvaImage
+              image={mockupImage}
+              x={0}
+              y={0}
+              width={stage.width}
+              height={stage.height}
+              listening={false}
+            />
+          ) : (
+            <GarmentMockup
+              mockupKey={mockupKey}
+              side={side}
+              color={color}
+              profile={profile}
+            />
+          )}
         </Layer>
 
         <Layer>

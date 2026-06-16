@@ -24,6 +24,7 @@ import {
   validateDesignFile,
   validateImageDimensions,
 } from "@/lib/designer/validation";
+import { uploadDesignAsset } from "@/lib/uploads/uploadDesignAsset";
 import type { LaserEditorElement } from "@/lib/designer/types";
 import type { ProductWithVariants } from "@/lib/db/types";
 import type Konva from "konva";
@@ -52,6 +53,8 @@ export default function LaserDesigner({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [designId, setDesignId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // Modo previsualización cuando el backend (storage/diseños) aún no está listo.
+  const [previewOnly, setPreviewOnly] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -90,9 +93,14 @@ export default function LaserDesigner({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.designId) {
+        if (data?.code === "STORAGE_NOT_CONFIGURED" || res.status === 503) {
+          setPreviewOnly(true);
+          return null;
+        }
         toast.error(data?.error ?? "No pudimos iniciar tu diseño.");
         return null;
       }
+      setPreviewOnly(false);
       setDesignId(data.designId as string);
       return data.designId as string;
     } catch {
@@ -124,46 +132,52 @@ export default function LaserDesigner({
       toast.error(dims.error);
       return;
     }
+    // 1) Coloca la imagen en el lienzo de inmediato: diseñar/probar nunca se
+    //    bloquea, aunque el storage todavía no esté configurado.
+    const localId = nanoid(8);
+    const fit = Math.min(
+      (safeArea.width * px * 0.4) / img.width,
+      (safeArea.height * px * 0.4) / img.height,
+    );
+    setImages((prev) => ({ ...prev, [localId]: img }));
+    setElements((prev) => [
+      ...prev,
+      {
+        id: localId,
+        type: "image",
+        assetId: "", // se completa al persistir en storage
+        localUrl: objectUrl,
+        remoteUrl: undefined,
+        naturalWidth: img.width,
+        naturalHeight: img.height,
+        x: centerX,
+        y: centerY,
+        scale: Math.max(0.05, Math.min(fit || 0.5, 12)),
+        rotation: 0,
+      },
+    ]);
+    setSelectedId(localId);
+    markDirty();
+
+    // 2) Persiste en segundo plano. Si falta configuración, modo previsualización.
     setUploading(true);
     try {
       const id = await ensureDesign();
       if (!id) return;
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("designProjectId", id);
-      const res = await fetch("/api/uploads/design-assets", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        toast.error(data?.error ?? "No pudimos subir tu archivo.");
+      const result = await uploadDesignAsset({ file, designProjectId: id });
+      if (!result.ok) {
+        if (result.configPending) setPreviewOnly(true);
+        else toast.error(result.message);
         return;
       }
-      const localId = nanoid(8);
-      const fit = Math.min(
-        (safeArea.width * px * 0.4) / img.width,
-        (safeArea.height * px * 0.4) / img.height,
+      setPreviewOnly(false);
+      setElements((prev) =>
+        prev.map((el) =>
+          el.id === localId && el.type === "image"
+            ? { ...el, assetId: result.assetId, remoteUrl: result.signedUrl }
+            : el,
+        ),
       );
-      setImages((prev) => ({ ...prev, [localId]: img }));
-      setElements((prev) => [
-        ...prev,
-        {
-          id: localId,
-          type: "image",
-          assetId: data.assetId as string,
-          localUrl: objectUrl,
-          remoteUrl: data.signedUrl as string | undefined,
-          naturalWidth: img.width,
-          naturalHeight: img.height,
-          x: centerX,
-          y: centerY,
-          scale: Math.max(0.05, Math.min(fit || 0.5, 12)),
-          rotation: 0,
-        },
-      ]);
-      setSelectedId(localId);
-      markDirty();
       toast.success("Imagen agregada");
     } finally {
       setUploading(false);
@@ -442,14 +456,19 @@ export default function LaserDesigner({
           </div>
 
           <DesignerCTA
-            canSave={elements.length > 0 && !uploading}
-            canAddToCart={elements.length > 0 && !uploading}
+            canSave={elements.length > 0 && !uploading && !previewOnly}
+            canAddToCart={elements.length > 0 && !uploading && !previewOnly}
             saving={saving}
             addingToCart={addingToCart}
             saved={saved}
             designId={designId}
             onSave={() => saveDesign(true)}
             onAddToCart={handleAddToCart}
+            note={
+              previewOnly
+                ? "Estás en modo previsualización: puedes diseñar tu grabado. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
+                : undefined
+            }
           />
         </aside>
       </div>

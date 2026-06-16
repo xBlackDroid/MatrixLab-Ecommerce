@@ -31,6 +31,7 @@ import {
   validateDesignFile,
   validateImageDimensions,
 } from "@/lib/designer/validation";
+import { uploadDesignAsset } from "@/lib/uploads/uploadDesignAsset";
 import type { PlacedAsset } from "@/lib/designer/types";
 import type {
   DesignerProductType,
@@ -84,6 +85,10 @@ export default function GarmentDesigner({
 
   const [designId, setDesignId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // true cuando el backend (storage/diseños) aún no está configurado: el editor
+  // sigue usable en modo previsualización, pero guardar/agregar al carrito se
+  // deshabilita con un aviso claro (en vez de un toast de "en configuración").
+  const [previewOnly, setPreviewOnly] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -155,9 +160,15 @@ export default function GarmentDesigner({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.designId) {
+        // Storage/diseños sin configurar: modo previsualización, sin alarmar.
+        if (data?.code === "STORAGE_NOT_CONFIGURED" || res.status === 503) {
+          setPreviewOnly(true);
+          return null;
+        }
         toast.error(data?.error ?? "No pudimos iniciar tu diseño.");
         return null;
       }
+      setPreviewOnly(false);
       setDesignId(data.designId as string);
       return data.designId as string;
     } catch {
@@ -202,43 +213,61 @@ export default function GarmentDesigner({
       const dims = validateImageDimensions(img.width, img.height);
       if (!dims.ok) {
         toast.error(dims.error);
+        URL.revokeObjectURL(objectUrl);
         return;
       }
+
+      // 1) Coloca la imagen en el lienzo de inmediato: diseñar y probar NUNCA se
+      //    bloquea, aunque el storage todavía no esté configurado.
+      const localId = nanoid(8);
+      const t = centeredTransform(img);
+      const placed: PlacedAsset = {
+        id: localId,
+        assetId: "", // se completa cuando se persiste en storage
+        localUrl: objectUrl,
+        remoteUrl: undefined,
+        naturalWidth: img.width,
+        naturalHeight: img.height,
+        x: t.x,
+        y: t.y,
+        scale: t.scale,
+        rotation: 0,
+        fileName: file.name,
+      };
+      setImages((prev) => ({ ...prev, [localId]: img }));
+      setAssets((prev) => ({ ...prev, [side]: [...prev[side], placed] }));
+      setSelectedId(localId);
+      markDirty();
+
+      // 2) Persiste en segundo plano al storage privado. Si falta configuración,
+      //    pasa a modo previsualización sin mostrar un error alarmante.
       setUploading(true);
       try {
         const id = await ensureDesign();
-        if (!id) return;
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("designProjectId", id);
-        const res = await fetch("/api/uploads/design-assets", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json().catch(() => null);
-        if (!res.ok || !data?.ok) {
-          toast.error(data?.error ?? "No pudimos subir tu archivo.");
+        if (!id) return; // previewOnly ya quedó activo si fue por configuración
+        const result = await uploadDesignAsset({ file, designProjectId: id });
+        if (!result.ok) {
+          if (result.configPending) {
+            setPreviewOnly(true);
+          } else {
+            toast.error(result.message);
+          }
           return;
         }
-        const localId = nanoid(8);
-        const t = centeredTransform(img);
-        const placed: PlacedAsset = {
-          id: localId,
-          assetId: data.assetId as string,
-          localUrl: objectUrl,
-          remoteUrl: data.signedUrl as string | undefined,
-          naturalWidth: img.width,
-          naturalHeight: img.height,
-          x: t.x,
-          y: t.y,
-          scale: t.scale,
-          rotation: 0,
-          fileName: (data.fileName as string) ?? file.name,
-        };
-        setImages((prev) => ({ ...prev, [localId]: img }));
-        setAssets((prev) => ({ ...prev, [side]: [...prev[side], placed] }));
-        setSelectedId(localId);
-        markDirty();
+        setPreviewOnly(false);
+        setAssets((prev) => ({
+          ...prev,
+          [side]: prev[side].map((a) =>
+            a.id === localId
+              ? {
+                  ...a,
+                  assetId: result.assetId,
+                  remoteUrl: result.signedUrl,
+                  fileName: result.fileName,
+                }
+              : a,
+          ),
+        }));
         toast.success("Imagen agregada");
       } catch {
         toast.error("No pudimos subir tu archivo. Intenta de nuevo.");
@@ -246,7 +275,10 @@ export default function GarmentDesigner({
         setUploading(false);
       }
     };
-    img.onerror = () => toast.error("No pudimos leer la imagen.");
+    img.onerror = () => {
+      toast.error("No pudimos leer la imagen.");
+      URL.revokeObjectURL(objectUrl);
+    };
     img.src = objectUrl;
   }
 
@@ -521,6 +553,8 @@ export default function GarmentDesigner({
           <MultiAssetCanvas
             stage={view.stage}
             mockupKey={view.mockupKey}
+            colorId={color.id}
+            profile={profile}
             color={{ hex: color.hex ?? "#f1f2f4", shadowHex: color.shadowHex }}
             side={side}
             safeArea={zone.safeArea}
@@ -678,10 +712,14 @@ export default function GarmentDesigner({
 
           <DesignerCTA
             canSave={
-              (assets.front.length > 0 || assets.back.length > 0) && !uploading
+              (assets.front.length > 0 || assets.back.length > 0) &&
+              !uploading &&
+              !previewOnly
             }
             canAddToCart={
-              (assets.front.length > 0 || assets.back.length > 0) && !uploading
+              (assets.front.length > 0 || assets.back.length > 0) &&
+              !uploading &&
+              !previewOnly
             }
             saving={saving}
             addingToCart={addingToCart}
@@ -689,6 +727,11 @@ export default function GarmentDesigner({
             designId={designId}
             onSave={() => saveDesign(true)}
             onAddToCart={handleAddToCart}
+            note={
+              previewOnly
+                ? "Estás en modo previsualización: puedes diseñar y acomodar tu imagen. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
+                : undefined
+            }
           />
         </aside>
       </div>

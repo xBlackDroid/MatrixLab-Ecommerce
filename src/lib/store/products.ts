@@ -68,6 +68,32 @@ export async function getCategoryByHandle(
   return (data as CategoryRow | null) ?? null;
 }
 
+/**
+ * "Insumos creativos" (madre) agrupa subcategorías comerciales. La página de la
+ * categoría madre muestra estos bloques (no tiene productos propios). El orden
+ * sigue el naming comercial del catálogo.
+ */
+export const INSUMOS_PARENT_HANDLE = "insumos";
+export const INSUMOS_SUBCATEGORY_HANDLES = [
+  "snowglobe", // SnowGlobe Bar
+  "repuestos-consumibles", // Sparkle Mix
+  "magic-flow", // Magic Flow
+  "wraps-glow-finish", // Wraps & Glow Finish
+  "acrilicos", // Acrylab
+  "accesorios-personalizacion", // Creator Tools
+  "llaveros", // Llaveros creativos
+  "tags-acrilico", // Tags de acrílico
+] as const;
+
+/** Subcategorías de Insumos creativos, en orden comercial (para su landing). */
+export async function getInsumosSubcategories(): Promise<CategoryRow[]> {
+  const all = await getCategories();
+  const order = INSUMOS_SUBCATEGORY_HANDLES as readonly string[];
+  return all
+    .filter((c) => order.includes(c.handle))
+    .sort((a, b) => order.indexOf(a.handle) - order.indexOf(b.handle));
+}
+
 function sortProducts(products: ProductRow[], sort: ProductSort): ProductRow[] {
   const sorted = [...products];
   switch (sort) {

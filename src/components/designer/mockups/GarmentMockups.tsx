@@ -1,7 +1,11 @@
 "use client";
 
 import { Circle, Ellipse, Group, Line, Path, Rect } from "react-konva";
-import type { MockupKey } from "@/lib/designer/product-views";
+import {
+  getProfileShape,
+  type GarmentProfileVisual,
+  type MockupKey,
+} from "@/lib/designer/product-views";
 
 /**
  * Mockups vectoriales del Laboratorio (Etapa 2) — siluetas realistas.
@@ -28,6 +32,8 @@ interface MockupProps {
   mockupKey: MockupKey;
   side: "front" | "back";
   color: MockupColor;
+  /** Perfil visual (solo playera/sudadera): ajusta el largo de la silueta. */
+  profile?: GarmentProfileVisual;
 }
 
 function grad(
@@ -218,7 +224,7 @@ function Tote({ color }: { color: MockupColor }) {
   );
 }
 
-export default function GarmentMockup({ mockupKey, side, color }: MockupProps) {
+function MockupBody({ mockupKey, side, color }: MockupProps) {
   switch (mockupKey) {
     case "sudadera":
       return <Sudadera side={side} color={color} />;
@@ -232,6 +238,30 @@ export default function GarmentMockup({ mockupKey, side, color }: MockupProps) {
     default:
       return <Playera side={side} color={color} />;
   }
+}
+
+export default function GarmentMockup({
+  mockupKey,
+  side,
+  color,
+  profile,
+}: MockupProps) {
+  const body = <MockupBody mockupKey={mockupKey} side={side} color={color} />;
+  const shape = profile ? getProfileShape(mockupKey, profile) : null;
+  if (!shape || shape.lengthFactor === 1) return body;
+  // Escala el largo anclado en la línea de hombros: niño más corto, mujer
+  // ligeramente más entallada, hombre completo. No mueve el cuello ni cambia
+  // el ancho, así el área imprimible (centrada) sigue siendo válida.
+  return (
+    <Group
+      y={shape.shoulderAnchorY}
+      offsetY={shape.shoulderAnchorY}
+      scaleY={shape.lengthFactor}
+      listening={false}
+    >
+      {body}
+    </Group>
+  );
 }
 
 /** Sombra de piso reutilizable bajo el producto. */

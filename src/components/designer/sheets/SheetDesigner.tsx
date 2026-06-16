@@ -31,6 +31,7 @@ import {
   validateDesignFile,
   validateImageDimensions,
 } from "@/lib/designer/validation";
+import { uploadDesignAsset } from "@/lib/uploads/uploadDesignAsset";
 import type { DesignerProductType, ProductWithVariants } from "@/lib/db/types";
 import type Konva from "konva";
 import type { SheetPiece } from "@/lib/designer/types";
@@ -84,6 +85,8 @@ export default function SheetDesigner({
   const [pieceH, setPieceH] = useState(DEFAULT_PIECE_CM);
 
   const [uploading, setUploading] = useState(false);
+  // Modo previsualización cuando el backend (storage/diseños) aún no está listo.
+  const [previewOnly, setPreviewOnly] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -124,9 +127,14 @@ export default function SheetDesigner({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.designId) {
+        if (data?.code === "STORAGE_NOT_CONFIGURED" || res.status === 503) {
+          setPreviewOnly(true);
+          return null;
+        }
         toast.error(data?.error ?? "No pudimos iniciar tu planilla.");
         return null;
       }
+      setPreviewOnly(false);
       setDesignId(data.designId as string);
       return data.designId as string;
     } catch {
@@ -163,23 +171,23 @@ export default function SheetDesigner({
       toast.error(dims.error);
       return null;
     }
+    // El arte se coloca en la planilla aunque el storage no esté listo: si la
+    // persistencia falla por configuración pendiente, seguimos en modo
+    // previsualización (assetId vacío) sin bloquear el diseño visual.
     const id = await ensureDesign();
-    if (!id) return null;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("designProjectId", id);
-    const res = await fetch("/api/uploads/design-assets", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json().catch(() => null);
-    if (!res.ok || !data?.ok) {
-      toast.error(data?.error ?? "No pudimos subir tu archivo.");
-      return null;
+    if (!id) {
+      return { assetId: "", remoteUrl: undefined, localUrl: objectUrl, img };
     }
+    const result = await uploadDesignAsset({ file, designProjectId: id });
+    if (!result.ok) {
+      if (result.configPending) setPreviewOnly(true);
+      else toast.error(result.message);
+      return { assetId: "", remoteUrl: undefined, localUrl: objectUrl, img };
+    }
+    setPreviewOnly(false);
     return {
-      assetId: data.assetId as string,
-      remoteUrl: data.signedUrl as string | undefined,
+      assetId: result.assetId,
+      remoteUrl: result.signedUrl,
       localUrl: objectUrl,
       img,
     };
@@ -521,14 +529,19 @@ export default function SheetDesigner({
           </div>
 
           <DesignerCTA
-            canSave={hasContent && !uploading}
-            canAddToCart={hasContent && !uploading}
+            canSave={hasContent && !uploading && !previewOnly}
+            canAddToCart={hasContent && !uploading && !previewOnly}
             saving={saving}
             addingToCart={addingToCart}
             saved={saved}
             designId={designId}
             onSave={() => saveDesign(true)}
             onAddToCart={handleAddToCart}
+            note={
+              previewOnly
+                ? "Estás en modo previsualización: puedes armar tu planilla. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
+                : undefined
+            }
           />
         </aside>
       </div>

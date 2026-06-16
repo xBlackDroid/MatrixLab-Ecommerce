@@ -116,10 +116,10 @@ export default async function DesignerProductPage({
 function UnavailableNotice() {
   return (
     <div className="glass mx-auto max-w-lg rounded-3xl p-12 text-center">
-      <h2 className="text-xl font-bold">Este laboratorio está en preparación</h2>
+      <h2 className="text-xl font-bold">Este producto aún no está disponible</h2>
       <p className="mt-3 text-ml-white/60">
-        Estamos configurando el producto base. Mientras tanto, cuéntanos tu idea
-        por WhatsApp y la producimos contigo.
+        No encontramos el producto base en el catálogo todavía. Cuéntanos tu
+        idea por WhatsApp y la producimos contigo.
       </p>
       <a
         href={buildWhatsAppUrl(whatsappMessages.quoteDesign())}

@@ -1,12 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  jsonError,
-  readJsonBody,
-  serviceUnavailable,
-  tooManyRequests,
-} from "@/lib/api";
+import { jsonError, readJsonBody, tooManyRequests } from "@/lib/api";
 import { requireServiceClient } from "@/lib/db/admin";
 import type { ProductRow } from "@/lib/db/types";
+import { UPLOAD_ERRORS } from "@/lib/uploads/errors";
 import { isSupabaseConfigured } from "@/lib/security/env";
 import {
   checkRateLimit,
@@ -31,8 +27,10 @@ export async function POST(request: NextRequest) {
   if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
 
   if (!isSupabaseConfigured()) {
-    return serviceUnavailable(
-      "El diseñador está en configuración. Intenta más tarde o cotiza por WhatsApp.",
+    return jsonError(
+      UPLOAD_ERRORS.STORAGE_NOT_CONFIGURED,
+      503,
+      "STORAGE_NOT_CONFIGURED",
     );
   }
 
@@ -53,8 +51,15 @@ export async function POST(request: NextRequest) {
     ProductRow,
     "id" | "status" | "is_customizable"
   > | null;
-  if (!product || product.status === "oculto" || !product.is_customizable) {
-    return jsonError("Este producto no se puede personalizar.", 409);
+  if (!product) {
+    return jsonError(UPLOAD_ERRORS.NO_BASE_PRODUCT, 409, "NO_BASE_PRODUCT");
+  }
+  if (product.status === "oculto" || !product.is_customizable) {
+    return jsonError(
+      "Este producto no se puede personalizar.",
+      409,
+      "PRODUCT_NOT_CUSTOMIZABLE",
+    );
   }
 
   if (parsed.data.variantId) {

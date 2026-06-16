@@ -1,12 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
-import {
-  jsonError,
-  serviceUnavailable,
-  tooManyRequests,
-} from "@/lib/api";
+import { jsonError, tooManyRequests } from "@/lib/api";
 import { requireServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl, uploadToBucket } from "@/lib/db/storage";
+import { UPLOAD_ERRORS } from "@/lib/uploads/errors";
 import type { DesignProjectRow } from "@/lib/db/types";
 import { getServerEnv, isSupabaseConfigured } from "@/lib/security/env";
 import {
@@ -47,14 +44,16 @@ export async function POST(request: NextRequest) {
   if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
 
   if (!isSupabaseConfigured()) {
-    return serviceUnavailable(
-      "Las subidas de archivos están en configuración. Intenta más tarde.",
+    return jsonError(
+      UPLOAD_ERRORS.STORAGE_NOT_CONFIGURED,
+      503,
+      "STORAGE_NOT_CONFIGURED",
     );
   }
 
   const sessionId = readSessionId(request);
   if (!sessionId) {
-    return jsonError("Tu sesión expiró. Recarga la página.", 401);
+    return jsonError(UPLOAD_ERRORS.SESSION_MISSING, 401, "SESSION_MISSING");
   }
 
   let formData: FormData;
@@ -79,6 +78,7 @@ export async function POST(request: NextRequest) {
     return jsonError(
       `El archivo debe pesar entre 1 byte y ${getServerEnv().uploadMaxMb} MB.`,
       413,
+      "FILE_TOO_LARGE",
     );
   }
 
@@ -119,6 +119,7 @@ export async function POST(request: NextRequest) {
       return jsonError(
         "Formato no permitido. Usa PNG, JPG o WEBP (recomendamos PNG).",
         415,
+        "INVALID_TYPE",
       );
     }
     if (
@@ -153,7 +154,11 @@ export async function POST(request: NextRequest) {
     contentType: detected.mime,
   });
   if (!originalUpload.ok) {
-    return jsonError("No pudimos guardar tu archivo. Intenta de nuevo.", 500);
+    return jsonError(
+      "No pudimos guardar tu archivo. Intenta de nuevo.",
+      500,
+      "STORAGE_POLICY",
+    );
   }
   await uploadToBucket({
     bucket: BUCKETS.designPreviews,

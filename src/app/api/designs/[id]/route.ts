@@ -1,13 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
-import {
-  jsonError,
-  readJsonBody,
-  serviceUnavailable,
-  tooManyRequests,
-} from "@/lib/api";
+import { jsonError, readJsonBody, tooManyRequests } from "@/lib/api";
 import { requireServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl, uploadToBucket } from "@/lib/db/storage";
+import { UPLOAD_ERRORS } from "@/lib/uploads/errors";
 import type { DesignProjectRow } from "@/lib/db/types";
 import { isSupabaseConfigured } from "@/lib/security/env";
 import {
@@ -50,7 +46,11 @@ async function findOwnedDesign(
 
 export async function GET(request: NextRequest, context: RouteContext) {
   if (!isSupabaseConfigured()) {
-    return serviceUnavailable("El diseñador está en configuración.");
+    return jsonError(
+      UPLOAD_ERRORS.STORAGE_NOT_CONFIGURED,
+      503,
+      "STORAGE_NOT_CONFIGURED",
+    );
   }
   const sessionId = readSessionId(request);
   if (!sessionId) return jsonError("Sesión inválida.", 401);
@@ -136,7 +136,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
 
   if (!isSupabaseConfigured()) {
-    return serviceUnavailable("El diseñador está en configuración.");
+    return jsonError(
+      UPLOAD_ERRORS.STORAGE_NOT_CONFIGURED,
+      503,
+      "STORAGE_NOT_CONFIGURED",
+    );
   }
   const sessionId = readSessionId(request);
   if (!sessionId) return jsonError("Sesión inválida.", 401);

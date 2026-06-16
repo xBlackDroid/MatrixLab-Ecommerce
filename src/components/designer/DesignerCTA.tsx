@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, MessageCircle, Save, ShoppingBag } from "lucide-react";
+import { Info, Loader2, MessageCircle, Save, ShoppingBag } from "lucide-react";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 interface DesignerCTAProps {
@@ -12,6 +12,12 @@ interface DesignerCTAProps {
   designId: string | null;
   onSave: () => void;
   onAddToCart: () => void;
+  /**
+   * Aviso opcional cuando guardar / agregar al carrito está deshabilitado por
+   * un motivo claro (p. ej. el almacenamiento todavía no está configurado y el
+   * editor está en modo previsualización).
+   */
+  note?: string;
 }
 
 /** Acciones finales del diseñador. */
@@ -24,9 +30,16 @@ export default function DesignerCTA({
   designId,
   onSave,
   onAddToCart,
+  note,
 }: DesignerCTAProps) {
   return (
     <div className="flex flex-col gap-3">
+      {note && (
+        <p className="flex items-start gap-2 rounded-2xl border border-ml-violet/30 bg-ml-violet/10 px-4 py-3 text-xs leading-relaxed text-ml-white/80">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-ml-violet" aria-hidden />
+          <span>{note}</span>
+        </p>
+      )}
       <button
         type="button"
         onClick={onAddToCart}

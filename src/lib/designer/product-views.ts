@@ -201,3 +201,82 @@ export function getFrames(
 ): string[] {
   return config.framesByColor?.[colorId] ?? [];
 }
+
+// ===========================================================================
+// Mockups PNG reales por color (con fallback vectorial).
+// ===========================================================================
+// El lienzo intenta cargar el PNG real; si el archivo no existe, hace fallback
+// al mockup vectorial. Para activar fotorrealismo basta con colocar los PNG en
+// /public siguiendo esta convención (sin tocar código):
+//   Prendas con frente/espalda:
+//     /images/products/playeras/mockups/front/<color>.png
+//     /images/products/playeras/mockups/back/<color>.png
+//     /images/products/sudaderas/mockups/front/<color>.png   (etc.)
+//   Gorras (solo frente):
+//     /images/products/gorras/trucker/mockups/<color>.png
+//     /images/products/gorras/clasica/mockups/<color>.png
+// donde <color> es el id de color (blanco, negro, rojo, azul-marino, …).
+// ===========================================================================
+
+/** Carpeta pública (bajo /images/products) por mockup. */
+const MOCKUP_FOLDER: Record<MockupKey, string> = {
+  playera: "playeras",
+  sudadera: "sudaderas",
+  "gorra-trucker": "gorras/trucker",
+  "gorra-clasica": "gorras/clasica",
+  tote: "totes",
+};
+
+const CAP_MOCKUPS = new Set<MockupKey>(["gorra-trucker", "gorra-clasica"]);
+
+/** Ruta candidata del PNG real por color. El render hace fallback si no existe. */
+export function getMockupSrc(
+  mockupKey: MockupKey,
+  side: "front" | "back",
+  colorId: string,
+): string {
+  const folder = MOCKUP_FOLDER[mockupKey];
+  if (CAP_MOCKUPS.has(mockupKey)) {
+    return `/images/products/${folder}/mockups/${colorId}.png`;
+  }
+  return `/images/products/${folder}/mockups/${side}/${colorId}.png`;
+}
+
+// ===========================================================================
+// Variación visual de silueta por perfil (niño / mujer / hombre).
+// SOLO afecta la silueta del mockup, NO las medidas de producción ni el área
+// imprimible (que se mantiene centrada y válida en los tres perfiles). Se
+// implementa como escalado de largo anclado en la línea de hombros.
+// ===========================================================================
+
+export type GarmentProfileVisual = "nino" | "mujer" | "hombre";
+
+export interface GarmentProfileShape {
+  /** Factor de largo de la prenda (1 = corte hombre, base). */
+  lengthFactor: number;
+  /** Y de anclaje (hombros): el escalado de largo no mueve cuello/hombros. */
+  shoulderAnchorY: number;
+}
+
+/** Solo prendas con talla/perfil (playera, sudadera) varían su silueta. */
+export const GARMENT_PROFILE_VISUALS: Partial<
+  Record<MockupKey, Record<GarmentProfileVisual, GarmentProfileShape>>
+> = {
+  playera: {
+    nino: { lengthFactor: 0.87, shoulderAnchorY: 150 },
+    mujer: { lengthFactor: 0.95, shoulderAnchorY: 150 },
+    hombre: { lengthFactor: 1, shoulderAnchorY: 150 },
+  },
+  sudadera: {
+    nino: { lengthFactor: 0.89, shoulderAnchorY: 170 },
+    mujer: { lengthFactor: 0.96, shoulderAnchorY: 170 },
+    hombre: { lengthFactor: 1, shoulderAnchorY: 170 },
+  },
+};
+
+export function getProfileShape(
+  mockupKey: MockupKey,
+  profile: GarmentProfileVisual,
+): GarmentProfileShape | null {
+  return GARMENT_PROFILE_VISUALS[mockupKey]?.[profile] ?? null;
+}
