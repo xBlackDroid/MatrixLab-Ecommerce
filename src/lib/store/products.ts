@@ -74,15 +74,16 @@ export async function getCategoryByHandle(
  * sigue el naming comercial del catálogo.
  */
 export const INSUMOS_PARENT_HANDLE = "insumos";
+// Orden público EXACTO de las 8 subcategorías de Insumos creativos.
 export const INSUMOS_SUBCATEGORY_HANDLES = [
-  "snowglobe", // SnowGlobe Bar
-  "repuestos-consumibles", // Sparkle Mix
-  "magic-flow", // Magic Flow
-  "wraps-glow-finish", // Wraps & Glow Finish
-  "acrilicos", // Acrylab
-  "accesorios-personalizacion", // Creator Tools
-  "llaveros", // Llaveros creativos
-  "tags-acrilico", // Tags de acrílico
+  "snowglobe", // 1. SnowGlobe Bar
+  "llaveros", // 2. Llaveros creativos
+  "tags-acrilico", // 3. Tags de acrílico
+  "acrilicos", // 4. Acrylab
+  "accesorios-personalizacion", // 5. Creator Tools
+  "repuestos-consumibles", // 6. Sparkle Mix
+  "magic-flow", // 7. Magic Flow
+  "wraps-glow-finish", // 8. Wraps & Glow Finish
 ] as const;
 
 /** Subcategorías de Insumos creativos, en orden comercial (para su landing). */

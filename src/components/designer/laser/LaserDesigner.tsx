@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { ImageIcon, Loader2, Trash2, Type, Upload } from "lucide-react";
+import { Loader2, Ruler, Trash2, Type } from "lucide-react";
 import { nanoid } from "nanoid";
 import { toast } from "sonner";
 import { emitCartUpdated } from "@/components/store/CartBadge";
@@ -13,19 +13,17 @@ import LaserTextTool from "@/components/designer/laser/LaserTextTool";
 import type { LaserTransform } from "@/components/designer/laser/LaserCanvas";
 import { exportStagePreview } from "@/lib/designer/exportPreview";
 import {
-  getLaserSafeAreaCm,
+  clampLaserDim,
   getLaserTemplate,
+  LASER_DEFAULT_CM,
   LASER_FONTS,
+  LASER_MAX_CM,
+  LASER_MIN_CM,
+  LASER_PADDING_CM,
   LASER_PX_PER_CM,
   LASER_TEMPLATES,
-  LASER_WORK_AREA_CM,
 } from "@/lib/designer/laser-config";
-import {
-  validateDesignFile,
-  validateImageDimensions,
-} from "@/lib/designer/validation";
-import { uploadDesignAsset } from "@/lib/uploads/uploadDesignAsset";
-import type { LaserEditorElement } from "@/lib/designer/types";
+import type { LaserTextElement } from "@/lib/designer/types";
 import type { ProductWithVariants } from "@/lib/db/types";
 import type Konva from "konva";
 import { cn } from "@/lib/utils";
@@ -48,12 +46,12 @@ export default function LaserDesigner({
   product: ProductWithVariants;
 }) {
   const [templateId, setTemplateId] = useState(LASER_TEMPLATES[0]!.id);
-  const [elements, setElements] = useState<LaserEditorElement[]>([]);
-  const [images, setImages] = useState<Record<string, HTMLImageElement>>({});
+  const [widthCm, setWidthCm] = useState<number>(LASER_DEFAULT_CM.width);
+  const [heightCm, setHeightCm] = useState<number>(LASER_DEFAULT_CM.height);
+  const [elements, setElements] = useState<LaserTextElement[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [designId, setDesignId] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  // Modo previsualización cuando el backend (storage/diseños) aún no está listo.
+  // Modo previsualización cuando el backend (diseños) aún no está configurado.
   const [previewOnly, setPreviewOnly] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -61,14 +59,11 @@ export default function LaserDesigner({
   const [notes, setNotes] = useState("");
 
   const stageRef = useRef<Konva.Stage | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const objectUrls = useRef<string[]>([]);
 
   const template = getLaserTemplate(templateId);
-  const safeArea = getLaserSafeAreaCm();
   const px = LASER_PX_PER_CM;
-  const centerX = (LASER_WORK_AREA_CM.width / 2) * px;
-  const centerY = (LASER_WORK_AREA_CM.height / 2) * px;
+  const centerX = (LASER_PADDING_CM + widthCm / 2) * px;
+  const centerY = (LASER_PADDING_CM + heightCm / 2) * px;
 
   const customVariant = useMemo(() => {
     const variants = product.variants ?? [];
@@ -109,79 +104,23 @@ export default function LaserDesigner({
     }
   }, [designId, product.id, customVariant]);
 
-  async function handleImageUpload(file: File) {
-    const validation = validateDesignFile(file);
-    if (!validation.ok) {
-      toast.error(validation.error);
-      return;
-    }
-    const objectUrl = URL.createObjectURL(file);
-    objectUrls.current.push(objectUrl);
-    const img = await new Promise<HTMLImageElement | null>((resolve) => {
-      const image = new window.Image();
-      image.onload = () => resolve(image);
-      image.onerror = () => resolve(null);
-      image.src = objectUrl;
-    });
-    if (!img) {
-      toast.error("No pudimos leer la imagen.");
-      return;
-    }
-    const dims = validateImageDimensions(img.width, img.height);
-    if (!dims.ok) {
-      toast.error(dims.error);
-      return;
-    }
-    // 1) Coloca la imagen en el lienzo de inmediato: diseñar/probar nunca se
-    //    bloquea, aunque el storage todavía no esté configurado.
-    const localId = nanoid(8);
-    const fit = Math.min(
-      (safeArea.width * px * 0.4) / img.width,
-      (safeArea.height * px * 0.4) / img.height,
-    );
-    setImages((prev) => ({ ...prev, [localId]: img }));
-    setElements((prev) => [
-      ...prev,
-      {
-        id: localId,
-        type: "image",
-        assetId: "", // se completa al persistir en storage
-        localUrl: objectUrl,
-        remoteUrl: undefined,
-        naturalWidth: img.width,
-        naturalHeight: img.height,
-        x: centerX,
-        y: centerY,
-        scale: Math.max(0.05, Math.min(fit || 0.5, 12)),
-        rotation: 0,
-      },
-    ]);
-    setSelectedId(localId);
+  function selectTemplate(id: string) {
+    setTemplateId(id);
+    // Sugerir las dimensiones de la forma elegida (siguen siendo editables).
+    const tpl = getLaserTemplate(id);
+    setWidthCm(clampLaserDim("width", tpl.sizeCm.width));
+    setHeightCm(clampLaserDim("height", tpl.sizeCm.height));
     markDirty();
+  }
 
-    // 2) Persiste en segundo plano. Si falta configuración, modo previsualización.
-    setUploading(true);
-    try {
-      const id = await ensureDesign();
-      if (!id) return;
-      const result = await uploadDesignAsset({ file, designProjectId: id });
-      if (!result.ok) {
-        if (result.configPending) setPreviewOnly(true);
-        else toast.error(result.message);
-        return;
-      }
-      setPreviewOnly(false);
-      setElements((prev) =>
-        prev.map((el) =>
-          el.id === localId && el.type === "image"
-            ? { ...el, assetId: result.assetId, remoteUrl: result.signedUrl }
-            : el,
-        ),
-      );
-      toast.success("Imagen agregada");
-    } finally {
-      setUploading(false);
-    }
+  function changeWidth(value: number) {
+    setWidthCm(clampLaserDim("width", value));
+    markDirty();
+  }
+
+  function changeHeight(value: number) {
+    setHeightCm(clampLaserDim("height", value));
+    markDirty();
   }
 
   function addText(text: string, fontId: string) {
@@ -204,6 +143,8 @@ export default function LaserDesigner({
     ]);
     setSelectedId(localId);
     markDirty();
+    // Detecta temprano si el almacenamiento aún no está configurado.
+    if (!designId && !previewOnly) void ensureDesign();
   }
 
   function updateElement(id: string, transform: LaserTransform) {
@@ -224,34 +165,24 @@ export default function LaserDesigner({
       version: 1 as const,
       designerType: "laser" as const,
       templateId,
-      elements: elements.map((el) =>
-        el.type === "image"
-          ? {
-              type: "image" as const,
-              assetId: el.assetId,
-              url: el.remoteUrl,
-              x: el.x,
-              y: el.y,
-              scale: el.scale,
-              rotation: el.rotation,
-            }
-          : {
-              type: "text" as const,
-              text: el.text,
-              fontId: el.fontId,
-              x: el.x,
-              y: el.y,
-              scale: el.scale,
-              rotation: el.rotation,
-              fontSize: el.fontSize,
-            },
-      ),
+      widthCm,
+      heightCm,
+      elements: elements.map((el) => ({
+        type: "text" as const,
+        text: el.text,
+        fontId: el.fontId,
+        x: el.x,
+        y: el.y,
+        scale: el.scale,
+        rotation: el.rotation,
+        fontSize: el.fontSize,
+      })),
     };
   }
 
   async function saveDesign(showToast = true): Promise<string | null> {
     if (elements.length === 0) {
-      toast.error("Agrega una imagen o texto para guardar tu diseño.");
+      toast.error("Agrega texto para guardar tu diseño.");
       return null;
     }
     const id = await ensureDesign();
@@ -328,20 +259,70 @@ export default function LaserDesigner({
     }
   }
 
+  const dimensionControl = (
+    <div className="glass rounded-2xl p-5">
+      <div className="mb-3 flex items-center gap-2">
+        <Ruler className="h-4 w-4 text-ml-cyan" aria-hidden />
+        <p className="text-sm font-medium text-ml-white/80">
+          Dimensiones del área
+        </p>
+      </div>
+      <p className="mb-3 rounded-xl border border-ml-cyan/20 bg-ml-cyan/5 px-3.5 py-2.5 text-sm text-ml-cyan">
+        Área seleccionada: <strong>{widthCm} cm</strong> ×{" "}
+        <strong>{heightCm} cm</strong>
+      </p>
+
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-sm font-medium text-ml-white/70">Ancho</span>
+        <span className="text-xs text-ml-white/50">{widthCm} cm</span>
+      </div>
+      <input
+        type="range"
+        min={LASER_MIN_CM.width}
+        max={LASER_MAX_CM.width}
+        step={0.5}
+        value={widthCm}
+        onChange={(e) => changeWidth(Number(e.target.value))}
+        className="w-full accent-ml-violet"
+        aria-label="Ancho del área en centímetros"
+      />
+
+      <div className="mb-1.5 mt-3 flex items-center justify-between">
+        <span className="text-sm font-medium text-ml-white/70">Alto</span>
+        <span className="text-xs text-ml-white/50">{heightCm} cm</span>
+      </div>
+      <input
+        type="range"
+        min={LASER_MIN_CM.height}
+        max={LASER_MAX_CM.height}
+        step={0.5}
+        value={heightCm}
+        onChange={(e) => changeHeight(Number(e.target.value))}
+        className="w-full accent-ml-violet"
+        aria-label="Alto del área en centímetros"
+      />
+      <p className="mt-3 text-xs text-ml-white/45">
+        Rango permitido: {LASER_MIN_CM.width}×{LASER_MIN_CM.height} cm a{" "}
+        {LASER_MAX_CM.width}×{LASER_MAX_CM.height} cm.
+      </p>
+    </div>
+  );
+
   return (
     <>
       <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)_300px]">
         <aside className="glass hidden h-fit rounded-2xl p-5 lg:block">
-          <LaserTemplateSelector selectedId={templateId} onSelect={(id) => { setTemplateId(id); markDirty(); }} />
+          <LaserTemplateSelector
+            selectedId={templateId}
+            onSelect={selectTemplate}
+          />
         </aside>
 
         <section className="glass-strong relative overflow-hidden rounded-3xl p-3 sm:p-5">
           <LaserCanvas
-            workAreaCm={LASER_WORK_AREA_CM}
-            safeAreaCm={safeArea}
+            areaCm={{ width: widthCm, height: heightCm }}
             template={template}
             elements={elements}
-            images={images}
             selectedId={selectedId}
             onSelect={setSelectedId}
             onChange={updateElement}
@@ -352,49 +333,21 @@ export default function LaserDesigner({
           <div className="mt-3 lg:hidden">
             <LaserTemplateSelector
               selectedId={templateId}
-              onSelect={(id) => {
-                setTemplateId(id);
-                markDirty();
-              }}
+              onSelect={selectTemplate}
             />
           </div>
         </section>
 
         <aside className="flex flex-col gap-5">
+          {dimensionControl}
+
           <div className="glass rounded-2xl p-5">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-white/15 bg-white/5 px-4 py-5 text-center transition hover:border-ml-violet/50 disabled:opacity-40"
-            >
-              {uploading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-ml-violet" aria-hidden />
-              ) : (
-                <Upload className="h-6 w-6 text-ml-violet" aria-hidden />
-              )}
-              <span className="text-sm font-semibold">Subir imagen</span>
-              <span className="text-xs text-ml-white/50">PNG, JPG o WEBP</span>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleImageUpload(file);
-                e.target.value = "";
-              }}
-            />
-            <div className="mt-4">
-              <LaserTextTool onAdd={addText} />
-            </div>
+            <LaserTextTool onAdd={addText} />
           </div>
 
           {elements.length > 0 && (
             <div className="glass rounded-2xl p-5">
-              <p className="mb-2 text-sm font-medium text-ml-white/70">Elementos</p>
+              <p className="mb-2 text-sm font-medium text-ml-white/70">Textos</p>
               <ul className="flex flex-col gap-2">
                 {elements.map((el) => (
                   <li
@@ -411,13 +364,9 @@ export default function LaserDesigner({
                       onClick={() => setSelectedId(el.id)}
                       className="flex min-w-0 flex-1 items-center gap-2 text-left"
                     >
-                      {el.type === "image" ? (
-                        <ImageIcon className="h-4 w-4 shrink-0 text-ml-violet" aria-hidden />
-                      ) : (
-                        <Type className="h-4 w-4 shrink-0 text-ml-violet" aria-hidden />
-                      )}
+                      <Type className="h-4 w-4 shrink-0 text-ml-violet" aria-hidden />
                       <span className="truncate text-xs text-ml-white/75">
-                        {el.type === "image" ? "Imagen" : el.text}
+                        {el.text}
                       </span>
                     </button>
                     <button
@@ -450,14 +399,14 @@ export default function LaserDesigner({
                 setNotes(e.target.value);
                 markDirty();
               }}
-              placeholder="Material, medidas o detalles de tu grabado…"
+              placeholder="Material, color de grabado o detalles…"
               className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-ml-white outline-none transition placeholder:text-ml-white/35 focus:border-ml-cyan"
             />
           </div>
 
           <DesignerCTA
-            canSave={elements.length > 0 && !uploading && !previewOnly}
-            canAddToCart={elements.length > 0 && !uploading && !previewOnly}
+            canSave={elements.length > 0 && !previewOnly}
+            canAddToCart={elements.length > 0 && !previewOnly}
             saving={saving}
             addingToCart={addingToCart}
             saved={saved}
@@ -466,7 +415,7 @@ export default function LaserDesigner({
             onAddToCart={handleAddToCart}
             note={
               previewOnly
-                ? "Estás en modo previsualización: puedes diseñar tu grabado. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
+                ? "Estás en modo previsualización: puedes diseñar tu grabado de texto. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
                 : undefined
             }
           />

@@ -214,11 +214,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   if (payload.designerType === "laser") {
     designJson = {
       ...payload.designJson,
-      elements: payload.designJson.elements.map((el) =>
-        el.type === "text"
-          ? { ...el, text: sanitizeText(el.text, 40) }
-          : el,
-      ),
+      // El láser es solo texto: sanitiza cada cadena antes de persistir.
+      elements: payload.designJson.elements.map((el) => ({
+        ...el,
+        text: sanitizeText(el.text, 40),
+      })),
     };
   }
 

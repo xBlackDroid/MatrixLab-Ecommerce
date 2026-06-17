@@ -12,6 +12,7 @@ import type {
   ProductVariantRow,
 } from "@/lib/db/types";
 import { checkAvailability } from "@/lib/store/inventory";
+import { getDesignerDisplayName } from "@/lib/designer/product-catalog";
 import { computeTotals, resolveUnitPrice } from "@/lib/store/pricing";
 
 /**
@@ -151,11 +152,16 @@ export async function buildCartView(sessionId: string): Promise<CartView> {
         1800,
       );
     }
+    const customTitle =
+      item.is_custom && design
+        ? getDesignerDisplayName(design.product_type)
+        : null;
     lines.push({
       id: item.id,
       productId: product.id,
       productHandle: product.handle,
       title: product.title,
+      customTitle,
       variantId: variant?.id ?? null,
       variantTitle: variant?.title ?? null,
       quantity: item.quantity,

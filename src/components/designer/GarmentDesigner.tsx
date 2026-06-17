@@ -379,11 +379,13 @@ export default function GarmentDesigner({
     };
   }
 
-  /** Cambia a `front`, espera dos frames y exporta la preview del lienzo. */
-  async function captureFrontPreview(): Promise<string | null> {
-    if (side !== "front") {
-      setSide("front");
+  /** Cambia al lado pedido, espera dos frames y exporta la preview del lienzo. */
+  async function captureSidePreview(
+    target: "front" | "back",
+  ): Promise<string | null> {
+    if (side !== target) {
       setSelectedId(null);
+      setSide(target);
       await new Promise<void>((r) =>
         requestAnimationFrame(() => requestAnimationFrame(() => r())),
       );
@@ -391,9 +393,43 @@ export default function GarmentDesigner({
     return stageRef.current ? exportStagePreview(stageRef.current) : null;
   }
 
+  const captureFrontPreview = () => captureSidePreview("front");
+
+  /**
+   * Genera previews locales de frente y espalda con el diseño aplicado, a
+   * partir del estado actual del lienzo (NO depende de nada persistido). Se usa
+   * al abrir la vista de giro para que nunca aparezca vacía después de guardar.
+   */
+  async function prepareSpinPreviews() {
+    const original = side;
+    let front = previews.front;
+    let back = previews.back;
+    if (assets.front.length > 0) front = await captureSidePreview("front");
+    if (assets.back.length > 0) back = await captureSidePreview("back");
+    if (side !== original) {
+      setSide(original);
+      await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    }
+    setPreviews({ front, back });
+  }
+
+  async function toggleSpin() {
+    const opening = !spinOpen;
+    setSpinOpen(opening);
+    if (opening) await prepareSpinPreviews();
+  }
+
   async function saveDesign(showToast = true): Promise<string | null> {
     if (assets.front.length === 0 && assets.back.length === 0) {
       toast.error("Sube al menos una imagen para guardar tu diseño.");
+      return null;
+    }
+    // El backend exige un assetId válido por imagen: si una subida quedó
+    // pendiente o falló, avisamos en claro en lugar de un "Datos inválidos".
+    if ([...assets.front, ...assets.back].some((a) => !a.assetId)) {
+      toast.error(
+        "Una de tus imágenes aún no termina de guardarse. Espera unos segundos o vuelve a subirla.",
+      );
       return null;
     }
     const id = await ensureDesign();
@@ -591,7 +627,7 @@ export default function GarmentDesigner({
             </Drawer.Root>
             <button
               type="button"
-              onClick={() => setSpinOpen((v) => !v)}
+              onClick={toggleSpin}
               className="glass inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold"
             >
               <Eye className="h-4 w-4 text-ml-violet" aria-hidden />
@@ -612,7 +648,8 @@ export default function GarmentDesigner({
                 }}
               />
               <p className="mt-2 text-center text-xs text-ml-white/45">
-                Vista de referencia. Guarda tu diseño para actualizar la preview.
+                Vista de referencia generada desde tu diseño. Arrastra para girar
+                entre frente y espalda.
               </p>
             </div>
           )}
@@ -702,7 +739,7 @@ export default function GarmentDesigner({
             />
             <button
               type="button"
-              onClick={() => setSpinOpen((v) => !v)}
+              onClick={toggleSpin}
               className="mt-3 hidden w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-ml-white/80 transition hover:border-ml-violet/50 lg:inline-flex"
             >
               <Eye className="h-4 w-4 text-ml-violet" aria-hidden />

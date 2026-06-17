@@ -272,6 +272,8 @@ export interface CartLineView {
   productId: string;
   productHandle: string;
   title: string;
+  /** Nombre público del diseño personalizado (deriva del tipo de diseñador). */
+  customTitle: string | null;
   variantId: string | null;
   variantTitle: string | null;
   quantity: number;

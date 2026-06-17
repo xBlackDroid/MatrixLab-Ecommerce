@@ -119,7 +119,7 @@ export default function LabHomePage() {
                         </p>
                       </div>
                       <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-ml-cyan">
-                        Abrir laboratorio
+                        {card.cta ?? "Abrir laboratorio"}
                         <ArrowRight
                           className="h-4 w-4 transition group-hover:translate-x-1"
                           aria-hidden

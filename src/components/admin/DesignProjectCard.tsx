@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Code2, Download, ImageOff } from "lucide-react";
 import { toast } from "sonner";
 import StatusBadge from "@/components/admin/StatusBadge";
 import type { DesignProjectRow } from "@/lib/db/types";
+import { getDesignerDisplayName } from "@/lib/designer/product-catalog";
 import { ADMIN_DESIGN_STATUSES } from "@/lib/validation/admin";
 
 const CSRF_HEADER = "x-ml-csrf";
@@ -30,6 +31,53 @@ const FAMILY_LABELS: Record<string, string> = {
   sheet: "Planilla",
   laser: "Láser",
 };
+
+/**
+ * Extrae datos de producción legibles del design_json para el admin, sin
+ * confiar en su forma exacta (los diseños v1 y v2 conviven). Devuelve filas
+ * [etiqueta, valor] que se muestran junto a color/perfil/talla.
+ */
+function extractProductionDetails(
+  json: Record<string, unknown> | null,
+): Array<[string, string]> {
+  if (!json || typeof json !== "object") return [];
+  const rows: Array<[string, string]> = [];
+  const designerType = json.designerType;
+
+  if (designerType === "laser") {
+    const w = Number(json.widthCm);
+    const h = Number(json.heightCm);
+    if (Number.isFinite(w) && Number.isFinite(h)) {
+      rows.push(["Dimensiones", `${w} × ${h} cm`]);
+    }
+    if (typeof json.templateId === "string") {
+      rows.push(["Plantilla", json.templateId]);
+    }
+  } else if (designerType === "sheet") {
+    if (json.mode === "free" && Array.isArray(json.assets)) {
+      rows.push(["Piezas", String(json.assets.length)]);
+    } else if (json.mode === "repeat") {
+      if (typeof json.shape === "string") rows.push(["Forma", json.shape]);
+      const size = json.pieceSizeCm as
+        | { width?: number; height?: number }
+        | undefined;
+      if (size && Number.isFinite(size.width) && Number.isFinite(size.height)) {
+        rows.push(["Tamaño", `${size.width} × ${size.height} cm`]);
+      }
+      if (Number.isFinite(Number(json.count))) {
+        rows.push(["Piezas", String(json.count)]);
+      }
+    }
+  } else if (designerType === "garment") {
+    const views = json.views as
+      | { front?: { assets?: unknown[] }; back?: { assets?: unknown[] } }
+      | undefined;
+    const front = views?.front?.assets?.length ?? 0;
+    const back = views?.back?.assets?.length ?? 0;
+    if (front || back) rows.push(["Frente/Espalda", `${front} / ${back}`]);
+  }
+  return rows;
+}
 
 export default function DesignProjectCard({
   view,
@@ -67,6 +115,10 @@ export default function DesignProjectCard({
     ? (FAMILY_LABELS[design.designer_type] ?? design.designer_type)
     : "Diseño";
   const downloads = view.assets.filter((a) => a.signedUrl);
+  const displayName =
+    getDesignerDisplayName(design.product_type) ??
+    design.product_type.replace(/-/g, " ");
+  const productionDetails = extractProductionDetails(design.design_json);
 
   return (
     <article className="glass flex flex-col overflow-hidden rounded-2xl">
@@ -95,9 +147,7 @@ export default function DesignProjectCard({
 
       <div className="flex flex-1 flex-col gap-3 p-4 text-sm">
         <div className="flex items-center justify-between gap-2">
-          <p className="font-bold capitalize">
-            {design.product_type.replace(/-/g, " ")}
-          </p>
+          <p className="font-bold">{displayName}</p>
           <p className="font-mono text-xs text-ml-white/45">
             {design.id.slice(0, 8)}
           </p>
@@ -122,6 +172,12 @@ export default function DesignProjectCard({
               <dd>{design.selected_size}</dd>
             </>
           )}
+          {productionDetails.map(([label, value]) => (
+            <Fragment key={label}>
+              <dt className="text-ml-white/40">{label}</dt>
+              <dd className="capitalize">{value}</dd>
+            </Fragment>
+          ))}
           <dt className="text-ml-white/40">Archivos</dt>
           <dd>{downloads.length || (view.fallbackOriginalUrl ? 1 : 0)}</dd>
           {view.orderNumber && (

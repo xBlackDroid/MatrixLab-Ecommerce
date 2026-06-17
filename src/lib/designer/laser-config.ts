@@ -1,29 +1,32 @@
 /**
- * Configuración del Laboratorio láser (Etapa 2 — estructura base).
+ * Configuración del Laboratorio láser (Etapa 2).
  *
- * Define el área de trabajo de la cortadora, el área segura (área total menos
- * 15% de margen) y las plantillas/figuras base. NO implementa lógica física
- * de corte todavía: deja todo listo para una etapa de producción posterior.
+ * En esta etapa el láser es SOLO texto: el cliente elige una forma/plantilla,
+ * ajusta libremente las dimensiones del área (dentro de un rango) y coloca
+ * texto corto. No hay subida de imágenes. La producción real (corte/grabado)
+ * se cotiza y ejecuta aparte; aquí solo se captura la intención de diseño.
  */
-
-export const LASER_WORK_AREA_CM = { width: 50, height: 30 } as const;
 
 /** px lógicos por cm en el lienzo láser (compartido canvas/orquestador). */
 export const LASER_PX_PER_CM = 14;
 
-/** Margen de seguridad: el área útil es el 85% del área total. */
-export const LASER_SAFE_MARGIN_RATIO = 0.15;
+/** Margen visual (cm) alrededor del área dentro del lienzo. */
+export const LASER_PADDING_CM = 2.5;
 
-export function getLaserSafeAreaCm() {
-  const factor = 1 - LASER_SAFE_MARGIN_RATIO;
-  const width = LASER_WORK_AREA_CM.width * factor;
-  const height = LASER_WORK_AREA_CM.height * factor;
-  return {
-    width,
-    height,
-    xCm: (LASER_WORK_AREA_CM.width - width) / 2,
-    yCm: (LASER_WORK_AREA_CM.height - height) / 2,
-  };
+/** Margen de seguridad interno del área (fracción del lado menor). */
+export const LASER_SAFE_INSET_RATIO = 0.08;
+
+/** Rango permitido del área láser (cm). */
+export const LASER_MIN_CM = { width: 5, height: 5 } as const;
+export const LASER_MAX_CM = { width: 35, height: 45 } as const;
+export const LASER_DEFAULT_CM = { width: 15, height: 10 } as const;
+
+/** Limita y cuantiza (0.5 cm) una dimensión del área al rango permitido. */
+export function clampLaserDim(axis: "width" | "height", value: number): number {
+  const min = LASER_MIN_CM[axis];
+  const max = LASER_MAX_CM[axis];
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, Math.round(value * 2) / 2));
 }
 
 export type LaserTemplateShape = "rect" | "roundrect" | "circle" | "pill";
@@ -32,23 +35,25 @@ export interface LaserTemplate {
   id: string;
   label: string;
   shape: LaserTemplateShape;
-  /** Tamaño representativo de la pieza en cm (solo visual en esta etapa). */
+  /** Dimensión sugerida del área en cm al elegir esta forma (editable luego). */
   sizeCm: { width: number; height: number };
 }
 
+/**
+ * Formas/plantillas disponibles. Se mantienen las que gustan visualmente y se
+ * eliminan Señalética pequeña, Medalla / Pet Tag y Caja pequeña. "Tag de
+ * acrílico" se renombra públicamente a "Tag".
+ */
 export const LASER_TEMPLATES: LaserTemplate[] = [
   { id: "termo", label: "Termo", shape: "roundrect", sizeCm: { width: 22, height: 8 } },
   { id: "taza", label: "Taza", shape: "roundrect", sizeCm: { width: 20, height: 8 } },
   { id: "vaso", label: "Vaso", shape: "roundrect", sizeCm: { width: 18, height: 8 } },
   { id: "tumbler", label: "Tumbler", shape: "roundrect", sizeCm: { width: 24, height: 9 } },
-  { id: "llavero", label: "Llavero", shape: "roundrect", sizeCm: { width: 6, height: 3 } },
-  { id: "tag-acrilico", label: "Tag de acrílico", shape: "roundrect", sizeCm: { width: 7, height: 4 } },
+  { id: "llavero", label: "Llavero", shape: "roundrect", sizeCm: { width: 6, height: 5 } },
+  { id: "tag", label: "Tag", shape: "roundrect", sizeCm: { width: 7, height: 5 } },
   { id: "placa-acrilica", label: "Placa acrílica", shape: "rect", sizeCm: { width: 20, height: 12 } },
-  { id: "senaletica", label: "Señalética pequeña", shape: "rect", sizeCm: { width: 15, height: 10 } },
   { id: "porta-vaso", label: "Porta vaso", shape: "circle", sizeCm: { width: 10, height: 10 } },
-  { id: "medalla", label: "Medalla / pet tag", shape: "circle", sizeCm: { width: 5, height: 5 } },
   { id: "tabla-madera", label: "Tabla de madera", shape: "roundrect", sizeCm: { width: 30, height: 20 } },
-  { id: "caja", label: "Caja pequeña", shape: "rect", sizeCm: { width: 15, height: 12 } },
 ];
 
 export function getLaserTemplate(id: string): LaserTemplate {
@@ -62,5 +67,7 @@ export const LASER_FONTS = [
   { id: "arial", label: "Arial", family: "Arial, Helvetica, sans-serif" },
   { id: "sans", label: "Sans", family: "system-ui, sans-serif" },
 ] as const;
+
+export const LASER_FONT_IDS = LASER_FONTS.map((f) => f.id);
 
 export const LASER_TEXT_MAX_LENGTH = 40;

@@ -234,25 +234,29 @@ export const SheetSavePayloadSchema = z
   })
   .strict();
 
-// ---- Láser ----------------------------------------------------------------
+// ---- Láser (solo texto en esta etapa) -------------------------------------
 
-const LaserImageElementSchema = z
-  .object({
-    type: z.literal("image"),
-    assetId: z.uuid(),
-    url: z.string().max(1200).optional(),
-    x: finiteNumber,
-    y: finiteNumber,
-    scale: z.number().min(0.05).max(12),
-    rotation: z.number().min(-180).max(180),
-  })
-  .strict();
+/** Fuentes permitidas (debe coincidir con LASER_FONTS en laser-config). */
+export const LASER_ALLOWED_FONT_IDS = [
+  "montserrat",
+  "fredoka",
+  "arial",
+  "sans",
+] as const;
+
+/** Rango del área láser (cm). Debe coincidir con laser-config. */
+export const LASER_AREA_LIMITS = {
+  minWidthCm: 5,
+  maxWidthCm: 35,
+  minHeightCm: 5,
+  maxHeightCm: 45,
+} as const;
 
 const LaserTextElementSchema = z
   .object({
     type: z.literal("text"),
     text: z.string().min(1).max(40),
-    fontId: z.string().max(20),
+    fontId: z.enum(LASER_ALLOWED_FONT_IDS),
     x: finiteNumber,
     y: finiteNumber,
     scale: z.number().min(0.05).max(12),
@@ -266,9 +270,17 @@ export const LaserDesignJsonSchema = z
     version: z.literal(1),
     designerType: z.literal("laser"),
     templateId: z.string().max(40),
-    elements: z
-      .array(z.union([LaserImageElementSchema, LaserTextElementSchema]))
-      .max(12),
+    // Dimensiones libres del área dentro del rango permitido.
+    widthCm: z
+      .number()
+      .min(LASER_AREA_LIMITS.minWidthCm)
+      .max(LASER_AREA_LIMITS.maxWidthCm),
+    heightCm: z
+      .number()
+      .min(LASER_AREA_LIMITS.minHeightCm)
+      .max(LASER_AREA_LIMITS.maxHeightCm),
+    // Solo texto: sin assets de imagen.
+    elements: z.array(LaserTextElementSchema).min(1).max(12),
   })
   .strict();
 

@@ -353,6 +353,18 @@ export default function SheetDesigner({
       toast.error("Agrega al menos una imagen para guardar tu planilla.");
       return null;
     }
+    // El backend exige assetId válido por pieza/base: si una subida quedó
+    // pendiente o falló, avisamos en claro en lugar de un "Datos inválidos".
+    const missingAsset =
+      mode === "free"
+        ? pieces.some((p) => !p.assetId)
+        : !repeatBase?.assetId;
+    if (missingAsset) {
+      toast.error(
+        "Una de tus imágenes aún no termina de guardarse. Espera unos segundos o vuelve a subirla.",
+      );
+      return null;
+    }
     const id = await ensureDesign();
     if (!id) return null;
     setSaving(true);

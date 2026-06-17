@@ -1,18 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  Circle,
-  Image as KonvaImage,
-  Layer,
-  Rect,
-  Stage,
-  Text,
-  Transformer,
-} from "react-konva";
+import { Circle, Layer, Rect, Stage, Text, Transformer } from "react-konva";
 import type Konva from "konva";
-import { LASER_PX_PER_CM, type LaserTemplate } from "@/lib/designer/laser-config";
-import type { LaserEditorElement } from "@/lib/designer/types";
+import {
+  LASER_PADDING_CM,
+  LASER_PX_PER_CM,
+  LASER_SAFE_INSET_RATIO,
+  type LaserTemplate,
+} from "@/lib/designer/laser-config";
+import type { LaserTextElement } from "@/lib/designer/types";
 
 export interface LaserTransform {
   x: number;
@@ -22,11 +19,10 @@ export interface LaserTransform {
 }
 
 interface LaserCanvasProps {
-  workAreaCm: { width: number; height: number };
-  safeAreaCm: { width: number; height: number; xCm: number; yCm: number };
+  /** Dimensiones libres del área/plantilla (cm). */
+  areaCm: { width: number; height: number };
   template: LaserTemplate;
-  elements: LaserEditorElement[];
-  images: Record<string, HTMLImageElement>;
+  elements: LaserTextElement[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   onChange: (id: string, transform: LaserTransform) => void;
@@ -34,11 +30,9 @@ interface LaserCanvasProps {
 }
 
 export default function LaserCanvas({
-  workAreaCm,
-  safeAreaCm,
+  areaCm,
   template,
   elements,
-  images,
   selectedId,
   onSelect,
   onChange,
@@ -48,9 +42,16 @@ export default function LaserCanvas({
   const transformerRef = useRef<Konva.Transformer | null>(null);
   const nodeRefs = useRef<Record<string, Konva.Node | null>>({});
   const [displayScale, setDisplayScale] = useState(1);
+
   const px = LASER_PX_PER_CM;
-  const stageW = workAreaCm.width * px;
-  const stageH = workAreaCm.height * px;
+  const pad = LASER_PADDING_CM * px;
+  const areaW = areaCm.width * px;
+  const areaH = areaCm.height * px;
+  const stageW = areaW + pad * 2;
+  const stageH = areaH + pad * 2;
+  const areaX = pad;
+  const areaY = pad;
+  const inset = Math.min(areaW, areaH) * LASER_SAFE_INSET_RATIO;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -83,11 +84,12 @@ export default function LaserCanvas({
     });
   }
 
-  // Plantilla centrada en el área de trabajo.
-  const tplW = template.sizeCm.width * px;
-  const tplH = template.sizeCm.height * px;
-  const tplX = (stageW - tplW) / 2;
-  const tplY = (stageH - tplH) / 2;
+  const cornerRadius =
+    template.shape === "rect"
+      ? 4
+      : template.shape === "pill"
+        ? areaH / 2
+        : 18;
 
   return (
     <div ref={containerRef} className="w-full">
@@ -105,107 +107,73 @@ export default function LaserCanvas({
       >
         <Layer listening={false}>
           <Rect x={0} y={0} width={stageW} height={stageH} fill="#111626" />
-          {/* Área segura (área total menos 15%) */}
-          <Rect
-            x={safeAreaCm.xCm * px}
-            y={safeAreaCm.yCm * px}
-            width={safeAreaCm.width * px}
-            height={safeAreaCm.height * px}
-            stroke="#4DCEFF"
-            strokeWidth={1.5}
-            dash={[8, 6]}
-          />
-          <Text
-            x={safeAreaCm.xCm * px}
-            y={safeAreaCm.yCm * px - 18}
-            text="Área segura de la cortadora"
-            fontSize={12}
-            fontStyle="bold"
-            fill="#4DCEFF"
-          />
-          {/* Plantilla base */}
+          {/* Área / plantilla a las dimensiones elegidas. */}
           {template.shape === "circle" ? (
             <Circle
-              x={stageW / 2}
-              y={stageH / 2}
-              radius={Math.min(tplW, tplH) / 2}
+              x={areaX + areaW / 2}
+              y={areaY + areaH / 2}
+              radius={Math.min(areaW, areaH) / 2}
               stroke="#B197FC"
               strokeWidth={2}
               fill="rgba(177,151,252,0.06)"
             />
           ) : (
             <Rect
-              x={tplX}
-              y={tplY}
-              width={tplW}
-              height={tplH}
-              cornerRadius={template.shape === "rect" ? 4 : 18}
+              x={areaX}
+              y={areaY}
+              width={areaW}
+              height={areaH}
+              cornerRadius={cornerRadius}
               stroke="#B197FC"
               strokeWidth={2}
               fill="rgba(177,151,252,0.06)"
             />
           )}
+          {/* Área segura interna (guía). */}
+          <Rect
+            x={areaX + inset}
+            y={areaY + inset}
+            width={areaW - inset * 2}
+            height={areaH - inset * 2}
+            stroke="#4DCEFF"
+            strokeWidth={1.25}
+            dash={[8, 6]}
+          />
           <Text
-            x={tplX}
-            y={tplY + tplH + 6}
-            width={tplW}
+            x={areaX}
+            y={areaY - 20}
+            width={areaW}
             align="center"
-            text={template.label}
+            text={`${template.label} · ${areaCm.width} × ${areaCm.height} cm`}
             fontSize={12}
+            fontStyle="bold"
             fill="#B197FC"
           />
         </Layer>
 
         <Layer>
-          {elements.map((el) => {
-            if (el.type === "image") {
-              const img = images[el.id];
-              if (!img) return null;
-              return (
-                <KonvaImage
-                  key={el.id}
-                  image={img}
-                  ref={(node) => {
-                    nodeRefs.current[el.id] = node;
-                  }}
-                  x={el.x}
-                  y={el.y}
-                  offsetX={img.width / 2}
-                  offsetY={img.height / 2}
-                  scaleX={el.scale}
-                  scaleY={el.scale}
-                  rotation={el.rotation}
-                  draggable
-                  onMouseDown={() => onSelect(el.id)}
-                  onTouchStart={() => onSelect(el.id)}
-                  onDragEnd={(e) => commit(el.id, e.target)}
-                  onTransformEnd={(e) => commit(el.id, e.target)}
-                />
-              );
-            }
-            return (
-              <Text
-                key={el.id}
-                ref={(node) => {
-                  nodeRefs.current[el.id] = node;
-                }}
-                text={el.text}
-                fontFamily={el.fontFamily}
-                fontSize={el.fontSize}
-                fill="#F8F9FA"
-                x={el.x}
-                y={el.y}
-                scaleX={el.scale}
-                scaleY={el.scale}
-                rotation={el.rotation}
-                draggable
-                onMouseDown={() => onSelect(el.id)}
-                onTouchStart={() => onSelect(el.id)}
-                onDragEnd={(e) => commit(el.id, e.target)}
-                onTransformEnd={(e) => commit(el.id, e.target)}
-              />
-            );
-          })}
+          {elements.map((el) => (
+            <Text
+              key={el.id}
+              ref={(node) => {
+                nodeRefs.current[el.id] = node;
+              }}
+              text={el.text}
+              fontFamily={el.fontFamily}
+              fontSize={el.fontSize}
+              fill="#F8F9FA"
+              x={el.x}
+              y={el.y}
+              scaleX={el.scale}
+              scaleY={el.scale}
+              rotation={el.rotation}
+              draggable
+              onMouseDown={() => onSelect(el.id)}
+              onTouchStart={() => onSelect(el.id)}
+              onDragEnd={(e) => commit(el.id, e.target)}
+              onTransformEnd={(e) => commit(el.id, e.target)}
+            />
+          ))}
           {selectedId && (
             <Transformer
               ref={transformerRef}

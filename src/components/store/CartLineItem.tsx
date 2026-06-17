@@ -21,6 +21,7 @@ export default function CartLineItem({
   onRemove,
 }: CartLineItemProps) {
   const image = line.designPreviewUrl ?? line.image;
+  const displayTitle = line.customTitle ?? line.title;
 
   return (
     <div className="glass flex gap-4 rounded-2xl p-4">
@@ -28,7 +29,7 @@ export default function CartLineItem({
         {image ? (
           <Image
             src={image}
-            alt={line.title}
+            alt={displayTitle}
             fill
             sizes="96px"
             unoptimized={Boolean(line.designPreviewUrl)}
@@ -46,7 +47,7 @@ export default function CartLineItem({
               href={`/tienda/producto/${line.productHandle}`}
               className="block truncate font-semibold hover:text-ml-violet"
             >
-              {line.title}
+              {displayTitle}
             </Link>
             {line.variantTitle && (
               <p className="text-sm text-ml-white/55">{line.variantTitle}</p>

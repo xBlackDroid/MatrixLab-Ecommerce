@@ -138,10 +138,10 @@ export const DESIGNER_CATALOG: Record<
   "stickers-planilla": {
     id: "stickers-planilla",
     kind: "sheet",
-    label: "Planilla de stickers",
-    publicName: "Planilla de stickers",
+    label: "Sticker Canvas Lab",
+    publicName: "Sticker Canvas Lab",
     shortDescription:
-      "Sube hasta 7 imágenes y arma tu hoja carta con libertad y control.",
+      "Sube varias imágenes y acomódalas libremente en una hoja carta lista para producir.",
     badge: "Planillas",
     isNew: true,
     baseHandle: "planilla-stickers",
@@ -167,21 +167,24 @@ export const DESIGNER_CATALOG: Record<
     iconKey: "repeat",
     order: 7,
   },
+  // Legado: los imanes ya no se promocionan en el laboratorio. La ruta sigue
+  // viva pero oculta; se cotiza por WhatsApp (ver page.tsx LEGACY_QUOTE_TYPES).
   "imanes-planilla": {
     id: "imanes-planilla",
     kind: "sheet",
-    label: "Planilla de imanes",
+    label: "Planilla de imanes (legado)",
     publicName: "Planilla de imanes",
     shortDescription:
       "Crea una hoja carta de imanes personalizados con tus imágenes favoritas.",
     badge: "Planillas",
-    isNew: true,
+    isNew: false,
     baseHandle: "planilla-imanes",
     usesProfileSize: false,
     sheetType: "imanes",
     sheetMode: "free",
     iconKey: "grid",
     order: 8,
+    hiddenFromLab: true,
   },
   // Legado: los imanes se trabajan públicamente desde "Planilla de imanes".
   // La ruta sigue viva (redirige a imanes-planilla) pero no se promociona.
@@ -224,6 +227,31 @@ export function isDesignerProductType(
   return Object.prototype.hasOwnProperty.call(DESIGNER_CATALOG, value);
 }
 
+/**
+ * Nombre público que se muestra al cliente en carrito y admin para un diseño
+ * personalizado, derivado SIEMPRE del tipo de diseñador (no del producto base,
+ * que puede ser compartido — p.ej. las dos planillas de stickers comparten el
+ * mismo `planilla-stickers`). El precio/producto base siguen viniendo del
+ * backend; esto solo cambia la etiqueta visible.
+ */
+const DESIGNER_DISPLAY_NAMES: Record<string, string> = {
+  playera: "Playera personalizada",
+  sudadera: "Sudadera personalizada",
+  "gorra-trucker": "Gorra personalizada",
+  "gorra-clasica": "Gorra personalizada",
+  gorra: "Gorra personalizada",
+  tote: "Tote bag personalizada",
+  "stickers-planilla": "Sticker Canvas Lab",
+  "stickers-repeticion": "Sticker Grid Automático",
+  "imanes-planilla": "Planilla de imanes personalizada",
+  "imanes-repeticion": "Planilla de imanes personalizada",
+  laser: "Diseño láser personalizado",
+};
+
+export function getDesignerDisplayName(productType: string): string | null {
+  return DESIGNER_DISPLAY_NAMES[productType] ?? null;
+}
+
 export function getCatalogEntry(
   productType: DesignerProductType,
 ): DesignerCatalogEntry {
@@ -256,6 +284,8 @@ export interface LabCard {
   iconKey: DesignerCatalogEntry["iconKey"];
   badge: DesignerBadge;
   isNew?: boolean;
+  /** CTA propio de la card (si no, "Abrir laboratorio"). */
+  cta?: string;
 }
 
 export interface LabBlock {
@@ -318,17 +348,19 @@ export const LAB_BLOCKS: LabBlock[] = [
     id: "planillas",
     title: "Planillas creativas",
     description:
-      "Arma tu hoja carta de stickers o imanes, a tu manera o de forma automática.",
+      "Arma tu hoja carta de stickers, a tu manera o de forma automática.",
     badge: "Planillas",
     cards: [
       {
         id: "stickers-planilla",
-        title: "Planilla de stickers",
+        title: "Sticker Canvas Lab",
         description:
-          "Sube hasta 7 imágenes y arma tu hoja carta con libertad y control.",
+          "Sube varias imágenes y acomódalas libremente en una hoja carta lista para producir.",
         href: "/tienda/disenador/stickers-planilla",
         iconKey: "grid",
         badge: "Planillas",
+        isNew: true,
+        cta: "Crear Sticker Canvas",
       },
       {
         id: "sticker-grid",
@@ -339,15 +371,7 @@ export const LAB_BLOCKS: LabBlock[] = [
         iconKey: "repeat",
         badge: "Planillas",
         isNew: true,
-      },
-      {
-        id: "imanes-planilla",
-        title: "Planilla de imanes",
-        description:
-          "Crea una hoja carta de imanes personalizados con tus imágenes favoritas.",
-        href: "/tienda/disenador/imanes-planilla",
-        iconKey: "grid",
-        badge: "Planillas",
+        cta: "Crear Sticker Grid",
       },
     ],
   },
@@ -355,14 +379,14 @@ export const LAB_BLOCKS: LabBlock[] = [
     id: "laser",
     title: "Laboratorio láser",
     description:
-      "Diseña grabados sobre plantillas como termos, tazas, tags, llaveros y acrílicos.",
+      "Diseña grabados de texto sobre plantillas como termos, tazas, tags, llaveros y acrílicos.",
     badge: "Láser",
     cards: [
       {
         id: "laser",
         title: "Laboratorio láser",
         description:
-          "Elige una plantilla, sube tu imagen o agrega texto y crea tu grabado.",
+          "Elige una plantilla, ajusta las dimensiones y agrega tu texto para crear tu grabado.",
         href: "/tienda/disenador/laser",
         iconKey: "laser",
         badge: "Láser",
