@@ -151,6 +151,14 @@ export const MOCK_CATEGORIES: CategoryRow[] = [
     "Láminas, wraps y acabados para transformar vasos, acrílicos y piezas personalizadas.",
     16,
   ),
+  // Etiquetas Escolares Lab (espejo de supabase/seed_school_labels.sql).
+  category(
+    "c0000000-0000-4000-8000-000000000011",
+    "Etiquetas escolares",
+    "etiquetas-escolares",
+    "Packs personalizados para útiles, loncheras, termos, cuadernos y regreso a clases.",
+    17,
+  ),
 ];
 
 type ProductSeed = Omit<
@@ -582,6 +590,22 @@ export const MOCK_PRODUCTS: ProductRow[] = [
     production_time: null,
     tags: ["insumos", "wraps-glow-finish"],
   }),
+  // Etiquetas Escolares Lab: producto base personalizable (precio placeholder).
+  product({
+    id: "d0000000-0000-4000-8000-000000000030",
+    category_id: "c0000000-0000-4000-8000-000000000011",
+    title: "Etiquetas escolares personalizadas",
+    handle: "etiquetas-escolares-personalizadas",
+    description:
+      "Pack de etiquetas escolares personalizadas con nombre, tipografía, combinación de colores y temática. Diseña tu pedido en el laboratorio y elige Elementary o Ultra. El precio final lo confirma MatrixLab.",
+    base_price: 199,
+    compare_at_price: null,
+    status: "sobre_pedido",
+    is_customizable: true,
+    production_time: "5 días hábiles (a convenir)",
+    max_quantity: 500,
+    tags: ["school-labels", "regreso-a-clases", "etiquetas", "stickers"],
+  }),
 ];
 
 function variant(
@@ -672,4 +696,7 @@ export const MOCK_VARIANTS: ProductVariantRow[] = [
   variant("e0000000-0000-4000-8000-000000000a0e", "d0000000-0000-4000-8000-00000000002d", "Botella", "INS-MGF-GLI", 69, 80, { option_label: "Botella" }),
   variant("e0000000-0000-4000-8000-000000000a0f", "d0000000-0000-4000-8000-00000000002e", "Hoja", "INS-WRP-LAM", 59, 100, { option_label: "Hoja" }),
   variant("e0000000-0000-4000-8000-000000000a10", "d0000000-0000-4000-8000-00000000002f", "Bote", "INS-WRP-RES", 119, 50, { option_label: "Bote" }),
+  // Etiquetas Escolares Lab: variantes Elementary y Ultra (precio placeholder).
+  variant("e0000000-0000-4000-8000-000000000b01", "d0000000-0000-4000-8000-000000000030", "Elementary", "ESC-ELEM", 199, 0, { option_label: "Elementary", status: "sobre_pedido" }),
+  variant("e0000000-0000-4000-8000-000000000b02", "d0000000-0000-4000-8000-000000000030", "Ultra", "ESC-ULTRA", 299, 0, { option_label: "Ultra", status: "sobre_pedido" }),
 ];

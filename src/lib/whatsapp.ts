@@ -35,4 +35,15 @@ export const whatsappMessages = {
     "Hola MatrixLab, quiero ayuda para armar mi planilla de stickers o imanes.",
   laserQuote: () =>
     "Hola MatrixLab, quiero cotizar un grabado personalizado del laboratorio láser.",
+  schoolLabels: (opts: {
+    pkg?: string;
+    typographyCode?: string;
+    colorCode?: string;
+    name?: string;
+  }) =>
+    `Hola MatrixLab, quiero hacer etiquetas escolares. Paquete: ${
+      opts.pkg || "[Elementary/Ultra]"
+    }, tipografía: ${opts.typographyCode || "[code]"}, colores: ${
+      opts.colorCode || "[code]"
+    }, nombre: ${opts.name || "[nombre]"}.`,
 } as const;

@@ -30,6 +30,7 @@ const FAMILY_LABELS: Record<string, string> = {
   garment: "Prenda",
   sheet: "Planilla",
   laser: "Láser",
+  "school-labels": "Etiquetas",
 };
 
 /**
@@ -75,6 +76,30 @@ function extractProductionDetails(
     const front = views?.front?.assets?.length ?? 0;
     const back = views?.back?.assets?.length ?? 0;
     if (front || back) rows.push(["Frente/Espalda", `${front} / ${back}`]);
+  } else if (designerType === "school-labels") {
+    if (typeof json.package === "string") rows.push(["Paquete", json.package]);
+    const student = json.student as
+      | { firstName?: string; lastName1?: string; lastName2?: string }
+      | undefined;
+    if (student) {
+      const fullName = [student.firstName, student.lastName1, student.lastName2]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      if (fullName) rows.push(["Estudiante", fullName]);
+    }
+    if (typeof json.typographyCode === "string") {
+      rows.push(["Tipografía", json.typographyCode]);
+    }
+    if (typeof json.colorCode === "string") {
+      rows.push(["Color", json.colorCode]);
+    }
+    if (typeof json.theme === "string" && json.theme.trim()) {
+      rows.push(["Temática", json.theme]);
+    }
+    if (Array.isArray(json.addons) && json.addons.length > 0) {
+      rows.push(["Add-ons", json.addons.join(", ")]);
+    }
   }
   return rows;
 }

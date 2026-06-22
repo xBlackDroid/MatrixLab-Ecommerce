@@ -7,6 +7,7 @@ import {
   PRODUCT_TYPES,
   SHEET_SHAPES,
 } from "@/lib/validation/store";
+import { SchoolLabelsDesignJsonSchema } from "@/lib/validation/school-labels";
 
 /** Límite duro del JSON de diseño serializado (bytes) — v1. */
 export const DESIGN_JSON_MAX_BYTES = 20_000;
@@ -296,11 +297,29 @@ export const LaserSavePayloadSchema = z
   })
   .strict();
 
+// ---- Etiquetas escolares (school-labels) ----------------------------------
+// El design_json (datos del estudiante, tipografía, color, temática) se valida
+// en lib/validation/school-labels.ts. Aquí solo envolvemos el payload de
+// guardado v2 (sin assets de imagen: el pedido es por formato, no por canvas).
+
+export const SchoolLabelsSavePayloadSchema = z
+  .object({
+    designerType: z.literal("school-labels"),
+    productType: z.literal("etiquetas-escolares"),
+    productId: z.uuid(),
+    variantId: z.uuid().optional(),
+    customerNotes: z.string().max(500).optional(),
+    designJson: SchoolLabelsDesignJsonSchema,
+    previewDataUrl: z.string().max(PREVIEW_MAX_BYTES).optional(),
+  })
+  .strict();
+
 /** Unión discriminada para el endpoint de guardado v2. */
 export const DesignSaveV2Schema = z.discriminatedUnion("designerType", [
   GarmentSavePayloadSchema,
   SheetSavePayloadSchema,
   LaserSavePayloadSchema,
+  SchoolLabelsSavePayloadSchema,
 ]);
 
 export type DesignSaveV2Input = z.infer<typeof DesignSaveV2Schema>;

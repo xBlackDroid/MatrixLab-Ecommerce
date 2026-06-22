@@ -62,9 +62,15 @@ export const DESIGNER_PRODUCT_TYPES = [
   "imanes-planilla",
   "imanes-repeticion",
   "laser",
+  "etiquetas-escolares",
 ] as const;
 
-export const DESIGNER_KINDS = ["garment", "sheet", "laser"] as const;
+export const DESIGNER_KINDS = [
+  "garment",
+  "sheet",
+  "laser",
+  "school-labels",
+] as const;
 
 export const GARMENT_PROFILES = ["nino", "mujer", "hombre"] as const;
 

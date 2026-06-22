@@ -7,6 +7,7 @@ import {
   Shirt,
   ShoppingBag,
   Sparkles,
+  Tag,
   Wand2,
   Zap,
   type LucideIcon,
@@ -37,12 +38,14 @@ const ICONS: Record<string, LucideIcon> = {
   grid: LayoutGrid,
   repeat: Repeat,
   laser: Zap,
+  tag: Tag,
 };
 
 const BADGE_STYLES: Record<DesignerBadge, string> = {
   Prendas: "border-ml-violet/40 bg-ml-violet/10 text-ml-violet",
   Planillas: "border-ml-cyan/40 bg-ml-cyan/10 text-ml-cyan",
   Láser: "border-ml-coral/40 bg-ml-coral/10 text-ml-coral",
+  Escolar: "border-ml-cyan/40 bg-ml-cyan/10 text-ml-cyan",
 };
 
 export default function LabHomePage() {

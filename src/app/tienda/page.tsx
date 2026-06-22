@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Building2,
   Gift,
+  GraduationCap,
   Package,
   PartyPopper,
   Sparkles,
@@ -120,6 +121,42 @@ export default async function TiendaHomePage() {
                 </Link>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2.b Regreso a clases — Etiquetas Escolares Lab */}
+      <section className="px-4 pb-20 sm:px-6">
+        <div className="glass relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-3xl p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-ml-violet/10 blur-3xl" />
+          <div className="relative">
+            <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
+              <GraduationCap className="h-4 w-4" aria-hidden />
+              Regreso a clases
+            </span>
+            <h2 className="mt-5 text-2xl font-bold sm:text-3xl">
+              Etiquetas <span className="text-gradient">Escolares Lab</span>
+            </h2>
+            <p className="mt-3 max-w-xl text-ml-white/65">
+              Arma tu pedido con nombre, tipografía, colores y temática en pocos
+              pasos. Packs personalizados para útiles, loncheras, termos,
+              cuadernos y regreso a clases.
+            </p>
+          </div>
+          <div className="relative flex flex-col gap-3 sm:flex-row lg:flex-col">
+            <Link
+              href="/tienda/disenador/etiquetas-escolares"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-ml-cyan px-7 py-3.5 font-semibold text-ml-bg shadow-glow-cyan transition hover:scale-[1.02] hover:bg-ml-cyan/90"
+            >
+              Crear etiquetas escolares
+              <ArrowRight className="h-5 w-5" aria-hidden />
+            </Link>
+            <Link
+              href="/tienda/categoria/etiquetas-escolares"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-ml-white/85 transition hover:border-white/30"
+            >
+              Ver categoría
+            </Link>
           </div>
         </div>
       </section>

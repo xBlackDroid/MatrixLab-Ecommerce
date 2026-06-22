@@ -13,7 +13,7 @@ import type { DesignerKind, DesignerProductType } from "@/lib/db/types";
  * NO inventa precios: usa el producto base como en Etapa 1.
  */
 
-export type DesignerBadge = "Prendas" | "Planillas" | "Láser";
+export type DesignerBadge = "Prendas" | "Planillas" | "Láser" | "Escolar";
 
 export interface DesignerCatalogEntry {
   id: DesignerProductType;
@@ -33,7 +33,15 @@ export interface DesignerCatalogEntry {
   sheetType?: "stickers" | "imanes";
   sheetMode?: "free" | "repeat";
   /** Clave de ícono (se resuelve en la UI; lib no importa lucide). */
-  iconKey: "shirt" | "hoodie" | "cap" | "bag" | "grid" | "repeat" | "laser";
+  iconKey:
+    | "shirt"
+    | "hoodie"
+    | "cap"
+    | "bag"
+    | "grid"
+    | "repeat"
+    | "laser"
+    | "tag";
   /** Orden en la pantalla del laboratorio. */
   order: number;
   /** Legado/alias que no se muestra como card en el laboratorio. */
@@ -219,6 +227,23 @@ export const DESIGNER_CATALOG: Record<
     iconKey: "laser",
     order: 10,
   },
+  "etiquetas-escolares": {
+    id: "etiquetas-escolares",
+    kind: "school-labels",
+    label: "Etiquetas Escolares Lab",
+    publicName: "Etiquetas Escolares Lab",
+    shortDescription:
+      "Arma tu pack escolar personalizado: nombre, tipografía, colores y temática en pocos pasos.",
+    badge: "Escolar",
+    isNew: true,
+    baseHandle: "etiquetas-escolares-personalizadas",
+    usesProfileSize: false,
+    iconKey: "tag",
+    order: 11,
+    // El laboratorio escolar tiene su propia ruta dedicada
+    // (/tienda/disenador/etiquetas-escolares) y bloque "Regreso a clases".
+    hiddenFromLab: true,
+  },
 };
 
 export function isDesignerProductType(
@@ -246,6 +271,7 @@ const DESIGNER_DISPLAY_NAMES: Record<string, string> = {
   "imanes-planilla": "Planilla de imanes personalizada",
   "imanes-repeticion": "Planilla de imanes personalizada",
   laser: "Diseño láser personalizado",
+  "etiquetas-escolares": "Etiquetas escolares personalizadas",
 };
 
 export function getDesignerDisplayName(productType: string): string | null {
@@ -391,6 +417,26 @@ export const LAB_BLOCKS: LabBlock[] = [
         iconKey: "laser",
         badge: "Láser",
         isNew: true,
+      },
+    ],
+  },
+  {
+    id: "regreso-a-clases",
+    title: "Regreso a clases",
+    description:
+      "Personaliza las etiquetas escolares de tus útiles, loncheras, termos y cuadernos.",
+    badge: "Escolar",
+    cards: [
+      {
+        id: "etiquetas-escolares",
+        title: "Etiquetas Escolares Lab",
+        description:
+          "Arma tu pedido con nombre, tipografía, colores y temática en pocos pasos.",
+        href: "/tienda/disenador/etiquetas-escolares",
+        iconKey: "tag",
+        badge: "Escolar",
+        isNew: true,
+        cta: "Crear etiquetas escolares",
       },
     ],
   },

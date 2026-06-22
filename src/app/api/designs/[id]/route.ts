@@ -220,6 +220,30 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         text: sanitizeText(el.text, 40),
       })),
     };
+  } else if (payload.designerType === "school-labels") {
+    // Etiquetas escolares: texto libre del cliente. Sanitiza cada campo antes
+    // de persistir (no HTML, no scripts, sin datos de control).
+    const j = payload.designJson;
+    const clean = (v: string | undefined, max: number) =>
+      v ? sanitizeText(v, max) : undefined;
+    designJson = {
+      ...j,
+      student: {
+        firstName: sanitizeText(j.student.firstName, 60),
+        lastName1: sanitizeText(j.student.lastName1, 60),
+        lastName2: clean(j.student.lastName2, 60),
+        nickname: clean(j.student.nickname, 40),
+        school: clean(j.student.school, 80),
+        grade: clean(j.student.grade, 20),
+        group: clean(j.student.group, 20),
+      },
+      theme: clean(j.theme, 200),
+      decorativeIcons: clean(j.decorativeIcons, 200),
+      characterInspiration: clean(j.characterInspiration, 120),
+      specialColors: clean(j.specialColors, 120),
+      designComments: clean(j.designComments, 300),
+      notes: clean(j.notes, 500),
+    };
   }
 
   const previewPath = payload.previewDataUrl

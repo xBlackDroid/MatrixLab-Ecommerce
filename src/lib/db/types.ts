@@ -62,10 +62,11 @@ export type DesignerProductType =
   | "stickers-repeticion"
   | "imanes-planilla"
   | "imanes-repeticion"
-  | "laser";
+  | "laser"
+  | "etiquetas-escolares";
 
 /** Familia de diseñador: define qué editor se monta. */
-export type DesignerKind = "garment" | "sheet" | "laser";
+export type DesignerKind = "garment" | "sheet" | "laser" | "school-labels";
 
 /** Perfil de talla para prendas (afecta área máxima de impresión). */
 export type GarmentProfile = "nino" | "mujer" | "hombre";

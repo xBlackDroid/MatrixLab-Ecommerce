@@ -234,6 +234,7 @@ export const DESIGNER_PRODUCT_HANDLES: Record<string, DesignerProductType> = {
   "planilla-stickers": "stickers-planilla",
   "planilla-imanes": "imanes-planilla",
   "grabado-laser-personalizado": "laser",
+  "etiquetas-escolares-personalizadas": "etiquetas-escolares",
 };
 
 // Re-export del mapa tipo → handle (fuente: product-catalog).
