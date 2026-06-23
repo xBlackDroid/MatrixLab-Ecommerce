@@ -234,14 +234,22 @@ export async function getRelatedProducts(
 export async function getDesignerBaseProduct(
   handle: string,
 ): Promise<ProductWithVariants | null> {
-  if (!isValidHandle(handle)) return null;
+  if (!isValidHandle(handle)) {
+    console.info("[school-labels] resolver: handle inválido", { handle });
+    return null;
+  }
 
   // Server-side: el service client es el adecuado para el producto base del
   // diseñador (las APIs de diseño/carrito también usan service role). Si no
   // existe, intenta anon; si tampoco, usa mocks.
-  const client = getServiceClient() ?? getAnonClient();
+  const service = getServiceClient();
+  const client = service ?? getAnonClient();
   if (!client) {
     const mock = MOCK_PRODUCTS.find((p) => p.handle === handle);
+    console.info("[school-labels] resolver: sin Supabase, usando mocks", {
+      handle,
+      foundMock: Boolean(mock),
+    });
     if (!mock || mock.status === "oculto") return null;
     return {
       ...mock,
@@ -252,25 +260,58 @@ export async function getDesignerBaseProduct(
     };
   }
 
-  const { data: productData } = await client
+  // Consulta SOLO por handle (sin filtrar status/categoría/embed) para no
+  // descartar el producto por error y poder diagnosticar su estado real.
+  const { data: rows, error } = await client
     .from("products")
     .select("*")
     .eq("handle", handle)
-    .neq("status", "oculto")
-    .limit(1)
-    .maybeSingle();
-  const product = productData as ProductRow | null;
-  if (!product) return null;
+    .limit(1);
+  const product = ((rows as ProductRow[] | null) ?? [])[0] ?? null;
 
-  const { data: variantData } = await client
+  // DIAGNÓSTICO TEMPORAL (sin secretos): revela por qué se resuelve o no.
+  console.info("[school-labels] resolver: products query", {
+    handle,
+    usingServiceRole: Boolean(service),
+    found: Boolean(product),
+    status: product?.status ?? null,
+    isCustomizable: product?.is_customizable ?? null,
+    error: error?.message ?? null,
+    errorCode: (error as { code?: string } | null)?.code ?? null,
+  });
+
+  if (!product) return null;
+  // Solo se descarta si está oculto; sobre_pedido y disponible se aceptan.
+  if (product.status === "oculto") {
+    console.info(
+      "[school-labels] resolver: producto OCULTO; cámbialo a sobre_pedido o disponible en /admin/productos.",
+      { handle },
+    );
+    return null;
+  }
+
+  const { data: variantData, error: variantError } = await client
     .from("product_variants")
     .select("*")
     .eq("product_id", product.id)
     .neq("status", "oculto");
+  const variants = (variantData as ProductVariantRow[] | null) ?? [];
+
+  console.info("[school-labels] resolver: variants query", {
+    productId: product.id,
+    variantCount: variants.length,
+    error: variantError?.message ?? null,
+    variants: variants.map((v) => ({
+      optionLabel: v.option_label,
+      title: v.title,
+      status: v.status,
+      price: v.price,
+    })),
+  });
 
   return {
     ...product,
-    variants: (variantData as ProductVariantRow[] | null) ?? [],
+    variants,
     category: null,
   };
 }
