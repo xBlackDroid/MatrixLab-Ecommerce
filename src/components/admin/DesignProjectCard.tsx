@@ -78,6 +78,9 @@ function extractProductionDetails(
     if (front || back) rows.push(["Frente/Espalda", `${front} / ${back}`]);
   } else if (designerType === "school-labels") {
     if (typeof json.package === "string") rows.push(["Paquete", json.package]);
+    if (json.package === "ultra" && Number.isFinite(Number(json.designCount))) {
+      rows.push(["Diseños", String(json.designCount)]);
+    }
     const student = json.student as
       | { firstName?: string; lastName1?: string; lastName2?: string }
       | undefined;

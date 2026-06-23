@@ -1,7 +1,25 @@
+import type { CSSProperties } from "react";
 import {
   getSchoolColorPalette,
   type SchoolColorPalette,
 } from "@/lib/designer/school-labels/color-palettes";
+
+// Variaciones de estilo para reflejar la tipografía seleccionada en la preview
+// (mientras no existan los thumbnails reales recortados del PDF).
+const TYPO_STYLES: Array<CSSProperties> = [
+  { fontFamily: "Georgia, serif", fontWeight: 700 },
+  { fontFamily: "'Brush Script MT', cursive", fontStyle: "italic" },
+  { fontFamily: "'Trebuchet MS', sans-serif", fontWeight: 700, letterSpacing: "0.04em" },
+  { fontFamily: "'Courier New', monospace", fontWeight: 700, textTransform: "uppercase" },
+  { fontFamily: "Palatino, 'Palatino Linotype', serif", fontStyle: "italic", fontWeight: 600 },
+  { fontFamily: "'Comic Sans MS', 'Comic Sans', cursive", fontWeight: 700 },
+  { fontFamily: "Verdana, sans-serif", fontWeight: 700, letterSpacing: "0.06em" },
+];
+
+function typographyStyle(code: string): CSSProperties {
+  const n = parseInt(code, 10) || 0;
+  return TYPO_STYLES[n % TYPO_STYLES.length]!;
+}
 
 /**
  * Vista previa estilo sticker escolar. No genera todavía todas las etiquetas;
@@ -61,7 +79,20 @@ export default function SchoolLabelPreview({
             style={{ background: paletteGradient(palette) }}
           >
             <div className="absolute inset-0 bg-black/10" />
-            <p className="relative text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] sm:text-4xl">
+            {/* Decoración de fondo estilo sticker (puntos suaves). */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-30"
+              style={{
+                backgroundImage:
+                  "radial-gradient(rgba(255,255,255,0.55) 1.5px, transparent 1.5px)",
+                backgroundSize: "16px 16px",
+              }}
+              aria-hidden
+            />
+            <p
+              className="relative text-3xl tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] sm:text-4xl"
+              style={typographyStyle(typographyCode)}
+            >
               {displayName}
             </p>
             {lastNames && (
@@ -69,9 +100,14 @@ export default function SchoolLabelPreview({
                 {lastNames}
               </p>
             )}
-            <span className="relative mt-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-ml-bg">
-              Tipografía {typographyCode}
-            </span>
+            <div className="relative mt-3 flex flex-wrap items-center justify-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-ml-bg">
+                Tipografía {typographyCode}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-black/35 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+                Color {colorCode}
+              </span>
+            </div>
           </div>
 
           {/* Mini stickers de muestra para dar sensación de planilla */}
@@ -82,7 +118,10 @@ export default function SchoolLabelPreview({
                 className="flex flex-col items-center justify-center rounded-xl px-2 py-2 text-center"
                 style={{ background: paletteGradient(palette) }}
               >
-                <span className="text-sm font-extrabold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
+                <span
+                  className="text-sm text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]"
+                  style={typographyStyle(typographyCode)}
+                >
                   {displayName}
                 </span>
                 <span className="text-[9px] font-semibold uppercase tracking-wide text-white/85">

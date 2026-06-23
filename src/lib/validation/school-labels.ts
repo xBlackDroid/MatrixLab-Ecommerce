@@ -79,6 +79,8 @@ export const SchoolLabelsDesignJsonSchema = z
     designerType: z.literal("school-labels"),
     productType: z.literal("etiquetas-escolares"),
     package: z.enum(SCHOOL_PACKAGE_VALUES),
+    /** Ultra puede llevar hasta 2 diseños diferentes (1 por defecto). */
+    designCount: z.union([z.literal(1), z.literal(2)]).optional(),
     student: StudentSchema,
     typographyCode: z.enum(SCHOOL_TYPOGRAPHY_VALUES),
     colorCode: z.enum(SCHOOL_COLOR_VALUES),

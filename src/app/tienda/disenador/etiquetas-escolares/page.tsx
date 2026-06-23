@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, GraduationCap, MessageCircle } from "lucide-react";
+import { ArrowLeft, GraduationCap } from "lucide-react";
 import SchoolLabelsLab from "@/components/designer/school-labels/SchoolLabelsLab";
 import { SCHOOL_ORDER_STEPS } from "@/lib/designer/school-labels/config";
 import { getProductByHandle } from "@/lib/store/products";
-import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
   title: "Etiquetas Escolares Lab",
@@ -73,35 +72,11 @@ export default async function SchoolLabelsPage() {
         </ol>
       </section>
 
-      {product ? (
-        <SchoolLabelsLab product={product} />
-      ) : (
-        <UnavailableNotice />
-      )}
-    </div>
-  );
-}
-
-function UnavailableNotice() {
-  return (
-    <div className="glass mx-auto max-w-lg rounded-3xl p-12 text-center">
-      <h2 className="text-xl font-bold">
-        El producto base aún no está disponible
-      </h2>
-      <p className="mt-3 text-ml-white/60">
-        No encontramos el producto base de etiquetas escolares en el catálogo
-        todavía. Aplica el seed (supabase/seed_school_labels.sql) o cuéntanos tu
-        idea por WhatsApp y la armamos contigo.
-      </p>
-      <a
-        href={buildWhatsAppUrl(whatsappMessages.schoolLabels({}))}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-6 inline-flex items-center gap-2 rounded-full bg-ml-coral px-6 py-3 font-semibold text-ml-bg transition hover:bg-ml-coral/90"
-      >
-        <MessageCircle className="h-5 w-5" aria-hidden />
-        Cotizar por WhatsApp
-      </a>
+      {/* El wizard SIEMPRE se renderiza: el cliente puede armar y previsualizar
+          su pedido aunque el producto base aún no esté disponible. Guardar y
+          agregar al carrito se habilitan solo cuando hay producto persistible
+          (lo resuelve SchoolLabelsLab). */}
+      <SchoolLabelsLab product={product} />
     </div>
   );
 }

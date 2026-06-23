@@ -36,7 +36,12 @@ import { cn } from "@/lib/utils";
 import type { ProductWithVariants } from "@/lib/db/types";
 
 interface SchoolLabelsLabProps {
-  product: ProductWithVariants;
+  /**
+   * Producto base de la tienda. Puede llegar null si el seed aún no se aplicó
+   * o el catálogo no lo expone: en ese caso el wizard sigue funcionando en
+   * modo previsualización y solo se bloquean Guardar / Agregar al carrito.
+   */
+  product: ProductWithVariants | null;
 }
 
 interface StudentState {
@@ -82,6 +87,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   const [step, setStep] = useState(1);
 
   const [pkg, setPkg] = useState<SchoolPackageId | null>(null);
+  const [designCount, setDesignCount] = useState<1 | 2>(1);
   const [student, setStudent] = useState<StudentState>({
     firstName: "",
     lastName1: "",
@@ -109,9 +115,12 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
 
   const markDirty = useCallback(() => setSaved(false), []);
 
+  // Sin producto base persistible: el wizard funciona en modo previsualización.
+  const hasBaseProduct = product !== null;
+
   const variantForPackage = useMemo(() => {
     return (id: SchoolPackageId | null) => {
-      if (!id) return null;
+      if (!id || !product) return null;
       const label = getSchoolPackage(id)?.variantLabel;
       const variants = product.variants ?? [];
       return (
@@ -122,7 +131,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
         null
       );
     };
-  }, [product.variants]);
+  }, [product]);
 
   const studentValidation = useMemo(
     () => validateSchoolStudent(student),
@@ -211,6 +220,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       colorCode,
       addons,
     };
+    // Ultra puede llevar hasta 2 diseños diferentes.
+    if (pkg === "ultra") json.designCount = designCount;
     if (trimmed(theme)) json.theme = trimmed(theme);
     if (trimmed(decorativeIcons)) json.decorativeIcons = trimmed(decorativeIcons);
     if (trimmed(characterInspiration))
@@ -224,6 +235,11 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   const ensureDesign = useCallback(async (): Promise<string | null> => {
     if (designId) return designId;
     if (!pkg) return null;
+    // Sin producto base no hay nada persistible: modo previsualización.
+    if (!product) {
+      setPreviewOnly(true);
+      return null;
+    }
     const variant = variantForPackage(pkg);
     try {
       const res = await fetch("/api/designs", {
@@ -251,7 +267,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       toast.error("Sin conexión. Intenta de nuevo.");
       return null;
     }
-  }, [designId, pkg, product.id, variantForPackage]);
+  }, [designId, pkg, product, variantForPackage]);
 
   const fullyValid =
     pkg !== null &&
@@ -265,7 +281,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       return null;
     }
     const id = await ensureDesign();
-    if (!id) return null;
+    if (!id || !product) return null;
     setSaving(true);
     try {
       const variant = variantForPackage(pkg);
@@ -307,6 +323,12 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   }
 
   async function handleAddToCart() {
+    if (!product) {
+      toast.error(
+        "El producto base aún no está disponible. Aplica el seed o cotiza por WhatsApp.",
+      );
+      return;
+    }
     const variant = variantForPackage(pkg);
     if (!variant) {
       toast.error("Este paquete no está disponible por ahora.");
@@ -408,7 +430,20 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="glass-strong rounded-3xl p-5 sm:p-7">
           {step === 1 && (
-            <StepPackage pkg={pkg} onSelect={(p) => { setPkg(p); markDirty(); }} whatsappUrl={whatsappUrl} />
+            <StepPackage
+              pkg={pkg}
+              designCount={designCount}
+              onSelect={(p) => {
+                setPkg(p);
+                if (p !== "ultra") setDesignCount(1);
+                markDirty();
+              }}
+              onDesignCountChange={(c) => {
+                setDesignCount(c);
+                markDirty();
+              }}
+              whatsappUrl={whatsappUrl}
+            />
           )}
           {step === 2 && (
             <StepStudent
@@ -457,6 +492,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
           {step === 7 && (
             <StepSummary
               pkg={pkg}
+              designCount={designCount}
               student={student}
               typographyCode={typographyCode}
               colorCode={colorCode}
@@ -514,17 +550,26 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
 
           <div className="glass rounded-2xl p-5">
             <div className="flex flex-col gap-3">
-              {previewOnly && (
-                <p className="rounded-2xl border border-ml-violet/30 bg-ml-violet/10 px-4 py-3 text-xs leading-relaxed text-ml-white/80">
-                  Estás en modo previsualización: puedes armar tu pedido. Para
-                  guardar o agregar al carrito, termina de configurar el
-                  almacenamiento o escríbenos por WhatsApp.
+              {!hasBaseProduct ? (
+                <p className="rounded-2xl border border-ml-coral/30 bg-ml-coral/10 px-4 py-3 text-xs leading-relaxed text-ml-white/80">
+                  El producto base de etiquetas escolares aún no está en el
+                  catálogo. Puedes armar y previsualizar tu pedido; para guardar
+                  o agregar al carrito, aplica el seed
+                  (supabase/seed_school_labels.sql) o cotízalo por WhatsApp.
                 </p>
+              ) : (
+                previewOnly && (
+                  <p className="rounded-2xl border border-ml-violet/30 bg-ml-violet/10 px-4 py-3 text-xs leading-relaxed text-ml-white/80">
+                    Estás en modo previsualización: puedes armar tu pedido. Para
+                    guardar o agregar al carrito, termina de configurar el
+                    almacenamiento o escríbenos por WhatsApp.
+                  </p>
+                )
               )}
               <button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={!fullyValid || addingToCart || previewOnly}
+                disabled={!fullyValid || addingToCart || previewOnly || !hasBaseProduct}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ml-cyan px-6 py-4 font-semibold text-ml-bg shadow-glow-cyan transition hover:bg-ml-cyan/90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
               >
                 {addingToCart ? (
@@ -537,7 +582,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
               <button
                 type="button"
                 onClick={() => saveDesign(true)}
-                disabled={!fullyValid || saving || previewOnly}
+                disabled={!fullyValid || saving || previewOnly || !hasBaseProduct}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-ml-violet/40 bg-ml-violet/10 px-6 py-3.5 font-semibold text-ml-violet transition hover:bg-ml-violet/20 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {saving ? (
@@ -569,11 +614,15 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
 // ===========================================================================
 function StepPackage({
   pkg,
+  designCount,
   onSelect,
+  onDesignCountChange,
   whatsappUrl,
 }: {
   pkg: SchoolPackageId | null;
+  designCount: 1 | 2;
   onSelect: (p: SchoolPackageId) => void;
+  onDesignCountChange: (c: 1 | 2) => void;
   whatsappUrl: string;
 }) {
   return (
@@ -614,6 +663,33 @@ function StepPackage({
           );
         })}
       </div>
+
+      {/* Ultra: cuántos diseños diferentes (hasta 2). */}
+      {pkg === "ultra" && (
+        <div className="mt-5 rounded-2xl border border-white/12 bg-white/5 p-4">
+          <p className="mb-2.5 text-sm font-medium text-ml-white/75">
+            ¿Cuántos diseños diferentes quieres? (Ultra permite hasta 2)
+          </p>
+          <div className="flex gap-3">
+            {([1, 2] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => onDesignCountChange(c)}
+                className={cn(
+                  "flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold transition",
+                  designCount === c
+                    ? "border-ml-cyan/60 bg-ml-cyan/10 text-ml-cyan"
+                    : "border-white/12 bg-white/5 text-ml-white/70 hover:border-ml-violet/40",
+                )}
+              >
+                {c} {c === 1 ? "diseño" : "diseños"}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <p className="mt-5 text-xs text-ml-white/50">
         El precio final lo confirma MatrixLab según tu pedido. Si hay opciones de
         upgrade de material disponibles en catálogo, las verás como add-on.{" "}
@@ -1064,6 +1140,7 @@ function StepAddons({
 // ===========================================================================
 function StepSummary({
   pkg,
+  designCount,
   student,
   typographyCode,
   colorCode,
@@ -1073,6 +1150,7 @@ function StepSummary({
   onNotesChange,
 }: {
   pkg: SchoolPackageId | null;
+  designCount: 1 | 2;
   student: StudentState;
   typographyCode: string | null;
   colorCode: string | null;
@@ -1089,6 +1167,11 @@ function StepSummary({
   const addonNames = addons
     .map((id) => SCHOOL_ADDONS.find((a) => a.id === id)?.name ?? id)
     .join(", ");
+  const packageLabel = pkg
+    ? `${getSchoolPackage(pkg)?.name}${
+        pkg === "ultra" ? ` · ${designCount} diseño${designCount === 2 ? "s" : ""}` : ""
+      }`
+    : "—";
 
   return (
     <div>
@@ -1097,7 +1180,7 @@ function StepSummary({
         subtitle="Revisa tu pedido antes de guardar o agregar al carrito."
       />
       <dl className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
-        <SummaryRow label="Paquete" value={pkg ? getSchoolPackage(pkg)?.name : "—"} />
+        <SummaryRow label="Paquete" value={packageLabel} />
         <SummaryRow label="Nombre completo" value={fullName || "—"} />
         <SummaryRow label="Tipografía" value={typographyCode ?? "—"} />
         <SummaryRow
