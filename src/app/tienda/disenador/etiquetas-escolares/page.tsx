@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, GraduationCap } from "lucide-react";
 import SchoolLabelsLab from "@/components/designer/school-labels/SchoolLabelsLab";
 import { SCHOOL_ORDER_STEPS } from "@/lib/designer/school-labels/config";
-import { getProductByHandle } from "@/lib/store/products";
+import { getDesignerBaseProduct } from "@/lib/store/products";
 
 export const metadata: Metadata = {
   title: "Etiquetas Escolares Lab",
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 const BASE_HANDLE = "etiquetas-escolares-personalizadas";
 
 export default async function SchoolLabelsPage() {
-  const product = await getProductByHandle(BASE_HANDLE);
+  const product = await getDesignerBaseProduct(BASE_HANDLE);
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">

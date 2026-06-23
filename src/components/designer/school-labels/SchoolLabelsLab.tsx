@@ -121,11 +121,14 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   const variantForPackage = useMemo(() => {
     return (id: SchoolPackageId | null) => {
       if (!id || !product) return null;
-      const label = getSchoolPackage(id)?.variantLabel;
+      const label = getSchoolPackage(id)?.variantLabel?.trim().toLowerCase();
       const variants = product.variants ?? [];
+      const norm = (v?: string | null) => v?.trim().toLowerCase() ?? "";
+      // Empareja por option_label o título (sin distinguir mayúsculas); si no
+      // hay coincidencia, cae a la primera variante para no bloquear el carrito.
       return (
         variants.find(
-          (v) => v.option_label === label || v.title === label,
+          (v) => norm(v.option_label) === label || norm(v.title) === label,
         ) ??
         variants[0] ??
         null

@@ -220,6 +220,62 @@ export async function getRelatedProducts(
 }
 
 /**
+ * Resolver del producto base de un laboratorio (diseñador).
+ *
+ * A diferencia de getProductByHandle (catálogo público vía anon key + RLS, con
+ * embed de categoría y filtro de estados visibles), este resuelve del lado
+ * servidor con el SERVICE client — igual que las APIs de diseño y carrito — por
+ * lo que NO depende de matices de RLS/estado del catálogo público. Acepta
+ * cualquier estado salvo 'oculto' (incluye 'sobre_pedido' y 'disponible'),
+ * y trae las variantes en una consulta aparte (sin embeds frágiles).
+ *
+ * Si Supabase no está configurado, cae a los mocks de desarrollo.
+ */
+export async function getDesignerBaseProduct(
+  handle: string,
+): Promise<ProductWithVariants | null> {
+  if (!isValidHandle(handle)) return null;
+
+  // Server-side: el service client es el adecuado para el producto base del
+  // diseñador (las APIs de diseño/carrito también usan service role). Si no
+  // existe, intenta anon; si tampoco, usa mocks.
+  const client = getServiceClient() ?? getAnonClient();
+  if (!client) {
+    const mock = MOCK_PRODUCTS.find((p) => p.handle === handle);
+    if (!mock || mock.status === "oculto") return null;
+    return {
+      ...mock,
+      variants: MOCK_VARIANTS.filter(
+        (v) => v.product_id === mock.id && v.status !== "oculto",
+      ),
+      category: MOCK_CATEGORIES.find((c) => c.id === mock.category_id) ?? null,
+    };
+  }
+
+  const { data: productData } = await client
+    .from("products")
+    .select("*")
+    .eq("handle", handle)
+    .neq("status", "oculto")
+    .limit(1)
+    .maybeSingle();
+  const product = productData as ProductRow | null;
+  if (!product) return null;
+
+  const { data: variantData } = await client
+    .from("product_variants")
+    .select("*")
+    .eq("product_id", product.id)
+    .neq("status", "oculto");
+
+  return {
+    ...product,
+    variants: (variantData as ProductVariantRow[] | null) ?? [],
+    category: null,
+  };
+}
+
+/**
  * Mapa handle de producto base → tipo del diseñador (para el CTA
  * "Personalizar en el laboratorio" en la página de producto). El mapa
  * inverso (tipo → handle) vive en lib/designer/product-catalog.ts.
