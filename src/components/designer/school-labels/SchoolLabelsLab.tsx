@@ -297,10 +297,11 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
         typographyCode: typographyCode!,
         colorCode: colorCode!,
       });
-      // La preview es best-effort: si por alguna razón sale muy grande, no la
-      // mandamos (el guardado nunca debe fallar por el tamaño de la preview).
+      // La preview es best-effort: el body de la API se limita a 256 KB
+      // (readJsonBody). Si por algo la preview sale grande, NO se manda, para
+      // que el guardado nunca falle por su tamaño. El JPEG suele pesar ~30 KB.
       const previewDataUrl =
-        rawPreview && rawPreview.length <= 1_400_000 ? rawPreview : null;
+        rawPreview && rawPreview.length <= 200_000 ? rawPreview : null;
       const res = await fetch(`/api/designs/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

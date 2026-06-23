@@ -20,8 +20,11 @@ export function renderSchoolLabelPreview(
 ): string | null {
   if (typeof document === "undefined") return null;
   try {
-    const width = 800;
-    const height = 450;
+    // Lienzo compacto + JPEG: el data URL debe ir MUY por debajo del límite de
+    // tamaño del body de la API (256 KB en readJsonBody). Un degradado en JPEG
+    // pesa pocas decenas de KB; en PNG pesaría cientos y rompería el guardado.
+    const width = 640;
+    const height = 360;
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -88,7 +91,8 @@ export function renderSchoolLabelPreview(
       height - 50,
     );
 
-    return canvas.toDataURL("image/png");
+    // JPEG (no PNG): comprime el degradado en pocas decenas de KB.
+    return canvas.toDataURL("image/jpeg", 0.82);
   } catch {
     return null;
   }

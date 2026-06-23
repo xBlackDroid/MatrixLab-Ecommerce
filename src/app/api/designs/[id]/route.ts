@@ -148,7 +148,43 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   const { id } = await context.params;
   const idParsed = UuidSchema.safeParse(id);
   const body = await readJsonBody(request);
+
+  // DIAGNÓSTICO TEMPORAL (incondicional, sin secretos): se ejecuta SIEMPRE,
+  // antes de cualquier validación. Revela si el body llegó null (p. ej. por
+  // exceder el límite de tamaño de readJsonBody) o con otra forma de llaves.
+  {
+    const rb = body as Record<string, unknown> | null;
+    const dj = (rb?.designJson ?? rb?.design_json) as
+      | Record<string, unknown>
+      | undefined;
+    console.info("[api/designs PATCH raw]", {
+      idValid: idParsed.success,
+      bodyIsNull: body === null,
+      contentLength: request.headers.get("content-length"),
+      bodyKeys: rb && typeof rb === "object" ? Object.keys(rb) : null,
+      hasDesignJsonCamel: Boolean(rb?.designJson),
+      hasDesignJsonSnake: Boolean(rb?.design_json),
+      topLevelDesignerType: rb?.designerType,
+      designJsonKeys: dj ? Object.keys(dj) : null,
+      designerType: dj?.designerType,
+    });
+  }
+
   if (!idParsed.success) return jsonError("Datos inválidos.", 400);
+
+  // Tolera snake_case / alias: la API valida sobre `designJson` (camelCase).
+  const normalizedBody = ((): unknown => {
+    if (!body || typeof body !== "object") return body;
+    const b = body as Record<string, unknown>;
+    if (b.designJson !== undefined) return b;
+    const alt = b.design_json ?? b.design ?? b.payload;
+    if (alt === undefined) return b;
+    const { design_json: _dj, design: _d, payload: _p, ...rest } = b;
+    void _dj;
+    void _d;
+    void _p;
+    return { ...rest, designJson: alt };
+  })();
 
   const design = await findOwnedDesign(idParsed.data, sessionId);
   if (!design) return jsonError("Diseño no encontrado.", 404);
@@ -158,37 +194,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
   const client = requireServiceClient();
 
-  // DIAGNÓSTICO TEMPORAL (sin secretos): solo para el laboratorio escolar.
-  const bodyForLog = body as {
-    designerType?: unknown;
-    designJson?: Record<string, unknown>;
-  } | null;
-  if (bodyForLog?.designerType === "school-labels") {
-    const dj = bodyForLog.designJson;
-    console.info("[api/designs PATCH school-labels] incoming", {
-      id: idParsed.data,
-      hasDesignJson: Boolean(dj),
-      designerType: dj?.designerType,
-      productType: dj?.productType,
-      productHandle: dj?.productHandle,
-      package: dj?.package,
-      designCount: dj?.designCount,
-      typographyCode: dj?.typographyCode,
-      colorCode: dj?.colorCode,
-      addons: dj?.addons,
-      studentKeys:
-        dj?.student && typeof dj.student === "object"
-          ? Object.keys(dj.student as Record<string, unknown>)
-          : null,
-      previewDataUrlLen:
-        typeof (body as { previewDataUrl?: unknown })?.previewDataUrl === "string"
-          ? ((body as { previewDataUrl: string }).previewDataUrl.length)
-          : 0,
-    });
-  }
-
   // ---- v1: single-asset (compatibilidad con diseños existentes) ----------
-  const v1 = DesignerSaveSchema.safeParse(body);
+  const v1 = DesignerSaveSchema.safeParse(normalizedBody);
   if (v1.success) {
     if (
       v1.data.designJson &&
@@ -227,14 +234,17 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   // ---- v2: prendas multi-imagen, planillas, láser y etiquetas escolares --
-  const v2 = DesignSaveV2Schema.safeParse(body);
+  const v2 = DesignSaveV2Schema.safeParse(normalizedBody);
   if (!v2.success) {
-    // DIAGNÓSTICO TEMPORAL (sin secretos): errores legibles de Zod.
-    if (bodyForLog?.designerType === "school-labels") {
-      console.info("[api/designs PATCH school-labels] validation error", {
-        issues: v2.error.flatten(),
-      });
-    }
+    // DIAGNÓSTICO TEMPORAL (incondicional, sin secretos): errores legibles.
+    const nb = normalizedBody as Record<string, unknown> | null;
+    const dj = nb?.designJson as Record<string, unknown> | undefined;
+    console.info("[api/designs PATCH validation error]", {
+      bodyIsNull: body === null,
+      topLevelDesignerType: nb?.designerType,
+      designJsonKeys: dj ? Object.keys(dj) : null,
+      issues: v2.error.flatten(),
+    });
     return jsonError("Datos inválidos.", 400);
   }
   const payload = v2.data;
