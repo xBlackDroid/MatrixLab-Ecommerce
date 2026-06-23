@@ -289,7 +289,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     setSaving(true);
     try {
       const variant = variantForPackage(pkg);
-      const previewDataUrl = renderSchoolLabelPreview({
+      const rawPreview = renderSchoolLabelPreview({
         firstName: student.firstName,
         lastName1: student.lastName1,
         lastName2: student.lastName2,
@@ -297,6 +297,10 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
         typographyCode: typographyCode!,
         colorCode: colorCode!,
       });
+      // La preview es best-effort: si por alguna razón sale muy grande, no la
+      // mandamos (el guardado nunca debe fallar por el tamaño de la preview).
+      const previewDataUrl =
+        rawPreview && rawPreview.length <= 1_400_000 ? rawPreview : null;
       const res = await fetch(`/api/designs/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

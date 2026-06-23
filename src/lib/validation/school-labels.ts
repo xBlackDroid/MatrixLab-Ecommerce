@@ -67,11 +67,17 @@ const StudentSchema = z
     grade: safeText(SCHOOL_FIELD_LIMITS.grade, "Grado").optional(),
     group: safeText(SCHOOL_FIELD_LIMITS.group, "Grupo").optional(),
   })
-  .strict();
+  // Tolerante: ignora llaves extra del estudiante en vez de rechazar el guardado.
+  .passthrough();
 
 /**
- * Esquema del design_json (version 1). `.strict()` rechaza llaves extra para
- * que el payload no crezca de forma arbitraria.
+ * Esquema del design_json (version 1).
+ *
+ * Tolerante a propósito: el laboratorio escolar se arma con texto/selección
+ * (no con uploads ni canvas), así que aceptamos el set de campos del wizard y
+ * DESCARTAMOS llaves desconocidas (p. ej. un `preview`) en lugar de rechazar
+ * el guardado. Las validaciones duras se mantienen donde importan: package,
+ * tipografía y color contra sus catálogos, y nombre/apellido requeridos.
  */
 export const SchoolLabelsDesignJsonSchema = z
   .object({
@@ -103,11 +109,13 @@ export const SchoolLabelsDesignJsonSchema = z
       SCHOOL_FIELD_LIMITS.designComments,
       "Comentarios de diseño",
     ).optional(),
-    addons: z.array(z.enum(SCHOOL_ADDON_VALUES)).max(SCHOOL_ADDON_VALUES.length),
+    // Acepta cualquier array de strings (ids o nombres comerciales de add-ons).
+    addons: z.array(z.string().max(80)).max(30).optional().default([]),
     notes: safeText(SCHOOL_FIELD_LIMITS.notes, "Notas").optional(),
     previewUrl: z.string().max(512).optional(),
   })
-  .strict();
+  // Ignora llaves desconocidas (no rompe el guardado) en vez de .strict().
+  .passthrough();
 
 export type SchoolLabelsDesignJson = z.infer<typeof SchoolLabelsDesignJsonSchema>;
 

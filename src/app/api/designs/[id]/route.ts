@@ -158,6 +158,35 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
   const client = requireServiceClient();
 
+  // DIAGNÓSTICO TEMPORAL (sin secretos): solo para el laboratorio escolar.
+  const bodyForLog = body as {
+    designerType?: unknown;
+    designJson?: Record<string, unknown>;
+  } | null;
+  if (bodyForLog?.designerType === "school-labels") {
+    const dj = bodyForLog.designJson;
+    console.info("[api/designs PATCH school-labels] incoming", {
+      id: idParsed.data,
+      hasDesignJson: Boolean(dj),
+      designerType: dj?.designerType,
+      productType: dj?.productType,
+      productHandle: dj?.productHandle,
+      package: dj?.package,
+      designCount: dj?.designCount,
+      typographyCode: dj?.typographyCode,
+      colorCode: dj?.colorCode,
+      addons: dj?.addons,
+      studentKeys:
+        dj?.student && typeof dj.student === "object"
+          ? Object.keys(dj.student as Record<string, unknown>)
+          : null,
+      previewDataUrlLen:
+        typeof (body as { previewDataUrl?: unknown })?.previewDataUrl === "string"
+          ? ((body as { previewDataUrl: string }).previewDataUrl.length)
+          : 0,
+    });
+  }
+
   // ---- v1: single-asset (compatibilidad con diseños existentes) ----------
   const v1 = DesignerSaveSchema.safeParse(body);
   if (v1.success) {
@@ -197,9 +226,17 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: true, designId: design.id });
   }
 
-  // ---- v2: prendas multi-imagen, planillas y láser -----------------------
+  // ---- v2: prendas multi-imagen, planillas, láser y etiquetas escolares --
   const v2 = DesignSaveV2Schema.safeParse(body);
-  if (!v2.success) return jsonError("Datos inválidos.", 400);
+  if (!v2.success) {
+    // DIAGNÓSTICO TEMPORAL (sin secretos): errores legibles de Zod.
+    if (bodyForLog?.designerType === "school-labels") {
+      console.info("[api/designs PATCH school-labels] validation error", {
+        issues: v2.error.flatten(),
+      });
+    }
+    return jsonError("Datos inválidos.", 400);
+  }
   const payload = v2.data;
 
   if (JSON.stringify(payload.designJson).length > DESIGN_JSON_MAX_BYTES_V2) {
