@@ -42,15 +42,32 @@ export async function POST(request: NextRequest) {
   const client = requireServiceClient();
 
   // El producto debe existir, ser visible y permitir personalización.
-  const { data: productData } = await client
+  const { data: productData, error: productError } = await client
     .from("products")
-    .select("id, status, is_customizable")
+    .select("id, handle, status, is_customizable")
     .eq("id", parsed.data.productId)
     .maybeSingle();
   const product = productData as Pick<
     ProductRow,
-    "id" | "status" | "is_customizable"
+    "id" | "handle" | "status" | "is_customizable"
   > | null;
+
+  // DIAGNÓSTICO TEMPORAL (sin secretos): solo para el laboratorio escolar.
+  if (parsed.data.productType === "etiquetas-escolares") {
+    console.info("[api/designs school-labels]", {
+      productType: parsed.data.productType,
+      designerType: getCatalogEntry(parsed.data.productType).kind,
+      productId: parsed.data.productId,
+      variantId: parsed.data.variantId ?? null,
+      productFound: Boolean(product),
+      productHandle: product?.handle ?? null,
+      productStatus: product?.status ?? null,
+      isCustomizable: product?.is_customizable ?? null,
+      lookupError: productError?.message ?? null,
+      lookupErrorCode: (productError as { code?: string } | null)?.code ?? null,
+    });
+  }
+
   if (!product) {
     return jsonError(UPLOAD_ERRORS.NO_BASE_PRODUCT, 409, "NO_BASE_PRODUCT");
   }

@@ -16,6 +16,21 @@ function clean(value: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+/**
+ * Normaliza la URL de Supabase: quita slash(es) final(es) y un segmento
+ * `/rest/v1` accidental. Una URL malformada (p. ej. con slash final) produce
+ * rutas REST inválidas (PostgREST PGRST125 "Invalid path specified in request
+ * URL") en TODOS los clientes (anon y service). Limpiarla en el origen evita
+ * ese fallo en catálogo, diseños, carrito y admin por igual.
+ */
+function normalizeSupabaseUrl(value: string | undefined): string | undefined {
+  if (!value) return value;
+  return value
+    .replace(/\/+$/, "")
+    .replace(/\/rest\/v1\/?$/i, "")
+    .replace(/\/+$/, "");
+}
+
 export function isProduction(): boolean {
   return process.env.NODE_ENV === "production";
 }
@@ -26,7 +41,7 @@ export function getServerEnv() {
     mpAccessToken: clean(process.env.MERCADOPAGO_ACCESS_TOKEN),
     mpWebhookSecret: clean(process.env.MERCADOPAGO_WEBHOOK_SECRET),
     databaseUrl: clean(process.env.DATABASE_URL),
-    supabaseUrl: clean(process.env.SUPABASE_URL),
+    supabaseUrl: normalizeSupabaseUrl(clean(process.env.SUPABASE_URL)),
     supabaseAnonKey: clean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     supabaseServiceRoleKey: clean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     adminAccessPassword: clean(process.env.ADMIN_ACCESS_PASSWORD),

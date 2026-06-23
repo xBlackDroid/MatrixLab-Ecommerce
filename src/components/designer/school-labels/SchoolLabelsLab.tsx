@@ -217,6 +217,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       version: 1,
       designerType: "school-labels",
       productType: "etiquetas-escolares",
+      productHandle: product?.handle ?? "etiquetas-escolares-personalizadas",
       package: pkg,
       student: studentJson,
       typographyCode,
