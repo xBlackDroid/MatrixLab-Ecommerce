@@ -3,6 +3,8 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Dominio único de producción del proyecto combinado (landing + tienda + admin).
+  metadataBase: new URL("https://matrixlabintelligence.com"),
   title: {
     default: "MatrixLab Intelligence",
     template: "%s | MatrixLab Intelligence",

@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   FlaskConical,
   Gift,
+  GraduationCap,
   Heart,
   Layers,
   Magnet,
@@ -91,6 +92,7 @@ const COMPANY_BULLETS = [
 
 const STORE_CATEGORIES = [
   { handle: "stickers", label: "Stickers", icon: Sticker },
+  { handle: "etiquetas-escolares", label: "Etiquetas escolares", icon: GraduationCap },
   { handle: "imanes", label: "Imanes", icon: Magnet },
   { handle: "playeras-prendas", label: "Playeras y prendas", icon: Shirt },
   { handle: "gorras", label: "Gorras", icon: Sparkles },
@@ -537,7 +539,7 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
               {STORE_CATEGORIES.map((category, index) => (
                 <Reveal key={category.handle} delay={index * 0.05}>
                   <Link
