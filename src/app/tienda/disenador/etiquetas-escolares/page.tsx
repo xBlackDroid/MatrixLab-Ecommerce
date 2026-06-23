@@ -26,30 +26,7 @@ export default async function SchoolLabelsPage() {
   // Sin caché: el producto base se resuelve siempre en cada request.
   noStore();
 
-  // DIAGNÓSTICO TEMPORAL (sin secretos): confirma que el runtime ve las envs.
-  console.info("[school-labels] env", {
-    hasSupabaseUrl: Boolean(process.env.SUPABASE_URL),
-    hasServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
-    hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-    handle: BASE_HANDLE,
-  });
-
   const product = await getDesignerBaseProduct(BASE_HANDLE);
-
-  // DIAGNÓSTICO TEMPORAL (sin secretos): resultado del resolver.
-  console.info("[school-labels] product resolved", {
-    found: Boolean(product),
-    handle: product?.handle,
-    status: product?.status,
-    variantCount: product?.variants?.length ?? 0,
-    variants: product?.variants?.map((v) => ({
-      optionLabel: v.option_label,
-      title: v.title,
-      status: v.status,
-      price: v.price,
-      stock: v.stock,
-    })),
-  });
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">

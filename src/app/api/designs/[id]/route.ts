@@ -148,28 +148,6 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   const { id } = await context.params;
   const idParsed = UuidSchema.safeParse(id);
   const body = await readJsonBody(request);
-
-  // DIAGNÓSTICO TEMPORAL (incondicional, sin secretos): se ejecuta SIEMPRE,
-  // antes de cualquier validación. Revela si el body llegó null (p. ej. por
-  // exceder el límite de tamaño de readJsonBody) o con otra forma de llaves.
-  {
-    const rb = body as Record<string, unknown> | null;
-    const dj = (rb?.designJson ?? rb?.design_json) as
-      | Record<string, unknown>
-      | undefined;
-    console.info("[api/designs PATCH raw]", {
-      idValid: idParsed.success,
-      bodyIsNull: body === null,
-      contentLength: request.headers.get("content-length"),
-      bodyKeys: rb && typeof rb === "object" ? Object.keys(rb) : null,
-      hasDesignJsonCamel: Boolean(rb?.designJson),
-      hasDesignJsonSnake: Boolean(rb?.design_json),
-      topLevelDesignerType: rb?.designerType,
-      designJsonKeys: dj ? Object.keys(dj) : null,
-      designerType: dj?.designerType,
-    });
-  }
-
   if (!idParsed.success) return jsonError("Datos inválidos.", 400);
 
   // Tolera snake_case / alias: la API valida sobre `designJson` (camelCase).
@@ -235,18 +213,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
   // ---- v2: prendas multi-imagen, planillas, láser y etiquetas escolares --
   const v2 = DesignSaveV2Schema.safeParse(normalizedBody);
-  if (!v2.success) {
-    // DIAGNÓSTICO TEMPORAL (incondicional, sin secretos): errores legibles.
-    const nb = normalizedBody as Record<string, unknown> | null;
-    const dj = nb?.designJson as Record<string, unknown> | undefined;
-    console.info("[api/designs PATCH validation error]", {
-      bodyIsNull: body === null,
-      topLevelDesignerType: nb?.designerType,
-      designJsonKeys: dj ? Object.keys(dj) : null,
-      issues: v2.error.flatten(),
-    });
-    return jsonError("Datos inválidos.", 400);
-  }
+  if (!v2.success) return jsonError("Datos inválidos.", 400);
   const payload = v2.data;
 
   if (JSON.stringify(payload.designJson).length > DESIGN_JSON_MAX_BYTES_V2) {

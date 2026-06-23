@@ -266,18 +266,11 @@ function getSchoolLabelsClient(): {
 export async function getDesignerBaseProduct(
   handle: string,
 ): Promise<ProductWithVariants | null> {
-  if (!isValidHandle(handle)) {
-    console.info("[school-labels] resolver: handle inválido", { handle });
-    return null;
-  }
+  if (!isValidHandle(handle)) return null;
 
-  const { client, usingServiceRole } = getSchoolLabelsClient();
+  const { client } = getSchoolLabelsClient();
   if (!client) {
     const mock = MOCK_PRODUCTS.find((p) => p.handle === handle);
-    console.info("[school-labels] resolver: sin Supabase, usando mocks", {
-      handle,
-      foundMock: Boolean(mock),
-    });
     if (!mock || mock.status === "oculto") return null;
     return {
       ...mock,
@@ -289,34 +282,18 @@ export async function getDesignerBaseProduct(
   }
 
   // Consulta limpia: SOLO por handle, sin embeds ni filtros de status/stock.
-  const { data: rows, error } = await client
+  const { data: rows } = await client
     .from("products")
     .select("*")
     .eq("handle", handle)
     .limit(1);
   const product = ((rows as ProductRow[] | null) ?? [])[0] ?? null;
 
-  // DIAGNÓSTICO TEMPORAL (sin secretos): revela por qué se resuelve o no.
-  console.info("[school-labels] resolver: products query", {
-    handle,
-    usingServiceRole,
-    found: Boolean(product),
-    status: product?.status ?? null,
-    isCustomizable: product?.is_customizable ?? null,
-    error: error?.message ?? null,
-    errorCode: (error as { code?: string } | null)?.code ?? null,
-  });
-
-  // Respaldo: si la consulta directa falló o no encontró, intenta el path
-  // probado del catálogo público (anon + RLS) que usa el resto de la tienda.
+  // Respaldo: si la consulta directa no encontró, intenta el path probado del
+  // catálogo público (anon + RLS) que usa el resto de la tienda.
   if (!product) {
     const fallback = await getProductByHandle(handle);
     if (fallback) {
-      console.info("[school-labels] resolver: resuelto vía getProductByHandle", {
-        handle,
-        status: fallback.status,
-        variantCount: fallback.variants.length,
-      });
       if (fallback.status === "oculto") return null;
       return fallback;
     }
@@ -324,15 +301,9 @@ export async function getDesignerBaseProduct(
   }
 
   // Solo se descarta si está oculto; sobre_pedido y disponible se aceptan.
-  if (product.status === "oculto") {
-    console.info(
-      "[school-labels] resolver: producto OCULTO; cámbialo a sobre_pedido o disponible en /admin/productos.",
-      { handle },
-    );
-    return null;
-  }
+  if (product.status === "oculto") return null;
 
-  const { data: variantData, error: variantError } = await client
+  const { data: variantData } = await client
     .from("product_variants")
     .select("*")
     .eq("product_id", product.id);
@@ -340,18 +311,6 @@ export async function getDesignerBaseProduct(
   const variants = ((variantData as ProductVariantRow[] | null) ?? []).filter(
     (v) => v.status !== "oculto",
   );
-
-  console.info("[school-labels] resolver: variants query", {
-    productId: product.id,
-    variantCount: variants.length,
-    error: variantError?.message ?? null,
-    variants: variants.map((v) => ({
-      optionLabel: v.option_label,
-      title: v.title,
-      status: v.status,
-      price: v.price,
-    })),
-  });
 
   return {
     ...product,
