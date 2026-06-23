@@ -1,7 +1,9 @@
 import "server-only";
 
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getAnonClient } from "@/lib/db/client";
 import { getServiceClient } from "@/lib/db/admin";
+import { getServerEnv } from "@/lib/security/env";
 import type {
   CategoryRow,
   DesignerProductType,
@@ -231,6 +233,36 @@ export async function getRelatedProducts(
  *
  * Si Supabase no está configurado, cae a los mocks de desarrollo.
  */
+/**
+ * Cliente Supabase dedicado del resolver, con la URL NORMALIZADA.
+ *
+ * PGRST125 ("Invalid path specified in request URL") aparece cuando la ruta
+ * REST queda malformada — típicamente porque SUPABASE_URL trae un slash final
+ * o un segmento `/rest/v1` extra. Aquí limpiamos esos casos antes de crear el
+ * cliente, sin tocar los clientes compartidos (anon/service) del resto de la
+ * app. Prefiere service role (server-side); si no hay, usa anon key.
+ */
+let cachedSchoolClient: SupabaseClient | null = null;
+function getSchoolLabelsClient(): {
+  client: SupabaseClient | null;
+  usingServiceRole: boolean;
+} {
+  const env = getServerEnv();
+  const rawUrl = env.supabaseUrl;
+  const key = env.supabaseServiceRoleKey ?? env.supabaseAnonKey;
+  if (!rawUrl || !key) return { client: null, usingServiceRole: false };
+  const url = rawUrl
+    .trim()
+    .replace(/\/+$/, "") // sin slash(es) final(es)
+    .replace(/\/rest\/v1\/?$/i, ""); // sin segmento /rest/v1 accidental
+  if (!cachedSchoolClient) {
+    cachedSchoolClient = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  }
+  return { client: cachedSchoolClient, usingServiceRole: Boolean(env.supabaseServiceRoleKey) };
+}
+
 export async function getDesignerBaseProduct(
   handle: string,
 ): Promise<ProductWithVariants | null> {
@@ -239,11 +271,7 @@ export async function getDesignerBaseProduct(
     return null;
   }
 
-  // Server-side: el service client es el adecuado para el producto base del
-  // diseñador (las APIs de diseño/carrito también usan service role). Si no
-  // existe, intenta anon; si tampoco, usa mocks.
-  const service = getServiceClient();
-  const client = service ?? getAnonClient();
+  const { client, usingServiceRole } = getSchoolLabelsClient();
   if (!client) {
     const mock = MOCK_PRODUCTS.find((p) => p.handle === handle);
     console.info("[school-labels] resolver: sin Supabase, usando mocks", {
@@ -260,8 +288,7 @@ export async function getDesignerBaseProduct(
     };
   }
 
-  // Consulta SOLO por handle (sin filtrar status/categoría/embed) para no
-  // descartar el producto por error y poder diagnosticar su estado real.
+  // Consulta limpia: SOLO por handle, sin embeds ni filtros de status/stock.
   const { data: rows, error } = await client
     .from("products")
     .select("*")
@@ -272,7 +299,7 @@ export async function getDesignerBaseProduct(
   // DIAGNÓSTICO TEMPORAL (sin secretos): revela por qué se resuelve o no.
   console.info("[school-labels] resolver: products query", {
     handle,
-    usingServiceRole: Boolean(service),
+    usingServiceRole,
     found: Boolean(product),
     status: product?.status ?? null,
     isCustomizable: product?.is_customizable ?? null,
@@ -280,7 +307,22 @@ export async function getDesignerBaseProduct(
     errorCode: (error as { code?: string } | null)?.code ?? null,
   });
 
-  if (!product) return null;
+  // Respaldo: si la consulta directa falló o no encontró, intenta el path
+  // probado del catálogo público (anon + RLS) que usa el resto de la tienda.
+  if (!product) {
+    const fallback = await getProductByHandle(handle);
+    if (fallback) {
+      console.info("[school-labels] resolver: resuelto vía getProductByHandle", {
+        handle,
+        status: fallback.status,
+        variantCount: fallback.variants.length,
+      });
+      if (fallback.status === "oculto") return null;
+      return fallback;
+    }
+    return null;
+  }
+
   // Solo se descarta si está oculto; sobre_pedido y disponible se aceptan.
   if (product.status === "oculto") {
     console.info(
@@ -293,9 +335,11 @@ export async function getDesignerBaseProduct(
   const { data: variantData, error: variantError } = await client
     .from("product_variants")
     .select("*")
-    .eq("product_id", product.id)
-    .neq("status", "oculto");
-  const variants = (variantData as ProductVariantRow[] | null) ?? [];
+    .eq("product_id", product.id);
+  // Filtra ocultas en JS (sin filtro de status/stock en la query).
+  const variants = ((variantData as ProductVariantRow[] | null) ?? []).filter(
+    (v) => v.status !== "oculto",
+  );
 
   console.info("[school-labels] resolver: variants query", {
     productId: product.id,
