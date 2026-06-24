@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FlaskConical, MessageCircle, Sparkles } from "lucide-react";
 import CartBadge from "@/components/store/CartBadge";
+import StoreMobileMenu from "@/components/store/StoreMobileMenu";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 /**
@@ -16,6 +17,7 @@ export default function StoreLayout({
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-ml-bg/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          {/* Logo (izquierda en móvil y escritorio) */}
           <Link href="/tienda" className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ml-violet/15 text-ml-violet">
               <FlaskConical className="h-5 w-5" aria-hidden />
@@ -26,7 +28,11 @@ export default function StoreLayout({
             </span>
           </Link>
 
+          {/* Navegación de escritorio: visible, sin hamburguesa */}
           <nav className="hidden items-center gap-6 text-sm text-ml-white/75 md:flex">
+            <Link href="/" className="transition hover:text-ml-white">
+              Inicio
+            </Link>
             <Link href="/tienda" className="transition hover:text-ml-white">
               Tienda
             </Link>
@@ -37,22 +43,23 @@ export default function StoreLayout({
               <Sparkles className="h-4 w-4" aria-hidden />
               Diseñador
             </Link>
-            <Link href="/" className="transition hover:text-ml-white">
-              Inicio
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
             <a
               href={buildWhatsAppUrl(whatsappMessages.customRequest())}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-ml-white/85 transition hover:border-ml-cyan/50 hover:text-ml-cyan sm:inline-flex"
+              className="flex items-center gap-1.5 transition hover:text-ml-cyan"
             >
               <MessageCircle className="h-4 w-4" aria-hidden />
               WhatsApp
             </a>
+          </nav>
+
+          {/* Derecha: carrito siempre visible + hamburguesa (solo móvil) */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <CartBadge />
+            <StoreMobileMenu
+              whatsappUrl={buildWhatsAppUrl(whatsappMessages.customRequest())}
+            />
           </div>
         </div>
       </header>

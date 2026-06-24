@@ -79,16 +79,16 @@ export function renderSchoolLabelPreview(
       ctx.fillText(lastNames.toUpperCase(), width / 2, height / 2 + 40);
     }
 
-    // Código de tipografía.
+    // Códigos de tipografía + color (los mismos que el cliente ve en la guía).
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
     ctx.font =
       "700 22px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
     ctx.fillText(
-      `Tipografía ${input.typographyCode}`,
+      `Tipografía ${input.typographyCode}  ·  Color ${input.colorCode}`,
       width / 2,
-      height - 50,
+      height - 46,
     );
 
     // JPEG (no PNG): comprime el degradado en pocas decenas de KB.

@@ -113,6 +113,17 @@ export const SchoolLabelsDesignJsonSchema = z
     addons: z.array(z.string().max(80)).max(30).optional().default([]),
     notes: safeText(SCHOOL_FIELD_LIMITS.notes, "Notas").optional(),
     previewUrl: z.string().max(512).optional(),
+    /** Familia de fondo automático sugerida por la paleta (arcoiris, neon…). */
+    backgroundPreset: z.string().max(16).optional(),
+    /** Imagen propia subida por el cliente (referencia en storage privado). */
+    customImage: z
+      .object({
+        assetId: z.string().max(64).optional(),
+        path: z.string().max(256).optional(),
+        fileName: z.string().max(160).optional(),
+      })
+      .partial()
+      .optional(),
   })
   // Ignora llaves desconocidas (no rompe el guardado) en vez de .strict().
   .passthrough();
