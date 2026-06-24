@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Save,
   ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { emitCartUpdated } from "@/components/store/CartBadge";
@@ -46,12 +47,7 @@ interface SchoolLabelsLabProps {
 
 interface StudentState {
   firstName: string;
-  lastName1: string;
-  lastName2: string;
-  nickname: string;
-  school: string;
-  grade: string;
-  group: string;
+  lastNames: string;
 }
 
 interface UploadedAsset {
@@ -62,13 +58,22 @@ interface UploadedAsset {
 // Stepper tipo chips, deslizable en móvil.
 const STEPS = [
   "Paquete",
-  "Nombre",
+  "Datos",
   "Tipografía",
   "Color",
   "Imagen",
   "Preview",
 ] as const;
 const TOTAL_STEPS = STEPS.length;
+
+// Texto contextual del botón "Siguiente" por paso (indexado desde 1).
+const NEXT_LABELS: Record<number, string> = {
+  1: "Siguiente: tus datos",
+  2: "Siguiente: elige tipografía",
+  3: "Siguiente: elige color",
+  4: "Siguiente: tu imagen",
+  5: "Siguiente: ver resumen",
+};
 
 const UPLOAD_ACCEPT = ["image/png", "image/jpeg", "image/webp"];
 const UPLOAD_MAX_BYTES = 8 * 1024 * 1024;
@@ -80,12 +85,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   const [designCount, setDesignCount] = useState<1 | 2>(1);
   const [student, setStudent] = useState<StudentState>({
     firstName: "",
-    lastName1: "",
-    lastName2: "",
-    nickname: "",
-    school: "",
-    grade: "",
-    group: "",
+    lastNames: "",
   });
   const [typographyCode, setTypographyCode] = useState<string | null>(null);
   const [colorCode, setColorCode] = useState<string | null>(null);
@@ -177,7 +177,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     if (!stepValid(step)) {
       toast.error(
         step === 2
-          ? "Escribe el nombre y al menos un apellido."
+          ? "Escribe el nombre y los apellidos."
           : "Completa este paso para continuar.",
       );
       return;
@@ -211,13 +211,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     const trimmed = (v: string) => v.trim();
     const studentJson: Record<string, string> = {
       firstName: trimmed(student.firstName),
-      lastName1: trimmed(student.lastName1),
+      lastNames: trimmed(student.lastNames),
     };
-    if (trimmed(student.lastName2)) studentJson.lastName2 = trimmed(student.lastName2);
-    if (trimmed(student.nickname)) studentJson.nickname = trimmed(student.nickname);
-    if (trimmed(student.school)) studentJson.school = trimmed(student.school);
-    if (trimmed(student.grade)) studentJson.grade = trimmed(student.grade);
-    if (trimmed(student.group)) studentJson.group = trimmed(student.group);
 
     const json: Record<string, unknown> = {
       version: 1,
@@ -365,9 +360,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       const variant = variantForPackage(pkg);
       const rawPreview = renderSchoolLabelPreview({
         firstName: student.firstName,
-        lastName1: student.lastName1,
-        lastName2: student.lastName2,
-        nickname: student.nickname,
+        lastNames: student.lastNames,
         typographyCode: typographyCode!,
         colorCode: colorCode!,
       });
@@ -463,16 +456,13 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     }),
   );
 
-  const displayName =
-    student.nickname.trim() || student.firstName.trim() || "Tu nombre";
+  const displayName = student.firstName.trim() || "Tu nombre";
   const previewBg = getBackgroundForPalette(colorCode);
 
   const previewNode = (
     <SchoolLabelPreview
       firstName={student.firstName}
-      lastName1={student.lastName1}
-      lastName2={student.lastName2}
-      nickname={student.nickname}
+      lastNames={student.lastNames}
       typographyCode={typographyCode ?? "001"}
       colorCode={colorCode ?? "ARC"}
       theme={theme}
@@ -610,7 +600,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* Contenido del paso */}
-        <section className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 sm:p-7">
+        <section className="rounded-3xl border border-violet-100 bg-white/80 p-5 shadow-sm backdrop-blur sm:p-7">
           {step === 1 && (
             <StepPackage
               pkg={pkg}
@@ -722,7 +712,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
                 onClick={goNext}
                 className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow transition hover:bg-violet-700"
               >
-                Siguiente
+                {NEXT_LABELS[step] ?? "Siguiente"}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </button>
             ) : (
@@ -768,8 +758,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
               onClick={goNext}
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-violet-600 px-5 py-3 text-sm font-bold text-white shadow transition hover:bg-violet-700"
             >
-              Siguiente
-              <ArrowRight className="h-4 w-4" aria-hidden />
+              <span className="truncate">{NEXT_LABELS[step] ?? "Siguiente"}</span>
+              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
             </button>
           </div>
         ) : (
@@ -941,83 +931,59 @@ function StepName({
   errors: Partial<Record<keyof StudentState, string>>;
   onChange: <K extends keyof StudentState>(key: K, value: string) => void;
 }) {
+  // Los errores solo se muestran tras tocar el campo: el primer vistazo de la
+  // pantalla queda limpio (sin rojo prematuro).
+  const [touched, setTouched] = useState<Partial<Record<keyof StudentState, boolean>>>(
+    {},
+  );
+  const touch = (key: keyof StudentState) =>
+    setTouched((t) => ({ ...t, [key]: true }));
+  const bigInputClass =
+    "w-full rounded-2xl border border-violet-200 bg-white px-4 py-3.5 text-base text-slate-800 shadow-sm outline-none transition placeholder:text-slate-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-100";
   return (
     <div>
       <StepHeader
-        title="Nombre del estudiante"
-        subtitle="Con esto personalizamos tus etiquetas. Solo el nombre y un apellido son obligatorios."
+        title="Personaliza tus etiquetas"
+        subtitle="Así aparecerá en tus etiquetas."
       />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Nombre *" error={errors.firstName}>
-          <input
-            value={student.firstName}
-            maxLength={SCHOOL_FIELD_LIMITS.name}
-            onChange={(e) => onChange("firstName", e.target.value)}
-            className={inputClass}
-            placeholder="Ej. Sofía"
-          />
-        </Field>
-        <Field label="Apellido paterno *" error={errors.lastName1}>
-          <input
-            value={student.lastName1}
-            maxLength={SCHOOL_FIELD_LIMITS.name}
-            onChange={(e) => onChange("lastName1", e.target.value)}
-            className={inputClass}
-            placeholder="Ej. García"
-          />
-        </Field>
-        <Field label="Apellido materno">
-          <input
-            value={student.lastName2}
-            maxLength={SCHOOL_FIELD_LIMITS.name}
-            onChange={(e) => onChange("lastName2", e.target.value)}
-            className={inputClass}
-            placeholder="Opcional"
-          />
-        </Field>
-        <Field label="Nombre corto o apodo">
-          <input
-            value={student.nickname}
-            maxLength={SCHOOL_FIELD_LIMITS.nickname}
-            onChange={(e) => onChange("nickname", e.target.value)}
-            className={inputClass}
-            placeholder="Opcional"
-          />
-        </Field>
-        <Field label="Colegio">
-          <input
-            value={student.school}
-            maxLength={SCHOOL_FIELD_LIMITS.school}
-            onChange={(e) => onChange("school", e.target.value)}
-            className={inputClass}
-            placeholder="Opcional"
-          />
-        </Field>
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Grado">
+      <div className="rounded-3xl border border-violet-100 bg-gradient-to-br from-white via-violet-50/50 to-cyan-50/40 p-5 shadow-sm sm:p-7">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field
+            label="Nombre"
+            error={touched.firstName ? errors.firstName : undefined}
+          >
             <input
-              value={student.grade}
-              maxLength={SCHOOL_FIELD_LIMITS.grade}
-              onChange={(e) => onChange("grade", e.target.value)}
-              className={inputClass}
-              placeholder="Opcional"
+              value={student.firstName}
+              maxLength={SCHOOL_FIELD_LIMITS.name}
+              onChange={(e) => onChange("firstName", e.target.value)}
+              onBlur={() => touch("firstName")}
+              className={bigInputClass}
+              placeholder="Ej. Sofía"
             />
           </Field>
-          <Field label="Grupo">
+          <Field
+            label="Apellidos"
+            error={touched.lastNames ? errors.lastNames : undefined}
+          >
             <input
-              value={student.group}
-              maxLength={SCHOOL_FIELD_LIMITS.group}
-              onChange={(e) => onChange("group", e.target.value)}
-              className={inputClass}
-              placeholder="Opcional"
+              value={student.lastNames}
+              maxLength={SCHOOL_FIELD_LIMITS.lastNames}
+              onChange={(e) => onChange("lastNames", e.target.value)}
+              onBlur={() => touch("lastNames")}
+              className={bigInputClass}
+              placeholder="Ej. García Hernández"
             />
           </Field>
         </div>
+        <p className="mt-5 flex items-start gap-2 text-xs leading-relaxed text-slate-500">
+          <Sparkles
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-400"
+            aria-hidden
+          />
+          Solo necesitamos el nombre y los apellidos para producir tus
+          etiquetas. Nada más.
+        </p>
       </div>
-      <p className="mt-4 text-xs text-slate-400">
-        No incluyas datos sensibles (dirección, teléfono, datos de pago). Solo
-        guardamos lo necesario para producir tus etiquetas.
-      </p>
     </div>
   );
 }
@@ -1109,7 +1075,7 @@ function StepPreview({
   const [showDetails, setShowDetails] = useState(false);
   const palette = colorCode ? getSchoolColorPalette(colorCode) : null;
   const bg = getBackgroundForPalette(colorCode);
-  const fullName = [student.firstName, student.lastName1, student.lastName2]
+  const fullName = [student.firstName, student.lastNames]
     .map((v) => v.trim())
     .filter(Boolean)
     .join(" ");

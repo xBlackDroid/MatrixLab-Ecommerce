@@ -8,9 +8,7 @@ import { getSchoolColorPalette } from "@/lib/designer/school-labels/color-palett
 
 export interface SchoolPreviewInput {
   firstName: string;
-  lastName1: string;
-  lastName2?: string;
-  nickname?: string;
+  lastNames: string;
   typographyCode: string;
   colorCode: string;
 }
@@ -49,16 +47,8 @@ export function renderSchoolLabelPreview(
     ctx.fillStyle = "rgba(0,0,0,0.18)";
     ctx.fillRect(0, 0, width, height);
 
-    const displayName =
-      (input.nickname?.trim() || input.firstName.trim() || "Tu nombre").slice(
-        0,
-        24,
-      );
-    const lastNames = [input.lastName1, input.lastName2]
-      .map((v) => v?.trim())
-      .filter(Boolean)
-      .join(" ")
-      .slice(0, 40);
+    const displayName = (input.firstName.trim() || "Tu nombre").slice(0, 24);
+    const lastNames = input.lastNames.trim().slice(0, 40);
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";

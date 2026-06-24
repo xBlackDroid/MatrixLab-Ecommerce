@@ -28,9 +28,7 @@ function typographyStyle(code: string): CSSProperties {
 
 export interface SchoolLabelPreviewProps {
   firstName: string;
-  lastName1: string;
-  lastName2?: string;
-  nickname?: string;
+  lastNames: string;
   typographyCode: string;
   colorCode: string;
   theme?: string;
@@ -40,9 +38,7 @@ export interface SchoolLabelPreviewProps {
 
 export default function SchoolLabelPreview({
   firstName,
-  lastName1,
-  lastName2,
-  nickname,
+  lastNames: lastNamesProp,
   typographyCode,
   colorCode,
   theme,
@@ -50,11 +46,8 @@ export default function SchoolLabelPreview({
 }: SchoolLabelPreviewProps) {
   const palette = getSchoolColorPalette(colorCode);
   const bg = getBackgroundForPalette(colorCode);
-  const displayName = nickname?.trim() || firstName.trim() || "Tu nombre";
-  const lastNames = [lastName1, lastName2]
-    .map((v) => v?.trim())
-    .filter(Boolean)
-    .join(" ");
+  const displayName = firstName.trim() || "Tu nombre";
+  const lastNames = lastNamesProp.trim();
 
   return (
     <div className="flex flex-col gap-3">

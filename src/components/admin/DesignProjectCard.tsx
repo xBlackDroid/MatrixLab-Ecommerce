@@ -82,10 +82,19 @@ function extractProductionDetails(
       rows.push(["Diseños", String(json.designCount)]);
     }
     const student = json.student as
-      | { firstName?: string; lastName1?: string; lastName2?: string }
+      | {
+          firstName?: string;
+          lastNames?: string;
+          // Compat. con diseños antiguos guardados antes del cambio de esquema.
+          lastName1?: string;
+          lastName2?: string;
+        }
       | undefined;
     if (student) {
-      const fullName = [student.firstName, student.lastName1, student.lastName2]
+      const lastNames =
+        student.lastNames ??
+        [student.lastName1, student.lastName2].filter(Boolean).join(" ");
+      const fullName = [student.firstName, lastNames]
         .filter(Boolean)
         .join(" ")
         .trim();

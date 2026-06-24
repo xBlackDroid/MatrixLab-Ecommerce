@@ -244,12 +244,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       ...j,
       student: {
         firstName: sanitizeText(j.student.firstName, 60),
-        lastName1: sanitizeText(j.student.lastName1, 60),
-        lastName2: clean(j.student.lastName2, 60),
-        nickname: clean(j.student.nickname, 40),
-        school: clean(j.student.school, 80),
-        grade: clean(j.student.grade, 20),
-        group: clean(j.student.group, 20),
+        lastNames: sanitizeText(j.student.lastNames, 80),
       },
       theme: clean(j.theme, 200),
       decorativeIcons: clean(j.decorativeIcons, 200),

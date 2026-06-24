@@ -144,10 +144,7 @@ export const SCHOOL_ORDER_STEPS: Array<{ title: string; text: string }> = [
 /** Límites de texto del laboratorio (espejados en la validación de servidor). */
 export const SCHOOL_FIELD_LIMITS = {
   name: 60,
-  nickname: 40,
-  school: 80,
-  grade: 20,
-  group: 20,
+  lastNames: 80,
   theme: 200,
   decorativeIcons: 200,
   characterInspiration: 120,
