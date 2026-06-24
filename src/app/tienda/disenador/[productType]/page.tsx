@@ -8,7 +8,7 @@ import {
   getCatalogEntry,
   isDesignerProductType,
 } from "@/lib/designer/product-catalog";
-import { getProductByHandle } from "@/lib/store/products";
+import { getDesignerBaseProduct } from "@/lib/store/products";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
@@ -77,8 +77,8 @@ export default async function DesignerProductPage({
   // 2) Sección pública combinada de gorras.
   if (productType === "gorras") {
     const [trucker, clasica] = await Promise.all([
-      getProductByHandle("gorra-trucker-personalizada"),
-      getProductByHandle("gorra-clasica-personalizada"),
+      getDesignerBaseProduct("gorra-trucker-personalizada"),
+      getDesignerBaseProduct("gorra-clasica-personalizada"),
     ]);
     return (
       <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
@@ -107,7 +107,7 @@ export default async function DesignerProductPage({
   if (!isDesignerProductType(productType)) notFound();
 
   const entry = getCatalogEntry(productType);
-  const product = await getProductByHandle(entry.baseHandle);
+  const product = await getDesignerBaseProduct(entry.baseHandle);
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
