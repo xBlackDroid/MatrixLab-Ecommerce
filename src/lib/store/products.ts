@@ -38,18 +38,59 @@ const VISIBLE_PRODUCT_FILTER = [
   "proximamente",
 ] as const;
 
+/**
+ * Tiempo máximo de una lectura de catálogo (ms). Si Supabase se cuelga
+ * (proyecto pausado, red lenta, etc.) NO bloqueamos la ruta: degradamos a un
+ * fallback (lista vacía / null) para que la página renderice su estado
+ * controlado en vez de quedar colgada hasta el timeout del serverless.
+ */
+const READ_TIMEOUT_MS = 4000;
+
+type ReadResult<T> = { data: T | null; error: unknown };
+
+/** Corre una query de Supabase contra un timeout; devuelve fallback si tarda. */
+async function raceRead<T>(query: PromiseLike<ReadResult<T>>): Promise<ReadResult<T>> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<ReadResult<T>>((resolve) => {
+    timer = setTimeout(
+      () => resolve({ data: null, error: { message: "read-timeout" } }),
+      READ_TIMEOUT_MS,
+    );
+  });
+  try {
+    return await Promise.race([query, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/** Acota una operación async completa contra un timeout (devuelve fallback). */
+function withTimeout<T>(p: Promise<T>, fallback: T, ms = READ_TIMEOUT_MS): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), ms);
+  });
+  return Promise.race([p, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 export async function getCategories(): Promise<CategoryRow[]> {
   const client = getCatalogClient();
   if (!client) {
     return [...MOCK_CATEGORIES].sort((a, b) => a.sort_order - b.sort_order);
   }
-  const { data, error } = await client
-    .from("categories")
-    .select("*")
-    .eq("status", "activa")
-    .order("sort_order", { ascending: true });
+  const { data, error } = await raceRead<CategoryRow[]>(
+    client
+      .from("categories")
+      .select("*")
+      .eq("status", "activa")
+      .order("sort_order", { ascending: true }) as unknown as PromiseLike<
+      ReadResult<CategoryRow[]>
+    >,
+  );
   if (error || !data) return [];
-  return data as CategoryRow[];
+  return data;
 }
 
 export async function getCategoryByHandle(
@@ -60,14 +101,16 @@ export async function getCategoryByHandle(
   if (!client) {
     return MOCK_CATEGORIES.find((c) => c.handle === handle) ?? null;
   }
-  const { data, error } = await client
-    .from("categories")
-    .select("*")
-    .eq("handle", handle)
-    .eq("status", "activa")
-    .maybeSingle();
+  const { data, error } = await raceRead<CategoryRow>(
+    client
+      .from("categories")
+      .select("*")
+      .eq("handle", handle)
+      .eq("status", "activa")
+      .maybeSingle() as unknown as PromiseLike<ReadResult<CategoryRow>>,
+  );
   if (error) return null;
-  return (data as CategoryRow | null) ?? null;
+  return data ?? null;
 }
 
 /**
@@ -156,22 +199,26 @@ export async function getProductsByCategory(
       query = query.order("created_at", { ascending: false });
   }
 
-  const { data, error } = await query;
+  const { data, error } = await raceRead<ProductRow[]>(
+    query as unknown as PromiseLike<ReadResult<ProductRow[]>>,
+  );
   if (error || !data) return [];
-  return data as ProductRow[];
+  return data;
 }
 
 export async function getAllVisibleProducts(): Promise<ProductRow[]> {
   const client = getCatalogClient();
   if (!client) return [...MOCK_PRODUCTS];
-  const { data, error } = await client
-    .from("products")
-    .select("*")
-    .in("status", [...VISIBLE_PRODUCT_FILTER])
-    .order("created_at", { ascending: false })
-    .limit(60);
+  const { data, error } = await raceRead<ProductRow[]>(
+    client
+      .from("products")
+      .select("*")
+      .in("status", [...VISIBLE_PRODUCT_FILTER])
+      .order("created_at", { ascending: false })
+      .limit(60) as unknown as PromiseLike<ReadResult<ProductRow[]>>,
+  );
   if (error || !data) return [];
-  return data as ProductRow[];
+  return data;
 }
 
 export async function getProductByHandle(
@@ -192,18 +239,21 @@ export async function getProductByHandle(
     };
   }
 
-  const { data, error } = await client
-    .from("products")
-    .select("*, product_variants(*), categories(id, title, handle)")
-    .eq("handle", handle)
-    .in("status", [...VISIBLE_PRODUCT_FILTER])
-    .maybeSingle();
-  if (error || !data) return null;
-
-  const row = data as ProductRow & {
+  type HandleRow = ProductRow & {
     product_variants: ProductVariantRow[] | null;
     categories: Pick<CategoryRow, "id" | "title" | "handle"> | null;
   };
+  const { data, error } = await raceRead<HandleRow>(
+    client
+      .from("products")
+      .select("*, product_variants(*), categories(id, title, handle)")
+      .eq("handle", handle)
+      .in("status", [...VISIBLE_PRODUCT_FILTER])
+      .maybeSingle() as unknown as PromiseLike<ReadResult<HandleRow>>,
+  );
+  if (error || !data) return null;
+
+  const row = data;
   return {
     ...row,
     variants: (row.product_variants ?? []).filter((v) => v.status !== "oculto"),
@@ -266,6 +316,14 @@ function getSchoolLabelsClient(): {
 export async function getDesignerBaseProduct(
   handle: string,
 ): Promise<ProductWithVariants | null> {
+  // Acota TODO el resolver: si Supabase se cuelga, la ruta del laboratorio
+  // degrada a "producto base no disponible" en ~4s en vez de timeout.
+  return withTimeout(resolveDesignerBaseProduct(handle), null);
+}
+
+async function resolveDesignerBaseProduct(
+  handle: string,
+): Promise<ProductWithVariants | null> {
   if (!isValidHandle(handle)) return null;
 
   const { client } = getSchoolLabelsClient();
@@ -282,12 +340,12 @@ export async function getDesignerBaseProduct(
   }
 
   // Consulta limpia: SOLO por handle, sin embeds ni filtros de status/stock.
-  const { data: rows } = await client
-    .from("products")
-    .select("*")
-    .eq("handle", handle)
-    .limit(1);
-  const product = ((rows as ProductRow[] | null) ?? [])[0] ?? null;
+  const { data: rows } = await raceRead<ProductRow[]>(
+    client.from("products").select("*").eq("handle", handle).limit(1) as unknown as PromiseLike<
+      ReadResult<ProductRow[]>
+    >,
+  );
+  const product = (rows ?? [])[0] ?? null;
 
   // Respaldo: si la consulta directa no encontró, intenta el path probado del
   // catálogo público (anon + RLS) que usa el resto de la tienda.
@@ -303,14 +361,16 @@ export async function getDesignerBaseProduct(
   // Solo se descarta si está oculto; sobre_pedido y disponible se aceptan.
   if (product.status === "oculto") return null;
 
-  const { data: variantData } = await client
-    .from("product_variants")
-    .select("*")
-    .eq("product_id", product.id);
-  // Filtra ocultas en JS (sin filtro de status/stock en la query).
-  const variants = ((variantData as ProductVariantRow[] | null) ?? []).filter(
-    (v) => v.status !== "oculto",
+  const { data: variantData } = await raceRead<ProductVariantRow[]>(
+    client
+      .from("product_variants")
+      .select("*")
+      .eq("product_id", product.id) as unknown as PromiseLike<
+      ReadResult<ProductVariantRow[]>
+    >,
   );
+  // Filtra ocultas en JS (sin filtro de status/stock en la query).
+  const variants = (variantData ?? []).filter((v) => v.status !== "oculto");
 
   return {
     ...product,
