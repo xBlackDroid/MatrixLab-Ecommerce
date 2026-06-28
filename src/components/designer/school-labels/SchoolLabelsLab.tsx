@@ -98,6 +98,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   const [imageTransform, setImageTransform] = useState<ImageTransform>(
     DEFAULT_IMAGE_TRANSFORM,
   );
+  // Velo de legibilidad automático (ON por defecto cuando hay imagen).
+  const [readabilityOverlay, setReadabilityOverlay] = useState(true);
 
   // Detalles opcionales (no estorban el flujo).
   const [theme, setTheme] = useState("");
@@ -236,6 +238,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
           y: imageTransform.y,
           scale: imageTransform.scale,
         },
+        readabilityOverlay,
       };
     }
     if (trimmed(theme)) json.theme = trimmed(theme);
@@ -358,6 +361,11 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     markDirty();
   }
 
+  function handleReadabilityOverlayChange(next: boolean) {
+    setReadabilityOverlay(next);
+    markDirty();
+  }
+
   // -------------------------------------------------------------------------
   // Guardar / carrito
   // -------------------------------------------------------------------------
@@ -477,6 +485,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       imageUrl={localPreview}
       imageTransform={imageTransform}
       onImageTransformChange={handleImageTransformChange}
+      readabilityOverlay={readabilityOverlay}
+      onReadabilityOverlayChange={handleReadabilityOverlayChange}
     />
   );
 

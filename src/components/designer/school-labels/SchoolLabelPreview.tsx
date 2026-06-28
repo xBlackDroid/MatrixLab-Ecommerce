@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Info, Minus, Move, Plus, RotateCcw } from "lucide-react";
+import { Info, Minus, Move, Plus, RotateCcw, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { getBackgroundForPalette } from "@/lib/designer/school-labels/background-presets";
 import { getSchoolTypography } from "@/lib/designer/school-labels/typography-options";
 import SchoolLabelTemplate, {
@@ -34,6 +35,9 @@ export interface SchoolLabelPreviewProps {
   /** Posición/escala de la imagen dentro de la etiqueta (editable). */
   imageTransform?: ImageTransform;
   onImageTransformChange?: (next: ImageTransform) => void;
+  /** Velo claro de legibilidad (auto). ON por defecto cuando hay imagen. */
+  readabilityOverlay?: boolean;
+  onReadabilityOverlayChange?: (next: boolean) => void;
 }
 
 export default function SchoolLabelPreview({
@@ -44,6 +48,8 @@ export default function SchoolLabelPreview({
   imageUrl,
   imageTransform,
   onImageTransformChange,
+  readabilityOverlay = true,
+  onReadabilityOverlayChange,
 }: SchoolLabelPreviewProps) {
   // Fondo automático por defecto (el usuario ya no elige color).
   const bg = getBackgroundForPalette(null);
@@ -86,46 +92,77 @@ export default function SchoolLabelPreview({
               imageUrl={imageUrl}
               imageTransform={transform}
               onImageTransformChange={onImageTransformChange}
+              readabilityOverlay={readabilityOverlay}
               variant="hero"
             />
           </div>
 
-          {/* Controles de la imagen subida (mover / escalar / restablecer). */}
+          {/* Controles de la imagen subida (mover / escalar / restablecer +
+              velo de legibilidad automático). */}
           {imageUrl && onImageTransformChange && (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
-                <Move className="h-3.5 w-3.5 text-violet-500" aria-hidden />
-                Mover imagen (arrástrala)
-              </span>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => bumpScale(-0.1)}
-                  aria-label="Reducir tamaño de la imagen"
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
-                >
-                  <Minus className="h-3.5 w-3.5" aria-hidden />
-                </button>
-                <span className="w-9 text-center text-[11px] font-semibold tabular-nums text-slate-500">
-                  {Math.round(transform.scale * 100)}%
+            <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
+                  <Move className="h-3.5 w-3.5 text-violet-500" aria-hidden />
+                  Mover imagen (arrástrala)
                 </span>
-                <button
-                  type="button"
-                  onClick={() => bumpScale(0.1)}
-                  aria-label="Aumentar tamaño de la imagen"
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
-                >
-                  <Plus className="h-3.5 w-3.5" aria-hidden />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onImageTransformChange(DEFAULT_IMAGE_TRANSFORM)}
-                  className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
-                >
-                  <RotateCcw className="h-3 w-3" aria-hidden />
-                  Restablecer
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => bumpScale(-0.1)}
+                    aria-label="Reducir tamaño de la imagen"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
+                  >
+                    <Minus className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                  <span className="w-9 text-center text-[11px] font-semibold tabular-nums text-slate-500">
+                    {Math.round(transform.scale * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => bumpScale(0.1)}
+                    aria-label="Aumentar tamaño de la imagen"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
+                  >
+                    <Plus className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onImageTransformChange(DEFAULT_IMAGE_TRANSFORM)}
+                    className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
+                  >
+                    <RotateCcw className="h-3 w-3" aria-hidden />
+                    Restablecer
+                  </button>
+                </div>
               </div>
+
+              {/* Toggle discreto: velo de legibilidad (ON por defecto). */}
+              {onReadabilityOverlayChange && (
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={readabilityOverlay}
+                  onClick={() => onReadabilityOverlayChange(!readabilityOverlay)}
+                  className="inline-flex items-center gap-2 self-start text-[11px] font-semibold text-slate-500"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-violet-500" aria-hidden />
+                  Contraste automático
+                  <span
+                    className={cn(
+                      "relative inline-flex h-4 w-7 items-center rounded-full transition",
+                      readabilityOverlay ? "bg-violet-500" : "bg-slate-300",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "inline-block h-3 w-3 rounded-full bg-white shadow transition",
+                        readabilityOverlay ? "translate-x-3.5" : "translate-x-0.5",
+                      )}
+                    />
+                  </span>
+                </button>
+              )}
             </div>
           )}
 

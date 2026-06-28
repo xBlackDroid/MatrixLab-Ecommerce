@@ -45,6 +45,11 @@ export interface SchoolLabelTemplateProps {
   imageTransform?: ImageTransform;
   /** Si se provee, la imagen es arrastrable dentro de la etiqueta (hero). */
   onImageTransformChange?: (next: ImageTransform) => void;
+  /**
+   * Velo claro automático entre la imagen y el texto (mejora legibilidad sobre
+   * imágenes oscuras/saturadas). Por defecto activo. Solo aplica con imagen.
+   */
+  readabilityOverlay?: boolean;
   /** "hero" = etiqueta principal grande; "mini" = mini etiqueta compacta. */
   variant?: "hero" | "mini";
   className?: string;
@@ -57,6 +62,7 @@ export default function SchoolLabelTemplate({
   imageUrl,
   imageTransform,
   onImageTransformChange,
+  readabilityOverlay = true,
   variant = "hero",
   className,
 }: SchoolLabelTemplateProps) {
@@ -143,6 +149,20 @@ export default function SchoolLabelTemplate({
             }}
           />
         </div>
+      )}
+
+      {/* Velo claro automático: entre la imagen (z-0) y el texto (z-[1]). Mejora
+          la legibilidad sobre imágenes oscuras/saturadas sin taparlas. */}
+      {imageUrl && variant === "hero" && readabilityOverlay && (
+        <div
+          className="pointer-events-none absolute inset-0 z-0"
+          aria-hidden
+          style={{
+            background: "rgba(255,255,255,0.55)",
+            backdropFilter: "blur(1.5px)",
+            WebkitBackdropFilter: "blur(1.5px)",
+          }}
+        />
       )}
 
       {variant === "mini" ? (

@@ -129,6 +129,8 @@ export const SchoolLabelsDesignJsonSchema = z
           })
           .partial()
           .optional(),
+        /** Velo claro de legibilidad sobre la imagen (auto, ON por defecto). */
+        readabilityOverlay: z.boolean().optional(),
       })
       .partial()
       .optional(),
