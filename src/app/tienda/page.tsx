@@ -121,15 +121,17 @@ export default async function TiendaHomePage() {
                 <ArrowRight className="h-5 w-5" aria-hidden />
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-2">
               {PRENDA_LAB_ITEMS.map((item) => (
                 <Link
                   key={item.type}
                   href={`/tienda/disenador/${item.type}`}
-                  className="glass group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl transition hover:border-ml-cyan/50"
+                  className="glass group flex flex-col items-center justify-center gap-2 rounded-xl px-3 py-4 transition hover:-translate-y-0.5 hover:border-ml-cyan/50"
                 >
-                  <item.Icon className="h-8 w-8 text-ml-violet transition group-hover:text-ml-cyan" />
-                  <span className="text-sm font-semibold">{item.label}</span>
+                  <item.Icon className="h-6 w-6 text-ml-violet transition group-hover:text-ml-cyan" />
+                  <span className="text-xs font-semibold sm:text-sm">
+                    {item.label}
+                  </span>
                 </Link>
               ))}
             </div>

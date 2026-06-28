@@ -38,12 +38,11 @@ export const whatsappMessages = {
   schoolLabels: (opts: {
     pkg?: string;
     typographyCode?: string;
-    colorCode?: string;
     name?: string;
   }) =>
     `Hola MatrixLab, quiero hacer etiquetas escolares. Paquete: ${
       opts.pkg || "[Elementary/Ultra]"
-    }, tipografía: ${opts.typographyCode || "[code]"}, colores: ${
-      opts.colorCode || "[code]"
-    }, nombre: ${opts.name || "[nombre]"}.`,
+    }, tipografía: ${opts.typographyCode || "[code]"}, nombre: ${
+      opts.name || "[nombre]"
+    }.`,
 } as const;

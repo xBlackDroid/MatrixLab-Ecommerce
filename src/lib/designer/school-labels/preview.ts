@@ -1,18 +1,28 @@
-import { getSchoolColorPalette } from "@/lib/designer/school-labels/color-palettes";
 import { typographyCanvasFont } from "@/lib/designer/school-labels/typography-styles";
 
 /**
  * Genera una preview (dataURL PNG) de la etiqueta escolar usando el Canvas 2D
  * del navegador. Self-contained: sin librerías externas ni CDNs. La preview es
  * opcional y best-effort; si algo falla devuelve null y el guardado sigue.
+ *
+ * El fondo es automático (el usuario ya no elige color), así que se usa un
+ * degradado por defecto agradable.
  */
 
 export interface SchoolPreviewInput {
   firstName: string;
   lastNames: string;
   typographyCode: string;
-  colorCode: string;
 }
+
+// Degradado por defecto del fondo automático (no depende de paleta del cliente).
+const DEFAULT_PREVIEW_SWATCHES = [
+  "#f9a8d4",
+  "#fcd34d",
+  "#86efac",
+  "#7dd3fc",
+  "#c4b5fd",
+];
 
 export function renderSchoolLabelPreview(
   input: SchoolPreviewInput,
@@ -30,13 +40,9 @@ export function renderSchoolLabelPreview(
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    const palette = getSchoolColorPalette(input.colorCode);
-    const swatches =
-      palette && palette.swatches.length > 0
-        ? palette.swatches
-        : ["#6C2BD9", "#22D3EE"];
+    const swatches = DEFAULT_PREVIEW_SWATCHES;
 
-    // Fondo degradado a partir de la paleta seleccionada.
+    // Fondo degradado automático (por defecto, sin elección de color).
     const gradient = ctx.createLinearGradient(0, 0, width, height);
     swatches.forEach((hex, i) => {
       gradient.addColorStop(i / Math.max(swatches.length - 1, 1), hex);
@@ -71,14 +77,14 @@ export function renderSchoolLabelPreview(
       ctx.fillText(lastNames.toUpperCase(), width / 2, height / 2 + 40);
     }
 
-    // Códigos de tipografía + color (los mismos que el cliente ve en la guía).
+    // Código de tipografía (el mismo que el cliente ve en la guía).
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
     ctx.font =
       "700 22px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
     ctx.fillStyle = "rgba(255,255,255,0.92)";
     ctx.fillText(
-      `Tipografía ${input.typographyCode}  ·  Color ${input.colorCode}`,
+      `Tipografía ${input.typographyCode}`,
       width / 2,
       height - 46,
     );

@@ -60,7 +60,7 @@ export default function SchoolLabelsGuideHero({
             </h1>
             <p className="mx-auto mt-3 max-w-md text-sm text-slate-500">
               Una experiencia interactiva para armar tu pack escolar: elige
-              diseño, tipografía y colores, o sube tu propia imagen. Simple,
+              paquete, nombre y tipografía, o sube tu propia imagen. Simple,
               rápido y sin complicaciones.
             </p>
           </div>

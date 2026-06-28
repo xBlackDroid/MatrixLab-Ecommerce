@@ -18,9 +18,7 @@ import { toast } from "sonner";
 import { emitCartUpdated } from "@/components/store/CartBadge";
 import SchoolLabelPreview from "@/components/designer/school-labels/SchoolLabelPreview";
 import TypographyGallery from "@/components/designer/school-labels/TypographyGallery";
-import ColorPaletteGallery from "@/components/designer/school-labels/ColorPaletteGallery";
 import CustomImageUploader from "@/components/designer/school-labels/CustomImageUploader";
-import AutoBackgroundPreview from "@/components/designer/school-labels/AutoBackgroundPreview";
 import {
   SCHOOL_ADDONS,
   SCHOOL_FIELD_LIMITS,
@@ -28,7 +26,6 @@ import {
   getSchoolPackage,
   type SchoolPackageId,
 } from "@/lib/designer/school-labels/config";
-import { getSchoolColorPalette } from "@/lib/designer/school-labels/color-palettes";
 import { getBackgroundForPalette } from "@/lib/designer/school-labels/background-presets";
 import { renderSchoolLabelPreview } from "@/lib/designer/school-labels/preview";
 import { validateSchoolStudent } from "@/lib/validation/school-labels";
@@ -55,24 +52,17 @@ interface UploadedAsset {
   fileName: string;
 }
 
-// Stepper tipo chips, deslizable en móvil.
-const STEPS = [
-  "Paquete",
-  "Datos",
-  "Tipografía",
-  "Color",
-  "Imagen",
-  "Preview",
-] as const;
+// Stepper tipo chips, deslizable en móvil. (Sin paso de Color: el fondo es
+// automático y el usuario no elige paleta.)
+const STEPS = ["Paquete", "Datos", "Tipografía", "Imagen", "Preview"] as const;
 const TOTAL_STEPS = STEPS.length;
 
 // Texto contextual del botón "Siguiente" por paso (indexado desde 1).
 const NEXT_LABELS: Record<number, string> = {
   1: "Siguiente: tus datos",
   2: "Siguiente: elige tipografía",
-  3: "Siguiente: elige color",
-  4: "Siguiente: tu imagen",
-  5: "Siguiente: ver resumen",
+  3: "Siguiente: tu imagen",
+  4: "Siguiente: ver resumen",
 };
 
 const UPLOAD_ACCEPT = ["image/png", "image/jpeg", "image/webp"];
@@ -88,7 +78,6 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     lastNames: "",
   });
   const [typographyCode, setTypographyCode] = useState<string | null>(null);
-  const [colorCode, setColorCode] = useState<string | null>(null);
 
   // Imagen propia (opcional).
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -154,13 +143,11 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
           return studentValidation.ok;
         case 3:
           return typographyCode !== null;
-        case 4:
-          return colorCode !== null;
         default:
-          return true; // 5 (imagen, opcional) y 6 (preview) siempre alcanzables
+          return true; // 4 (imagen, opcional) y 5 (preview) siempre alcanzables
       }
     },
-    [pkg, studentValidation.ok, typographyCode, colorCode],
+    [pkg, studentValidation.ok, typographyCode],
   );
 
   const canReach = useCallback(
@@ -202,10 +189,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   }
 
   const fullyValid =
-    pkg !== null &&
-    studentValidation.ok &&
-    typographyCode !== null &&
-    colorCode !== null;
+    pkg !== null && studentValidation.ok && typographyCode !== null;
 
   function buildDesignJson(): Record<string, unknown> {
     const trimmed = (v: string) => v.trim();
@@ -222,8 +206,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       package: pkg,
       student: studentJson,
       typographyCode,
-      colorCode,
-      backgroundPreset: getBackgroundForPalette(colorCode).id,
+      // El fondo es automático (el usuario ya no elige color/paleta).
+      backgroundPreset: getBackgroundForPalette(null).id,
       addons,
     };
     if (pkg === "ultra") json.designCount = designCount;
@@ -350,7 +334,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   // -------------------------------------------------------------------------
   async function saveDesign(showToast = true): Promise<string | null> {
     if (!fullyValid) {
-      toast.error("Completa paquete, nombre, tipografía y color.");
+      toast.error("Completa paquete, nombre y tipografía.");
       return null;
     }
     const id = await ensureDesign();
@@ -362,7 +346,6 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
         firstName: student.firstName,
         lastNames: student.lastNames,
         typographyCode: typographyCode!,
-        colorCode: colorCode!,
       });
       const previewDataUrl =
         rawPreview && rawPreview.length <= 200_000 ? rawPreview : null;
@@ -451,20 +434,19 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     whatsappMessages.schoolLabels({
       pkg: pkg ? getSchoolPackage(pkg)?.name : undefined,
       typographyCode: typographyCode ?? undefined,
-      colorCode: colorCode ?? undefined,
       name: student.firstName.trim() || undefined,
     }),
   );
 
   const displayName = student.firstName.trim() || "Tu nombre";
-  const previewBg = getBackgroundForPalette(colorCode);
+  // Fondo automático por defecto (sin elección de color).
+  const previewBg = getBackgroundForPalette(null);
 
   const previewNode = (
     <SchoolLabelPreview
       firstName={student.firstName}
       lastNames={student.lastNames}
       typographyCode={typographyCode ?? "001"}
-      colorCode={colorCode ?? "ARC"}
       theme={theme}
       imageUrl={localPreview}
     />
@@ -589,7 +571,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
             Vista previa
           </span>
           <span className="block text-xs text-slate-400">
-            Tipografía {typographyCode ?? "—"} · Color {colorCode ?? "—"}
+            Tipografía {typographyCode ?? "—"}
           </span>
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-3 py-2 text-xs font-bold text-white">
@@ -641,23 +623,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
             </div>
           )}
           {step === 4 && (
-            <div>
-              <StepHeader
-                title="Elige tu combinación de colores"
-                subtitle="Cada paleta activa un fondo automático acorde a la guía."
-              />
-              <ColorPaletteGallery
-                selected={colorCode}
-                onSelect={(c) => {
-                  setColorCode(c);
-                  markDirty();
-                }}
-              />
-            </div>
-          )}
-          {step === 5 && (
             <StepImage
-              colorCode={colorCode}
               localPreview={localPreview}
               imageFileName={imageFileName}
               imgUploading={imgUploading}
@@ -672,13 +638,12 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
               onRemove={handleRemoveImage}
             />
           )}
-          {step === 6 && (
+          {step === 5 && (
             <StepPreview
               pkg={pkg}
               designCount={designCount}
               student={student}
               typographyCode={typographyCode}
-              colorCode={colorCode}
               hasImage={Boolean(localPreview)}
               theme={theme}
               notes={notes}
@@ -992,7 +957,6 @@ function StepName({
 // Paso 5 — Imagen
 // ===========================================================================
 function StepImage({
-  colorCode,
   localPreview,
   imageFileName,
   imgUploading,
@@ -1002,7 +966,6 @@ function StepImage({
   onFileSelected,
   onRemove,
 }: {
-  colorCode: string | null;
   localPreview: string | null;
   imageFileName: string | null;
   imgUploading: boolean;
@@ -1028,16 +991,14 @@ function StepImage({
         onFileSelected={onFileSelected}
         onRemove={onRemove}
       />
-      <div className="mt-5">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-violet-400">
-          Fondo automático
-        </p>
-        <AutoBackgroundPreview colorCode={colorCode} />
-        <p className="mt-2 text-xs text-slate-400">
-          No tienes que diseñar el fondo: lo generamos automáticamente según la
-          paleta que elegiste. Puedes cambiar la paleta en el paso anterior.
-        </p>
-      </div>
+      <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-slate-500">
+        <Sparkles
+          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-400"
+          aria-hidden
+        />
+        No tienes que diseñar el fondo: lo generamos automáticamente con un
+        acabado bonito. Tú solo eliges tipografía (y opcionalmente una imagen).
+      </p>
     </div>
   );
 }
@@ -1050,7 +1011,6 @@ function StepPreview({
   designCount,
   student,
   typographyCode,
-  colorCode,
   hasImage,
   theme,
   notes,
@@ -1063,7 +1023,6 @@ function StepPreview({
   designCount: 1 | 2;
   student: StudentState;
   typographyCode: string | null;
-  colorCode: string | null;
   hasImage: boolean;
   theme: string;
   notes: string;
@@ -1073,8 +1032,6 @@ function StepPreview({
   onToggleAddon: (id: string) => void;
 }) {
   const [showDetails, setShowDetails] = useState(false);
-  const palette = colorCode ? getSchoolColorPalette(colorCode) : null;
-  const bg = getBackgroundForPalette(colorCode);
   const fullName = [student.firstName, student.lastNames]
     .map((v) => v.trim())
     .filter(Boolean)
@@ -1099,11 +1056,6 @@ function StepPreview({
         <SummaryRow label="Paquete" value={packageLabel} />
         <SummaryRow label="Nombre completo" value={fullName || "—"} />
         <SummaryRow label="Tipografía" value={typographyCode ?? "—"} />
-        <SummaryRow
-          label="Color"
-          value={palette ? `${palette.code} · ${palette.name}` : colorCode ?? "—"}
-        />
-        <SummaryRow label="Fondo automático" value={bg.label} />
         <SummaryRow label="Imagen propia" value={hasImage ? "Incluida" : "Sin imagen"} />
       </dl>
 

@@ -124,13 +124,19 @@ const PRENDA_TILES: Array<{
  * rectángulo flotante que puede mostrar una imagen/banner, título, subtítulo y
  * enlace. Si no hay `image`, se muestra el estado por defecto (icono + texto).
  *
- * Para cambiar un banner basta editar este arreglo: añade `image` (p. ej.
- * "/images/stickers/marcas.jpg") y, si quieres, `href`. No requiere admin.
+ * CÓMO CAMBIAR LOS BANNERS (sin admin):
+ *   1. Sube la imagen a `public/images/home/sticker-banners/` (ver README ahí).
+ *   2. Añade el campo `image` (y opcionalmente `href`) al banner de abajo:
+ *        image: "/images/home/sticker-banners/marcas.webp"
+ *   Mientras no haya `image`, se usa el fallback con icono — nada se rompe.
  */
 type StickerFeatureBanner = {
   title: string;
   subtitle?: string;
-  /** Ruta de la imagen/banner. Si se omite, se usa el fallback con icono. */
+  /**
+   * Ruta pública de la imagen/banner (empieza en `/images/...`). Súbela a
+   * `public/images/home/sticker-banners/`. Si se omite, se usa el fallback.
+   */
   image?: string;
   /** Enlace opcional al hacer clic en el banner. */
   href?: string;
@@ -140,21 +146,25 @@ const stickerFeatureBanners: StickerFeatureBanner[] = [
   {
     title: "Marcas y empaques",
     subtitle: "Stickers, etiquetas y empaques con tu identidad.",
+    // image: "/images/home/sticker-banners/marcas.webp",
     href: "/tienda/categoria/stickers",
   },
   {
     title: "Eventos y campañas",
     subtitle: "Activaciones, ferias y campañas memorables.",
+    // image: "/images/home/sticker-banners/eventos.webp",
     href: "/tienda/categoria/stickers",
   },
   {
     title: "Colecciones propias",
     subtitle: "Lanza tu propia línea de stickers coleccionables.",
+    // image: "/images/home/sticker-banners/colecciones.webp",
     href: "/tienda/categoria/stickers",
   },
   {
     title: "Regalos y detalles",
     subtitle: "Detalles personalizados que la gente conserva.",
+    // image: "/images/home/sticker-banners/regalos.webp",
     href: "/tienda/categoria/stickers",
   },
 ];
@@ -488,17 +498,16 @@ export default function LandingPage() {
               </Reveal>
 
               <Reveal delay={0.1}>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                   {PRENDA_TILES.map((item) => (
                     <Link
                       key={item.type}
                       href={`/tienda/disenador/${item.type}`}
-                      className="glass group flex aspect-[3/4] flex-col items-center justify-center gap-3 rounded-2xl transition hover:-translate-y-1 hover:border-ml-cyan/50"
+                      className="glass group flex flex-col items-center justify-center gap-2 rounded-xl px-3 py-4 transition hover:-translate-y-0.5 hover:border-ml-cyan/50"
                     >
-                      <item.Icon className="h-9 w-9 text-ml-violet transition group-hover:text-ml-cyan" />
-                      <span className="text-sm font-semibold">{item.label}</span>
-                      <span className="text-[11px] text-ml-white/45">
-                        Personalizable
+                      <item.Icon className="h-6 w-6 text-ml-violet transition group-hover:text-ml-cyan" />
+                      <span className="text-xs font-semibold sm:text-sm">
+                        {item.label}
                       </span>
                     </Link>
                   ))}

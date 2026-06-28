@@ -12,7 +12,7 @@ import { SCHOOL_TYPOGRAPHY_CODES } from "@/lib/designer/school-labels/typography
  * el cliente nunca es de confianza. Reglas:
  *   - package ∈ {elementary, ultra}
  *   - typographyCode ∈ 001 … 054
- *   - colorCode ∈ ARC/PAS/NEO/TRO/SUN/OCE/FIE/GAL/ROS/AZU/VER/MOR/NAR/AMA/ROJ/GRI/CAF
+ *   - colorCode: OPCIONAL (el fondo es automático; el usuario ya no elige color)
  *   - student: solo firstName (requerido) + lastNames (requerido)
  *   - límites de longitud por campo, sin HTML ni scripts
  *   - addons dentro de la whitelist
@@ -87,7 +87,9 @@ export const SchoolLabelsDesignJsonSchema = z
     designCount: z.union([z.literal(1), z.literal(2)]).optional(),
     student: StudentSchema,
     typographyCode: z.enum(SCHOOL_TYPOGRAPHY_VALUES),
-    colorCode: z.enum(SCHOOL_COLOR_VALUES),
+    // El color/paleta ya NO es parte del flujo: el fondo es automático. Se deja
+    // opcional para no romper diseños antiguos que aún lo traigan.
+    colorCode: z.enum(SCHOOL_COLOR_VALUES).optional(),
     theme: safeText(SCHOOL_FIELD_LIMITS.theme, "Temática").optional(),
     decorativeIcons: safeText(
       SCHOOL_FIELD_LIMITS.decorativeIcons,

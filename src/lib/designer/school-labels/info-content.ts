@@ -30,7 +30,7 @@ export const SCHOOL_GUIDE_STEPS: GuideStep[] = [
   {
     icon: "✏️",
     title: "Personaliza tu diseño",
-    text: "Nombre, tipografía, combinación de colores y, si quieres, tu propia imagen.",
+    text: "Nombre, tipografía y, si quieres, tu propia imagen. El fondo es automático.",
   },
   {
     icon: "✨",
