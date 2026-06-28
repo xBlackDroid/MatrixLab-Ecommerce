@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { emitCartUpdated } from "@/components/store/CartBadge";
 import SchoolLabelPreview from "@/components/designer/school-labels/SchoolLabelPreview";
+import SchoolLabelTemplate from "@/components/designer/school-labels/SchoolLabelTemplate";
 import TypographyGallery from "@/components/designer/school-labels/TypographyGallery";
 import CustomImageUploader from "@/components/designer/school-labels/CustomImageUploader";
 import {
@@ -438,10 +439,6 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     }),
   );
 
-  const displayName = student.firstName.trim() || "Tu nombre";
-  // Fondo automático por defecto (sin elección de color).
-  const previewBg = getBackgroundForPalette(null);
-
   const previewNode = (
     <SchoolLabelPreview
       firstName={student.firstName}
@@ -556,15 +553,13 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
         onClick={() => setPreviewSheetOpen(true)}
         className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-2.5 text-left shadow-sm lg:hidden"
       >
-        <span
-          className="relative grid h-12 w-16 shrink-0 place-items-center overflow-hidden rounded-xl"
-          style={{ background: previewBg.gradient }}
-          aria-hidden
-        >
-          <span className="absolute inset-0 bg-black/15" />
-          <span className="relative max-w-full truncate px-1 text-xs font-bold text-white drop-shadow">
-            {displayName}
-          </span>
+        <span className="block h-12 w-16 shrink-0 overflow-hidden rounded-xl" aria-hidden>
+          <SchoolLabelTemplate
+            firstName={student.firstName}
+            lastNames=""
+            typographyCode={typographyCode ?? "001"}
+            variant="mini"
+          />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold text-slate-700">

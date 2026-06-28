@@ -34,6 +34,26 @@ export default async function SchoolLabelsPage() {
   return (
     // Cuerpo claro estilo guía (entre el header y el footer oscuros de MatrixLab).
     <div className="bg-[#f4f2fb] text-slate-800">
+      {/*
+        Fuentes web para el matching visual de las plantillas de tipografía.
+        React 19 (App Router) eleva estos <link> al <head>; al estar en esta
+        página, solo se cargan al entrar al laboratorio escolar. Si no cargan,
+        las plantillas degradan a fuentes seguras del sistema (no se rompen).
+      */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossOrigin="anonymous"
+      />
+      {/* Carga deliberada y scoped a esta página (las plantillas de tipografía
+          solo se usan aquí); por eso evitamos next/font global. */}
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Graduate&family=Luckiest+Guy&family=Nunito:wght@800;900&family=Pacifico&family=Saira+Condensed:ital,wght@0,700;0,800;1,700;1,800&display=swap"
+      />
+
       {/* Barra morada superior, como en la guía */}
       <div className="h-1.5 w-full bg-gradient-to-r from-violet-400 via-violet-500 to-violet-400" />
 
