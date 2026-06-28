@@ -1,30 +1,17 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { getSchoolColorPalette } from "@/lib/designer/school-labels/color-palettes";
 import { getBackgroundForPalette } from "@/lib/designer/school-labels/background-presets";
+import { typographyPreviewStyle } from "@/lib/designer/school-labels/typography-styles";
 
 /**
  * Vista previa de la etiqueta escolar. Compone el fondo automático (según la
- * paleta), el nombre con un estilo que evoca la tipografía elegida, los
- * apellidos, los códigos visibles (tipografía + color), la imagen subida (si
- * existe) y una planilla de mini-etiquetas (útiles / lonchera / cuaderno).
+ * paleta), el nombre con el estilo de la tipografía elegida (receta compartida
+ * con la galería, ver typography-styles.ts), los apellidos, los códigos
+ * visibles (tipografía + color), la imagen subida (si existe) y una planilla de
+ * mini-etiquetas (útiles / lonchera / cuaderno). Al cambiar de tipografía la
+ * preview cambia de inmediato.
  */
-
-const TYPO_STYLES: Array<CSSProperties> = [
-  { fontFamily: "Georgia, serif", fontWeight: 800 },
-  { fontFamily: "'Brush Script MT', cursive", fontStyle: "italic" },
-  { fontFamily: "'Trebuchet MS', sans-serif", fontWeight: 800, letterSpacing: "0.03em" },
-  { fontFamily: "'Courier New', monospace", fontWeight: 800, textTransform: "uppercase" },
-  { fontFamily: "Palatino, 'Palatino Linotype', serif", fontStyle: "italic", fontWeight: 700 },
-  { fontFamily: "'Comic Sans MS', 'Comic Sans', cursive", fontWeight: 700 },
-  { fontFamily: "Verdana, sans-serif", fontWeight: 800, letterSpacing: "0.05em" },
-];
-
-function typographyStyle(code: string): CSSProperties {
-  const n = parseInt(code, 10) || 0;
-  return TYPO_STYLES[n % TYPO_STYLES.length]!;
-}
 
 export interface SchoolLabelPreviewProps {
   firstName: string;
@@ -83,7 +70,7 @@ export default function SchoolLabelPreview({
 
             <p
               className="relative text-3xl tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] sm:text-4xl"
-              style={typographyStyle(typographyCode)}
+              style={typographyPreviewStyle(typographyCode)}
             >
               {displayName}
             </p>
@@ -114,7 +101,7 @@ export default function SchoolLabelPreview({
                 <span className="absolute inset-0 bg-black/10" aria-hidden />
                 <span
                   className="relative truncate text-sm text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
-                  style={typographyStyle(typographyCode)}
+                  style={typographyPreviewStyle(typographyCode)}
                 >
                   {displayName}
                 </span>

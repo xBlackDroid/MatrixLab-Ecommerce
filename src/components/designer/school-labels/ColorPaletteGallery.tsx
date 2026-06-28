@@ -5,14 +5,14 @@ import {
   groupSchoolColorPalettes,
   type SchoolColorPalette,
 } from "@/lib/designer/school-labels/color-palettes";
-import { getBackgroundForPalette } from "@/lib/designer/school-labels/background-presets";
 import { cn } from "@/lib/utils";
 
 /**
  * Galería de combinaciones de color — fiel a las páginas "Elige tu combinación
  * de colores" de la guía: tarjetas blancas con código de 3 letras en morado,
- * nombre y los swatches redondeados. Cada tarjeta también anuncia el fondo
- * automático que se sugerirá al elegirla.
+ * nombre y los swatches redondeados. El fondo automático sigue funcionando
+ * internamente (se sugiere al elegir la paleta), pero no se explica en la
+ * tarjeta para mantenerla simple.
  */
 
 interface ColorPaletteGalleryProps {
@@ -58,8 +58,6 @@ function PaletteCard({
   active: boolean;
   onSelect: () => void;
 }) {
-  const bg = getBackgroundForPalette(palette.code);
-
   return (
     <button
       type="button"
@@ -98,16 +96,6 @@ function PaletteCard({
           />
         ))}
       </div>
-
-      {/* Fondo automático que activará esta paleta. */}
-      <span className="flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
-        <span
-          className="h-3 w-3 rounded-full"
-          style={{ background: bg.gradient }}
-          aria-hidden
-        />
-        Fondo automático: {bg.label}
-      </span>
     </button>
   );
 }

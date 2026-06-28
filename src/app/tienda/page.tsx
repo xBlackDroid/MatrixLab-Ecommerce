@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -6,14 +7,20 @@ import {
   GraduationCap,
   Package,
   PartyPopper,
+  Shirt,
   Sparkles,
   User,
   Wand2,
 } from "lucide-react";
+import {
+  CapIcon,
+  HoodieIcon,
+  ToteIcon,
+} from "@/components/icons/GarmentIcons";
 import CategoryGrid from "@/components/store/CategoryGrid";
 import StoreCTA from "@/components/store/StoreCTA";
 import StoreHero from "@/components/store/StoreHero";
-import { getCategories } from "@/lib/store/products";
+import { getPublicStoreCategories } from "@/lib/store/products";
 
 // Catálogo público con cache razonable (5 min). Carrito y checkout son
 // siempre dinámicos en sus propias rutas.
@@ -52,8 +59,20 @@ const VOLUME_ITEMS = [
   },
 ];
 
+// Prendas del laboratorio, cada una con su icono específico (no genérico).
+const PRENDA_LAB_ITEMS: Array<{
+  label: string;
+  type: string;
+  Icon: ComponentType<{ className?: string }>;
+}> = [
+  { label: "Playera", type: "playera", Icon: Shirt },
+  { label: "Sudadera", type: "sudadera", Icon: HoodieIcon },
+  { label: "Gorra", type: "gorra", Icon: CapIcon },
+  { label: "Tote bag", type: "tote", Icon: ToteIcon },
+];
+
 export default async function TiendaHomePage() {
-  const categories = await getCategories();
+  const categories = await getPublicStoreCategories();
 
   return (
     <>
@@ -102,21 +121,14 @@ export default async function TiendaHomePage() {
                 <ArrowRight className="h-5 w-5" aria-hidden />
               </Link>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Playera", type: "playera" },
-                { label: "Gorra", type: "gorra" },
-                { label: "Tote bag", type: "tote" },
-              ].map((item) => (
+            <div className="grid grid-cols-2 gap-3">
+              {PRENDA_LAB_ITEMS.map((item) => (
                 <Link
                   key={item.type}
                   href={`/tienda/disenador/${item.type}`}
                   className="glass group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl transition hover:border-ml-cyan/50"
                 >
-                  <Wand2
-                    className="h-8 w-8 text-ml-violet transition group-hover:text-ml-cyan"
-                    aria-hidden
-                  />
+                  <item.Icon className="h-8 w-8 text-ml-violet transition group-hover:text-ml-cyan" />
                   <span className="text-sm font-semibold">{item.label}</span>
                 </Link>
               ))}

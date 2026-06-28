@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { CSSProperties } from "react";
 import { Check } from "lucide-react";
 import {
   groupSchoolTypographyByPage,
   type SchoolTypographyOption,
 } from "@/lib/designer/school-labels/typography-options";
+import { typographyFallbackStyle } from "@/lib/designer/school-labels/typography-styles";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,22 +20,6 @@ interface TypographyGalleryProps {
   firstName: string;
   selected: string | null;
   onSelect: (code: string) => void;
-}
-
-// Fuente + color alegres para el fallback (mientras imita las muestras del PDF).
-const FALLBACK_STYLES: Array<CSSProperties> = [
-  { fontFamily: "Georgia, serif", fontWeight: 800, color: "#ef476f" },
-  { fontFamily: "'Brush Script MT', cursive", fontStyle: "italic", color: "#118ab2" },
-  { fontFamily: "'Trebuchet MS', sans-serif", fontWeight: 800, letterSpacing: "0.03em", color: "#06a77d" },
-  { fontFamily: "'Courier New', monospace", fontWeight: 800, textTransform: "uppercase", color: "#8338ec" },
-  { fontFamily: "Palatino, 'Palatino Linotype', serif", fontStyle: "italic", fontWeight: 700, color: "#f4711e" },
-  { fontFamily: "'Comic Sans MS', 'Comic Sans', cursive", fontWeight: 700, color: "#ff5da2" },
-  { fontFamily: "Verdana, sans-serif", fontWeight: 800, letterSpacing: "0.06em", color: "#3a86ff" },
-];
-
-function fallbackStyle(code: string): CSSProperties {
-  const n = parseInt(code, 10) || 0;
-  return FALLBACK_STYLES[n % FALLBACK_STYLES.length]!;
 }
 
 export default function TypographyGallery({
@@ -108,7 +92,7 @@ function TypographyCard({
       {/* Fallback con el nombre estilizado (visible por defecto). */}
       <span
         className="px-1 text-center text-lg leading-tight"
-        style={fallbackStyle(option.code)}
+        style={typographyFallbackStyle(option.code)}
       >
         {previewName}
       </span>

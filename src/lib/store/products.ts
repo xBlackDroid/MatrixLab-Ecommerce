@@ -16,8 +16,49 @@ import {
   MOCK_PRODUCTS,
   MOCK_VARIANTS,
 } from "@/lib/store/mock-data";
+import { repairMojibake, repairMojibakeNullable } from "@/lib/store/text";
 import { isValidHandle } from "@/lib/security/sanitize";
 import type { ProductSort } from "@/lib/validation/store";
+
+/**
+ * Repara mojibake (encoding roto) en los textos visibles del catálogo. Solo
+ * afecta la presentación; la base de datos no se toca. Idempotente.
+ */
+function fixCategoryText(c: CategoryRow): CategoryRow {
+  return {
+    ...c,
+    title: repairMojibake(c.title),
+    description: repairMojibakeNullable(c.description),
+  };
+}
+
+function fixProductText(p: ProductRow): ProductRow {
+  return {
+    ...p,
+    title: repairMojibake(p.title),
+    description: repairMojibakeNullable(p.description),
+  };
+}
+
+/**
+ * Categorías que NO se muestran como tarjetas públicas en /tienda. No se borran
+ * de la base de datos ni de sus rutas: solo se ocultan del grid del catálogo
+ * para que la tienda se enfoque en las categorías principales. Corresponden a
+ * "Insumos creativos" y sus subcategorías (SnowGlobe Bar, Llaveros, Tags de
+ * acrílico, Acrylab, Creator Tools, Sparkle Mix, Magic Flow, Wraps & Glow
+ * Finish).
+ */
+export const PUBLIC_HIDDEN_CATEGORY_HANDLES: ReadonlySet<string> = new Set([
+  "insumos",
+  "snowglobe",
+  "llaveros",
+  "tags-acrilico",
+  "acrilicos",
+  "accesorios-personalizacion",
+  "repuestos-consumibles",
+  "magic-flow",
+  "wraps-glow-finish",
+]);
 
 /**
  * Catálogo público. Lee vía anon key (RLS limita a contenido visible).
@@ -78,7 +119,9 @@ function withTimeout<T>(p: Promise<T>, fallback: T, ms = READ_TIMEOUT_MS): Promi
 export async function getCategories(): Promise<CategoryRow[]> {
   const client = getCatalogClient();
   if (!client) {
-    return [...MOCK_CATEGORIES].sort((a, b) => a.sort_order - b.sort_order);
+    return [...MOCK_CATEGORIES]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(fixCategoryText);
   }
   const { data, error } = await raceRead<CategoryRow[]>(
     client
@@ -90,7 +133,17 @@ export async function getCategories(): Promise<CategoryRow[]> {
     >,
   );
   if (error || !data) return [];
-  return data;
+  return data.map(fixCategoryText);
+}
+
+/**
+ * Categorías para el GRID público de /tienda: las activas menos la familia de
+ * "Insumos creativos" (ver PUBLIC_HIDDEN_CATEGORY_HANDLES). Las rutas de esas
+ * categorías siguen vivas; solo no aparecen como tarjetas en el catálogo.
+ */
+export async function getPublicStoreCategories(): Promise<CategoryRow[]> {
+  const all = await getCategories();
+  return all.filter((c) => !PUBLIC_HIDDEN_CATEGORY_HANDLES.has(c.handle));
 }
 
 export async function getCategoryByHandle(
@@ -99,7 +152,8 @@ export async function getCategoryByHandle(
   if (!isValidHandle(handle)) return null;
   const client = getCatalogClient();
   if (!client) {
-    return MOCK_CATEGORIES.find((c) => c.handle === handle) ?? null;
+    const mock = MOCK_CATEGORIES.find((c) => c.handle === handle);
+    return mock ? fixCategoryText(mock) : null;
   }
   const { data, error } = await raceRead<CategoryRow>(
     client
@@ -110,7 +164,7 @@ export async function getCategoryByHandle(
       .maybeSingle() as unknown as PromiseLike<ReadResult<CategoryRow>>,
   );
   if (error) return null;
-  return data ?? null;
+  return data ? fixCategoryText(data) : null;
 }
 
 /**
@@ -174,7 +228,7 @@ export async function getProductsByCategory(
     return sortProducts(
       MOCK_PRODUCTS.filter((p) => p.category_id === categoryId),
       sort,
-    );
+    ).map(fixProductText);
   }
   let query = client
     .from("products")
@@ -203,12 +257,12 @@ export async function getProductsByCategory(
     query as unknown as PromiseLike<ReadResult<ProductRow[]>>,
   );
   if (error || !data) return [];
-  return data;
+  return data.map(fixProductText);
 }
 
 export async function getAllVisibleProducts(): Promise<ProductRow[]> {
   const client = getCatalogClient();
-  if (!client) return [...MOCK_PRODUCTS];
+  if (!client) return [...MOCK_PRODUCTS].map(fixProductText);
   const { data, error } = await raceRead<ProductRow[]>(
     client
       .from("products")
@@ -218,7 +272,7 @@ export async function getAllVisibleProducts(): Promise<ProductRow[]> {
       .limit(60) as unknown as PromiseLike<ReadResult<ProductRow[]>>,
   );
   if (error || !data) return [];
-  return data;
+  return data.map(fixProductText);
 }
 
 export async function getProductByHandle(
@@ -229,13 +283,13 @@ export async function getProductByHandle(
   if (!client) {
     const mock = MOCK_PRODUCTS.find((p) => p.handle === handle);
     if (!mock || mock.status === "oculto") return null;
+    const mockCategory = MOCK_CATEGORIES.find((c) => c.id === mock.category_id);
     return {
-      ...mock,
+      ...fixProductText(mock),
       variants: MOCK_VARIANTS.filter(
         (v) => v.product_id === mock.id && v.status !== "oculto",
       ),
-      category:
-        MOCK_CATEGORIES.find((c) => c.id === mock.category_id) ?? null,
+      category: mockCategory ? fixCategoryText(mockCategory) : null,
     };
   }
 
@@ -255,9 +309,11 @@ export async function getProductByHandle(
 
   const row = data;
   return {
-    ...row,
+    ...fixProductText(row),
     variants: (row.product_variants ?? []).filter((v) => v.status !== "oculto"),
-    category: row.categories ?? null,
+    category: row.categories
+      ? { ...row.categories, title: repairMojibake(row.categories.title) }
+      : null,
   };
 }
 

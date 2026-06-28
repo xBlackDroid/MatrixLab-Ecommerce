@@ -1,4 +1,5 @@
 import { getSchoolColorPalette } from "@/lib/designer/school-labels/color-palettes";
+import { typographyCanvasFont } from "@/lib/designer/school-labels/typography-styles";
 
 /**
  * Genera una preview (dataURL PNG) de la etiqueta escolar usando el Canvas 2D
@@ -47,16 +48,17 @@ export function renderSchoolLabelPreview(
     ctx.fillStyle = "rgba(0,0,0,0.18)";
     ctx.fillRect(0, 0, width, height);
 
-    const displayName = (input.firstName.trim() || "Tu nombre").slice(0, 24);
+    const nameFont = typographyCanvasFont(input.typographyCode, 84);
+    const rawName = (input.firstName.trim() || "Tu nombre").slice(0, 24);
+    const displayName = nameFont.uppercase ? rawName.toUpperCase() : rawName;
     const lastNames = input.lastNames.trim().slice(0, 40);
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // Nombre principal.
+    // Nombre principal con la tipografía elegida (familia/peso/estilo).
     ctx.fillStyle = "#FFFFFF";
-    ctx.font =
-      "700 84px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    ctx.font = nameFont.font;
     ctx.shadowColor = "rgba(0,0,0,0.45)";
     ctx.shadowBlur = 12;
     ctx.shadowOffsetY = 3;

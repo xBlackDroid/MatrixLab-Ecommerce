@@ -1,3 +1,4 @@
+import type { ComponentType, SVGProps } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -16,13 +17,13 @@ import {
   Rocket,
   Shirt,
   ShoppingBag,
-  Sparkles,
   Sticker,
   Upload,
   Users,
   Wand2,
   Zap,
 } from "lucide-react";
+import { CapIcon, HoodieIcon, ToteIcon } from "@/components/icons/GarmentIcons";
 import LandingNav from "@/components/landing/LandingNav";
 import Reveal from "@/components/landing/Reveal";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
@@ -90,14 +91,72 @@ const COMPANY_BULLETS = [
   "Atención directa y tiempos claros de entrega",
 ];
 
-const STORE_CATEGORIES = [
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const STORE_CATEGORIES: Array<{
+  handle: string;
+  label: string;
+  icon: IconComponent;
+}> = [
   { handle: "stickers", label: "Stickers", icon: Sticker },
   { handle: "etiquetas-escolares", label: "Etiquetas escolares", icon: GraduationCap },
   { handle: "imanes", label: "Imanes", icon: Magnet },
   { handle: "playeras-prendas", label: "Playeras y prendas", icon: Shirt },
-  { handle: "gorras", label: "Gorras", icon: Sparkles },
+  { handle: "gorras", label: "Gorras", icon: CapIcon },
   { handle: "grabado-laser", label: "Grabado láser", icon: Zap },
   { handle: "impresion-3d", label: "Impresión 3D", icon: Box },
+];
+
+// Prendas del laboratorio (T-Shirt Lab) con su icono específico, no genérico.
+const PRENDA_TILES: Array<{
+  label: string;
+  type: string;
+  Icon: IconComponent;
+}> = [
+  { label: "Playera", type: "playera", Icon: Shirt },
+  { label: "Sudadera", type: "sudadera", Icon: HoodieIcon },
+  { label: "Gorra", type: "gorra", Icon: CapIcon },
+  { label: "Tote bag", type: "tote", Icon: ToteIcon },
+];
+
+/**
+ * Banners configurables de la sección de stickers en la home. Cada slot es un
+ * rectángulo flotante que puede mostrar una imagen/banner, título, subtítulo y
+ * enlace. Si no hay `image`, se muestra el estado por defecto (icono + texto).
+ *
+ * Para cambiar un banner basta editar este arreglo: añade `image` (p. ej.
+ * "/images/stickers/marcas.jpg") y, si quieres, `href`. No requiere admin.
+ */
+type StickerFeatureBanner = {
+  title: string;
+  subtitle?: string;
+  /** Ruta de la imagen/banner. Si se omite, se usa el fallback con icono. */
+  image?: string;
+  /** Enlace opcional al hacer clic en el banner. */
+  href?: string;
+};
+
+const stickerFeatureBanners: StickerFeatureBanner[] = [
+  {
+    title: "Marcas y empaques",
+    subtitle: "Stickers, etiquetas y empaques con tu identidad.",
+    href: "/tienda/categoria/stickers",
+  },
+  {
+    title: "Eventos y campañas",
+    subtitle: "Activaciones, ferias y campañas memorables.",
+    href: "/tienda/categoria/stickers",
+  },
+  {
+    title: "Colecciones propias",
+    subtitle: "Lanza tu propia línea de stickers coleccionables.",
+    href: "/tienda/categoria/stickers",
+  },
+  {
+    title: "Regalos y detalles",
+    subtitle: "Detalles personalizados que la gente conserva.",
+    href: "/tienda/categoria/stickers",
+  },
 ];
 
 export default function LandingPage() {
@@ -261,24 +320,56 @@ export default function LandingPage() {
 
               <Reveal delay={0.1}>
                 <div className="grid grid-cols-2 gap-4">
-                  {[
-                    "Marcas y empaques",
-                    "Eventos y campañas",
-                    "Colecciones propias",
-                    "Regalos y detalles",
-                  ].map((useCase, index) => (
-                    <div
-                      key={useCase}
-                      className="glass animate-float rounded-2xl p-5 text-center"
-                      style={{ animationDelay: `${index * 0.9}s` }}
-                    >
-                      <Sticker
-                        className="mx-auto h-7 w-7 text-ml-coral/80"
-                        aria-hidden
-                      />
-                      <p className="mt-3 text-sm font-semibold">{useCase}</p>
-                    </div>
-                  ))}
+                  {stickerFeatureBanners.map((banner, index) => {
+                    const content = (
+                      <div
+                        className="glass animate-float relative flex h-full min-h-[132px] flex-col items-center justify-center overflow-hidden rounded-2xl p-5 text-center"
+                        style={{ animationDelay: `${index * 0.9}s` }}
+                      >
+                        {banner.image ? (
+                          <>
+                            {/* Banner: imagen de fondo + velo para legibilidad. */}
+                            <span
+                              className="absolute inset-0 bg-cover bg-center"
+                              style={{ backgroundImage: `url(${banner.image})` }}
+                              aria-hidden
+                            />
+                            <span
+                              className="absolute inset-0 bg-gradient-to-t from-ml-bg/85 via-ml-bg/45 to-transparent"
+                              aria-hidden
+                            />
+                          </>
+                        ) : (
+                          // Fallback: icono + texto (estado por defecto).
+                          <Sticker
+                            className="relative h-7 w-7 text-ml-coral/80"
+                            aria-hidden
+                          />
+                        )}
+                        <div className="relative mt-3">
+                          <p className="text-sm font-semibold">{banner.title}</p>
+                          {banner.subtitle && (
+                            <p className="mt-1 text-xs text-ml-white/65">
+                              {banner.subtitle}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                    return banner.href ? (
+                      <Link
+                        key={banner.title}
+                        href={banner.href}
+                        className="block h-full transition hover:-translate-y-1 hover:border-ml-coral/40"
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <div key={banner.title} className="h-full">
+                        {content}
+                      </div>
+                    );
+                  })}
                 </div>
               </Reveal>
             </div>
@@ -397,21 +488,14 @@ export default function LandingPage() {
               </Reveal>
 
               <Reveal delay={0.1}>
-                <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                  {[
-                    { label: "Playera", type: "playera", icon: Shirt },
-                    { label: "Gorra", type: "gorra", icon: Sparkles },
-                    { label: "Tote bag", type: "tote", icon: ShoppingBag },
-                  ].map((item) => (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+                  {PRENDA_TILES.map((item) => (
                     <Link
                       key={item.type}
                       href={`/tienda/disenador/${item.type}`}
                       className="glass group flex aspect-[3/4] flex-col items-center justify-center gap-3 rounded-2xl transition hover:-translate-y-1 hover:border-ml-cyan/50"
                     >
-                      <item.icon
-                        className="h-9 w-9 text-ml-violet transition group-hover:text-ml-cyan"
-                        aria-hidden
-                      />
+                      <item.Icon className="h-9 w-9 text-ml-violet transition group-hover:text-ml-cyan" />
                       <span className="text-sm font-semibold">{item.label}</span>
                       <span className="text-[11px] text-ml-white/45">
                         Personalizable
