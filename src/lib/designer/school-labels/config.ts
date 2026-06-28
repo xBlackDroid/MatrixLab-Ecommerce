@@ -85,9 +85,6 @@ export const SCHOOL_ADDON_GROUPS: SchoolAddonGroup[] = [
       { id: "vinil-blanco", name: "Vinil blanco" },
       { id: "vinil-transparente", name: "Vinil transparente" },
       { id: "vinil-holografico", name: "Vinil holográfico" },
-      { id: "sticker-premium", name: "Sticker premium para termo/lonchera/vaso" },
-      { id: "dtf-textil", name: "DTF textil para ropa" },
-      { id: "vinil-textil", name: "Vinil textil para ropa" },
     ],
   },
   {
@@ -95,9 +92,8 @@ export const SCHOOL_ADDON_GROUPS: SchoolAddonGroup[] = [
     label: "Extras escolares",
     options: [
       { id: "tag-acrilico", name: "Tag acrílico personalizado" },
-      { id: "extra-lapices", name: "Etiquetas extra para lápices" },
-      { id: "extra-lonchera-termo", name: "Etiquetas extra para lonchera/termo" },
-      { id: "extra-cuadernos-libros", name: "Etiquetas extra para cuadernos/libros" },
+      { id: "planilla-sticker-premium", name: "Planilla Sticker Premium" },
+      { id: "planilla-textil", name: "Planilla Textil" },
     ],
   },
   {
@@ -111,20 +107,43 @@ export const SCHOOL_ADDON_GROUPS: SchoolAddonGroup[] = [
   },
 ];
 
-/** Lista plana de todos los add-ons (deriva de los grupos). */
+/** Lista plana de todos los add-ons SELECCIONABLES (deriva de los grupos). */
 export const SCHOOL_ADDONS: SchoolAddonOption[] = SCHOOL_ADDON_GROUPS.flatMap(
   (g) => g.options,
 );
 
 export const SCHOOL_ADDON_IDS = SCHOOL_ADDONS.map((a) => a.id);
 
+/**
+ * Nombres de add-ons retirados del diseñador. Ya NO se ofrecen como opciones
+ * nuevas, pero se conservan aquí para que los diseños antiguos sigan mostrando
+ * un nombre legible en /admin/disenos y WhatsApp (no romper datos existentes).
+ */
+const LEGACY_ADDON_NAMES: Record<string, string> = {
+  "sticker-premium": "Sticker premium para termo/lonchera/vaso",
+  "dtf-textil": "DTF textil para ropa",
+  "vinil-textil": "Vinil textil para ropa",
+  "extra-lapices": "Etiquetas extra para lápices",
+  "extra-lonchera-termo": "Etiquetas extra para lonchera/termo",
+  "extra-cuadernos-libros": "Etiquetas extra para cuadernos/libros",
+  // IDs aún más antiguos (primera versión del catálogo de add-ons).
+  "material-upgrade": "Upgrade de material",
+  "extra-design": "Diseño adicional",
+  "extra-name": "Nombre extra",
+  "extra-labels": "Etiquetas extra",
+  "priority-review": "Revisión prioritaria",
+};
+
 export function getSchoolAddon(id: string): SchoolAddonOption | null {
   return SCHOOL_ADDONS.find((a) => a.id === id) ?? null;
 }
 
-/** Nombre legible de un add-on por id (cae al id si no existe). */
+/**
+ * Nombre legible de un add-on por id. Resuelve opciones actuales, luego ids
+ * legacy (compat. con diseños antiguos); si no existe, devuelve el id.
+ */
 export function getSchoolAddonName(id: string): string {
-  return getSchoolAddon(id)?.name ?? id;
+  return getSchoolAddon(id)?.name ?? LEGACY_ADDON_NAMES[id] ?? id;
 }
 
 /**
