@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Info, Minus, Move, Plus, RotateCcw } from "lucide-react";
 import { getBackgroundForPalette } from "@/lib/designer/school-labels/background-presets";
 import { getSchoolTypography } from "@/lib/designer/school-labels/typography-options";
-import SchoolLabelTemplate from "@/components/designer/school-labels/SchoolLabelTemplate";
+import SchoolLabelTemplate, {
+  DEFAULT_IMAGE_TRANSFORM,
+  IMAGE_SCALE_MAX,
+  IMAGE_SCALE_MIN,
+  type ImageTransform,
+} from "@/components/designer/school-labels/SchoolLabelTemplate";
 
 /**
  * Vista previa de la etiqueta escolar.
@@ -25,6 +31,9 @@ export interface SchoolLabelPreviewProps {
   theme?: string;
   /** Imagen subida por el cliente (object URL o URL firmada). */
   imageUrl?: string | null;
+  /** Posición/escala de la imagen dentro de la etiqueta (editable). */
+  imageTransform?: ImageTransform;
+  onImageTransformChange?: (next: ImageTransform) => void;
 }
 
 export default function SchoolLabelPreview({
@@ -33,9 +42,21 @@ export default function SchoolLabelPreview({
   typographyCode,
   theme,
   imageUrl,
+  imageTransform,
+  onImageTransformChange,
 }: SchoolLabelPreviewProps) {
   // Fondo automático por defecto (el usuario ya no elige color).
   const bg = getBackgroundForPalette(null);
+  const transform = imageTransform ?? DEFAULT_IMAGE_TRANSFORM;
+
+  function bumpScale(delta: number) {
+    if (!onImageTransformChange) return;
+    const scale = Math.min(
+      IMAGE_SCALE_MAX,
+      Math.max(IMAGE_SCALE_MIN, Number((transform.scale + delta).toFixed(2))),
+    );
+    onImageTransformChange({ ...transform, scale });
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -63,9 +84,58 @@ export default function SchoolLabelPreview({
               lastNames={lastNames}
               typographyCode={typographyCode}
               imageUrl={imageUrl}
+              imageTransform={transform}
+              onImageTransformChange={onImageTransformChange}
               variant="hero"
             />
           </div>
+
+          {/* Controles de la imagen subida (mover / escalar / restablecer). */}
+          {imageUrl && onImageTransformChange && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
+                <Move className="h-3.5 w-3.5 text-violet-500" aria-hidden />
+                Mover imagen (arrástrala)
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => bumpScale(-0.1)}
+                  aria-label="Reducir tamaño de la imagen"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
+                >
+                  <Minus className="h-3.5 w-3.5" aria-hidden />
+                </button>
+                <span className="w-9 text-center text-[11px] font-semibold tabular-nums text-slate-500">
+                  {Math.round(transform.scale * 100)}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() => bumpScale(0.1)}
+                  aria-label="Aumentar tamaño de la imagen"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
+                >
+                  <Plus className="h-3.5 w-3.5" aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onImageTransformChange(DEFAULT_IMAGE_TRANSFORM)}
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-600"
+                >
+                  <RotateCcw className="h-3 w-3" aria-hidden />
+                  Restablecer
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Nota de referencia: la preview es orientativa; el diseño final se
+              ajusta al estilo de la tipografía elegida. Estilo suave (lavanda). */}
+          <p className="flex items-start gap-2 rounded-xl bg-violet-50 px-3 py-2 text-[11px] leading-relaxed text-violet-700/90">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-400" aria-hidden />
+            Vista previa de referencia. El diseño final se ajustará al estilo
+            elegido en Tipografía.
+          </p>
 
           {/* Mini etiquetas tipo planilla, con el mismo estilo. */}
           <div className="grid grid-cols-3 gap-2">

@@ -39,10 +39,16 @@ export const whatsappMessages = {
     pkg?: string;
     typographyCode?: string;
     name?: string;
-  }) =>
-    `Hola MatrixLab, quiero hacer etiquetas escolares. Paquete: ${
+    addons?: string[];
+  }) => {
+    const base = `Hola MatrixLab, quiero hacer etiquetas escolares. Paquete: ${
       opts.pkg || "[Elementary/Ultra]"
     }, tipografía: ${opts.typographyCode || "[code]"}, nombre: ${
       opts.name || "[nombre]"
-    }.`,
+    }.`;
+    const addons = opts.addons?.filter(Boolean) ?? [];
+    return addons.length
+      ? `${base} Add-ons: ${addons.join(", ")}.`
+      : base;
+  },
 } as const;

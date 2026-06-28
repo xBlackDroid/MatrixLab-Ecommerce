@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import {
   getTypographyTemplate,
   type TemplateDecoration,
@@ -8,6 +8,24 @@ import {
   type TypographyTemplate,
 } from "@/lib/designer/school-labels/templates";
 import { cn } from "@/lib/utils";
+
+/** Posición (px, relativa al centro) y escala de la imagen dentro de la etiqueta. */
+export interface ImageTransform {
+  x: number;
+  y: number;
+  scale: number;
+}
+
+export const DEFAULT_IMAGE_TRANSFORM: ImageTransform = { x: 0, y: 0, scale: 1 };
+
+/** Límites para que la imagen no se pierda fuera del área de la etiqueta. */
+const DRAG_LIMIT = 180;
+export const IMAGE_SCALE_MIN = 0.3;
+export const IMAGE_SCALE_MAX = 3;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
 
 /**
  * Renderiza una etiqueta escolar REAL a partir de la plantilla de la tipografia
@@ -23,6 +41,10 @@ export interface SchoolLabelTemplateProps {
   lastNames: string;
   typographyCode: string;
   imageUrl?: string | null;
+  /** Posición/escala de la imagen (editable). Si falta, se usa el default. */
+  imageTransform?: ImageTransform;
+  /** Si se provee, la imagen es arrastrable dentro de la etiqueta (hero). */
+  onImageTransformChange?: (next: ImageTransform) => void;
   /** "hero" = etiqueta principal grande; "mini" = mini etiqueta compacta. */
   variant?: "hero" | "mini";
   className?: string;
@@ -33,6 +55,8 @@ export default function SchoolLabelTemplate({
   lastNames,
   typographyCode,
   imageUrl,
+  imageTransform,
+  onImageTransformChange,
   variant = "hero",
   className,
 }: SchoolLabelTemplateProps) {
@@ -40,27 +64,85 @@ export default function SchoolLabelTemplate({
   const name = firstName.trim() || "Tu nombre";
   const last = lastNames.trim();
   const scale = variant === "mini" ? 0.42 : 1;
+  const transform = imageTransform ?? DEFAULT_IMAGE_TRANSFORM;
+
+  // La imagen es arrastrable solo en el hero, con imagen y handler de cambio.
+  const draggable = Boolean(
+    variant === "hero" && imageUrl && onImageTransformChange,
+  );
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    origX: number;
+    origY: number;
+  } | null>(null);
+
+  function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!draggable) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: transform.x,
+      origY: transform.y,
+    };
+  }
+
+  function handlePointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!draggable || !dragRef.current || !onImageTransformChange) return;
+    const d = dragRef.current;
+    onImageTransformChange({
+      ...transform,
+      x: clamp(d.origX + (e.clientX - d.startX), -DRAG_LIMIT, DRAG_LIMIT),
+      y: clamp(d.origY + (e.clientY - d.startY), -DRAG_LIMIT, DRAG_LIMIT),
+    });
+  }
+
+  function endDrag(e: ReactPointerEvent<HTMLDivElement>) {
+    if (dragRef.current && e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    dragRef.current = null;
+  }
 
   return (
     <div
       className={cn(
         "relative flex w-full items-center justify-center overflow-hidden rounded-2xl",
         variant === "hero" ? "min-h-[150px] px-5 py-6" : "min-h-[70px] px-2 py-2.5",
+        draggable && "cursor-move select-none",
         className,
       )}
-      style={{ background: template.surface ?? "#ffffff" }}
+      style={{
+        background: template.surface ?? "#ffffff",
+        ...(draggable ? { touchAction: "none" } : {}),
+      }}
+      onPointerDown={draggable ? handlePointerDown : undefined}
+      onPointerMove={draggable ? handlePointerMove : undefined}
+      onPointerUp={draggable ? endDrag : undefined}
+      onPointerCancel={draggable ? endDrag : undefined}
     >
       {variant === "hero" && (
         <BackgroundDecorations decorations={template.decorations} scale={scale} />
       )}
 
+      {/* Imagen subida: SIEMPRE detrás del texto (z-0), centrada y movible. */}
       {imageUrl && variant === "hero" && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt="Tu imagen"
-          className="absolute right-3 top-3 z-10 h-12 w-12 rounded-full border-2 border-white object-cover shadow"
-        />
+        <div
+          className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+          aria-hidden
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageUrl}
+            alt=""
+            draggable={false}
+            className="h-28 w-auto max-w-[85%] rounded-xl object-contain opacity-90"
+            style={{
+              transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+            }}
+          />
+        </div>
       )}
 
       {variant === "mini" ? (
@@ -68,7 +150,16 @@ export default function SchoolLabelTemplate({
         // que no se recorte en el tile pequeno).
         <StyledText text={name} style={template.nameStyle} scale={scale} />
       ) : (
-        <LayoutBody template={template} name={name} last={last} scale={scale} />
+        // El texto va SIEMPRE encima de la imagen (z-[1]); cuando se arrastra,
+        // los pointer-events pasan al contenedor para mover la imagen.
+        <div
+          className={cn(
+            "relative z-[1] flex w-full items-center justify-center",
+            draggable && "pointer-events-none",
+          )}
+        >
+          <LayoutBody template={template} name={name} last={last} scale={scale} />
+        </div>
       )}
     </div>
   );

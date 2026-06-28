@@ -59,54 +59,72 @@ export function getSchoolPackage(
 export interface SchoolAddonOption {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   /** true = abre WhatsApp en vez de sumar al diseño (sin precio definido). */
   quoteOnly?: boolean;
 }
 
+export interface SchoolAddonGroup {
+  id: string;
+  label: string;
+  options: SchoolAddonOption[];
+}
+
 /**
- * Add-ons opcionales. Quedan preparados para que el admin defina precio/stock
- * desde la tienda; aquí solo guardamos el catálogo de opciones seleccionables.
+ * Add-ons opcionales, agrupados por categoría (material / extras escolares /
+ * producción). El cliente puede elegir varios; se guardan en
+ * design_json.addons (por id). NO se muestran precios todavía: el costo lo
+ * confirma MatrixLab según el pedido. Seleccionar add-ons NUNCA bloquea el
+ * guardado.
  */
-export const SCHOOL_ADDONS: SchoolAddonOption[] = [
+export const SCHOOL_ADDON_GROUPS: SchoolAddonGroup[] = [
   {
-    id: "material-upgrade",
-    name: "Upgrade de material",
-    description:
-      "Mejora el material de las etiquetas si está disponible en catálogo.",
+    id: "material",
+    label: "Upgrade de material",
+    options: [
+      { id: "vinil-blanco", name: "Vinil blanco" },
+      { id: "vinil-transparente", name: "Vinil transparente" },
+      { id: "vinil-holografico", name: "Vinil holográfico" },
+      { id: "sticker-premium", name: "Sticker premium para termo/lonchera/vaso" },
+      { id: "dtf-textil", name: "DTF textil para ropa" },
+      { id: "vinil-textil", name: "Vinil textil para ropa" },
+    ],
   },
   {
-    id: "extra-design",
-    name: "Diseño adicional",
-    description: "Agrega un segundo diseño (disponible en el paquete Ultra).",
+    id: "escolares",
+    label: "Extras escolares",
+    options: [
+      { id: "tag-acrilico", name: "Tag acrílico personalizado" },
+      { id: "extra-lapices", name: "Etiquetas extra para lápices" },
+      { id: "extra-lonchera-termo", name: "Etiquetas extra para lonchera/termo" },
+      { id: "extra-cuadernos-libros", name: "Etiquetas extra para cuadernos/libros" },
+    ],
   },
   {
-    id: "extra-name",
-    name: "Nombre extra",
-    description: "Incluye el nombre de otro estudiante en el mismo pedido.",
-  },
-  {
-    id: "extra-labels",
-    name: "Etiquetas extra",
-    description: "Más piezas para cubrir todos los útiles del ciclo escolar.",
-  },
-  {
-    id: "priority-review",
-    name: "Revisión prioritaria",
-    description: "Tu diseño pasa primero a revisión (sujeto a disponibilidad).",
-  },
-  {
-    id: "whatsapp-quote",
-    name: "Cotizar por WhatsApp",
-    description: "¿No sabes qué elegir? Lo armamos contigo por WhatsApp.",
-    quoteOnly: true,
+    id: "produccion",
+    label: "Producción / pedido",
+    options: [
+      { id: "segundo-diseno", name: "Segundo diseño adicional" },
+      { id: "diseno-personaje", name: "Diseño con personaje o temática específica" },
+      { id: "ajuste-imagen", name: "Ajuste de imagen/referencia personalizada" },
+    ],
   },
 ];
+
+/** Lista plana de todos los add-ons (deriva de los grupos). */
+export const SCHOOL_ADDONS: SchoolAddonOption[] = SCHOOL_ADDON_GROUPS.flatMap(
+  (g) => g.options,
+);
 
 export const SCHOOL_ADDON_IDS = SCHOOL_ADDONS.map((a) => a.id);
 
 export function getSchoolAddon(id: string): SchoolAddonOption | null {
   return SCHOOL_ADDONS.find((a) => a.id === id) ?? null;
+}
+
+/** Nombre legible de un add-on por id (cae al id si no existe). */
+export function getSchoolAddonName(id: string): string {
+  return getSchoolAddon(id)?.name ?? id;
 }
 
 /**

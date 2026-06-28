@@ -118,7 +118,17 @@ export const SchoolLabelsDesignJsonSchema = z
       .object({
         assetId: z.string().max(64).optional(),
         path: z.string().max(256).optional(),
+        url: z.string().max(512).optional(),
         fileName: z.string().max(160).optional(),
+        /** Posición/escala dentro de la etiqueta (editable en la preview). */
+        transform: z
+          .object({
+            x: z.number(),
+            y: z.number(),
+            scale: z.number(),
+          })
+          .partial()
+          .optional(),
       })
       .partial()
       .optional(),

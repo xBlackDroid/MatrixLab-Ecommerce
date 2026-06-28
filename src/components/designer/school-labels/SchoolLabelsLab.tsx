@@ -7,23 +7,30 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
   Expand,
   Loader2,
   MessageCircle,
   Save,
   ShoppingBag,
   Sparkles,
+  Wand2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { emitCartUpdated } from "@/components/store/CartBadge";
 import SchoolLabelPreview from "@/components/designer/school-labels/SchoolLabelPreview";
-import SchoolLabelTemplate from "@/components/designer/school-labels/SchoolLabelTemplate";
+import SchoolLabelTemplate, {
+  DEFAULT_IMAGE_TRANSFORM,
+  type ImageTransform,
+} from "@/components/designer/school-labels/SchoolLabelTemplate";
 import TypographyGallery from "@/components/designer/school-labels/TypographyGallery";
 import CustomImageUploader from "@/components/designer/school-labels/CustomImageUploader";
 import {
-  SCHOOL_ADDONS,
+  SCHOOL_ADDON_GROUPS,
   SCHOOL_FIELD_LIMITS,
   SCHOOL_PACKAGES,
+  getSchoolAddonName,
   getSchoolPackage,
   type SchoolPackageId,
 } from "@/lib/designer/school-labels/config";
@@ -87,6 +94,10 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
   const [imgUploading, setImgUploading] = useState(false);
   const [imgUploadedOk, setImgUploadedOk] = useState(false);
   const [imgError, setImgError] = useState<string | null>(null);
+  // Posición/escala de la imagen dentro de la etiqueta (editable en la preview).
+  const [imageTransform, setImageTransform] = useState<ImageTransform>(
+    DEFAULT_IMAGE_TRANSFORM,
+  );
 
   // Detalles opcionales (no estorban el flujo).
   const [theme, setTheme] = useState("");
@@ -212,10 +223,19 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       addons,
     };
     if (pkg === "ultra") json.designCount = designCount;
-    if (uploadedAsset) {
+    // Imagen propia: guarda referencia en storage + posición/escala elegida.
+    // Si hay imagen local (modo previsualización) pero aún no se subió, igual
+    // persistimos su transform para no perder el ajuste del cliente.
+    if (uploadedAsset || localPreview) {
       json.customImage = {
-        assetId: uploadedAsset.assetId,
-        fileName: uploadedAsset.fileName,
+        ...(uploadedAsset
+          ? { assetId: uploadedAsset.assetId, fileName: uploadedAsset.fileName }
+          : {}),
+        transform: {
+          x: imageTransform.x,
+          y: imageTransform.y,
+          scale: imageTransform.scale,
+        },
       };
     }
     if (trimmed(theme)) json.theme = trimmed(theme);
@@ -283,6 +303,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     setUploadedAsset(null);
     setPreview(URL.createObjectURL(file));
     setImageFileName(file.name);
+    // Imagen nueva: parte centrada y a escala 1 dentro de la etiqueta.
+    setImageTransform(DEFAULT_IMAGE_TRANSFORM);
     markDirty();
 
     // Sin producto base no se puede persistir: la preview local basta.
@@ -327,6 +349,12 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
     setUploadedAsset(null);
     setImgUploadedOk(false);
     setImgError(null);
+    setImageTransform(DEFAULT_IMAGE_TRANSFORM);
+    markDirty();
+  }
+
+  function handleImageTransformChange(next: ImageTransform) {
+    setImageTransform(next);
     markDirty();
   }
 
@@ -436,6 +464,7 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       pkg: pkg ? getSchoolPackage(pkg)?.name : undefined,
       typographyCode: typographyCode ?? undefined,
       name: student.firstName.trim() || undefined,
+      addons: addons.map(getSchoolAddonName),
     }),
   );
 
@@ -446,6 +475,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       typographyCode={typographyCode ?? "001"}
       theme={theme}
       imageUrl={localPreview}
+      imageTransform={imageTransform}
+      onImageTransformChange={handleImageTransformChange}
     />
   );
 
@@ -986,14 +1017,17 @@ function StepImage({
         onFileSelected={onFileSelected}
         onRemove={onRemove}
       />
-      <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-slate-500">
-        <Sparkles
-          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-400"
-          aria-hidden
-        />
-        No tienes que diseñar el fondo: lo generamos automáticamente con un
-        acabado bonito. Tú solo eliges tipografía (y opcionalmente una imagen).
-      </p>
+      {/* Mensaje destacado (no nota secundaria): el fondo es automático. */}
+      <div className="mt-4 flex items-start gap-3 rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 via-white to-cyan-50 p-4 shadow-sm">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-white shadow">
+          <Wand2 className="h-5 w-5" aria-hidden />
+        </span>
+        <p className="text-sm font-semibold leading-relaxed text-slate-700">
+          No tienes que diseñar el fondo. Nosotros lo generamos automáticamente
+          con un acabado bonito. Tú solo eliges la tipografía y, si quieres,
+          subes una imagen de referencia.
+        </p>
+      </div>
     </div>
   );
 }
@@ -1027,6 +1061,7 @@ function StepPreview({
   onToggleAddon: (id: string) => void;
 }) {
   const [showDetails, setShowDetails] = useState(false);
+  const [showAddons, setShowAddons] = useState(false);
   const fullName = [student.firstName, student.lastNames]
     .map((v) => v.trim())
     .filter(Boolean)
@@ -1038,8 +1073,6 @@ function StepPreview({
           : ""
       }`
     : "—";
-
-  const selectableAddons = SCHOOL_ADDONS.filter((a) => !a.quoteOnly);
 
   return (
     <div>
@@ -1054,11 +1087,99 @@ function StepPreview({
         <SummaryRow label="Imagen propia" value={hasImage ? "Incluida" : "Sin imagen"} />
       </dl>
 
-      {/* Detalles opcionales (no obligan a nada). */}
+      {/* Add-ons opcionales: sección desplegable (multiselect) con chips. */}
       <div className="mt-5 rounded-2xl border border-slate-200 bg-white">
         <button
           type="button"
+          onClick={() => setShowAddons((s) => !s)}
+          aria-expanded={showAddons}
+          className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold text-slate-700"
+        >
+          Add-ons opcionales
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-400">
+            {addons.length > 0 && (
+              <span className="rounded-full bg-cyan-100 px-2 py-0.5 font-bold text-cyan-700">
+                {addons.length}
+              </span>
+            )}
+            <ChevronDown
+              className={cn("h-4 w-4 transition", showAddons && "rotate-180")}
+              aria-hidden
+            />
+          </span>
+        </button>
+
+        {/* Chips de seleccionados (visibles aunque el panel esté cerrado). */}
+        {addons.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 border-t border-slate-100 px-4 py-3">
+            {addons.map((id) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onToggleAddon(id)}
+                className="inline-flex items-center gap-1 rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-semibold text-cyan-700 transition hover:bg-cyan-100"
+              >
+                {getSchoolAddonName(id)}
+                <X className="h-3 w-3" aria-hidden />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showAddons && (
+          <div className="flex flex-col gap-4 border-t border-slate-100 px-4 py-4">
+            {SCHOOL_ADDON_GROUPS.map((group) => (
+              <div key={group.id}>
+                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-violet-500">
+                  {group.label}
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {group.options.map((addon) => {
+                    const active = addons.includes(addon.id);
+                    return (
+                      <button
+                        key={addon.id}
+                        type="button"
+                        onClick={() => onToggleAddon(addon.id)}
+                        aria-pressed={active}
+                        className={cn(
+                          "flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition",
+                          active
+                            ? "border-cyan-400 bg-cyan-50 text-cyan-700"
+                            : "border-slate-200 bg-white text-slate-500 hover:border-violet-300",
+                        )}
+                      >
+                        {addon.name}
+                        <span
+                          className={cn(
+                            "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                            active
+                              ? "border-cyan-400 bg-cyan-400 text-white"
+                              : "border-slate-300",
+                          )}
+                        >
+                          {active && <Check className="h-3 w-3" aria-hidden />}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              Puedes elegir varios. El precio final lo confirma MatrixLab según
+              tu pedido; elegir add-ons no es obligatorio.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Detalles opcionales (temática + notas; no obligan a nada). */}
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white">
+        <button
+          type="button"
           onClick={() => setShowDetails((s) => !s)}
+          aria-expanded={showDetails}
           className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold text-slate-700"
         >
           Detalles opcionales
@@ -1077,42 +1198,6 @@ function StepPreview({
                 placeholder="Ej. espacio, dinosaurios, flores…"
               />
             </Field>
-            <div>
-              <p className="mb-2 text-sm font-medium text-slate-600">
-                Add-ons opcionales
-              </p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {selectableAddons.map((addon) => {
-                  const active = addons.includes(addon.id);
-                  return (
-                    <button
-                      key={addon.id}
-                      type="button"
-                      onClick={() => onToggleAddon(addon.id)}
-                      aria-pressed={active}
-                      className={cn(
-                        "flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition",
-                        active
-                          ? "border-cyan-400 bg-cyan-50 text-cyan-700"
-                          : "border-slate-200 bg-white text-slate-500 hover:border-violet-300",
-                      )}
-                    >
-                      {addon.name}
-                      <span
-                        className={cn(
-                          "flex h-4 w-4 items-center justify-center rounded border",
-                          active
-                            ? "border-cyan-400 bg-cyan-400 text-white"
-                            : "border-slate-300",
-                        )}
-                      >
-                        {active && <Check className="h-3 w-3" aria-hidden />}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
             <Field label="Notas para el laboratorio">
               <textarea
                 rows={3}
