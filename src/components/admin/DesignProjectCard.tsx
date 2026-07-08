@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import StatusBadge from "@/components/admin/StatusBadge";
 import type { DesignProjectRow } from "@/lib/db/types";
 import { getDesignerDisplayName } from "@/lib/designer/product-catalog";
+import { getSchoolAddonName } from "@/lib/designer/school-labels/config";
 import { ADMIN_DESIGN_STATUSES } from "@/lib/validation/admin";
 
 const CSRF_HEADER = "x-ml-csrf";
@@ -82,10 +83,19 @@ function extractProductionDetails(
       rows.push(["Diseños", String(json.designCount)]);
     }
     const student = json.student as
-      | { firstName?: string; lastName1?: string; lastName2?: string }
+      | {
+          firstName?: string;
+          lastNames?: string;
+          // Compat. con diseños antiguos guardados antes del cambio de esquema.
+          lastName1?: string;
+          lastName2?: string;
+        }
       | undefined;
     if (student) {
-      const fullName = [student.firstName, student.lastName1, student.lastName2]
+      const lastNames =
+        student.lastNames ??
+        [student.lastName1, student.lastName2].filter(Boolean).join(" ");
+      const fullName = [student.firstName, lastNames]
         .filter(Boolean)
         .join(" ")
         .trim();
@@ -101,7 +111,19 @@ function extractProductionDetails(
       rows.push(["Temática", json.theme]);
     }
     if (Array.isArray(json.addons) && json.addons.length > 0) {
-      rows.push(["Add-ons", json.addons.join(", ")]);
+      const names = json.addons
+        .filter((a): a is string => typeof a === "string")
+        .map(getSchoolAddonName);
+      if (names.length) rows.push(["Add-ons", names.join(", ")]);
+    }
+    const customImage = json.customImage as
+      | { transform?: { scale?: number } }
+      | undefined;
+    if (customImage?.transform?.scale != null) {
+      rows.push([
+        "Imagen (escala)",
+        `${Math.round(Number(customImage.transform.scale) * 100)}%`,
+      ]);
     }
   }
   return rows;

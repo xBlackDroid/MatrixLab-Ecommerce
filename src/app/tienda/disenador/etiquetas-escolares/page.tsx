@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
-import { ArrowLeft, GraduationCap } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import SchoolLabelsLab from "@/components/designer/school-labels/SchoolLabelsLab";
-import { SCHOOL_ORDER_STEPS } from "@/lib/designer/school-labels/config";
+import SchoolLabelsGuideHero from "@/components/designer/school-labels/SchoolLabelsGuideHero";
+import SchoolLabelsInfoSections from "@/components/designer/school-labels/SchoolLabelsInfoSections";
+import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 import { getDesignerBaseProduct } from "@/lib/store/products";
 
 export const metadata: Metadata = {
   title: "Etiquetas Escolares Lab",
   description:
-    "Crea tu pack escolar personalizado: nombre, tipografía, colores y temática en un solo pedido. Diseña etiquetas escolares listas para producción.",
+    "Crea tu pack escolar personalizado: nombre, tipografía, colores y tu propia imagen en una experiencia interactiva fiel a la guía MatrixLab. Etiquetas escolares listas para producción.",
   openGraph: {
     title: "Etiquetas Escolares Lab | Tienda MatrixLab",
     description:
-      "Arma tu pedido de etiquetas escolares con nombre, tipografía, colores y temática en pocos pasos.",
+      "Arma tu pedido de etiquetas escolares con nombre, tipografía, colores e imagen propia en pocos pasos.",
   },
 };
 
@@ -27,61 +29,54 @@ export default async function SchoolLabelsPage() {
   noStore();
 
   const product = await getDesignerBaseProduct(BASE_HANDLE);
+  const whatsappUrl = buildWhatsAppUrl(whatsappMessages.schoolLabels({}));
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
-      <div className="mb-6">
+    // Cuerpo claro estilo guía (entre el header y el footer oscuros de MatrixLab).
+    <div className="bg-[#f4f2fb] text-slate-800">
+      {/*
+        Fuentes web para el matching visual de las plantillas de tipografía.
+        React 19 (App Router) eleva estos <link> al <head>; al estar en esta
+        página, solo se cargan al entrar al laboratorio escolar. Si no cargan,
+        las plantillas degradan a fuentes seguras del sistema (no se rompen).
+      */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossOrigin="anonymous"
+      />
+      {/* Carga deliberada y scoped a esta página (las plantillas de tipografía
+          solo se usan aquí); por eso evitamos next/font global. */}
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Graduate&family=Luckiest+Guy&family=Nunito:wght@800;900&family=Pacifico&family=Saira+Condensed:ital,wght@0,700;0,800;1,700;1,800&display=swap"
+      />
+
+      {/* Barra morada superior, como en la guía */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-violet-400 via-violet-500 to-violet-400" />
+
+      <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6 sm:py-9">
         <Link
           href="/tienda/disenador"
-          className="inline-flex items-center gap-1.5 text-sm text-ml-white/60 transition hover:text-ml-cyan"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-violet-600"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Volver al laboratorio
         </Link>
-        <div className="mt-3 flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-ml-cyan/15 text-ml-cyan">
-            <GraduationCap className="h-6 w-6" aria-hidden />
-          </span>
-          <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">
-              Etiquetas <span className="text-gradient">Escolares Lab</span>
-            </h1>
-            <p className="text-sm text-ml-white/60">
-              Crea tu pack escolar personalizado: nombre, tipografía, colores y
-              temática en un solo pedido.
-            </p>
-          </div>
+
+        <div className="mt-5 flex flex-col gap-8">
+          {/* 1. Guía rápida / portada (páginas 1-2) */}
+          <SchoolLabelsGuideHero whatsappUrl={whatsappUrl} />
+
+          {/* 2-6. Wizard interactivo (paquete → preview) */}
+          <SchoolLabelsLab product={product} />
+
+          {/* 7. Secciones informativas (páginas 11-13) */}
+          <SchoolLabelsInfoSections />
         </div>
       </div>
-
-      {/* Cómo funciona tu pedido */}
-      <section className="glass mb-8 rounded-3xl p-6 sm:p-8">
-        <h2 className="text-lg font-bold">Cómo funciona tu pedido</h2>
-        <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SCHOOL_ORDER_STEPS.map((stepItem, i) => (
-            <li
-              key={stepItem.title}
-              className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4"
-            >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ml-violet/20 text-sm font-bold text-ml-violet">
-                {i + 1}
-              </span>
-              <div>
-                <p className="text-sm font-semibold">{stepItem.title}</p>
-                <p className="mt-0.5 text-xs text-ml-white/60">
-                  {stepItem.text}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* El wizard SIEMPRE se renderiza: el cliente puede armar y previsualizar
-          su pedido aunque el producto base aún no esté disponible. Guardar y
-          agregar al carrito se habilitan solo cuando hay producto persistible
-          (lo resuelve SchoolLabelsLab). */}
-      <SchoolLabelsLab product={product} />
     </div>
   );
 }

@@ -38,12 +38,17 @@ export const whatsappMessages = {
   schoolLabels: (opts: {
     pkg?: string;
     typographyCode?: string;
-    colorCode?: string;
     name?: string;
-  }) =>
-    `Hola MatrixLab, quiero hacer etiquetas escolares. Paquete: ${
+    addons?: string[];
+  }) => {
+    const base = `Hola MatrixLab, quiero hacer etiquetas escolares. Paquete: ${
       opts.pkg || "[Elementary/Ultra]"
-    }, tipografía: ${opts.typographyCode || "[code]"}, colores: ${
-      opts.colorCode || "[code]"
-    }, nombre: ${opts.name || "[nombre]"}.`,
+    }, tipografía: ${opts.typographyCode || "[code]"}, nombre: ${
+      opts.name || "[nombre]"
+    }.`;
+    const addons = opts.addons?.filter(Boolean) ?? [];
+    return addons.length
+      ? `${base} Add-ons: ${addons.join(", ")}.`
+      : base;
+  },
 } as const;

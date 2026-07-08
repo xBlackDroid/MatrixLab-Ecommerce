@@ -1,3 +1,4 @@
+import type { ComponentType, SVGProps } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -5,13 +6,11 @@ import {
   LayoutGrid,
   Repeat,
   Shirt,
-  ShoppingBag,
-  Sparkles,
   Tag,
   Wand2,
   Zap,
-  type LucideIcon,
 } from "lucide-react";
+import { CapIcon, HoodieIcon, ToteIcon } from "@/components/icons/GarmentIcons";
 import { LAB_BLOCKS } from "@/lib/designer/product-catalog";
 import type { DesignerBadge } from "@/lib/designer/product-catalog";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
@@ -30,11 +29,11 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600;
 
-const ICONS: Record<string, LucideIcon> = {
+const ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   shirt: Shirt,
-  hoodie: Shirt,
-  cap: Sparkles,
-  bag: ShoppingBag,
+  hoodie: HoodieIcon,
+  cap: CapIcon,
+  bag: ToteIcon,
   grid: LayoutGrid,
   repeat: Repeat,
   laser: Zap,

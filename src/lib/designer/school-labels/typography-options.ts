@@ -6,12 +6,15 @@
  * páginas de 10 códigos (la última con 4). Aquí solo guardamos el código,
  * la página de origen y la ruta del thumbnail real (opcional).
  *
- * Cómo agregar/editar thumbnails reales:
- *   1. Recorta cada muestra del PDF a PNG con fondo transparente.
- *   2. Guárdala como `public/images/school-labels/typography/0NN.png`
- *      (p. ej. 001.png, 002.png … 054.png).
- *   3. No hace falta tocar este archivo: la UI usa `previewImage` y, si la
- *      imagen no existe todavía, muestra un fallback con el nombre escrito.
+ * Los thumbnails reales se exportan de la guía PDF como `.webp` optimizados
+ * (≈ 6 KB c/u) en `public/images/school-labels/typography/0NN.webp`
+ * (001.webp … 054.webp). Si una imagen no existe, la UI degrada a un fallback
+ * con el nombre escrito por el cliente, así que nunca se rompe.
+ *
+ * Cómo regenerar/editar thumbnails:
+ *   1. Recorta cada muestra de la guía (páginas "Elige tu tipografía").
+ *   2. Guárdala como `public/images/school-labels/typography/0NN.webp`.
+ *   3. No hace falta tocar este archivo: la UI usa `previewImage`.
  */
 
 export type SchoolTypographyOption = {
@@ -48,7 +51,7 @@ export const SCHOOL_TYPOGRAPHY_OPTIONS: SchoolTypographyOption[] = Array.from(
       label: `Tipografía ${code}`,
       // 001–010 → parte 1, 011–020 → parte 2 … 051–054 → parte 6.
       page: Math.ceil(n / 10),
-      previewImage: `/images/school-labels/typography/${code}.png`,
+      previewImage: `/images/school-labels/typography/${code}.webp`,
     };
   },
 );

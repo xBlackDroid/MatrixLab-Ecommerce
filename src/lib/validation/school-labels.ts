@@ -12,8 +12,8 @@ import { SCHOOL_TYPOGRAPHY_CODES } from "@/lib/designer/school-labels/typography
  * el cliente nunca es de confianza. Reglas:
  *   - package ∈ {elementary, ultra}
  *   - typographyCode ∈ 001 … 054
- *   - colorCode ∈ ARC/PAS/NEO/TRO/SUN/OCE/FIE/GAL/ROS/AZU/VER/MOR/NAR/AMA/ROJ/GRI/CAF
- *   - firstName requerido, lastName1 requerido, lastName2 opcional
+ *   - colorCode: OPCIONAL (el fondo es automático; el usuario ya no elige color)
+ *   - student: solo firstName (requerido) + lastNames (requerido)
  *   - límites de longitud por campo, sin HTML ni scripts
  *   - addons dentro de la whitelist
  *   - tamaño total del JSON acotado (límite duro en designer.ts)
@@ -55,19 +55,15 @@ const StudentSchema = z
       .min(1, "El nombre es obligatorio.")
       .max(SCHOOL_FIELD_LIMITS.name)
       .refine((v) => !HTML_ANGLE.test(v), { message: "Nombre inválido." }),
-    lastName1: z
+    lastNames: z
       .string()
       .trim()
-      .min(1, "Se requiere al menos un apellido.")
-      .max(SCHOOL_FIELD_LIMITS.name)
-      .refine((v) => !HTML_ANGLE.test(v), { message: "Apellido inválido." }),
-    lastName2: safeText(SCHOOL_FIELD_LIMITS.name, "Apellido materno").optional(),
-    nickname: safeText(SCHOOL_FIELD_LIMITS.nickname, "Apodo").optional(),
-    school: safeText(SCHOOL_FIELD_LIMITS.school, "Colegio").optional(),
-    grade: safeText(SCHOOL_FIELD_LIMITS.grade, "Grado").optional(),
-    group: safeText(SCHOOL_FIELD_LIMITS.group, "Grupo").optional(),
+      .min(1, "Los apellidos son obligatorios.")
+      .max(SCHOOL_FIELD_LIMITS.lastNames)
+      .refine((v) => !HTML_ANGLE.test(v), { message: "Apellidos inválidos." }),
   })
-  // Tolerante: ignora llaves extra del estudiante en vez de rechazar el guardado.
+  // Tolerante: ignora llaves extra del estudiante (p. ej. de diseños antiguos)
+  // en vez de rechazar el guardado.
   .passthrough();
 
 /**
@@ -91,7 +87,9 @@ export const SchoolLabelsDesignJsonSchema = z
     designCount: z.union([z.literal(1), z.literal(2)]).optional(),
     student: StudentSchema,
     typographyCode: z.enum(SCHOOL_TYPOGRAPHY_VALUES),
-    colorCode: z.enum(SCHOOL_COLOR_VALUES),
+    // El color/paleta ya NO es parte del flujo: el fondo es automático. Se deja
+    // opcional para no romper diseños antiguos que aún lo traigan.
+    colorCode: z.enum(SCHOOL_COLOR_VALUES).optional(),
     theme: safeText(SCHOOL_FIELD_LIMITS.theme, "Temática").optional(),
     decorativeIcons: safeText(
       SCHOOL_FIELD_LIMITS.decorativeIcons,
@@ -113,6 +111,29 @@ export const SchoolLabelsDesignJsonSchema = z
     addons: z.array(z.string().max(80)).max(30).optional().default([]),
     notes: safeText(SCHOOL_FIELD_LIMITS.notes, "Notas").optional(),
     previewUrl: z.string().max(512).optional(),
+    /** Familia de fondo automático sugerida por la paleta (arcoiris, neon…). */
+    backgroundPreset: z.string().max(16).optional(),
+    /** Imagen propia subida por el cliente (referencia en storage privado). */
+    customImage: z
+      .object({
+        assetId: z.string().max(64).optional(),
+        path: z.string().max(256).optional(),
+        url: z.string().max(512).optional(),
+        fileName: z.string().max(160).optional(),
+        /** Posición/escala dentro de la etiqueta (editable en la preview). */
+        transform: z
+          .object({
+            x: z.number(),
+            y: z.number(),
+            scale: z.number(),
+          })
+          .partial()
+          .optional(),
+        /** Velo claro de legibilidad sobre la imagen (auto, ON por defecto). */
+        readabilityOverlay: z.boolean().optional(),
+      })
+      .partial()
+      .optional(),
   })
   // Ignora llaves desconocidas (no rompe el guardado) en vez de .strict().
   .passthrough();
@@ -125,12 +146,7 @@ export type SchoolLabelsDesignJson = z.infer<typeof SchoolLabelsDesignJsonSchema
 
 export interface SchoolStudentInput {
   firstName: string;
-  lastName1: string;
-  lastName2?: string;
-  nickname?: string;
-  school?: string;
-  grade?: string;
-  group?: string;
+  lastNames: string;
 }
 
 /** Valida los datos del estudiante; devuelve errores por campo. */
@@ -145,12 +161,12 @@ export function validateSchoolStudent(
   } else if (HTML_ANGLE.test(input.firstName)) {
     errors.firstName = "No se permite HTML.";
   }
-  if (!input.lastName1.trim()) {
-    errors.lastName1 = "Se requiere al menos un apellido.";
-  } else if (input.lastName1.trim().length > SCHOOL_FIELD_LIMITS.name) {
-    errors.lastName1 = `Máximo ${SCHOOL_FIELD_LIMITS.name} caracteres.`;
-  } else if (HTML_ANGLE.test(input.lastName1)) {
-    errors.lastName1 = "No se permite HTML.";
+  if (!input.lastNames.trim()) {
+    errors.lastNames = "Los apellidos son obligatorios.";
+  } else if (input.lastNames.trim().length > SCHOOL_FIELD_LIMITS.lastNames) {
+    errors.lastNames = `Máximo ${SCHOOL_FIELD_LIMITS.lastNames} caracteres.`;
+  } else if (HTML_ANGLE.test(input.lastNames)) {
+    errors.lastNames = "No se permite HTML.";
   }
   return { ok: Object.keys(errors).length === 0, errors };
 }
