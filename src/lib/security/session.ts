@@ -8,7 +8,11 @@ import {
 } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { getServerEnv, isProduction } from "@/lib/security/env";
+import {
+  getAdminSessionSecret,
+  getServerEnv,
+  isProduction,
+} from "@/lib/security/env";
 
 /**
  * Sesiones de tienda (carrito) y sesiones de administración.
@@ -116,7 +120,7 @@ export function createAdminSessionToken(): {
   token: string;
   payload: AdminSessionPayload;
 } | null {
-  const secret = getServerEnv().adminSessionSecret;
+  const secret = getAdminSessionSecret();
   if (!secret) return null;
   const payload: AdminSessionPayload = {
     sid: randomBytes(18).toString("base64url"),
@@ -133,7 +137,7 @@ export function createAdminSessionToken(): {
 export function verifyAdminSessionToken(
   token: string | null | undefined,
 ): AdminSessionPayload | null {
-  const secret = getServerEnv().adminSessionSecret;
+  const secret = getAdminSessionSecret();
   if (!secret || !token || token.length > 2048) return null;
   const parts = token.split(".");
   if (parts.length !== 2) return null;

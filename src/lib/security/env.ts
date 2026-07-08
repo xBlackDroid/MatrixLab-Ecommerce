@@ -72,9 +72,28 @@ export function isMercadoPagoConfigured(): boolean {
   return Boolean(getServerEnv().mpAccessToken);
 }
 
+/** Longitudes mínimas de credenciales admin (ver .env.example). */
+export const ADMIN_SECRET_MIN_LENGTH = 32;
+export const ADMIN_PASSWORD_MIN_LENGTH = 8;
+
+/**
+ * Secreto de firma de sesiones admin. Un secreto corto debilita el HMAC,
+ * así que uno por debajo del mínimo se trata como NO configurado: el panel
+ * queda bloqueado (fail-safe) en lugar de operar con firmas débiles.
+ */
+export function getAdminSessionSecret(): string | undefined {
+  const secret = getServerEnv().adminSessionSecret;
+  if (!secret || secret.length < ADMIN_SECRET_MIN_LENGTH) return undefined;
+  return secret;
+}
+
 export function isAdminConfigured(): boolean {
   const env = getServerEnv();
-  return Boolean(env.adminAccessPassword && env.adminSessionSecret);
+  return Boolean(
+    env.adminAccessPassword &&
+      env.adminAccessPassword.length >= ADMIN_PASSWORD_MIN_LENGTH &&
+      getAdminSessionSecret(),
+  );
 }
 
 /**
@@ -83,6 +102,11 @@ export function isAdminConfigured(): boolean {
  */
 export function isCheckoutConfigured(): boolean {
   const env = getServerEnv();
+  // En producción las back_urls y notification_url deben ser https públicas;
+  // un siteUrl http dejaría el webhook sin TLS. Fail-safe: checkout apagado.
+  if (isProduction() && env.siteUrl && !env.siteUrl.startsWith("https://")) {
+    return false;
+  }
   return Boolean(
     env.mpAccessToken &&
       env.siteUrl &&

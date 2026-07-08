@@ -29,6 +29,12 @@ export async function persistAdminSession(
     token_hash: hashAdminSid(payload.sid),
     expires_at: new Date(payload.exp * 1000).toISOString(),
   });
+  // Higiene oportunista: purga sesiones ya expiradas en cada login para que
+  // la tabla no acumule registros muertos (no requiere cron).
+  await client
+    .from("admin_sessions")
+    .delete()
+    .lt("expires_at", new Date().toISOString());
 }
 
 export async function revokeAdminSession(
