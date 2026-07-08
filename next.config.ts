@@ -10,6 +10,10 @@ import type { NextConfig } from "next";
  *   vía fetch para montarlos en el canvas.
  * - script-src necesita 'unsafe-inline' por los scripts de hidratación de
  *   Next.js; en desarrollo se añade 'unsafe-eval' (requerido por HMR).
+ * - style-src/font-src permiten Google Fonts: el diseñador de Etiquetas
+ *   Escolares carga tipografías (Baloo 2, Caveat, Fredoka, Pacifico…) desde
+ *   fonts.googleapis.com (hoja) y fonts.gstatic.com (archivos). Sin esto la
+ *   galería de tipografías degrada a fuentes del sistema.
  * - El checkout de Mercado Pago es por redirección (Checkout Pro), no hay
  *   SDK embebido ni iframes: frame-src queda cerrado.
  */
@@ -21,9 +25,9 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
-      "font-src 'self' data:",
+      "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co https://*.supabase.in",
       "worker-src 'self' blob:",
       "object-src 'none'",
