@@ -295,9 +295,20 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   } else if (payload.designerType === "school-labels") {
     // Etiquetas escolares: texto libre del cliente. Sanitiza cada campo antes
     // de persistir (no HTML, no scripts, sin datos de control).
+    // Nota: el schema usa .passthrough() para tolerar llaves nuevas/legadas,
+    // así que aquí saneamos explícitamente TODO campo de texto de usuario
+    // (incluye los añadidos por el flujo de imagen propia y add-ons) en lugar
+    // de confiar en el spread de `...j`.
     const j = payload.designJson;
     const clean = (v: string | undefined, max: number) =>
       v ? sanitizeText(v, max) : undefined;
+    const customImage = j.customImage
+      ? {
+          ...j.customImage,
+          // El nombre de archivo original es texto controlado por el cliente.
+          fileName: clean(j.customImage.fileName, 160),
+        }
+      : j.customImage;
     designJson = {
       ...j,
       student: {
@@ -310,6 +321,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       specialColors: clean(j.specialColors, 120),
       designComments: clean(j.designComments, 300),
       notes: clean(j.notes, 500),
+      backgroundPreset: clean(j.backgroundPreset, 16),
+      addons: Array.isArray(j.addons)
+        ? j.addons.map((a) => sanitizeText(a, 80)).filter(Boolean)
+        : j.addons,
+      ...(customImage !== undefined ? { customImage } : {}),
     };
   }
 

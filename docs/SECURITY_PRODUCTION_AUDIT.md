@@ -180,13 +180,23 @@ checklist de configuración de la sección 10 (secretos fuertes, webhook secret,
 - IDs son `z.uuid()`. Strings con `.max()` en todos los campos.
 - `notes`, `theme`, `name`, `lastNames` acotados; `previewDataUrl` limitado a
   2 MB; `design_json` acotado (20 KB v1 / 80 KB v2 / 12 KB etiquetas).
-- No hay `.passthrough()` en el código. El único uso amplio es
-  `WebhookBodySchema.loose()` en el webhook — **justificado**: Mercado Pago
-  envía campos variables y el pago se reconfirma contra su API, no se confía en
-  el payload.
+- Usos de esquemas abiertos (`.loose()` / `.passthrough()`), ambos **justificados
+  y mitigados**:
+  - `WebhookBodySchema.loose()` en el webhook: Mercado Pago envía campos
+    variables y el pago se reconfirma contra su API, no se confía en el payload.
+  - `SchoolLabelsDesignJsonSchema.passthrough()` (aportado por la rama de
+    etiquetas): tolera llaves nuevas/legadas del `design_json` para no romper
+    guardados. Mitigado porque (a) el tamaño total está acotado a 12 KB, (b) el
+    route sanea explícitamente **todo** campo de texto de usuario antes de
+    persistir —no confía en el spread `...j`— y (c) nada del `design_json` se
+    renderiza vía `dangerouslySetInnerHTML` (React escapa siempre). Ver nota de
+    integración al final.
 - `design_json` no permite HTML: texto de láser y etiquetas escolares se
   sanitiza con `sanitizeText` (quita tags, control chars) antes de persistir, y
-  el schema de etiquetas rechaza `<`/`>`.
+  el schema de etiquetas rechaza `<`/`>` en los campos de nombre/apellidos y
+  vía `safeText` en los descriptivos. Los campos añadidos por el flujo de imagen
+  propia (`customImage.fileName`), `addons` y `backgroundPreset` también se
+  sanean en el route.
 
 ### 4. Uploads y Storage — ✅
 - Solo PNG/JPG/WEBP; MIME real verificado con `sharp` (no por extensión/header).
@@ -386,3 +396,35 @@ código).
 | Pruebas de fail-safe / bypass admin | ✅ ver secciones 4.6 y 4.9 |
 
 **Veredicto: apto para producción** tras completar el checklist de la sección 10.
+
+---
+
+## 12. Nota de integración — `release/preprod-matrixlab`
+
+Esta rama integra dos líneas de trabajo independientes derivadas de `main`:
+
+- `feat/etiquetas-draft-engine` (motor interactivo de Etiquetas Escolares:
+  imagen propia, galería de tipografías, plantillas, add-ons, simplificación de
+  datos del alumno a `firstName` + `lastNames`).
+- `feat/security-production-audit` (este informe + hardening M-1…M-4, L-1).
+
+**Integración:** merge de ambas ramas (sin rebase, para no reescribir historia
+ni perder commits). Solo `src/app/api/designs/[id]/route.ts` era tocado por las
+dos ramas; git lo auto-fusionó (regiones disjuntas) y se verificó a mano que
+conviven la simplificación de etiquetas (`lastNames`) y el guard de seguridad
+`validateProductChange` (v1 y v2).
+
+**Revisión de seguridad post-merge (regresión detectada y corregida):**
+la rama de etiquetas cambió `SchoolLabelsDesignJsonSchema` de `.strict()` a
+`.passthrough()` e introdujo campos nuevos de texto de usuario (`addons`,
+`backgroundPreset`, `customImage.fileName`) que el bloque de sanitización de la
+rama de seguridad —escrito antes de que esos campos existieran— no cubría. Un
+merge textualmente limpio **no** detecta esto. Corrección aplicada en el route:
+se sanean explícitamente `addons`, `backgroundPreset` y `customImage.fileName`
+con `sanitizeText`, restaurando el principio "sanear todo texto de usuario antes
+de persistir". Impacto real previo: **bajo** (no hay `dangerouslySetInnerHTML`
+en el ecommerce y React escapa en render), pero se cierra por defensa en
+profundidad y para mantener el informe fiel al código.
+
+Con esto, **ni se perdieron cambios de etiquetas al traer seguridad, ni se
+perdió seguridad al traer etiquetas.**
