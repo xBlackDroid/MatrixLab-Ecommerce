@@ -44,6 +44,51 @@ async function findOwnedDesign(
   return (data as DesignProjectRow | null) ?? null;
 }
 
+/**
+ * Si el guardado intenta cambiar el producto/variante del diseño, se aplican
+ * las mismas reglas que en la creación (POST /api/designs): producto visible
+ * y personalizable, variante perteneciente al producto. Un diseño existente
+ * cuyo producto se ocultó DESPUÉS puede seguir guardándose (no se degrada
+ * UX), pero no puede re-apuntarse a un producto no personalizable u oculto.
+ */
+async function validateProductChange(params: {
+  design: DesignProjectRow;
+  productId: string;
+  variantId: string | undefined;
+}): Promise<string | null> {
+  const { design, productId, variantId } = params;
+  const productChanged = productId !== design.product_id;
+  const variantChanged = (variantId ?? null) !== design.variant_id;
+  if (!productChanged && !variantChanged) return null;
+
+  const client = requireServiceClient();
+  if (productChanged) {
+    const { data: productData } = await client
+      .from("products")
+      .select("id, status, is_customizable")
+      .eq("id", productId)
+      .maybeSingle();
+    const product = productData as {
+      id: string;
+      status: string;
+      is_customizable: boolean;
+    } | null;
+    if (!product || product.status === "oculto" || !product.is_customizable) {
+      return "Este producto no se puede personalizar.";
+    }
+  }
+  if (variantId) {
+    const { data: variantData } = await client
+      .from("product_variants")
+      .select("id")
+      .eq("id", variantId)
+      .eq("product_id", productId)
+      .maybeSingle();
+    if (!variantData) return "Opción inválida.";
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest, context: RouteContext) {
   if (!isSupabaseConfigured()) {
     return jsonError(
@@ -181,6 +226,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     ) {
       return jsonError("El diseño es demasiado complejo.", 400);
     }
+    const changeError = await validateProductChange({
+      design,
+      productId: v1.data.productId,
+      variantId: v1.data.variantId,
+    });
+    if (changeError) return jsonError(changeError, 409);
     const previewPath = v1.data.previewDataUrl
       ? await buildPreviewPath(sessionId, design.id, v1.data.previewDataUrl)
       : undefined;
@@ -219,6 +270,13 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   if (JSON.stringify(payload.designJson).length > DESIGN_JSON_MAX_BYTES_V2) {
     return jsonError("El diseño es demasiado complejo.", 400);
   }
+
+  const changeError = await validateProductChange({
+    design,
+    productId: payload.productId,
+    variantId: payload.variantId,
+  });
+  if (changeError) return jsonError(changeError, 409);
 
   // Sanitiza el texto del láser antes de persistir (defensa en profundidad).
   let designJson: Record<string, unknown> = payload.designJson as Record<
