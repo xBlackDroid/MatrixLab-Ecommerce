@@ -20,13 +20,14 @@ function category(
   handle: string,
   description: string,
   sortOrder: number,
+  imageUrl: string | null = null,
 ): CategoryRow {
   return {
     id,
     title,
     handle,
     description,
-    image_url: null,
+    image_url: imageUrl,
     sort_order: sortOrder,
     status: "activa",
     created_at: NOW,
@@ -84,16 +85,18 @@ export const MOCK_CATEGORIES: CategoryRow[] = [
     "Crea prendas y accesorios textiles personalizados desde el laboratorio interactivo.",
     7,
   ),
-  // Etapa 2: Insumos creativos + subcategorías comerciales (espejo de
-  // supabase/seed_etapa2.sql). Rebrand "in place": mismos ids/handles y misma
-  // estructura (catálogo/inventario/carrito/admin); solo cambia el naming a uno
-  // comercial. Las dos últimas son aditivas para completar los 6 bloques.
+  // Etapa 2: MatrixLab Tumbler (antes "Insumos creativos") + subcategorías
+  // comerciales (espejo de supabase/seed_etapa2.sql). Rebrand "in place":
+  // mismo id y misma estructura (catálogo/inventario/carrito/admin); la única
+  // tarjeta pública de la línea es la categoría madre y las subcategorías
+  // siguen vivas internamente.
   category(
     "c0000000-0000-4000-8000-000000000008",
-    "Insumos creativos",
-    "insumos",
-    "Materiales, accesorios y piezas listas para darle vida a tus proyectos personalizados.",
+    "MatrixLab Tumbler",
+    "matrixlab-tumbler",
+    "Insumos, accesorios y materiales para vasos, termos y proyectos snow globe.",
     8,
+    "/images/categories/matrixlab-tumbler.png",
   ),
   category(
     "c0000000-0000-4000-8000-000000000009",

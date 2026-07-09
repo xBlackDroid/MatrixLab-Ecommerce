@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   Box,
+  CupSoda,
   Magnet,
   Shirt,
   Sparkles,
@@ -20,6 +22,8 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "grabado-laser": Zap,
   "impresion-3d": Box,
   "disenador-tshirt-lab": Wand2,
+  // Línea de vasos, termos, snow globe e insumos.
+  "matrixlab-tumbler": CupSoda,
 };
 
 export default function CategoryCard({ category }: { category: CategoryRow }) {
@@ -35,9 +39,23 @@ export default function CategoryCard({ category }: { category: CategoryRow }) {
       href={href}
       className="group glass flex flex-col gap-4 rounded-2xl p-6 transition hover:-translate-y-1 hover:border-ml-cyan/40 hover:shadow-glow-cyan"
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-ml-violet/15 text-ml-violet transition group-hover:bg-ml-cyan/15 group-hover:text-ml-cyan">
-        <Icon className="h-6 w-6" aria-hidden />
-      </span>
+      {/* Si la categoría tiene logo/imagen (verificada en servidor: solo llega
+          aquí si el archivo existe o es una URL remota del admin) se muestra;
+          si no, cae al icono de la categoría. */}
+      {category.image_url ? (
+        <Image
+          src={category.image_url}
+          alt=""
+          width={48}
+          height={48}
+          className="h-12 w-12 rounded-xl border border-white/10 object-cover"
+          aria-hidden
+        />
+      ) : (
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-ml-violet/15 text-ml-violet transition group-hover:bg-ml-cyan/15 group-hover:text-ml-cyan">
+          <Icon className="h-6 w-6" aria-hidden />
+        </span>
+      )}
       <div>
         <h3 className="text-lg font-semibold">{category.title}</h3>
         {category.description && (

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getAnonClient } from "@/lib/db/client";
 import { getServiceClient } from "@/lib/db/admin";
@@ -40,16 +42,65 @@ function fixProductText(p: ProductRow): ProductRow {
   };
 }
 
+// ---------------------------------------------------------------------------
+// MatrixLab Tumbler — línea comercial de vasos, termos, snow globe e insumos.
+// ---------------------------------------------------------------------------
+
+/** Handle público oficial de la categoría madre de la línea. */
+export const TUMBLER_PARENT_HANDLE = "matrixlab-tumbler";
+/** Handle histórico ("Insumos creativos"); se mantiene por compatibilidad. */
+export const LEGACY_TUMBLER_PARENT_HANDLE = "insumos";
+
+const TUMBLER_TITLE = "MatrixLab Tumbler";
+const TUMBLER_DESCRIPTION =
+  "Insumos, accesorios y materiales para vasos, termos y proyectos snow globe.";
+
+/**
+ * Rebrand de presentación: si la base de datos aún tiene la categoría madre
+ * con el handle/nombre histórico ("Insumos creativos" / `insumos`), se muestra
+ * al público como "MatrixLab Tumbler" sin tocar la fila real. El admin sigue
+ * viendo los datos reales (consulta la tabla directamente, no pasa por aquí).
+ */
+function normalizeTumblerCategory(c: CategoryRow): CategoryRow {
+  if (c.handle !== LEGACY_TUMBLER_PARENT_HANDLE) return c;
+  return {
+    ...c,
+    handle: TUMBLER_PARENT_HANDLE,
+    title: TUMBLER_TITLE,
+    description: TUMBLER_DESCRIPTION,
+  };
+}
+
+/**
+ * Imagen de la categoría: si existe `public/images/categories/<handle>.png`
+ * (o .webp) se usa esa; si el admin configuró una URL remota, se respeta; y si
+ * no hay nada, queda null y la UI cae a su icono (nunca una imagen rota).
+ */
+function resolveCategoryImage(c: CategoryRow): string | null {
+  for (const ext of ["png", "webp"] as const) {
+    const rel = `/images/categories/${c.handle}.${ext}`;
+    if (existsSync(join(process.cwd(), "public", rel))) return rel;
+  }
+  if (c.image_url && /^https?:\/\//.test(c.image_url)) return c.image_url;
+  return null;
+}
+
+/** Pipeline de presentación pública de una categoría. */
+function presentCategory(c: CategoryRow): CategoryRow {
+  const branded = normalizeTumblerCategory(fixCategoryText(c));
+  return { ...branded, image_url: resolveCategoryImage(branded) };
+}
+
 /**
  * Categorías que NO se muestran como tarjetas públicas en /tienda. No se borran
- * de la base de datos ni de sus rutas: solo se ocultan del grid del catálogo
- * para que la tienda se enfoque en las categorías principales. Corresponden a
- * "Insumos creativos" y sus subcategorías (SnowGlobe Bar, Llaveros, Tags de
- * acrílico, Acrylab, Creator Tools, Sparkle Mix, Magic Flow, Wraps & Glow
- * Finish).
+ * de la base de datos ni de sus rutas: solo se ocultan del grid del catálogo.
+ * Son las subcategorías internas de "MatrixLab Tumbler" (SnowGlobe Bar,
+ * Llaveros, Tags de acrílico, Acrylab, Creator Tools, Sparkle Mix, Magic Flow,
+ * Wraps & Glow Finish): siguen vivas como handles/seeds/productos y como
+ * bloques dentro de la landing de MatrixLab Tumbler, pero la única tarjeta
+ * pública de la línea es la categoría madre.
  */
 export const PUBLIC_HIDDEN_CATEGORY_HANDLES: ReadonlySet<string> = new Set([
-  "insumos",
   "snowglobe",
   "llaveros",
   "tags-acrilico",
@@ -121,7 +172,7 @@ export async function getCategories(): Promise<CategoryRow[]> {
   if (!client) {
     return [...MOCK_CATEGORIES]
       .sort((a, b) => a.sort_order - b.sort_order)
-      .map(fixCategoryText);
+      .map(presentCategory);
   }
   const { data, error } = await raceRead<CategoryRow[]>(
     client
@@ -133,13 +184,14 @@ export async function getCategories(): Promise<CategoryRow[]> {
     >,
   );
   if (error || !data) return [];
-  return data.map(fixCategoryText);
+  return data.map(presentCategory);
 }
 
 /**
- * Categorías para el GRID público de /tienda: las activas menos la familia de
- * "Insumos creativos" (ver PUBLIC_HIDDEN_CATEGORY_HANDLES). Las rutas de esas
- * categorías siguen vivas; solo no aparecen como tarjetas en el catálogo.
+ * Categorías para el GRID público de /tienda: las activas menos las
+ * subcategorías internas de MatrixLab Tumbler (ver
+ * PUBLIC_HIDDEN_CATEGORY_HANDLES). Las rutas de esas categorías siguen vivas;
+ * solo no aparecen como tarjetas en el catálogo.
  */
 export async function getPublicStoreCategories(): Promise<CategoryRow[]> {
   const all = await getCategories();
@@ -152,29 +204,46 @@ export async function getCategoryByHandle(
   if (!isValidHandle(handle)) return null;
   const client = getCatalogClient();
   if (!client) {
-    const mock = MOCK_CATEGORIES.find((c) => c.handle === handle);
-    return mock ? fixCategoryText(mock) : null;
+    const mock =
+      MOCK_CATEGORIES.find((c) => c.handle === handle) ??
+      // Compatibilidad: la ruta nueva resuelve aunque el dato aún tenga el
+      // handle histórico (el rebrand lo aplica presentCategory).
+      (handle === TUMBLER_PARENT_HANDLE
+        ? MOCK_CATEGORIES.find(
+            (c) => c.handle === LEGACY_TUMBLER_PARENT_HANDLE,
+          )
+        : undefined);
+    return mock ? presentCategory(mock) : null;
   }
-  const { data, error } = await raceRead<CategoryRow>(
-    client
-      .from("categories")
-      .select("*")
-      .eq("handle", handle)
-      .eq("status", "activa")
-      .maybeSingle() as unknown as PromiseLike<ReadResult<CategoryRow>>,
-  );
+  const fetchByHandle = (h: string) =>
+    raceRead<CategoryRow>(
+      client
+        .from("categories")
+        .select("*")
+        .eq("handle", h)
+        .eq("status", "activa")
+        .maybeSingle() as unknown as PromiseLike<ReadResult<CategoryRow>>,
+    );
+  const { data, error } = await fetchByHandle(handle);
   if (error) return null;
-  return data ? fixCategoryText(data) : null;
+  if (data) return presentCategory(data);
+  // Base de datos aún sin migrar: /tienda/categoria/matrixlab-tumbler debe
+  // funcionar aunque la fila conserve el handle histórico `insumos`.
+  if (handle === TUMBLER_PARENT_HANDLE) {
+    const legacy = await fetchByHandle(LEGACY_TUMBLER_PARENT_HANDLE);
+    if (!legacy.error && legacy.data) return presentCategory(legacy.data);
+  }
+  return null;
 }
 
 /**
- * "Insumos creativos" (madre) agrupa subcategorías comerciales. La página de la
- * categoría madre muestra estos bloques (no tiene productos propios). El orden
- * sigue el naming comercial del catálogo.
+ * "MatrixLab Tumbler" (madre) agrupa subcategorías comerciales. La página de
+ * la categoría madre muestra estos bloques (no tiene productos propios). El
+ * orden sigue el naming comercial del catálogo. Los handles internos se
+ * conservan tal cual por compatibilidad con seeds, productos y rutas.
  */
-export const INSUMOS_PARENT_HANDLE = "insumos";
-// Orden público EXACTO de las 8 subcategorías de Insumos creativos.
-export const INSUMOS_SUBCATEGORY_HANDLES = [
+// Orden público EXACTO de las 8 subcategorías de MatrixLab Tumbler.
+export const TUMBLER_SUBCATEGORY_HANDLES = [
   "snowglobe", // 1. SnowGlobe Bar
   "llaveros", // 2. Llaveros creativos
   "tags-acrilico", // 3. Tags de acrílico
@@ -185,10 +254,10 @@ export const INSUMOS_SUBCATEGORY_HANDLES = [
   "wraps-glow-finish", // 8. Wraps & Glow Finish
 ] as const;
 
-/** Subcategorías de Insumos creativos, en orden comercial (para su landing). */
-export async function getInsumosSubcategories(): Promise<CategoryRow[]> {
+/** Subcategorías de MatrixLab Tumbler, en orden comercial (para su landing). */
+export async function getTumblerSubcategories(): Promise<CategoryRow[]> {
   const all = await getCategories();
-  const order = INSUMOS_SUBCATEGORY_HANDLES as readonly string[];
+  const order = TUMBLER_SUBCATEGORY_HANDLES as readonly string[];
   return all
     .filter((c) => order.includes(c.handle))
     .sort((a, b) => order.indexOf(a.handle) - order.indexOf(b.handle));

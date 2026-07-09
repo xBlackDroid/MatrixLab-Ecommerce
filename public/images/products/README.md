@@ -61,4 +61,5 @@ no, mantiene el fallback frente/espalda.
 - `playeras/`, `sudaderas/`, `gorras/trucker/`, `gorras/clasica/`, `totes/`
   → `mockups/` (con `front/` y `back/`) y `frames/`
 - `laser/templates/` → ilustraciones opcionales de plantillas láser
-- `insumos/` → fotos de productos de la categoría Insumos creativos
+- `insumos/` → fotos de productos de la línea MatrixLab Tumbler (la carpeta
+  conserva su nombre histórico; no hace falta mover archivos)

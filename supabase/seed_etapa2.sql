@@ -2,21 +2,27 @@
 -- MatrixLab Store Core — Etapa 2 — Seed aditivo (idempotente)
 --
 -- Agrega, sin borrar nada de Etapa 1:
---   * Categoría Insumos y sus subcategorías (como handles propios).
+--   * Categoría MatrixLab Tumbler (madre de la línea de vasos/insumos) y sus
+--     subcategorías internas (como handles propios).
 --   * Productos base de los nuevos diseñadores (sudadera, gorras, planillas)
 --     con una variante "Personalizado" (sobre pedido) para el carrito.
 --   * Variante "Personalizado" para los productos base existentes.
---   * Productos demo de Insumos con inventario.
+--   * Productos demo de la línea Tumbler con inventario.
 --
 -- Ejecutar después de supabase/seed.sql. Re-ejecutable (upsert por id).
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
--- Categorías: Insumos + subcategorías (modelo plano por handle)
+-- Categorías: MatrixLab Tumbler (madre) + subcategorías (modelo plano por handle)
+-- La madre se renombró de "Insumos creativos" (handle `insumos`) a
+-- "MatrixLab Tumbler" (handle `matrixlab-tumbler`) conservando el MISMO id:
+-- re-ejecutar este seed sobre una base existente renombra la fila in-place sin
+-- borrar productos ni relaciones. Las subcategorías conservan sus handles
+-- internos y NO se muestran como tarjetas principales en /tienda.
 -- ---------------------------------------------------------------------------
 insert into public.categories (id, title, handle, description, sort_order, status) values
-  ('c0000000-0000-4000-8000-000000000008', 'Insumos creativos', 'insumos',
-   'Materiales, accesorios y piezas listas para darle vida a tus proyectos personalizados.', 8, 'activa'),
+  ('c0000000-0000-4000-8000-000000000008', 'MatrixLab Tumbler', 'matrixlab-tumbler',
+   'Insumos, accesorios y materiales para vasos, termos y proyectos snow globe.', 8, 'activa'),
   ('c0000000-0000-4000-8000-000000000009', 'SnowGlobe Bar', 'snowglobe',
    'Todo para crear vasos con movimiento, brillo y efecto mágico.', 9, 'activa'),
   ('c0000000-0000-4000-8000-00000000000a', 'Llaveros creativos', 'llaveros',
@@ -35,6 +41,7 @@ insert into public.categories (id, title, handle, description, sort_order, statu
    'Láminas, wraps y acabados para transformar vasos, acrílicos y piezas personalizadas.', 16, 'activa')
 on conflict (id) do update set
   title = excluded.title,
+  handle = excluded.handle,
   description = excluded.description,
   sort_order = excluded.sort_order,
   status = excluded.status;

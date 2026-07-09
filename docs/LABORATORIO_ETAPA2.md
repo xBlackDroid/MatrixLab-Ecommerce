@@ -85,8 +85,10 @@ supabase/seed_etapa2.sql                           -- categorías/productos/insu
 
 Diseñador: `/tienda/disenador/{sudadera, gorra-trucker, gorra-clasica,
 stickers-planilla, stickers-repeticion, imanes-planilla, imanes-repeticion,
-laser}`. Categorías: `/tienda/categoria/{insumos, snowglobe, llaveros,
-tags-acrilico, acrilicos, accesorios-personalizacion, repuestos-consumibles}`.
+laser}`. Categorías: `/tienda/categoria/{matrixlab-tumbler, snowglobe,
+llaveros, tags-acrilico, acrilicos, accesorios-personalizacion,
+repuestos-consumibles}`. La madre pública de la línea de vasos/insumos es
+`matrixlab-tumbler` (antes `insumos`; la URL vieja redirige).
 Las rutas de Etapa 1 (playera/gorra/tote) siguen funcionando.
 
 ## 6. Cómo agregar mockups reales y frames 360

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import ProductGrid from "@/components/store/ProductGrid";
 import SortSelect from "@/components/store/SortSelect";
 import {
   getCategoryByHandle,
-  getInsumosSubcategories,
   getProductsByCategory,
-  INSUMOS_PARENT_HANDLE,
+  getTumblerSubcategories,
+  LEGACY_TUMBLER_PARENT_HANDLE,
+  TUMBLER_PARENT_HANDLE,
 } from "@/lib/store/products";
 import type { CategoryRow } from "@/lib/db/types";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
@@ -46,18 +48,24 @@ export default async function CategoryPage({
   const { handle } = await params;
   const { orden } = await searchParams;
 
+  // Compatibilidad: el handle histórico de la línea de vasos/insumos redirige
+  // a la URL pública oficial de MatrixLab Tumbler.
+  if (handle === LEGACY_TUMBLER_PARENT_HANDLE) {
+    redirect(`/tienda/categoria/${TUMBLER_PARENT_HANDLE}`);
+  }
+
   const category = await getCategoryByHandle(handle);
   if (!category) notFound();
 
-  // "Insumos creativos" (categoría madre) presenta sus subcategorías
+  // "MatrixLab Tumbler" (categoría madre) presenta sus subcategorías
   // comerciales como bloques; no tiene productos propios. El resto de
   // categorías muestra su grilla de productos normal.
-  const isInsumosParent = handle === INSUMOS_PARENT_HANDLE;
-  const subcategories = isInsumosParent ? await getInsumosSubcategories() : [];
+  const isTumblerParent = handle === TUMBLER_PARENT_HANDLE;
+  const subcategories = isTumblerParent ? await getTumblerSubcategories() : [];
 
   // Whitelist de ordenamiento: cualquier valor extraño cae en "newest".
   const sort = ProductSortSchema.parse(orden ?? "newest");
-  const products = isInsumosParent
+  const products = isTumblerParent
     ? []
     : await getProductsByCategory(category.id, sort);
 
@@ -72,19 +80,33 @@ export default async function CategoryPage({
       </Link>
 
       <div className="mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <h1 className="text-3xl font-bold sm:text-4xl">{category.title}</h1>
-          {category.description && (
-            <p className="mt-3 max-w-2xl text-ml-white/65">
-              {category.description}
-            </p>
+        <div className="flex items-start gap-4">
+          {/* Logo/imagen de la categoría (p. ej. matrixlab-tumbler.png). Si el
+              archivo aún no existe, image_url llega null y no se renderiza
+              nada: la página nunca muestra una imagen rota. */}
+          {category.image_url && (
+            <Image
+              src={category.image_url}
+              alt={category.title}
+              width={72}
+              height={72}
+              className="h-16 w-16 shrink-0 rounded-2xl border border-white/10 object-cover sm:h-[72px] sm:w-[72px]"
+            />
           )}
+          <div>
+            <h1 className="text-3xl font-bold sm:text-4xl">{category.title}</h1>
+            {category.description && (
+              <p className="mt-3 max-w-2xl text-ml-white/65">
+                {category.description}
+              </p>
+            )}
+          </div>
         </div>
-        {!isInsumosParent && <SortSelect current={sort} />}
+        {!isTumblerParent && <SortSelect current={sort} />}
       </div>
 
-      {isInsumosParent ? (
-        <InsumosBlocks subcategories={subcategories} />
+      {isTumblerParent ? (
+        <TumblerBlocks subcategories={subcategories} />
       ) : (
         <div className="mt-10">
           <ProductGrid products={products} />
@@ -94,8 +116,8 @@ export default async function CategoryPage({
   );
 }
 
-/** Bloques de las subcategorías comerciales de Insumos creativos. */
-function InsumosBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
+/** Bloques de las subcategorías comerciales de MatrixLab Tumbler. */
+function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
   return (
     <div className="mt-10">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -127,7 +149,7 @@ function InsumosBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
         </p>
         <a
           href={buildWhatsAppUrl(
-            "Hola, busco un insumo creativo específico. ¿Me pueden ayudar?",
+            "Hola, busco un insumo de MatrixLab Tumbler. ¿Me pueden ayudar?",
           )}
           target="_blank"
           rel="noopener noreferrer"

@@ -6,6 +6,7 @@ import {
   Box,
   Building2,
   CheckCircle2,
+  CupSoda,
   FlaskConical,
   Gift,
   GraduationCap,
@@ -97,6 +98,8 @@ const STORE_CATEGORIES: Array<{
   handle: string;
   label: string;
   icon: IconComponent;
+  /** Copy corto opcional (tooltip/title del tile). */
+  copy?: string;
 }> = [
   { handle: "stickers", label: "Stickers", icon: Sticker },
   { handle: "etiquetas-escolares", label: "Etiquetas escolares", icon: GraduationCap },
@@ -105,6 +108,12 @@ const STORE_CATEGORIES: Array<{
   { handle: "gorras", label: "Gorras", icon: CapIcon },
   { handle: "grabado-laser", label: "Grabado láser", icon: Zap },
   { handle: "impresion-3d", label: "Impresión 3D", icon: Box },
+  {
+    handle: "matrixlab-tumbler",
+    label: "MatrixLab Tumbler",
+    icon: CupSoda,
+    copy: "Vasos, termos, snow globe e insumos creativos para personalización.",
+  },
 ];
 
 // Prendas del laboratorio (T-Shirt Lab) con su icono específico, no genérico.
@@ -632,11 +641,12 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
+            <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4">
               {STORE_CATEGORIES.map((category, index) => (
                 <Reveal key={category.handle} delay={index * 0.05}>
                   <Link
                     href={`/tienda/categoria/${category.handle}`}
+                    title={category.copy}
                     className="glass group flex h-full flex-col items-center gap-3 rounded-2xl px-4 py-7 text-center transition hover:-translate-y-1 hover:border-ml-violet/40 hover:shadow-glow-violet"
                   >
                     <category.icon
