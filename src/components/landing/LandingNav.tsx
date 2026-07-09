@@ -6,12 +6,10 @@ import { FlaskConical, Menu, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { href: "/#quienes-somos", label: "Quiénes somos" },
-  { href: "/#stickers", label: "Stickers" },
-  { href: "/#experiencias", label: "Experiencias" },
+  { href: "/#laboratorio", label: "Laboratorio" },
+  { href: "/#tumbler", label: "MatrixLab Tumbler" },
   { href: "/#tshirtlab", label: "T-Shirt Lab" },
   { href: "/#empresas", label: "Empresas" },
-  { href: "/#tienda", label: "Tienda" },
   { href: "/#contacto", label: "Contacto" },
 ];
 

@@ -9,6 +9,7 @@
   --color-ml-violet: #b197fc;
   --color-ml-cyan: #4dceff;
   --color-ml-coral: #ff8787;
+  --color-ml-green: #3ddc97;
   --color-ml-gray: #343a40;
   --color-ml-white: #f8f9fa;
 
@@ -17,6 +18,8 @@
 
   --shadow-glow-violet: 0 0 24px 0 rgba(177, 151, 252, 0.35);
   --shadow-glow-cyan: 0 0 24px 0 rgba(77, 206, 255, 0.3);
+  --shadow-glow-coral: 0 0 24px 0 rgba(255, 135, 135, 0.3);
+  --shadow-glow-green: 0 0 24px 0 rgba(61, 220, 151, 0.3);
 
   --animate-float: float 7s ease-in-out infinite;
 }
