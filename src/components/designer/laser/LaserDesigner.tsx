@@ -42,8 +42,15 @@ const LaserCanvas = dynamic(
 
 export default function LaserDesigner({
   product,
+  previewOnly: catalogPreview = false,
 }: {
   product: ProductWithVariants;
+  /**
+   * true cuando el producto base no existe en el catálogo real y `product` es
+   * el respaldo de previsualización: se diseña el grabado y se cotiza por
+   * WhatsApp, sin persistir nada (guardar/carrito deshabilitados).
+   */
+  previewOnly?: boolean;
 }) {
   const [templateId, setTemplateId] = useState(LASER_TEMPLATES[0]!.id);
   const [widthCm, setWidthCm] = useState<number>(LASER_DEFAULT_CM.width);
@@ -51,8 +58,9 @@ export default function LaserDesigner({
   const [elements, setElements] = useState<LaserTextElement[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [designId, setDesignId] = useState<string | null>(null);
-  // Modo previsualización cuando el backend (diseños) aún no está configurado.
-  const [previewOnly, setPreviewOnly] = useState(false);
+  // Modo previsualización cuando el backend (diseños) aún no está configurado
+  // o el producto base no existe en catálogo (catalogPreview).
+  const [previewOnly, setPreviewOnly] = useState(catalogPreview);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -415,7 +423,9 @@ export default function LaserDesigner({
             onAddToCart={handleAddToCart}
             note={
               previewOnly
-                ? "Estás en modo previsualización: puedes diseñar tu grabado de texto. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
+                ? catalogPreview
+                  ? "Para guardar o agregar al carrito necesitamos activar este producto en catálogo. Puedes cotizar por WhatsApp."
+                  : "Estás en modo previsualización: puedes diseñar tu grabado de texto. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
                 : undefined
             }
           />

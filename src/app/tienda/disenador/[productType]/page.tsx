@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, Info, MessageCircle } from "lucide-react";
 import DesignerRouter from "@/components/designer/DesignerRouter";
 import GorrasDesigner from "@/components/designer/GorrasDesigner";
 import {
   getCatalogEntry,
   isDesignerProductType,
 } from "@/lib/designer/product-catalog";
-import { getDesignerBaseProduct } from "@/lib/store/products";
+import {
+  getDesignerBaseProduct,
+  getDesignerFallbackProduct,
+} from "@/lib/store/products";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +83,19 @@ export default async function DesignerProductPage({
       getDesignerBaseProduct("gorra-trucker-personalizada"),
       getDesignerBaseProduct("gorra-clasica-personalizada"),
     ]);
+    // Respaldo: si el catálogo no tiene el producto base, el diseñador abre en
+    // modo previsualización/cotización en lugar de bloquear la página.
+    const truckerView =
+      trucker ?? getDesignerFallbackProduct("gorra-trucker-personalizada");
+    const clasicaView =
+      clasica ?? getDesignerFallbackProduct("gorra-clasica-personalizada");
+    if (!trucker || !clasica) {
+      console.warn("[designer] producto base no encontrado; modo previsualización", {
+        productType,
+        trucker: Boolean(trucker),
+        clasica: Boolean(clasica),
+      });
+    }
     return (
       <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
         <div className="mb-6">
@@ -94,8 +110,14 @@ export default async function DesignerProductPage({
             Diseña tu <span className="text-gradient">gorra</span>
           </h1>
         </div>
-        {trucker || clasica ? (
-          <GorrasDesigner truckerProduct={trucker} clasicaProduct={clasica} />
+        {!trucker && !clasica && <PreviewModeBanner />}
+        {truckerView || clasicaView ? (
+          <GorrasDesigner
+            truckerProduct={truckerView}
+            clasicaProduct={clasicaView}
+            truckerPreviewOnly={!trucker}
+            clasicaPreviewOnly={!clasica}
+          />
         ) : (
           <UnavailableNotice />
         )}
@@ -108,6 +130,17 @@ export default async function DesignerProductPage({
 
   const entry = getCatalogEntry(productType);
   const product = await getDesignerBaseProduct(entry.baseHandle);
+  // Respaldo: sin producto base en catálogo, el diseñador abre igual en modo
+  // previsualización (armar diseño + cotizar por WhatsApp); guardar/carrito se
+  // deshabilitan con aviso claro dentro del editor.
+  const viewProduct = product ?? getDesignerFallbackProduct(entry.baseHandle);
+  if (!product) {
+    console.warn("[designer] producto base no encontrado; modo previsualización", {
+      productType,
+      baseHandle: entry.baseHandle,
+      fallback: Boolean(viewProduct),
+    });
+  }
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
@@ -124,16 +157,31 @@ export default async function DesignerProductPage({
         </h1>
       </div>
 
-      {product ? (
+      {!product && viewProduct && <PreviewModeBanner />}
+      {viewProduct ? (
         <DesignerRouter
           kind={entry.kind}
           productType={productType}
-          product={product}
+          product={viewProduct}
+          previewOnly={!product}
         />
       ) : (
         <UnavailableNotice />
       )}
     </div>
+  );
+}
+
+/** Alerta suave del modo previsualización (el diseñador sigue usable). */
+function PreviewModeBanner() {
+  return (
+    <p className="mb-6 flex items-start gap-2.5 rounded-2xl border border-ml-cyan/30 bg-ml-cyan/10 px-5 py-4 text-sm leading-relaxed text-ml-white/85">
+      <Info className="mt-0.5 h-5 w-5 shrink-0 text-ml-cyan" aria-hidden />
+      <span>
+        Modo previsualización: el producto base no está disponible en catálogo,
+        pero puedes armar tu diseño y cotizar por WhatsApp.
+      </span>
+    </p>
   );
 }
 

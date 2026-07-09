@@ -24,14 +24,21 @@ const OPTIONS: Array<{ id: GorraType; label: string }> = [
 export default function GorrasDesigner({
   truckerProduct,
   clasicaProduct,
+  truckerPreviewOnly = false,
+  clasicaPreviewOnly = false,
 }: {
   truckerProduct: ProductWithVariants | null;
   clasicaProduct: ProductWithVariants | null;
+  /** true si el producto de ese tipo es respaldo de previsualización. */
+  truckerPreviewOnly?: boolean;
+  clasicaPreviewOnly?: boolean;
 }) {
   const [type, setType] = useState<GorraType>(
     truckerProduct ? "gorra-trucker" : "gorra-clasica",
   );
   const product = type === "gorra-trucker" ? truckerProduct : clasicaProduct;
+  const previewOnly =
+    type === "gorra-trucker" ? truckerPreviewOnly : clasicaPreviewOnly;
 
   return (
     <div className="flex flex-col gap-6">
@@ -63,7 +70,12 @@ export default function GorrasDesigner({
       </div>
 
       {product ? (
-        <GarmentDesigner key={type} productType={type} product={product} />
+        <GarmentDesigner
+          key={type}
+          productType={type}
+          product={product}
+          previewOnly={previewOnly}
+        />
       ) : (
         <div className="glass rounded-3xl p-12 text-center text-ml-white/60">
           Este tipo de gorra está en preparación. Elige otro tipo o escríbenos

@@ -446,6 +446,34 @@ export async function getDesignerBaseProduct(
   return withTimeout(resolveDesignerBaseProduct(handle), null);
 }
 
+/**
+ * Producto base de RESPALDO para el laboratorio, construido desde los mocks.
+ *
+ * Se usa cuando el catálogo real (Supabase) no tiene el producto base: el
+ * diseñador abre en modo previsualización/cotización en lugar de bloquear la
+ * página. Este producto NUNCA debe llegar a guardar/carrito (los diseñadores
+ * deshabilitan esas acciones en modo previsualización): sus ids son los
+ * canónicos de seeds/mocks y pueden no existir en la base de datos.
+ */
+export function getDesignerFallbackProduct(
+  handle: string,
+): ProductWithVariants | null {
+  if (!isValidHandle(handle)) return null;
+  return mockDesignerProduct(handle);
+}
+
+function mockDesignerProduct(handle: string): ProductWithVariants | null {
+  const mock = MOCK_PRODUCTS.find((p) => p.handle === handle);
+  if (!mock || mock.status === "oculto") return null;
+  return {
+    ...mock,
+    variants: MOCK_VARIANTS.filter(
+      (v) => v.product_id === mock.id && v.status !== "oculto",
+    ),
+    category: MOCK_CATEGORIES.find((c) => c.id === mock.category_id) ?? null,
+  };
+}
+
 async function resolveDesignerBaseProduct(
   handle: string,
 ): Promise<ProductWithVariants | null> {
@@ -453,15 +481,7 @@ async function resolveDesignerBaseProduct(
 
   const { client } = getSchoolLabelsClient();
   if (!client) {
-    const mock = MOCK_PRODUCTS.find((p) => p.handle === handle);
-    if (!mock || mock.status === "oculto") return null;
-    return {
-      ...mock,
-      variants: MOCK_VARIANTS.filter(
-        (v) => v.product_id === mock.id && v.status !== "oculto",
-      ),
-      category: MOCK_CATEGORIES.find((c) => c.id === mock.category_id) ?? null,
-    };
+    return mockDesignerProduct(handle);
   }
 
   // Consulta limpia: SOLO por handle, sin embeds ni filtros de status/stock.

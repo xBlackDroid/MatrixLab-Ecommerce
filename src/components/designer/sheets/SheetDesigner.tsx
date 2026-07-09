@@ -62,6 +62,12 @@ interface RepeatBase {
 interface SheetDesignerProps {
   productType: DesignerProductType;
   product: ProductWithVariants;
+  /**
+   * true cuando el producto base no existe en el catálogo real y `product` es
+   * el respaldo de previsualización: se arma la planilla y se cotiza por
+   * WhatsApp, sin persistir nada (guardar/carrito deshabilitados).
+   */
+  previewOnly?: boolean;
 }
 
 const AREA = PRINTABLE_AREA_CM;
@@ -69,6 +75,7 @@ const AREA = PRINTABLE_AREA_CM;
 export default function SheetDesigner({
   productType,
   product,
+  previewOnly: catalogPreview = false,
 }: SheetDesignerProps) {
   const entry = getCatalogEntry(productType);
   const sheetType = entry.sheetType ?? "stickers";
@@ -85,8 +92,9 @@ export default function SheetDesigner({
   const [pieceH, setPieceH] = useState(DEFAULT_PIECE_CM);
 
   const [uploading, setUploading] = useState(false);
-  // Modo previsualización cuando el backend (storage/diseños) aún no está listo.
-  const [previewOnly, setPreviewOnly] = useState(false);
+  // Modo previsualización cuando el backend (storage/diseños) aún no está
+  // listo, o cuando el producto base no existe en catálogo (catalogPreview).
+  const [previewOnly, setPreviewOnly] = useState(catalogPreview);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -170,6 +178,11 @@ export default function SheetDesigner({
     if (!dims.ok) {
       toast.error(dims.error);
       return null;
+    }
+    // Producto base fuera de catálogo: nada que persistir; la pieza se coloca
+    // en la planilla en modo previsualización (assetId vacío) y se cotiza.
+    if (catalogPreview) {
+      return { assetId: "", remoteUrl: undefined, localUrl: objectUrl, img };
     }
     // El arte se coloca en la planilla aunque el storage no esté listo: si la
     // persistencia falla por configuración pendiente, seguimos en modo
@@ -551,7 +564,9 @@ export default function SheetDesigner({
             onAddToCart={handleAddToCart}
             note={
               previewOnly
-                ? "Estás en modo previsualización: puedes armar tu planilla. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
+                ? catalogPreview
+                  ? "Para guardar o agregar al carrito necesitamos activar este producto en catálogo. Puedes cotizar por WhatsApp."
+                  : "Estás en modo previsualización: puedes armar tu planilla. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
                 : undefined
             }
           />

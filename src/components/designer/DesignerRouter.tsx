@@ -33,16 +33,35 @@ export default function DesignerRouter({
   kind,
   productType,
   product,
+  previewOnly = false,
 }: {
   kind: DesignerKind;
   productType: DesignerProductType;
   product: ProductWithVariants;
+  /**
+   * true cuando el producto base NO está en el catálogo real y `product` es el
+   * respaldo de previsualización: el editor abre completo pero guardar/agregar
+   * al carrito quedan deshabilitados con aviso claro (solo cotización).
+   */
+  previewOnly?: boolean;
 }) {
   if (kind === "sheet") {
-    return <SheetDesigner productType={productType} product={product} />;
+    return (
+      <SheetDesigner
+        productType={productType}
+        product={product}
+        previewOnly={previewOnly}
+      />
+    );
   }
   if (kind === "laser") {
-    return <LaserDesigner product={product} />;
+    return <LaserDesigner product={product} previewOnly={previewOnly} />;
   }
-  return <GarmentDesigner productType={productType} product={product} />;
+  return (
+    <GarmentDesigner
+      productType={productType}
+      product={product}
+      previewOnly={previewOnly}
+    />
+  );
 }

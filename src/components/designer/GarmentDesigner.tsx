@@ -59,6 +59,12 @@ const SIZES: GarmentSize[] = ["CH", "M", "G", "EG"];
 interface GarmentDesignerProps {
   productType: DesignerProductType;
   product: ProductWithVariants;
+  /**
+   * true cuando el producto base no existe en el catálogo real y `product` es
+   * el respaldo de previsualización: se diseña y cotiza por WhatsApp, pero no
+   * se persiste nada (guardar/carrito deshabilitados con aviso claro).
+   */
+  previewOnly?: boolean;
 }
 
 type SideAssets = { front: PlacedAsset[]; back: PlacedAsset[] };
@@ -66,6 +72,7 @@ type SideAssets = { front: PlacedAsset[]; back: PlacedAsset[] };
 export default function GarmentDesigner({
   productType,
   product,
+  previewOnly: catalogPreview = false,
 }: GarmentDesignerProps) {
   const entry = getCatalogEntry(productType);
   const view = getGarmentView(productType);
@@ -85,10 +92,11 @@ export default function GarmentDesigner({
 
   const [designId, setDesignId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  // true cuando el backend (storage/diseños) aún no está configurado: el editor
-  // sigue usable en modo previsualización, pero guardar/agregar al carrito se
+  // true cuando el backend (storage/diseños) aún no está configurado o el
+  // producto base no existe en el catálogo (catalogPreview): el editor sigue
+  // usable en modo previsualización, pero guardar/agregar al carrito se
   // deshabilita con un aviso claro (en vez de un toast de "en configuración").
-  const [previewOnly, setPreviewOnly] = useState(false);
+  const [previewOnly, setPreviewOnly] = useState(catalogPreview);
   const [saving, setSaving] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -238,6 +246,13 @@ export default function GarmentDesigner({
       setAssets((prev) => ({ ...prev, [side]: [...prev[side], placed] }));
       setSelectedId(localId);
       markDirty();
+
+      // Producto base fuera de catálogo: no hay nada que persistir (el diseño
+      // se cotiza por WhatsApp). La imagen ya quedó colocada en el lienzo.
+      if (catalogPreview) {
+        toast.success("Imagen agregada (modo previsualización)");
+        return;
+      }
 
       // 2) Persiste en segundo plano al storage privado. Si falta configuración,
       //    pasa a modo previsualización sin mostrar un error alarmante.
@@ -766,7 +781,9 @@ export default function GarmentDesigner({
             onAddToCart={handleAddToCart}
             note={
               previewOnly
-                ? "Estás en modo previsualización: puedes diseñar y acomodar tu imagen. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
+                ? catalogPreview
+                  ? "Para guardar o agregar al carrito necesitamos activar este producto en catálogo. Puedes cotizar por WhatsApp."
+                  : "Estás en modo previsualización: puedes diseñar y acomodar tu imagen. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
                 : undefined
             }
           />
