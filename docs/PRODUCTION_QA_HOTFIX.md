@@ -382,6 +382,112 @@ URLs completas) en los logs del deployment con:
    `TODO(diagnóstico temporal)` en `src/lib/store/products.ts`; el
    `console.warn` de "lookup sin resultado" sí se queda).
 
+## Hotfix 4 — Falso fallback por timeout del resolver (log real: 9.01s)
+
+### Causa raíz exacta (confirmada con el log real de Vercel)
+
+El log de Preview (`commit b5ecaff`) mostró `errorMessage: "read-timeout"` con
+duración de función de 9.01s y `projectRef` correcto. La cadena era:
+
+1. Cada lectura individual tenía un timeout local de **4s** (`READ_TIMEOUT_MS`).
+2. El resolver hacía **lecturas secuenciales**: producto → (reintento) →
+   variantes → (reintento) → fallback del catálogo.
+3. Todo bajo un **presupuesto global rígido de 9s** que cortaba la función a
+   los 9.01s y devolvía `null` ⇒ modo previsualización **con el producto
+   existente** en Supabase. La latencia real Preview↔Supabase (>4s por
+   lectura en frío) convertía el presupuesto en un falso negativo garantizado.
+
+### Corrección
+
+`src/lib/store/products.ts` (`resolveDesignerBaseProduct`):
+
+* **UNA sola lectura** con variantes embebidas por la FK real:
+  `products?select=*,product_variants(*)&handle=eq.<handle>&limit=1`
+  (el mismo embed ya probado del catálogo público). Antes: 2–3+ requests
+  secuenciales; ahora: **1 request por resolución**.
+* **Sin presupuesto global**: se eliminó el corte rígido de 9s (y el
+  `withTimeout` huérfano). La única lectura tiene su propio límite de **15s**
+  (`DESIGNER_READ_TIMEOUT_MS`).
+* **Máximo un reintento** y SOLO ante fallos transitorios (timeout, conexión,
+  429, 5xx — `isTransientReadError`), con espera corta de **350ms**. Un
+  resultado limpio sin fila (`found:false` sin error) **nunca** se reintenta
+  ni se cachea. Nota: supabase-js además reintenta 5xx internamente (medido:
+  hasta 4 requests/~7s antes de exponer `code: '503'`), así que el peor caso
+  acotado es ~30s únicamente con Supabase caído dos veces seguidas — sin
+  bloqueo indefinido; después la página degrada a previsualización.
+* **Estados**: el diseñador acepta `disponible` y `sobre_pedido` siempre que
+  `is_customizable = true` (ahora también validado en el resolver); nunca se
+  exige stock físico a personalizados bajo pedido. `oculto` o
+  `is_customizable=false` ⇒ previsualización (fallback legítimo).
+* El respaldo por el path del catálogo público solo corre ante miss limpio o
+  error NO transitorio (p. ej. llave service inválida, donde el path anon
+  puede funcionar); tras doble fallo transitorio no se apilan más timeouts.
+
+### Números antes / después
+
+| Métrica | Antes (b5ecaff) | Después |
+|---|---|---|
+| Requests a Supabase por resolución | 2 secuenciales + hasta 2 reintentos + 1 fallback | **1** (embed) |
+| Timeout por lectura | 4s | 15s |
+| Presupuesto global | 9s rígido (cortaba la función) | Ninguno (límite por lectura) |
+| Preview real (log Vercel) | 9.01s → `read-timeout`, `found:false` | — (pendiente redeploy) |
+| Reproducción: Supabase a 6s/request | falso negativo garantizado (4s < 6s) | `found:true, attempts:1, elapsedMs:6354` |
+| Reproducción: latencia normal | — | `elapsedMs` 47–95ms, `attempts:1` |
+| 7 rutas × 5 cargas (35 resoluciones) | — | 35/35 `found:true`, 0 intermitencias, 1 request c/u |
+| 503 transitorio (1º falla, 2º ok) | — | recuperado sin fallback (la lib reintenta; capa propia cubre timeout/conexión) |
+
+Log local esperado para sudadera (verificado):
+`resolvedHandle:'sudadera-personalizada', status:'disponible',
+variantSkus:['SUD-CUSTOM'], found:true, isCustomizable:true, variantCount:1,
+errorCode:null, errorMessage:null`.
+
+### Región (documentación de la decisión)
+
+El log de Vercel muestra la función en **Washington D.C. (iad1)**. Desde este
+entorno de trabajo NO fue posible verificar la región real del proyecto
+Supabase `spgrjhlwmyjfwiwsgqvn` (el proxy de salida bloquea la consulta), así
+que **no se fijó región por código** (la instrucción exige comprobar antes de
+hardcodear). Cómo cerrar esto:
+
+1. Supabase Dashboard → Project Settings → General → **Region**.
+2. Si es `us-east-1` (N. Virginia): iad1 ya es la región óptima — no hacer nada.
+3. Si es otra: en Vercel → Project Settings → Functions → Region elegir la
+   más cercana (o `vercel.json` → `{"regions": ["<id>"]}`). Mapeo rápido:
+   `us-east-1→iad1`, `us-west-1→sfo1`, `sa-east-1→gru1`,
+   `eu-west-1→dub1`, `eu-central-1→fra1`, `ap-southeast-1→sin1`.
+   Con la lectura única + 15s, la latencia cruzada deja de ser bloqueante en
+   cualquier caso; fijar región es optimización, no requisito.
+
+### Log temporal
+
+`[designer runtime diagnostic]` sigue activo (una línea por resolución) ahora
+con `elapsedMs` y `attempts`. **Retirarlo tras confirmar en Preview** (bloque
+marcado `TODO(diagnóstico temporal)` en `src/lib/store/products.ts`).
+
+### Copy
+
+`src/lib/designer/school-labels/info-content.ts`: eliminado
+“Cuenta Banamex a nombre de Karla Elorza.” de Métodos de pago →
+Transferencia bancaria. Quedan solo las dos líneas de datos-al-confirmar y
+comprobante por WhatsApp. Sin cambios de lógica de pagos.
+
+### QA técnico del hotfix 4
+
+`type-check` ✓ · `lint` ✓ · `build` ✓ · `npm audit` 0 vulnerabilidades ·
+mapeo 66/66 ✓ · contratos 19/19 ✓ · reproducción con mock PostgREST en 6
+escenarios (normal, 6s/request, 503 transitorio, 503 persistente, sin fila,
+llave inválida) ✓.
+
+### Pendiente en Vercel Preview (con Supabase real)
+
+1. Desplegar la rama y abrir las 7 rutas del diseñador 5 veces cada una.
+2. Confirmar en el log: `found:true, isCustomizable:true, variantCount>0,
+   errorMessage:null` y para sudadera `variantSkus:['SUD-CUSTOM']`.
+3. QA funcional: sin mensaje de catálogo; guardar habilitado; carrito;
+   `/tienda/carrito`; `/admin/disenos`; stickers-planilla/repetición y gorras
+   guardan; sin regresión en etiquetas.
+4. Confirmada la corrección → retirar el log temporal.
+
 ## Instrucciones exactas de producción
 
 1. **Supabase (SQL Editor):** ejecutar `supabase/seed_designer_base_v2.sql`

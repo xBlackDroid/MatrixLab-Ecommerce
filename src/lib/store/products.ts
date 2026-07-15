@@ -145,12 +145,15 @@ const READ_TIMEOUT_MS = 4000;
 type ReadResult<T> = { data: T | null; error: unknown };
 
 /** Corre una query de Supabase contra un timeout; devuelve fallback si tarda. */
-async function raceRead<T>(query: PromiseLike<ReadResult<T>>): Promise<ReadResult<T>> {
+async function raceRead<T>(
+  query: PromiseLike<ReadResult<T>>,
+  timeoutMs: number = READ_TIMEOUT_MS,
+): Promise<ReadResult<T>> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<ReadResult<T>>((resolve) => {
     timer = setTimeout(
       () => resolve({ data: null, error: { message: "read-timeout" } }),
-      READ_TIMEOUT_MS,
+      timeoutMs,
     );
   });
   try {
@@ -158,17 +161,6 @@ async function raceRead<T>(query: PromiseLike<ReadResult<T>>): Promise<ReadResul
   } finally {
     if (timer) clearTimeout(timer);
   }
-}
-
-/** Acota una operación async completa contra un timeout (devuelve fallback). */
-function withTimeout<T>(p: Promise<T>, fallback: T, ms = READ_TIMEOUT_MS): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<T>((resolve) => {
-    timer = setTimeout(() => resolve(fallback), ms);
-  });
-  return Promise.race([p, timeout]).finally(() => {
-    if (timer) clearTimeout(timer);
-  });
 }
 
 export async function getCategories(): Promise<CategoryRow[]> {
@@ -464,34 +456,61 @@ export async function getDesignerBaseProduct(
   // ("playera-personalizada", "grabado-laser-personalizado",
   // "planilla-stickers", …) antes de consultar. Así ningún lookup "viejo"
   // vuelve a caer en modo previsualización con el producto sí existente.
+  //
+  // NOTA: aquí NO hay presupuesto global. El presupuesto rígido anterior
+  // (9s totales sobre lecturas secuenciales de 4s + reintentos) cortaba la
+  // función a los 9.01s y producía un falso "read-timeout" con el producto
+  // existente en Supabase. Ahora el resolver hace UNA sola lectura con su
+  // propio límite (15s) y máximo un reintento transitorio.
   const canonical = resolveDesignerHandle(handle);
-  // Acota TODO el resolver: si Supabase se cuelga, la ruta del laboratorio
-  // degrada a "producto base no disponible" en ~4s en vez de timeout.
-  const resolved = await withTimeout(
-    resolveDesignerBaseProduct(canonical, context),
-    null,
-    DESIGNER_RESOLVER_TIMEOUT_MS,
-  );
+  const resolved = await resolveDesignerBaseProduct(canonical, context);
   if (resolved) return resolved;
   // Último respaldo: si la entrada original era distinta al handle canónico
   // (caso anómalo: la base usa el alias como handle), intenta la consulta
   // literal antes de rendirse.
   if (canonical !== handle && isValidHandle(handle)) {
-    return withTimeout(
-      resolveDesignerBaseProduct(handle, context),
-      null,
-      DESIGNER_RESOLVER_TIMEOUT_MS,
-    );
+    return resolveDesignerBaseProduct(handle, context);
   }
   return null;
 }
 
 /**
- * Presupuesto total del resolver del laboratorio. Más holgado que el timeout
- * de una lectura individual (READ_TIMEOUT_MS) porque el resolver puede hacer
- * hasta 2 lecturas + 1 reintento en frío (cold start serverless + TLS).
+ * Timeout de la ÚNICA lectura del resolver del laboratorio (producto +
+ * variantes embebidas en un solo round-trip). Holgado a propósito: un cold
+ * start serverless + TLS + región cruzada puede superar por mucho los 4s del
+ * catálogo general, y un falso timeout manda el diseñador a previsualización
+ * con el producto existente.
  */
-const DESIGNER_RESOLVER_TIMEOUT_MS = 9000;
+const DESIGNER_READ_TIMEOUT_MS = 15_000;
+
+/** Espera corta antes del único reintento por fallo transitorio. */
+const DESIGNER_RETRY_DELAY_MS = 350;
+
+/**
+ * ¿El error de lectura es transitorio (timeout, conexión, 429, 5xx)?
+ * Solo estos casos justifican UN reintento; un resultado limpio sin fila
+ * (found:false sin error) jamás se reintenta.
+ */
+function isTransientReadError(
+  err: { code?: string; message?: string } | null | undefined,
+): boolean {
+  if (!err) return false;
+  const message = (err.message ?? "").toLowerCase();
+  const code = String(err.code ?? "");
+  return (
+    message.includes("timeout") || // read-timeout local o gateway timeout
+    message.includes("fetch failed") || // undici: DNS/TLS/conexión
+    message.includes("network") ||
+    message.includes("socket") ||
+    message.includes("econn") ||
+    message.includes("aborted") ||
+    message.includes("too many requests") ||
+    message.includes("bad gateway") ||
+    message.includes("service unavailable") ||
+    code === "429" ||
+    /^5\d\d$/.test(code)
+  );
+}
 
 /**
  * Producto base de RESPALDO para el laboratorio, construido desde los mocks.
@@ -524,6 +543,11 @@ function mockDesignerProduct(handle: string): ProductWithVariants | null {
   };
 }
 
+/** Fila embebida de la lectura única del resolver (producto + variantes). */
+type DesignerEmbeddedRow = ProductRow & {
+  product_variants: ProductVariantRow[] | null;
+};
+
 async function resolveDesignerBaseProduct(
   handle: string,
   context?: { productType?: string },
@@ -535,97 +559,93 @@ async function resolveDesignerBaseProduct(
     return mockDesignerProduct(handle);
   }
 
-  // Consulta limpia: SOLO por handle, sin embeds ni filtros de status/stock.
-  const readProduct = () =>
-    raceRead<ProductRow[]>(
-      client.from("products").select("*").eq("handle", handle).limit(1) as unknown as PromiseLike<
-        ReadResult<ProductRow[]>
-      >,
+  const startedAt = Date.now();
+
+  // UNA SOLA lectura: producto + variantes embebidas por la FK real
+  // (product_variants.product_id → products.id), el mismo embed que ya usa el
+  // catálogo público (getProductByHandle). Antes eran 2 lecturas secuenciales
+  // (producto y luego variantes) con timeout de 4s cada una + reintentos bajo
+  // un presupuesto global de 9s: en Preview la función moría a los 9.01s con
+  // un falso "read-timeout" aunque la fila existía.
+  const readOnce = () =>
+    raceRead<DesignerEmbeddedRow[]>(
+      client
+        .from("products")
+        .select("*, product_variants(*)")
+        .eq("handle", handle)
+        .limit(1) as unknown as PromiseLike<ReadResult<DesignerEmbeddedRow[]>>,
+      DESIGNER_READ_TIMEOUT_MS,
     );
-  let { data: rows, error: readError } = await readProduct();
-  // Un fallo transitorio (timeout de cold start, hipo de red) no debe tirar
-  // el diseñador a previsualización: reintenta UNA vez solo si hubo error.
-  // Un resultado limpio pero vacío ([] sin error) NO se reintenta ni se
-  // cachea: cada request vuelve a consultar (la página es force-dynamic).
-  if (readError) {
-    ({ data: rows, error: readError } = await readProduct());
-  }
-  const product = (rows ?? [])[0] ?? null;
 
+  let attempts = 1;
+  let { data: rows, error: readError } = await readOnce();
+  // Reintento ÚNICO y solo ante fallos realmente transitorios (timeout,
+  // conexión, 429, 5xx), con espera corta. Un resultado limpio sin fila
+  // ([] sin error) NUNCA se reintenta ni se cachea: cada request vuelve a
+  // consultar (las rutas del diseñador son force-dynamic).
+  if (isTransientReadError(readError as { code?: string; message?: string } | null)) {
+    await new Promise((resolve) => setTimeout(resolve, DESIGNER_RETRY_DELAY_MS));
+    attempts += 1;
+    ({ data: rows, error: readError } = await readOnce());
+  }
+
+  const row = (rows ?? [])[0] ?? null;
   const err = readError as { code?: string; message?: string } | null;
+  const variants = row
+    ? (row.product_variants ?? []).filter((v) => v.status !== "oculto")
+    : [];
 
-  // TODO(diagnóstico temporal — retirar tras confirmar la causa en Preview):
-  // línea única y segura que responde, desde los logs del deployment:
-  //   1. qué commit corre (VERCEL_GIT_COMMIT_SHA),
-  //   2. si SUPABASE_URL / SERVICE_ROLE / ANON existen en este runtime,
-  //   3. a QUÉ proyecto apunta la URL normalizada (projectRef),
-  //   5. si se usa el cliente service-role,
-  //   6. el handle exacto consultado,
-  //   7-8. status/variantes de la fila encontrada,
-  //   y el código/mensaje de error de Supabase si la consulta falló.
-  // No imprime claves ni URLs completas.
-  let variants: ProductVariantRow[] = [];
-  if (product && product.status !== "oculto") {
-    const readVariants = () =>
-      raceRead<ProductVariantRow[]>(
-        client
-          .from("product_variants")
-          .select("*")
-          .eq("product_id", product.id) as unknown as PromiseLike<
-          ReadResult<ProductVariantRow[]>
-        >,
-      );
-    let { data: variantData, error: variantError } = await readVariants();
-    // Mismo criterio anti-transitorios que el producto: 1 reintento con error.
-    if (variantError) {
-      ({ data: variantData, error: variantError } = await readVariants());
-    }
-    // Filtra ocultas en JS (sin filtro de status/stock en la query).
-    variants = (variantData ?? []).filter((v) => v.status !== "oculto");
-  }
-
+  // TODO(diagnóstico temporal — retirar tras confirmar la corrección en
+  // Preview): línea única y segura con commit del deployment, projectRef de
+  // la URL normalizada, cliente usado, tiempo real de la lectura, intentos y
+  // resultado. No imprime claves, URLs completas ni datos personales.
   console.info("[designer runtime diagnostic]", {
     productType: context?.productType ?? null,
     resolvedHandle: handle,
     commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
-    vercelEnv: process.env.VERCEL_ENV ?? null,
-    hasSupabaseUrl: Boolean(process.env.SUPABASE_URL),
-    hasServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
-    hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     projectRef,
     usingServiceRole,
-    found: Boolean(product),
-    status: product?.status ?? null,
-    isCustomizable: product?.is_customizable ?? null,
+    elapsedMs: Date.now() - startedAt,
+    attempts,
+    found: Boolean(row),
+    status: row?.status ?? null,
+    isCustomizable: row?.is_customizable ?? null,
     variantCount: variants.length,
-    variantSkus: variants.map((v) => v.sku).slice(0, 4),
+    variantSkus: variants.map((v) => v.sku),
     errorCode: err?.code ?? null,
     errorMessage: err?.message ?? null,
   });
 
-  if (!product) {
+  if (!row) {
     console.warn("[designer] lookup de producto base sin resultado", {
       handle,
       usingServiceRole,
       errorCode: err?.code ?? null,
       errorMessage: err?.message ?? null,
     });
-  }
-
-  // Respaldo: si la consulta directa no encontró, intenta el path probado del
-  // catálogo público (anon + RLS) que usa el resto de la tienda.
-  if (!product) {
+    // Doble fallo transitorio: la red hacia Supabase está caída AHORA; un
+    // tercer intento por el otro path solo sumaría otro timeout al render.
+    if (isTransientReadError(err)) return null;
+    // Miss limpio o error no transitorio (p. ej. llave service inválida):
+    // último respaldo por el path del catálogo público (cliente anon + RLS,
+    // una lectura acotada) antes de caer a previsualización.
     const fallback = await getProductByHandle(handle);
     if (fallback) {
-      if (fallback.status === "oculto") return null;
+      if (fallback.status === "oculto" || !fallback.is_customizable) {
+        return null;
+      }
       return fallback;
     }
     return null;
   }
 
-  // Solo se descarta si está oculto; sobre_pedido y disponible se aceptan.
-  if (product.status === "oculto") return null;
+  // Estados válidos para el diseñador: cualquiera visible ('disponible' y
+  // 'sobre_pedido' incluidos) con is_customizable = true. Los personalizados
+  // se fabrican bajo pedido: NUNCA se exige stock físico aquí.
+  if (row.status === "oculto" || !row.is_customizable) return null;
 
+  const { product_variants: _pv, ...product } = row;
+  void _pv;
   return {
     ...product,
     variants,
