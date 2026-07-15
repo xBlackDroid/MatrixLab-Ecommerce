@@ -307,6 +307,81 @@ código/mensaje del error real de Supabase) y validar
 en el entorno del deploy. Importante: el fix vive en ESTA rama; producción lo
 recibe hasta que la rama se despliegue.
 
+## Hotfix 3 — Diagnóstico de runtime del deployment (Preview en previsualización)
+
+Con Supabase producción confirmado
+(`sudadera-personalizada | disponible | true | 1 variante | SUD-CUSTOM`) y el
+mensaje de catálogo aún visible en Preview, se auditó el runtime completo del
+camino `getDesignerBaseProduct("sudadera-personalizada")` reproduciéndolo
+contra un Supabase REST simulado (PostgREST) en 5 escenarios. Resultado: **el
+código resuelve correctamente cuando el runtime tiene URL/llaves válidas del
+proyecto correcto** — y una deducción clave:
+
+> Si faltaran las variables de Supabase, la página usaría los mocks de
+> desarrollo y NO mostraría el mensaje de catálogo. Que Preview muestre ese
+> mensaje implica que su runtime SÍ tiene `SUPABASE_URL` + una llave, ejecuta
+> la consulta… y no recibe la fila. Es decir: **el deployment Preview está
+> consultando otro proyecto, o con llaves inválidas, o corre un commit viejo.**
+
+### Log temporal `[designer runtime diagnostic]`
+
+Cada visita a una ruta del diseñador emite UNA línea segura (sin llaves ni
+URLs completas) en los logs del deployment con:
+`productType`, `resolvedHandle`, `commit` (7 chars de `VERCEL_GIT_COMMIT_SHA`),
+`vercelEnv`, `hasSupabaseUrl`, `hasServiceRole`, `hasAnonKey`, `projectRef`
+(subdominio de la URL normalizada), `usingServiceRole`, `found`, `status`,
+`isCustomizable`, `variantCount`, `variantSkus`, `errorCode`, `errorMessage`.
+
+**Cómo leerla (firmas verificadas en reproducción local):**
+
+| Firma en el log | Causa exacta | Corrección |
+|---|---|---|
+| `found: true, status: 'disponible', variantSkus: ['SUD-CUSTOM']` | Todo bien: si aún ves el banner, el HTML es de un deployment/caché viejo | Redeploy / hard-refresh |
+| `commit` ≠ `9fc11ac`+ o `null` en Vercel | El deployment NO corre esta rama | Desplegar la rama del hotfix (check 1) |
+| `projectRef` ≠ `spgrjhlwmyjfwiwsgqvn` | Preview apunta a OTRO proyecto Supabase (env vars de Preview ≠ producción) | Corregir `SUPABASE_URL` del entorno Preview en Vercel (check 3) |
+| `found: false, errorCode: null, errorMessage: null` | El proyecto consultado NO tiene la fila (proyecto equivocado o sin seed) | Igual que arriba: revisar `projectRef` |
+| `errorMessage: 'Invalid API key'` | `SUPABASE_SERVICE_ROLE_KEY` / anon key inválidas o de otro proyecto | Re-copiar llaves del proyecto correcto (check 2) |
+| `errorMessage: 'read-timeout'` | URL inaccesible desde el runtime (URL rota, red) | Revisar `SUPABASE_URL` exacta |
+| `hasSupabaseUrl: false` | (No produce el mensaje de catálogo: caería a mocks) | Definir las vars en el scope Preview |
+
+### Verificaciones ejecutadas (reproducción con mock PostgREST)
+
+1. **Proyecto correcto** → consulta EXACTA `handle=eq.sudadera-personalizada`
+   (visible en el access-log del mock), acepta `status='disponible'`,
+   encuentra `SUD-CUSTOM` (variantCount 1), página SIN banner ni mensaje. ✓
+2. **Proyecto sin la fila** → `found:false, error null` + banner. ✓
+3. **Llave inválida (401)** → `errorMessage:'Invalid API key'` + banner. ✓
+4. **URL inaccesible** → `errorMessage:'read-timeout'` + banner. ✓
+5. **URL sucia** `…/rest/v1/` con slash final → se normaliza y resuelve igual
+   (check 4). ✓
+6. **Sin cache negativo** (check 9): el MISMO proceso que falló 3 veces
+   resolvió al instante al recuperarse la fuente; las rutas son
+   `force-dynamic` y no se cachea ningún resultado (solo el cliente HTTP). ✓
+7. `usingServiceRole:true` cuando `SUPABASE_SERVICE_ROLE_KEY` existe
+   (check 5); con solo anon también funciona (RLS permite
+   `status <> 'oculto'`). ✓
+
+### Robustez agregada
+
+* Reintento único de la lectura (producto y variantes) cuando hay ERROR
+  transitorio (cold start / hipo de red). Un resultado vacío limpio NO se
+  reintenta ni se cachea.
+* Presupuesto del resolver ampliado a 9s (era 4s totales; un cold start
+  serverless con TLS podía tirar a previsualización por timeout).
+
+### Pasos para cerrar en Vercel
+
+1. Abrir el deployment Preview → Functions/Logs.
+2. Visitar `/tienda/disenador/sudadera` en ese Preview.
+3. Buscar `[designer runtime diagnostic]` y comparar contra la tabla.
+4. Aplicar la corrección de la fila que coincida (env vars del scope
+   Preview: `SUPABASE_URL` → `https://spgrjhlwmyjfwiwsgqvn.supabase.co`,
+   `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) y redeploy.
+5. Confirmado `found:true` sin banner → **retirar el log temporal** (bloque
+   `console.info("[designer runtime diagnostic]", …)` marcado con
+   `TODO(diagnóstico temporal)` en `src/lib/store/products.ts`; el
+   `console.warn` de "lookup sin resultado" sí se queda).
+
 ## Instrucciones exactas de producción
 
 1. **Supabase (SQL Editor):** ejecutar `supabase/seed_designer_base_v2.sql`

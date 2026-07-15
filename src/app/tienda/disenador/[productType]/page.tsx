@@ -84,8 +84,8 @@ export default async function DesignerProductPage({
     const truckerHandle = DESIGNER_PRODUCT_HANDLE_MAP["gorra-trucker"];
     const clasicaHandle = DESIGNER_PRODUCT_HANDLE_MAP["gorra-clasica"];
     const [trucker, clasica] = await Promise.all([
-      getDesignerBaseProduct(truckerHandle),
-      getDesignerBaseProduct(clasicaHandle),
+      getDesignerBaseProduct(truckerHandle, { productType: "gorra-trucker" }),
+      getDesignerBaseProduct(clasicaHandle, { productType: "gorra-clasica" }),
     ]);
     // Respaldo: si el catálogo no tiene el producto base, el diseñador abre en
     // modo previsualización/cotización en lugar de bloquear la página.
@@ -131,7 +131,9 @@ export default async function DesignerProductPage({
   if (!isDesignerProductType(productType)) notFound();
 
   const entry = getCatalogEntry(productType);
-  const product = await getDesignerBaseProduct(entry.baseHandle);
+  const product = await getDesignerBaseProduct(entry.baseHandle, {
+    productType,
+  });
   // Respaldo: sin producto base en catálogo, el diseñador abre igual en modo
   // previsualización (armar diseño + cotizar por WhatsApp); guardar/carrito se
   // deshabilitan con aviso claro dentro del editor.

@@ -30,7 +30,9 @@ export default async function SchoolLabelsPage() {
   // Sin caché: el producto base se resuelve siempre en cada request.
   noStore();
 
-  const product = await getDesignerBaseProduct(BASE_HANDLE);
+  const product = await getDesignerBaseProduct(BASE_HANDLE, {
+    productType: "etiquetas-escolares",
+  });
   const whatsappUrl = buildWhatsAppUrl(whatsappMessages.schoolLabels({}));
 
   return (

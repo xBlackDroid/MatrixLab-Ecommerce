@@ -425,25 +425,38 @@ let cachedSchoolClient: SupabaseClient | null = null;
 function getSchoolLabelsClient(): {
   client: SupabaseClient | null;
   usingServiceRole: boolean;
+  projectRef: string | null;
 } {
   const env = getServerEnv();
   const rawUrl = env.supabaseUrl;
   const key = env.supabaseServiceRoleKey ?? env.supabaseAnonKey;
-  if (!rawUrl || !key) return { client: null, usingServiceRole: false };
+  if (!rawUrl || !key) {
+    return { client: null, usingServiceRole: false, projectRef: null };
+  }
   const url = rawUrl
     .trim()
     .replace(/\/+$/, "") // sin slash(es) final(es)
-    .replace(/\/rest\/v1\/?$/i, ""); // sin segmento /rest/v1 accidental
+    .replace(/\/rest\/v1\/?$/i, "") // sin segmento /rest/v1 accidental
+    .replace(/\/+$/, "");
+  // Ref del proyecto Supabase que este runtime está consultando REALMENTE
+  // (subdominio de la URL normalizada; no es secreto). Clave para detectar un
+  // deployment apuntando a otro proyecto (p. ej. Preview vs producción).
+  const projectRef = /^https?:\/\/([^./]+)/.exec(url)?.[1] ?? null;
   if (!cachedSchoolClient) {
     cachedSchoolClient = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
   }
-  return { client: cachedSchoolClient, usingServiceRole: Boolean(env.supabaseServiceRoleKey) };
+  return {
+    client: cachedSchoolClient,
+    usingServiceRole: Boolean(env.supabaseServiceRoleKey),
+    projectRef,
+  };
 }
 
 export async function getDesignerBaseProduct(
   handle: string,
+  context?: { productType?: string },
 ): Promise<ProductWithVariants | null> {
   // Normaliza SIEMPRE al handle real de producción vía el mapa canónico:
   // si llega un tipo de diseñador o alias de ruta ("playera", "laser",
@@ -454,16 +467,31 @@ export async function getDesignerBaseProduct(
   const canonical = resolveDesignerHandle(handle);
   // Acota TODO el resolver: si Supabase se cuelga, la ruta del laboratorio
   // degrada a "producto base no disponible" en ~4s en vez de timeout.
-  const resolved = await withTimeout(resolveDesignerBaseProduct(canonical), null);
+  const resolved = await withTimeout(
+    resolveDesignerBaseProduct(canonical, context),
+    null,
+    DESIGNER_RESOLVER_TIMEOUT_MS,
+  );
   if (resolved) return resolved;
   // Último respaldo: si la entrada original era distinta al handle canónico
   // (caso anómalo: la base usa el alias como handle), intenta la consulta
   // literal antes de rendirse.
   if (canonical !== handle && isValidHandle(handle)) {
-    return withTimeout(resolveDesignerBaseProduct(handle), null);
+    return withTimeout(
+      resolveDesignerBaseProduct(handle, context),
+      null,
+      DESIGNER_RESOLVER_TIMEOUT_MS,
+    );
   }
   return null;
 }
+
+/**
+ * Presupuesto total del resolver del laboratorio. Más holgado que el timeout
+ * de una lectura individual (READ_TIMEOUT_MS) porque el resolver puede hacer
+ * hasta 2 lecturas + 1 reintento en frío (cold start serverless + TLS).
+ */
+const DESIGNER_RESOLVER_TIMEOUT_MS = 9000;
 
 /**
  * Producto base de RESPALDO para el laboratorio, construido desde los mocks.
@@ -498,28 +526,84 @@ function mockDesignerProduct(handle: string): ProductWithVariants | null {
 
 async function resolveDesignerBaseProduct(
   handle: string,
+  context?: { productType?: string },
 ): Promise<ProductWithVariants | null> {
   if (!isValidHandle(handle)) return null;
 
-  const { client, usingServiceRole } = getSchoolLabelsClient();
+  const { client, usingServiceRole, projectRef } = getSchoolLabelsClient();
   if (!client) {
     return mockDesignerProduct(handle);
   }
 
   // Consulta limpia: SOLO por handle, sin embeds ni filtros de status/stock.
-  const { data: rows, error: readError } = await raceRead<ProductRow[]>(
-    client.from("products").select("*").eq("handle", handle).limit(1) as unknown as PromiseLike<
-      ReadResult<ProductRow[]>
-    >,
-  );
+  const readProduct = () =>
+    raceRead<ProductRow[]>(
+      client.from("products").select("*").eq("handle", handle).limit(1) as unknown as PromiseLike<
+        ReadResult<ProductRow[]>
+      >,
+    );
+  let { data: rows, error: readError } = await readProduct();
+  // Un fallo transitorio (timeout de cold start, hipo de red) no debe tirar
+  // el diseñador a previsualización: reintenta UNA vez solo si hubo error.
+  // Un resultado limpio pero vacío ([] sin error) NO se reintenta ni se
+  // cachea: cada request vuelve a consultar (la página es force-dynamic).
+  if (readError) {
+    ({ data: rows, error: readError } = await readProduct());
+  }
   const product = (rows ?? [])[0] ?? null;
 
-  // Diagnóstico de producción: si la base SÍ tiene el producto pero la
-  // consulta falla (clave inválida, RLS, URL malformada, timeout), esto es lo
-  // que lo distingue en logs de un simple "no existe". Sin este log, el
-  // diseñador cae a modo previsualización en silencio.
+  const err = readError as { code?: string; message?: string } | null;
+
+  // TODO(diagnóstico temporal — retirar tras confirmar la causa en Preview):
+  // línea única y segura que responde, desde los logs del deployment:
+  //   1. qué commit corre (VERCEL_GIT_COMMIT_SHA),
+  //   2. si SUPABASE_URL / SERVICE_ROLE / ANON existen en este runtime,
+  //   3. a QUÉ proyecto apunta la URL normalizada (projectRef),
+  //   5. si se usa el cliente service-role,
+  //   6. el handle exacto consultado,
+  //   7-8. status/variantes de la fila encontrada,
+  //   y el código/mensaje de error de Supabase si la consulta falló.
+  // No imprime claves ni URLs completas.
+  let variants: ProductVariantRow[] = [];
+  if (product && product.status !== "oculto") {
+    const readVariants = () =>
+      raceRead<ProductVariantRow[]>(
+        client
+          .from("product_variants")
+          .select("*")
+          .eq("product_id", product.id) as unknown as PromiseLike<
+          ReadResult<ProductVariantRow[]>
+        >,
+      );
+    let { data: variantData, error: variantError } = await readVariants();
+    // Mismo criterio anti-transitorios que el producto: 1 reintento con error.
+    if (variantError) {
+      ({ data: variantData, error: variantError } = await readVariants());
+    }
+    // Filtra ocultas en JS (sin filtro de status/stock en la query).
+    variants = (variantData ?? []).filter((v) => v.status !== "oculto");
+  }
+
+  console.info("[designer runtime diagnostic]", {
+    productType: context?.productType ?? null,
+    resolvedHandle: handle,
+    commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
+    vercelEnv: process.env.VERCEL_ENV ?? null,
+    hasSupabaseUrl: Boolean(process.env.SUPABASE_URL),
+    hasServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    projectRef,
+    usingServiceRole,
+    found: Boolean(product),
+    status: product?.status ?? null,
+    isCustomizable: product?.is_customizable ?? null,
+    variantCount: variants.length,
+    variantSkus: variants.map((v) => v.sku).slice(0, 4),
+    errorCode: err?.code ?? null,
+    errorMessage: err?.message ?? null,
+  });
+
   if (!product) {
-    const err = readError as { code?: string; message?: string } | null;
     console.warn("[designer] lookup de producto base sin resultado", {
       handle,
       usingServiceRole,
@@ -541,17 +625,6 @@ async function resolveDesignerBaseProduct(
 
   // Solo se descarta si está oculto; sobre_pedido y disponible se aceptan.
   if (product.status === "oculto") return null;
-
-  const { data: variantData } = await raceRead<ProductVariantRow[]>(
-    client
-      .from("product_variants")
-      .select("*")
-      .eq("product_id", product.id) as unknown as PromiseLike<
-      ReadResult<ProductVariantRow[]>
-    >,
-  );
-  // Filtra ocultas en JS (sin filtro de status/stock en la query).
-  const variants = (variantData ?? []).filter((v) => v.status !== "oculto");
 
   return {
     ...product,
