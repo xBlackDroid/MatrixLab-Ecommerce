@@ -42,8 +42,13 @@ export default function GorrasDesigner({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <p className="mb-2 text-sm font-medium text-ml-white/70">Tipo de gorra</p>
+      <div className="glass rounded-2xl px-5 py-4">
+        <h2 className="mb-3 flex items-center gap-2.5 text-sm font-bold text-ml-white">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ml-cyan/15 text-xs font-bold text-ml-cyan">
+            1
+          </span>
+          Elige tu prenda: tipo de gorra
+        </h2>
         <div className="inline-flex flex-wrap gap-2">
           {OPTIONS.map((opt) => {
             const available =
@@ -55,7 +60,7 @@ export default function GorrasDesigner({
                 disabled={!available}
                 onClick={() => setType(opt.id)}
                 className={cn(
-                  "rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+                  "min-h-11 rounded-full border px-5 py-2.5 text-sm font-semibold transition",
                   type === opt.id
                     ? "border-ml-cyan bg-ml-cyan/10 text-ml-cyan"
                     : "border-white/15 bg-white/5 text-ml-white/75 hover:border-white/30",
@@ -75,6 +80,7 @@ export default function GorrasDesigner({
           productType={type}
           product={product}
           previewOnly={previewOnly}
+          showStepOne={false}
         />
       ) : (
         <div className="glass rounded-3xl p-12 text-center text-ml-white/60">

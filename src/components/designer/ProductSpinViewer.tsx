@@ -99,12 +99,15 @@ export default function ProductSpinViewer({
   const frameSrc = hasFrames
     ? frames[Math.floor((norm / 360) * frames.length) % frames.length]
     : null;
-  const fallbackSrc = side === "back" ? views.back : views.front;
+  // Sin vista posterior (p. ej. gorras) el giro recae en el frente: nunca se
+  // muestra una pantalla vacía a mitad del giro.
+  const fallbackSrc =
+    side === "back" ? (views.back ?? views.front) : views.front;
   const showImage = frameSrc ?? fallbackSrc ?? null;
-  const flipBack = !hasFrames && side === "back";
+  const flipBack = !hasFrames && side === "back" && Boolean(views.back);
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div data-testid="spin-viewer" className="flex flex-col items-center gap-3">
       <div
         role="img"
         aria-label="Vista del producto"
@@ -128,6 +131,9 @@ export default function ProductSpinViewer({
               transformStyle: "preserve-3d",
             }}
           >
+            {/* La preview de espalda ya está capturada tal como se ve la
+                prenda girada: se muestra SIN espejear (un scaleX(-1) aquí
+                invertía el diseño y cualquier texto se leía al revés). */}
             <Image
               src={showImage}
               alt="Producto"
@@ -135,12 +141,12 @@ export default function ProductSpinViewer({
               unoptimized
               sizes="384px"
               className="object-contain"
-              style={flipBack ? { transform: "scaleX(-1)" } : undefined}
             />
           </div>
         ) : (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-ml-white/45">
-            Guarda tu diseño para ver la vista de giro del producto.
+            Abre la vista de giro desde el diseñador para ver tu prenda por
+            ambos lados.
           </div>
         )}
       </div>
@@ -150,7 +156,7 @@ export default function ProductSpinViewer({
           type="button"
           onClick={() => setSide("front")}
           className={cn(
-            "rounded-full border px-4 py-1.5 text-sm transition",
+            "min-h-11 rounded-full border px-4 py-1.5 text-sm transition",
             side === "front"
               ? "border-ml-cyan bg-ml-cyan/10 text-ml-cyan"
               : "border-white/15 text-ml-white/70 hover:border-white/30",
@@ -158,24 +164,27 @@ export default function ProductSpinViewer({
         >
           Frente
         </button>
-        {(views.back || viewType === "360" || viewType === "180") && (
+        {/* El botón de espalda solo aparece cuando de verdad hay vista
+            posterior (frames o preview de espalda). Las gorras, que solo se
+            diseñan de frente, no muestran un botón roto. */}
+        {(hasFrames || views.back) && (
           <button
             type="button"
             onClick={() => setSide("back")}
             className={cn(
-              "rounded-full border px-4 py-1.5 text-sm transition",
+              "min-h-11 rounded-full border px-4 py-1.5 text-sm transition",
               side === "back"
                 ? "border-ml-cyan bg-ml-cyan/10 text-ml-cyan"
                 : "border-white/15 text-ml-white/70 hover:border-white/30",
             )}
           >
-            Atrás
+            Espalda
           </button>
         )}
         <button
           type="button"
           onClick={spinOnce}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-4 py-1.5 text-sm text-ml-white/70 transition hover:border-ml-violet/50 hover:text-ml-violet"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/15 px-4 py-1.5 text-sm text-ml-white/70 transition hover:border-ml-violet/50 hover:text-ml-violet"
         >
           <RotateCw className="h-4 w-4" aria-hidden />
           Girar
@@ -184,7 +193,7 @@ export default function ProductSpinViewer({
           type="button"
           onClick={() => setAngle(0)}
           aria-label="Reiniciar vista"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-4 py-1.5 text-sm text-ml-white/70 transition hover:border-white/30"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/15 px-4 py-1.5 text-sm text-ml-white/70 transition hover:border-white/30"
         >
           <RotateCcw className="h-4 w-4" aria-hidden />
           Reiniciar

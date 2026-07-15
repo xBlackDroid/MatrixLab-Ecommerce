@@ -151,9 +151,8 @@ export default function SheetDesigner({
     }
   }, [designId, productType, product.id, customVariant]);
 
-  async function uploadFile(file: File): Promise<{
-    assetId: string;
-    remoteUrl?: string;
+  /** Valida el archivo y lo carga como imagen local (sin tocar la red). */
+  async function loadLocalImage(file: File): Promise<{
     localUrl: string;
     img: HTMLImageElement;
   } | null> {
@@ -179,31 +178,37 @@ export default function SheetDesigner({
       toast.error(dims.error);
       return null;
     }
-    // Producto base fuera de catálogo: nada que persistir; la pieza se coloca
-    // en la planilla en modo previsualización (assetId vacío) y se cotiza.
-    if (catalogPreview) {
-      return { assetId: "", remoteUrl: undefined, localUrl: objectUrl, img };
+    return { localUrl: objectUrl, img };
+  }
+
+  /**
+   * Persiste el archivo en storage privado en SEGUNDO PLANO y aplica el
+   * assetId/URL firmada cuando termina. La pieza ya está visible en la
+   * planilla desde antes: subir nunca bloquea la previsualización (esa race
+   * dejaba el lienzo vacío en producción con redes lentas).
+   */
+  async function persistAssetInBackground(
+    file: File,
+    apply: (assetId: string, remoteUrl?: string) => void,
+  ) {
+    if (catalogPreview) return;
+    setUploading(true);
+    try {
+      const id = await ensureDesign();
+      if (!id) return; // previewOnly ya quedó activo si fue por configuración
+      const result = await uploadDesignAsset({ file, designProjectId: id });
+      if (!result.ok) {
+        if (result.configPending) setPreviewOnly(true);
+        else toast.error(result.message);
+        return;
+      }
+      setPreviewOnly(false);
+      apply(result.assetId, result.signedUrl);
+    } catch {
+      toast.error("No pudimos subir tu archivo. Intenta de nuevo.");
+    } finally {
+      setUploading(false);
     }
-    // El arte se coloca en la planilla aunque el storage no esté listo: si la
-    // persistencia falla por configuración pendiente, seguimos en modo
-    // previsualización (assetId vacío) sin bloquear el diseño visual.
-    const id = await ensureDesign();
-    if (!id) {
-      return { assetId: "", remoteUrl: undefined, localUrl: objectUrl, img };
-    }
-    const result = await uploadDesignAsset({ file, designProjectId: id });
-    if (!result.ok) {
-      if (result.configPending) setPreviewOnly(true);
-      else toast.error(result.message);
-      return { assetId: "", remoteUrl: undefined, localUrl: objectUrl, img };
-    }
-    setPreviewOnly(false);
-    return {
-      assetId: result.assetId,
-      remoteUrl: result.signedUrl,
-      localUrl: objectUrl,
-      img,
-    };
   }
 
   async function handleFreeUpload(file: File) {
@@ -211,71 +216,91 @@ export default function SheetDesigner({
       toast.error("Alcanzaste el máximo de 7 imágenes.");
       return;
     }
-    setUploading(true);
-    try {
-      const uploaded = await uploadFile(file);
-      if (!uploaded) return;
-      const ratio = uploaded.img.height / uploaded.img.width;
-      const widthCm = DEFAULT_PIECE_CM;
-      const heightCm = Math.round(DEFAULT_PIECE_CM * ratio * 10) / 10;
-      const others: RectCm[] = pieces.map((p) => ({
-        xCm: p.xCm,
-        yCm: p.yCm,
-        widthCm: p.widthCm,
-        heightCm: p.heightCm,
-      }));
-      const slot = findSlot(widthCm, heightCm, others, AREA, MIN_SPACING_CM);
-      if (!slot) {
-        toast.error(
-          "Esta pieza ya no cabe con la separación mínima. Reduce tamaño o elimina otra pieza.",
-        );
-        return;
-      }
-      const localId = nanoid(8);
-      setImages((prev) => ({ ...prev, [localId]: uploaded.img }));
-      setPieces((prev) => [
-        ...prev,
-        {
-          id: localId,
-          assetId: uploaded.assetId,
-          localUrl: uploaded.localUrl,
-          remoteUrl: uploaded.remoteUrl,
-          naturalWidth: uploaded.img.width,
-          naturalHeight: uploaded.img.height,
-          xCm: slot.xCm,
-          yCm: slot.yCm,
-          widthCm,
-          heightCm,
-          rotation: 0,
-          fileName: file.name,
-        },
-      ]);
-      setSelectedId(localId);
-      markDirty();
-      toast.success("Imagen agregada a la planilla");
-    } finally {
-      setUploading(false);
+    const loaded = await loadLocalImage(file);
+    if (!loaded) return;
+    const ratio = loaded.img.height / loaded.img.width;
+    // La pieza nueva nunca puede nacer más alta que el área imprimible.
+    let widthCm = DEFAULT_PIECE_CM;
+    let heightCm = Math.round(DEFAULT_PIECE_CM * ratio * 10) / 10;
+    if (heightCm > AREA.heightCm) {
+      widthCm = Math.max(1, Math.floor((AREA.heightCm / ratio) * 10) / 10);
+      heightCm = Math.round(widthCm * ratio * 10) / 10;
     }
+    const others: RectCm[] = pieces.map((p) => ({
+      xCm: p.xCm,
+      yCm: p.yCm,
+      widthCm: p.widthCm,
+      heightCm: p.heightCm,
+    }));
+    const slot = findSlot(widthCm, heightCm, others, AREA, MIN_SPACING_CM);
+    if (!slot) {
+      toast.error(
+        "Esta pieza ya no cabe con la separación mínima. Reduce tamaño o elimina otra pieza.",
+      );
+      return;
+    }
+    // 1) La pieza aparece en la planilla DE INMEDIATO.
+    const localId = nanoid(8);
+    setImages((prev) => ({ ...prev, [localId]: loaded.img }));
+    setPieces((prev) => [
+      ...prev,
+      {
+        id: localId,
+        assetId: "", // se completa cuando el storage confirma
+        localUrl: loaded.localUrl,
+        remoteUrl: undefined,
+        naturalWidth: loaded.img.width,
+        naturalHeight: loaded.img.height,
+        xCm: slot.xCm,
+        yCm: slot.yCm,
+        widthCm,
+        heightCm,
+        rotation: 0,
+        fileName: file.name,
+      },
+    ]);
+    setSelectedId(localId);
+    markDirty();
+    toast.success(
+      catalogPreview
+        ? "Imagen agregada (modo previsualización)"
+        : "Imagen agregada a la planilla",
+    );
+    // 2) Persistencia en segundo plano.
+    void persistAssetInBackground(file, (assetId, remoteUrl) => {
+      setPieces((prev) =>
+        prev.map((p) => (p.id === localId ? { ...p, assetId, remoteUrl } : p)),
+      );
+    });
   }
 
   async function handleRepeatUpload(file: File) {
-    setUploading(true);
-    try {
-      const uploaded = await uploadFile(file);
-      if (!uploaded) return;
-      setRepeatBase({
-        assetId: uploaded.assetId,
-        localUrl: uploaded.localUrl,
-        remoteUrl: uploaded.remoteUrl,
-        image: uploaded.img,
-        naturalWidth: uploaded.img.width,
-        naturalHeight: uploaded.img.height,
-      });
-      markDirty();
-      toast.success("Imagen lista para repetir");
-    } finally {
-      setUploading(false);
-    }
+    const loaded = await loadLocalImage(file);
+    if (!loaded) return;
+    // 1) La imagen base se aplica DE INMEDIATO (la grilla se llena al momento).
+    setRepeatBase({
+      assetId: "", // se completa cuando el storage confirma
+      localUrl: loaded.localUrl,
+      remoteUrl: undefined,
+      image: loaded.img,
+      naturalWidth: loaded.img.width,
+      naturalHeight: loaded.img.height,
+    });
+    markDirty();
+    toast.success(
+      catalogPreview
+        ? "Imagen lista para repetir (modo previsualización)"
+        : "Imagen lista para repetir",
+    );
+    // 2) Persistencia en segundo plano. Solo se aplica si el cliente no cambió
+    //    de imagen mientras subía.
+    void persistAssetInBackground(file, (assetId, remoteUrl) => {
+      setRepeatBase((prev) =>
+        prev && prev.localUrl === loaded.localUrl
+          ? { ...prev, assetId, remoteUrl }
+          : prev,
+      );
+    });
   }
 
   function movePiece(id: string, xCm: number, yCm: number) {
@@ -296,12 +321,24 @@ export default function SheetDesigner({
       prev.map((p) => {
         if (p.id !== id) return p;
         const ratio = p.naturalHeight / p.naturalWidth;
-        const heightCm = Math.round(widthCm * ratio * 10) / 10;
+        // El alto derivado nunca puede exceder el área imprimible.
+        let nextWidth = widthCm;
+        let heightCm = Math.round(nextWidth * ratio * 10) / 10;
+        if (heightCm > AREA.heightCm) {
+          nextWidth = Math.max(1, Math.floor((AREA.heightCm / ratio) * 10) / 10);
+          heightCm = Math.round(nextWidth * ratio * 10) / 10;
+        }
         const clamped = clampToPrintable(
-          { xCm: p.xCm, yCm: p.yCm, widthCm, heightCm },
+          { xCm: p.xCm, yCm: p.yCm, widthCm: nextWidth, heightCm },
           AREA,
         );
-        return { ...p, widthCm, heightCm, xCm: clamped.xCm, yCm: clamped.yCm };
+        return {
+          ...p,
+          widthCm: nextWidth,
+          heightCm,
+          xCm: clamped.xCm,
+          yCm: clamped.yCm,
+        };
       }),
     );
     markDirty();

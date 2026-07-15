@@ -1,0 +1,272 @@
+# PRODUCTION QA HOTFIX — MatrixLab
+
+Hotfix de los bloqueadores funcionales reportados por QA en producción
+(https://www.matrixlabintelligence.com). No rediseña la home, no toca Mercado
+Pago, no elimina MatrixLab Tumbler / Etiquetas Escolares / landing, y conserva
+todo el hardening de seguridad (CSP, sesiones admin, rate limiting, Zod,
+validación producto/variante, uploads seguros, webhook MP, límites de body,
+RLS, cookies seguras).
+
+Rama: `claude/matrixlab-production-qa-vj9ptw` (rol de
+`hotfix/production-qa-blockers`, creada desde el main actual `3cc7073`).
+
+---
+
+## Resumen por prioridad
+
+| # | Problema reportado | Causa raíz | Estado |
+|---|--------------------|-----------|--------|
+| P0 | Producción solo tiene `etiquetas-escolares-personalizadas` | Los seeds de productos base nunca se ejecutaron completos en el Supabase productivo | `supabase/seed_designer_base_v2.sql` (transaccional, idempotente, probado en Postgres 16) |
+| P1 | “Para guardar o agregar al carrito necesitamos activar este producto en catálogo” | Consecuencia directa de P0: el resolver no encuentra el producto base y el diseñador cae a modo previsualización | Se corrige al ejecutar el seed; contratos Zod verificados con test automatizado; fix adicional en `/admin/disenos` |
+| P2 | Stickers-planilla: lienzo vacío al subir imagen y elegir círculo | (a) La matemática del `fillPattern` de Konva desplazaba la imagen fuera del círculo; (b) la pieza se colocaba hasta DESPUÉS de subir al storage (race con red lenta) | Máscara real con `clipFunc` + colocación inmediata con persistencia en segundo plano |
+| P3 | “Vista de giro” no funciona bien | Solo se capturaba preview de lados CON diseño (espalda vacía → mensaje “guarda tu diseño”); la espalda se mostraba espejeada (`scaleX(-1)`) | Captura de ambos lados siempre (mockup vacío si no hay diseño), espalda sin espejo, botón "Espalda" solo cuando existe vista posterior |
+| P4 | Links de la home a 404 (Impresión 3D) | `/tienda/categoria/[handle]` hace `notFound()` si la categoría no existe en la BD; producción no tiene `impresion-3d` | Seed incluye la categoría/producto de Impresión 3D + fallback “Próximamente” para categorías curadas + script de auditoría de links |
+| P5 | Falta guía visible “para dummies” | Secciones solo con iconos/labels sueltos | Encabezados numerados 1–6 en diseñadores de prendas + botones táctiles ≥44px |
+| P6 | Verificar imagen personalizada en etiquetas | — (ya implementado) | Verificado: PNG/JPG/JPEG/WEBP, mover, escalar, detrás del texto, contraste automático, persistencia en `design_json.customImage` |
+| P7 | Responsive móvil sudadera/gorra | — | Verificado en 390×844 y 430×932: sin scroll horizontal, drawer accesible, CTA visible, upload/giro funcionan |
+
+---
+
+## P0 — Base de datos (ACCIÓN REQUERIDA EN PRODUCCIÓN)
+
+**Archivo:** `supabase/seed_designer_base_v2.sql`
+
+**Cómo ejecutarlo:** copiar y pegar TODO el archivo en el SQL Editor del
+proyecto Supabase de producción y correrlo. Es seguro correrlo varias veces.
+
+Garantiza (verificado contra el esquema real de `0001_schema.sql` +
+`0004_designer_expansion.sql` + `0005_school_labels.sql`):
+
+- Productos base de TODOS los diseñadores: `playera-personalizada`,
+  `sudadera-personalizada`, `gorra-trucker-personalizada`,
+  `gorra-clasica-personalizada`, `gorra-personalizada` (alias legado),
+  `tote-bag-personalizada`, `planilla-stickers` (compartido por
+  stickers-planilla y stickers-repeticion), `planilla-imanes` (legado),
+  `grabado-laser-personalizado`, `etiquetas-escolares-personalizadas` y
+  `pieza-3d-personalizada` (para el CTA de Impresión 3D).
+- Todos con `is_customizable = true`, status vendible (`disponible` /
+  `sobre_pedido`), categoría real, al menos una variante activa con precio > 0.
+- **No** borra datos, **no** reemplaza ids existentes, **no** pisa
+  títulos/descripciones/precios curados. Repara solo: `oculto` → status
+  canónico, `is_customizable = false` → `true`, precio 0 → precio canónico,
+  `min_quantity > 1` → 1 (el diseñador agrega quantity=1), variantes
+  `oculto/agotado` → `sobre_pedido`.
+- A prueba de ids canónicos reciclados (usa `gen_random_uuid()` si el id ya
+  está ocupado por otra fila) y garantiza una variante de reparación (sku
+  `…-R`) si un producto quedara sin variante visible.
+- Transaccional: bloque `DO` atómico + `begin/commit`.
+
+La consulta de validación va al final del archivo y devuelve por handle:
+`status`, `is_customizable`, `variantes_visibles`, `sku_variantes`, `precio`
+y un booleano `ok`. **Todas las filas deben salir con `ok = true`.**
+
+**Evidencia:** probado contra Postgres 16 local con las migraciones reales,
+partiendo del estado exacto reportado por QA (solo etiquetas):
+- 1ª corrida: crea todo, respeta el precio curado existente (219 ≠ 199).
+- 2ª corrida con datos rotos a propósito (producto oculto, precio 0,
+  min_quantity 10, variante oculta/agotada, sku ligado a otro producto,
+  título curado): repara lo mínimo y no pisa lo curado.
+- 3ª corrida: cero filas nuevas (idempotencia exacta).
+- Caso id reciclado: inserta con uuid nuevo sin tocar la fila ajena.
+
+## P1 — Guardar y agregar al carrito
+
+Causa raíz: el resolver (`getDesignerBaseProduct`) no encontraba el producto
+base porque no existe en producción → los diseñadores caen a modo
+previsualización con el mensaje reportado. **Con el seed aplicado, el flujo
+completo (resolver → guardar → carrito) funciona sin tocar código del
+backend**, que ya validaba correctamente producto/variante/sesión.
+
+Cambios adicionales:
+
+- `src/app/admin/disenos/page.tsx`: un diseño GUARDADO por el cliente
+  permanece en status `draft` hasta agregarse al carrito, y la página lo
+  excluía (`.neq status draft`) — por eso “guardar diseño” nunca aparecía en
+  `/admin/disenos`. Ahora incluye drafts con `design_json` guardado (los
+  borradores vacíos siguen ocultos).
+- `scripts/qa/designer-contracts.test.ts`: test de contratos que valida los
+  payloads reales de los 9 diseñadores (crear diseño, guardar v2 y carrito)
+  contra los schemas Zod del backend (19/19 OK). Guardar y carrito usan el
+  mismo contrato; no se relajó ninguna validación global.
+
+## P2 — Stickers planilla sin preview
+
+- `src/components/designer/sheets/SheetCanvas.tsx`: el círculo usaba
+  `fillPattern*` con un transform que desplazaba la imagen `imgWidth/2` px
+  fuera de la figura → círculos vacíos (el bug del QA). Ahora la forma
+  (círculo / cuadrado / rectángulo) es una máscara real (`Group.clipFunc`) y
+  la imagen se dibuja en modo *cover* (centrada, recorte uniforme, sin
+  distorsión), con línea de corte punteada de referencia.
+- `src/components/designer/sheets/SheetDesigner.tsx`: la pieza/imagen base
+  aparece en la hoja INMEDIATAMENTE al subirla; la persistencia al storage
+  corre en segundo plano y rellena `assetId`/URL firmada al confirmar (igual
+  que el diseñador de prendas). Se eliminó la race condition que dejaba el
+  lienzo vacío mientras la red respondía. El guardado sigue exigiendo
+  `assetId` real (aviso claro si la subida sigue pendiente).
+- Guarda de tamaño: una imagen muy vertical ya no puede generar un alto mayor
+  al área imprimible (el ancho se ajusta), evitando payloads inválidos.
+
+## P3 — Vista de giro
+
+- `src/components/designer/GarmentDesigner.tsx` (`prepareSpinPreviews`):
+  captura SIEMPRE frente y espalda (si la prenda tiene espalda). Un lado sin
+  diseño produce el mockup vacío — nunca pantalla rota ni el mensaje “guarda
+  tu diseño…”. Funciona desde el primer clic, sin guardar.
+- `src/components/designer/ProductSpinViewer.tsx`:
+  - la espalda ya NO se espejea (`scaleX(-1)` invertía el diseño y el texto);
+  - el botón pasa de “Atrás” a “Espalda” (consistente con el selector de zona);
+  - el botón de espalda solo aparece cuando existe vista posterior (las
+    gorras, que solo se diseñan de frente, ya no muestran un botón roto);
+  - sin vista posterior el giro recae en el frente (nunca queda en blanco);
+  - botones con área táctil ≥44px.
+- Aplica automáticamente a sudadera y tote (mismo motor `GarmentDesigner`).
+
+## P4 — Navegación y 404
+
+- `supabase/seed_designer_base_v2.sql` crea la categoría `impresion-3d` con el
+  producto `pieza-3d-personalizada` (sobre pedido) → el CTA “Impresión 3D” de
+  la home apunta a una **ruta de categoría real** (opción 1 del checklist).
+- `src/app/tienda/categoria/[handle]/page.tsx`: respaldo “Próximamente” con
+  CTA de WhatsApp para las categorías curadas enlazadas desde la home
+  (`stickers`, `imanes`, `impresion-3d`, `etiquetas-escolares`,
+  `matrixlab-tumbler`) cuando la fila aún no existe en la BD (p. ej. seed
+  pendiente). Cualquier otro handle sigue dando 404 normal.
+- `scripts/qa/check-home-links.mjs`: recorre todos los `href` internos de `/`
+  (y páginas extra), verifica que ninguno dé 404/5xx y que las anclas
+  `/#seccion` apunten a un `id` existente. Correr con el server arriba:
+  `node scripts/qa/check-home-links.mjs http://localhost:3000 /`.
+
+**Auditoría ejecutada (19 links internos de `/`, todos OK):**
+`/`, `/#contacto`, `/#empresas`, `/#laboratorio`, `/#tshirtlab`, `/#tumbler`,
+`/tienda`, `/tienda/categoria/imanes`, `/tienda/categoria/impresion-3d`,
+`/tienda/categoria/matrixlab-tumbler`, `/tienda/categoria/stickers`,
+`/tienda/disenador`, `/tienda/disenador/etiquetas-escolares`,
+`/tienda/disenador/gorra` (→ `/gorras`), `/tienda/disenador/gorra-clasica`
+(→ `/gorras`), `/tienda/disenador/laser`, `/tienda/disenador/playera`,
+`/tienda/disenador/sudadera`, `/tienda/disenador/tote`. Los chips del hero
+apuntan a rutas existentes y las anclas del footer/nav a secciones con `id`
+real. “Cotizar por WhatsApp” abre `wa.me` (externo).
+
+## P5 — UX “para dummies”
+
+`GarmentDesigner` (playera, sudadera, gorras, tote) ahora muestra encabezados
+numerados visibles:
+
+1. **Elige tu prenda** (barra superior con nombre del producto y “Cambiar
+   prenda”; en gorras es el selector trucker/clásica)
+2. **Selecciona perfil, talla y color** (o “Selecciona el color” si la prenda
+   no usa tallas)
+3. **Sube tu diseño** (zona Frente/Espalda + upload + capas + medidas)
+4. **Ajusta tamaño y posición** (encabezado del lienzo con instrucción)
+5. **Revisa frente y espalda** (vista de giro + notas)
+6. **Guarda o agrega al carrito** (CTA)
+
+En móvil los pasos 2 y 5 viven en la botonera bajo el lienzo con su número
+visible. Botones táctiles ≥44px (perfil, tallas, zonas, giro, drawer).
+
+## P6 — Etiquetas escolares: imagen personalizada
+
+Verificado en navegador (sin rehacer el motor de tipografías aprobado):
+
+- Acepta PNG, JPG, JPEG y WEBP (whitelist en cliente y servidor; SVG
+  prohibido); máx. 8 MB.
+- La imagen aparece en la preview inmediatamente después del upload, se puede
+  **mover** (drag con pointer events, también táctil) y **escalar** (30 % –
+  300 %), siempre **detrás del texto** (z-order fijo) y con **velo de
+  contraste automático** activable.
+- No depende de catálogo de personajes: cualquier imagen propia del cliente
+  funciona (la función es para imágenes/referencias del cliente; no se
+  prometen personajes protegidos).
+- `design_json.customImage` persiste `assetId`, `fileName`,
+  `transform {x, y, scale}` y `readabilityOverlay`, validado por
+  `SchoolLabelsDesignJsonSchema` y saneado en el backend.
+
+## P7 — Responsive móvil
+
+Verificado con Chromium (emulación táctil) en **390×844** y **430×932**:
+home, sudadera y gorras sin scroll horizontal; drawer de perfil/talla/color
+utilizable; upload, drag y escala funcionan; vista de giro abre; CTA final
+alcanzable (56px de alto); modales y botonera inferior accesibles.
+
+---
+
+## Archivos modificados
+
+| Archivo | Cambio |
+|---|---|
+| `supabase/seed_designer_base_v2.sql` | **Nuevo.** Seed transaccional/idempotente de productos base (P0/P1/P4) |
+| `src/components/designer/sheets/SheetCanvas.tsx` | Máscara real por `clipFunc` + imagen cover + línea de corte (P2) |
+| `src/components/designer/sheets/SheetDesigner.tsx` | Colocación inmediata + persistencia en segundo plano + clamp de alto (P2) |
+| `src/components/designer/GarmentDesigner.tsx` | Spin captura ambos lados; pasos numerados 1–6; targets 44px (P3/P5) |
+| `src/components/designer/ProductSpinViewer.tsx` | Espalda sin espejo, botón “Espalda” condicional, fallback al frente (P3) |
+| `src/components/designer/GorrasDesigner.tsx` | Encabezado “1. Elige tu prenda: tipo de gorra” (P5) |
+| `src/components/designer/PrintZoneSelector.tsx` | Targets 44px + `data-testid` (P5/QA) |
+| `src/app/admin/disenos/page.tsx` | Muestra diseños guardados en `draft` con `design_json` (P1) |
+| `src/app/tienda/categoria/[handle]/page.tsx` | Fallback “Próximamente” para categorías curadas (P4) |
+| `scripts/qa/check-home-links.mjs` | **Nuevo.** Auditoría automatizada de links internos (P4) |
+| `scripts/qa/designer-contracts.test.ts` | **Nuevo.** Test de contratos Zod cliente↔backend (P1) |
+| `package.json` | Override `postcss ^8.5.10` (npm audit: 0 vulnerabilidades) |
+| `docs/qa-screenshots/*` | Capturas de evidencia desktop y móvil |
+
+Seguridad: no se relajó ninguna validación. Los schemas Zod, la CSP, el rate
+limiting, la validación de producto/variante y el resto del hardening quedan
+intactos (el fix de payloads fue innecesario: los contratos ya eran
+compatibles — se agregó el test para evitar drift futuro).
+
+## Evidencia de QA
+
+- `npm run type-check` ✓ · `npm run lint` ✓ · `npm run build` ✓ ·
+  `npm audit` ✓ (0 vulnerabilidades tras el override de postcss).
+- `node scripts/qa/check-home-links.mjs` → 19/19 links internos de `/` OK.
+- `npx tsx scripts/qa/designer-contracts.test.ts` → 19/19 contratos OK.
+- QA de navegador real (Chromium headless) → **35/35 checks OK** en desktop
+  1440×900 y móvil 390×844 / 430×932, incluyendo: imagen visible al subir en
+  playera/planilla/grid, círculo/cuadrado/rectángulo con máscara correcta,
+  “Caben N piezas” se actualiza al cambiar tamaño, giro frente/espalda con y
+  sin diseño posterior, persistencia del diseño frontal, imagen propia en
+  etiquetas, cero 404 en rutas mínimas y CTA alcanzable en móvil.
+- Capturas en `docs/qa-screenshots/` (desktop y móvil).
+- Seed probado en Postgres 16 con migraciones reales (4 corridas, casos
+  límite arriba).
+
+## Riesgos pendientes
+
+1. **El seed debe ejecutarse en el Supabase de PRODUCCIÓN** — es la causa
+   raíz de P1. Hasta entonces, los diseñadores seguirán en modo
+   previsualización (ahora con imagen visible y cotización por WhatsApp, pero
+   sin guardar/carrito).
+2. Guardar/carrito end-to-end contra Supabase real no se pudo ejercitar desde
+   este entorno (sin credenciales): validado por contrato + lectura del
+   backend + Postgres local. Verificar en producción tras el seed (checklist
+   abajo).
+3. El fallback “Próximamente” cubre solo las categorías curadas de la home;
+   si se agregan nuevas cards a la home, añadirlas a
+   `CURATED_CATEGORY_FALLBACKS` o crear su categoría real.
+4. Los QA reportaron “forma circular” en `/tienda/disenador/stickers-planilla`
+   (modo libre, sin selector de forma): el selector de formas vive en
+   `stickers-repeticion`. Ambos quedaron verificados; si QA esperaba formas
+   en el modo libre, es un feature nuevo (no un bug) y queda fuera de este
+   hotfix.
+5. `npm audit` quedó en 0 con el override `postcss ^8.5.10` (Next pinea
+   8.4.31, vulnerable GHSA-qx2v-qp2m-jg93). El build/lint/type-check pasan
+   con 8.5.19; si una actualización futura de Next lo resuelve, retirar el
+   override.
+
+## Instrucciones exactas de producción
+
+1. **Supabase (SQL Editor):** ejecutar `supabase/seed_designer_base_v2.sql`
+   completo. Revisar que la consulta final devuelva `ok = true` en las 11
+   filas. (Re-ejecutable sin riesgo.)
+2. **Deploy** de esta rama al hosting (tras aprobar el QA de la rama).
+3. **Smoke test en producción (en este orden):**
+   1. `/tienda/disenador/playera`: NO debe aparecer el banner de modo
+      previsualización; subir imagen → guardar → “Diseño guardado ✓”.
+   2. Agregar al carrito → aparece en `/tienda/carrito` con precio.
+   3. `/admin/disenos`: el diseño guardado aparece con preview.
+   4. Repetir guardar+carrito en sudadera, gorras (trucker y clásica), tote,
+      stickers-planilla, stickers-repeticion (círculo), laser y
+      etiquetas-escolares (con imagen propia).
+   5. Home: click a cada card/chip — cero 404 (o correr
+      `node scripts/qa/check-home-links.mjs https://www.matrixlabintelligence.com /`).
+   6. Móvil real: sudadera y gorra (subir, mover, escalar, girar, guardar).
+4. **No hacer merge a main** hasta completar el punto 3.
