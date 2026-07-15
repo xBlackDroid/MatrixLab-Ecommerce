@@ -252,6 +252,61 @@ compatibles — se agregó el test para evitar drift futuro).
    con 8.5.19; si una actualización futura de Next lo resuelve, retirar el
    override.
 
+## Hotfix 2 — Mapeo canónico ruta/tipo → handle real de Supabase
+
+Con el seed ya ejecutado en producción (11 productos confirmados), se
+centralizó TODO el mapeo entre rutas/tipos del diseñador y los handles reales
+del catálogo en **una única fuente de verdad**:
+
+- **`src/lib/designer/product-handles.ts` (nuevo):**
+  `DESIGNER_PRODUCT_HANDLE_MAP` (tipo/alias → handle real, incluye alias
+  `tote-bag`, `grabado-laser`, `impresion-3d`, `pieza-3d`, ambos modos de
+  imanes), `resolveDesignerHandle()` (normaliza cualquier entrada — tipo,
+  alias o handle canónico — al handle real), `CANONICAL_DESIGNER_HANDLES` y el
+  mapa inverso `DESIGNER_HANDLE_TO_TYPE`.
+- **`src/lib/designer/product-catalog.ts`:** todos los `baseHandle` del
+  catálogo del laboratorio ahora DERIVAN del mapa (cero literales).
+- **`src/lib/store/products.ts`:**
+  - `getDesignerBaseProduct()` normaliza la entrada vía
+    `resolveDesignerHandle()` antes de consultar — un lookup "viejo" por
+    `playera`, `laser`, `stickers-planilla`, `tote`, etc. ya NO puede caer a
+    modo previsualización: se traduce al handle real
+    (`playera-personalizada`, `grabado-laser-personalizado`,
+    `planilla-stickers`, `tote-bag-personalizada`). Como último respaldo, si
+    el handle canónico no existiera en la base, intenta la consulta literal.
+  - `getDesignerFallbackProduct()` usa la misma normalización.
+  - `DESIGNER_PRODUCT_HANDLES` (handle → tipo, CTA de producto) derivado del
+    mapa inverso en vez de literales.
+  - **Diagnóstico de producción:** cuando el lookup del producto base no
+    devuelve fila, se registra `[designer] lookup de producto base sin
+    resultado` con `handle`, `usingServiceRole` y el código/mensaje de error
+    de Supabase. Si producción sigue en modo previsualización con los datos
+    presentes, este log en el hosting distingue entre "no existe la fila" y
+    "la consulta falla" (clave inválida/env/RLS/timeout/URL).
+- **Rutas:** la página de gorras y la de etiquetas escolares toman sus handles
+  del mapa (`DESIGNER_PRODUCT_HANDLE_MAP["gorra-trucker"|"gorra-clasica"|"etiquetas-escolares"]`);
+  el fallback de `SchoolLabelsLab` también.
+- **Guardado/carrito/admin:** operan por `product_id`/`variant_id` resueltos
+  desde el producto ya mapeado (verificado; no traducen handles por su
+  cuenta), y los schemas Zod validan `productType` contra el mismo catálogo.
+- **`scripts/qa/designer-handles.test.ts` (nuevo):** 66 checks que fallan si
+  cualquier tipo, alias o entrada del catálogo deja de resolver a uno de los
+  11 handles confirmados en producción.
+  Correr con `npx tsx scripts/qa/designer-handles.test.ts`.
+
+QA del hotfix 2: `type-check` ✓, `lint` ✓, `build` ✓, mapeo 66/66 ✓,
+contratos 19/19 ✓, links de la home 19/19 sin 404 ✓, smoke de navegador en
+las 8 rutas del diseñador (producto base resuelto, sin aviso de catálogo;
+upload coloca la imagen y lista la capa) ✓.
+
+**Si tras desplegar esta rama producción siguiera en previsualización:** el
+problema ya no puede ser el mapeo — revisar en los logs del hosting el
+warning `[designer] lookup de producto base sin resultado` (revela
+código/mensaje del error real de Supabase) y validar
+`SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+en el entorno del deploy. Importante: el fix vive en ESTA rama; producción lo
+recibe hasta que la rama se despliegue.
+
 ## Instrucciones exactas de producción
 
 1. **Supabase (SQL Editor):** ejecutar `supabase/seed_designer_base_v2.sql`

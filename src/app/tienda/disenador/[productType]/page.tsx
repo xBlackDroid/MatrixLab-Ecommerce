@@ -8,6 +8,7 @@ import {
   getCatalogEntry,
   isDesignerProductType,
 } from "@/lib/designer/product-catalog";
+import { DESIGNER_PRODUCT_HANDLE_MAP } from "@/lib/designer/product-handles";
 import {
   getDesignerBaseProduct,
   getDesignerFallbackProduct,
@@ -77,18 +78,19 @@ export default async function DesignerProductPage({
     );
   }
 
-  // 2) Sección pública combinada de gorras.
+  // 2) Sección pública combinada de gorras. Los handles reales salen SIEMPRE
+  //    del mapa canónico (fuente única en lib/designer/product-handles.ts).
   if (productType === "gorras") {
+    const truckerHandle = DESIGNER_PRODUCT_HANDLE_MAP["gorra-trucker"];
+    const clasicaHandle = DESIGNER_PRODUCT_HANDLE_MAP["gorra-clasica"];
     const [trucker, clasica] = await Promise.all([
-      getDesignerBaseProduct("gorra-trucker-personalizada"),
-      getDesignerBaseProduct("gorra-clasica-personalizada"),
+      getDesignerBaseProduct(truckerHandle),
+      getDesignerBaseProduct(clasicaHandle),
     ]);
     // Respaldo: si el catálogo no tiene el producto base, el diseñador abre en
     // modo previsualización/cotización en lugar de bloquear la página.
-    const truckerView =
-      trucker ?? getDesignerFallbackProduct("gorra-trucker-personalizada");
-    const clasicaView =
-      clasica ?? getDesignerFallbackProduct("gorra-clasica-personalizada");
+    const truckerView = trucker ?? getDesignerFallbackProduct(truckerHandle);
+    const clasicaView = clasica ?? getDesignerFallbackProduct(clasicaHandle);
     if (!trucker || !clasica) {
       console.warn("[designer] producto base no encontrado; modo previsualización", {
         productType,

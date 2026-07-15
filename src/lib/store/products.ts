@@ -14,6 +14,10 @@ import type {
   ProductWithVariants,
 } from "@/lib/db/types";
 import {
+  DESIGNER_HANDLE_TO_TYPE,
+  resolveDesignerHandle,
+} from "@/lib/designer/product-handles";
+import {
   MOCK_CATEGORIES,
   MOCK_PRODUCTS,
   MOCK_VARIANTS,
@@ -441,9 +445,24 @@ function getSchoolLabelsClient(): {
 export async function getDesignerBaseProduct(
   handle: string,
 ): Promise<ProductWithVariants | null> {
+  // Normaliza SIEMPRE al handle real de producción vía el mapa canónico:
+  // si llega un tipo de diseñador o alias de ruta ("playera", "laser",
+  // "stickers-planilla", …) se traduce a su handle real
+  // ("playera-personalizada", "grabado-laser-personalizado",
+  // "planilla-stickers", …) antes de consultar. Así ningún lookup "viejo"
+  // vuelve a caer en modo previsualización con el producto sí existente.
+  const canonical = resolveDesignerHandle(handle);
   // Acota TODO el resolver: si Supabase se cuelga, la ruta del laboratorio
   // degrada a "producto base no disponible" en ~4s en vez de timeout.
-  return withTimeout(resolveDesignerBaseProduct(handle), null);
+  const resolved = await withTimeout(resolveDesignerBaseProduct(canonical), null);
+  if (resolved) return resolved;
+  // Último respaldo: si la entrada original era distinta al handle canónico
+  // (caso anómalo: la base usa el alias como handle), intenta la consulta
+  // literal antes de rendirse.
+  if (canonical !== handle && isValidHandle(handle)) {
+    return withTimeout(resolveDesignerBaseProduct(handle), null);
+  }
+  return null;
 }
 
 /**
@@ -458,8 +477,11 @@ export async function getDesignerBaseProduct(
 export function getDesignerFallbackProduct(
   handle: string,
 ): ProductWithVariants | null {
-  if (!isValidHandle(handle)) return null;
-  return mockDesignerProduct(handle);
+  // Mismo mapeo canónico que el resolver real: los mocks de respaldo viven
+  // bajo los handles reales de producción.
+  const canonical = resolveDesignerHandle(handle);
+  if (!isValidHandle(canonical)) return null;
+  return mockDesignerProduct(canonical);
 }
 
 function mockDesignerProduct(handle: string): ProductWithVariants | null {
@@ -479,18 +501,32 @@ async function resolveDesignerBaseProduct(
 ): Promise<ProductWithVariants | null> {
   if (!isValidHandle(handle)) return null;
 
-  const { client } = getSchoolLabelsClient();
+  const { client, usingServiceRole } = getSchoolLabelsClient();
   if (!client) {
     return mockDesignerProduct(handle);
   }
 
   // Consulta limpia: SOLO por handle, sin embeds ni filtros de status/stock.
-  const { data: rows } = await raceRead<ProductRow[]>(
+  const { data: rows, error: readError } = await raceRead<ProductRow[]>(
     client.from("products").select("*").eq("handle", handle).limit(1) as unknown as PromiseLike<
       ReadResult<ProductRow[]>
     >,
   );
   const product = (rows ?? [])[0] ?? null;
+
+  // Diagnóstico de producción: si la base SÍ tiene el producto pero la
+  // consulta falla (clave inválida, RLS, URL malformada, timeout), esto es lo
+  // que lo distingue en logs de un simple "no existe". Sin este log, el
+  // diseñador cae a modo previsualización en silencio.
+  if (!product) {
+    const err = readError as { code?: string; message?: string } | null;
+    console.warn("[designer] lookup de producto base sin resultado", {
+      handle,
+      usingServiceRole,
+      errorCode: err?.code ?? null,
+      errorMessage: err?.message ?? null,
+    });
+  }
 
   // Respaldo: si la consulta directa no encontró, intenta el path probado del
   // catálogo público (anon + RLS) que usa el resto de la tienda.
@@ -526,21 +562,15 @@ async function resolveDesignerBaseProduct(
 
 /**
  * Mapa handle de producto base → tipo del diseñador (para el CTA
- * "Personalizar en el laboratorio" en la página de producto). El mapa
- * inverso (tipo → handle) vive en lib/designer/product-catalog.ts.
+ * "Personalizar en el laboratorio" en la página de producto). Derivado de la
+ * FUENTE ÚNICA de verdad en lib/designer/product-handles.ts — no editar aquí.
  */
-export const DESIGNER_PRODUCT_HANDLES: Record<string, DesignerProductType> = {
-  "playera-personalizada": "playera",
-  "sudadera-personalizada": "sudadera",
-  "gorra-personalizada": "gorra",
-  "gorra-trucker-personalizada": "gorra-trucker",
-  "gorra-clasica-personalizada": "gorra-clasica",
-  "tote-bag-personalizada": "tote",
-  "planilla-stickers": "stickers-planilla",
-  "planilla-imanes": "imanes-planilla",
-  "grabado-laser-personalizado": "laser",
-  "etiquetas-escolares-personalizadas": "etiquetas-escolares",
-};
+export const DESIGNER_PRODUCT_HANDLES: Record<string, DesignerProductType> =
+  DESIGNER_HANDLE_TO_TYPE;
 
-// Re-export del mapa tipo → handle (fuente: product-catalog).
+// Re-exports del mapeo canónico (fuente: lib/designer/product-handles.ts).
 export { DESIGNER_TYPE_TO_HANDLE } from "@/lib/designer/product-catalog";
+export {
+  DESIGNER_PRODUCT_HANDLE_MAP,
+  resolveDesignerHandle,
+} from "@/lib/designer/product-handles";

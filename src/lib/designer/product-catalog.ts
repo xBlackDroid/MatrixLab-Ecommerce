@@ -1,4 +1,5 @@
 import type { DesignerKind, DesignerProductType } from "@/lib/db/types";
+import { DESIGNER_PRODUCT_HANDLE_MAP } from "@/lib/designer/product-handles";
 
 /**
  * Catálogo del Laboratorio MatrixLab (Etapa 2).
@@ -25,7 +26,11 @@ export interface DesignerCatalogEntry {
   shortDescription: string;
   badge: DesignerBadge;
   isNew: boolean;
-  /** Handle del producto base en la tienda (carrito + precio). */
+  /**
+   * Handle REAL del producto base en la tienda (carrito + precio).
+   * SIEMPRE derivado de DESIGNER_PRODUCT_HANDLE_MAP (product-handles.ts),
+   * la única fuente de verdad del mapeo tipo → handle de Supabase.
+   */
   baseHandle: string;
   /** Solo prendas con tallas (playera, sudadera) usan perfil/talla. */
   usesProfileSize: boolean;
@@ -61,7 +66,7 @@ export const DESIGNER_CATALOG: Record<
       "Playera personalizada con acabado premium para crear una pieza única o producir por volumen.",
     badge: "Prendas",
     isNew: false,
-    baseHandle: "playera-personalizada",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP.playera,
     usesProfileSize: true,
     iconKey: "shirt",
     order: 1,
@@ -75,7 +80,7 @@ export const DESIGNER_CATALOG: Record<
       "Sudadera personalizada con acabado premium para eventos, marcas, regalos y equipos.",
     badge: "Prendas",
     isNew: true,
-    baseHandle: "sudadera-personalizada",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP.sudadera,
     usesProfileSize: true,
     iconKey: "hoodie",
     order: 2,
@@ -89,7 +94,7 @@ export const DESIGNER_CATALOG: Record<
       "Gorra trucker personalizada para eventos, marcas, equipos y activaciones.",
     badge: "Prendas",
     isNew: true,
-    baseHandle: "gorra-trucker-personalizada",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP["gorra-trucker"],
     usesProfileSize: false,
     iconKey: "cap",
     order: 3,
@@ -105,7 +110,7 @@ export const DESIGNER_CATALOG: Record<
       "Gorra clásica ajustable con personalización premium para destacar tu marca o evento.",
     badge: "Prendas",
     isNew: true,
-    baseHandle: "gorra-clasica-personalizada",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP["gorra-clasica"],
     usesProfileSize: false,
     iconKey: "cap",
     order: 4,
@@ -121,7 +126,7 @@ export const DESIGNER_CATALOG: Record<
       "Tote bag personalizada para regalos, eventos, marcas y experiencias creativas.",
     badge: "Prendas",
     isNew: false,
-    baseHandle: "tote-bag-personalizada",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP.tote,
     usesProfileSize: false,
     iconKey: "bag",
     order: 5,
@@ -137,7 +142,7 @@ export const DESIGNER_CATALOG: Record<
       "Gorra personalizada para eventos, marcas, equipos y activaciones.",
     badge: "Prendas",
     isNew: false,
-    baseHandle: "gorra-personalizada",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP.gorra,
     usesProfileSize: false,
     iconKey: "cap",
     order: 99,
@@ -152,7 +157,7 @@ export const DESIGNER_CATALOG: Record<
       "Sube varias imágenes y acomódalas libremente en una hoja carta lista para producir.",
     badge: "Planillas",
     isNew: true,
-    baseHandle: "planilla-stickers",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP["stickers-planilla"],
     usesProfileSize: false,
     sheetType: "stickers",
     sheetMode: "free",
@@ -168,7 +173,7 @@ export const DESIGNER_CATALOG: Record<
       "Sube una imagen, elige forma y tamaño, y el laboratorio llena tu hoja carta automáticamente.",
     badge: "Planillas",
     isNew: true,
-    baseHandle: "planilla-stickers",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP["stickers-repeticion"],
     usesProfileSize: false,
     sheetType: "stickers",
     sheetMode: "repeat",
@@ -186,7 +191,7 @@ export const DESIGNER_CATALOG: Record<
       "Crea una hoja carta de imanes personalizados con tus imágenes favoritas.",
     badge: "Planillas",
     isNew: false,
-    baseHandle: "planilla-imanes",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP["imanes-planilla"],
     usesProfileSize: false,
     sheetType: "imanes",
     sheetMode: "free",
@@ -205,7 +210,7 @@ export const DESIGNER_CATALOG: Record<
       "Crea una hoja carta de imanes personalizados con tus imágenes favoritas.",
     badge: "Planillas",
     isNew: false,
-    baseHandle: "planilla-imanes",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP["imanes-repeticion"],
     usesProfileSize: false,
     sheetType: "imanes",
     sheetMode: "repeat",
@@ -222,7 +227,7 @@ export const DESIGNER_CATALOG: Record<
       "Diseña grabados personalizados sobre plantillas como termos, tazas, tags, llaveros y acrílicos.",
     badge: "Láser",
     isNew: true,
-    baseHandle: "grabado-laser-personalizado",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP.laser,
     usesProfileSize: false,
     iconKey: "laser",
     order: 10,
@@ -236,7 +241,7 @@ export const DESIGNER_CATALOG: Record<
       "Arma tu pack escolar personalizado: nombre, tipografía, colores y temática en pocos pasos.",
     badge: "Escolar",
     isNew: true,
-    baseHandle: "etiquetas-escolares-personalizadas",
+    baseHandle: DESIGNER_PRODUCT_HANDLE_MAP["etiquetas-escolares"],
     usesProfileSize: false,
     iconKey: "tag",
     order: 11,

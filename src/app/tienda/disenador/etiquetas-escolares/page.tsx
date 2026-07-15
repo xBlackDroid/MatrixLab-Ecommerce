@@ -6,6 +6,7 @@ import SchoolLabelsLab from "@/components/designer/school-labels/SchoolLabelsLab
 import SchoolLabelsGuideHero from "@/components/designer/school-labels/SchoolLabelsGuideHero";
 import SchoolLabelsInfoSections from "@/components/designer/school-labels/SchoolLabelsInfoSections";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
+import { DESIGNER_PRODUCT_HANDLE_MAP } from "@/lib/designer/product-handles";
 import { getDesignerBaseProduct } from "@/lib/store/products";
 
 export const metadata: Metadata = {
@@ -22,7 +23,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const BASE_HANDLE = "etiquetas-escolares-personalizadas";
+// Handle real del producto base (fuente única: product-handles.ts).
+const BASE_HANDLE = DESIGNER_PRODUCT_HANDLE_MAP["etiquetas-escolares"];
 
 export default async function SchoolLabelsPage() {
   // Sin caché: el producto base se resuelve siempre en cada request.
