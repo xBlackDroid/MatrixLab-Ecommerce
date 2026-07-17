@@ -488,6 +488,66 @@ llave inválida) ✓.
    guardan; sin regresión en etiquetas.
 4. Confirmada la corrección → retirar el log temporal.
 
+## Hotfix 5 — "TypeError: fetch failed": la función no alcanza el host de Supabase
+
+### Qué dice el log real de `2554274`
+
+`elapsedMs:14456, attempts:2, errorMessage:"TypeError: fetch failed"` con
+projectRef y llaves correctos. `fetch failed` de undici significa que el
+runtime **ni siquiera obtuvo una respuesta HTTP**: el fallo es de RED pura
+(DNS, TCP o TLS) hacia `https://spgrjhlwmyjfwiwsgqvn.supabase.co`. No es la
+consulta, no es PostgREST, no es RLS ni el mapeo. Los "read-timeout" previos
+eran este mismo fallo enmascarado por el timer local de 4s. Los ~7s por
+intento son los reintentos internos de supabase-js fallando en cadena.
+
+### Qué se embarcó en este hotfix
+
+1. **Sonda de red de bajo nivel** (solo corre cuando la lectura falla a nivel
+   de red): agrega al diagnóstico `netHost` (hostname realmente usado),
+   `netHostClean` (¿el host tiene caracteres raros/invisibles?), `netDns`
+   (resultado del lookup con familias v4/v6 o código ENOTFOUND/…),
+   `netConnect` (fetch crudo a `/auth/v1/health`: `http:<status>` o código
+   ECONNREFUSED/ETIMEDOUT/CERT_*) y `nodeVersion`. Verificada localmente:
+   DNS roto → `ENOTFOUND`; puerto bloqueado → `ok(v4)` + `ECONNREFUSED`.
+2. **Fix candidato #1 — caracteres invisibles en `SUPABASE_URL`**:
+   `normalizeSupabaseUrl` ahora elimina zero-width spaces (U+200B/C/D),
+   word-joiner, BOM, NBSP y espacios internos. Un solo U+200B pegado al
+   copiar la URL al panel de Vercel corrompe el hostname y produce EXACTAMENTE
+   `TypeError: fetch failed` persistente, aunque la variable "se vea" bien.
+   Reproducido y verificado: URL con U+200B incrustado → antes fetch failed,
+   ahora `found:true` con `SUD-CUSTOM`.
+3. **Fix candidato #2 — respaldo de URL**: si `SUPABASE_URL` falta en un
+   scope, se usa `NEXT_PUBLIC_SUPABASE_URL` (mismo valor público estándar).
+
+### Cómo leer la nueva línea del log en Preview
+
+| Firma de la sonda | Causa exacta | Corrección |
+|---|---|---|
+| `found:true` (ya no aparece sonda) | Era el carácter invisible en la URL: el fix #1 lo eliminó | Nada: cerrado |
+| `netHostClean:false` o `netDns:ENOTFOUND` con host "raro" | Carácter invisible/typo visible en `SUPABASE_URL` | Reescribir la variable A MANO (no pegar) en Vercel |
+| `netDns:ENOTFOUND` con host correcto | El hostname no existe: typo `.com`/`.co`, o proyecto pausado/eliminado sin DNS | Verificar URL exacta y estado del proyecto en Supabase |
+| `netDns:ok(v4[,v6])` + `netConnect:ETIMEDOUT/ECONNREFUSED` | Red bloqueada hacia el gateway: proyecto PAUSADO (plan free), restricciones, o incidente | Supabase Dashboard → restaurar/verificar el proyecto |
+| `netDns:ok(v6)` (solo v6) + fetch failed | Runtime sin egreso IPv6 con host solo-AAAA | Actualizar Node en Vercel (Settings → Node.js ≥20) |
+| `netDns:ok` + `netConnect:http:401/200` | ¡La red FUNCIONA con conexión fresca! ⇒ sockets keep-alive rancios del pool | Redeploy; si reincide, avisar para montar fetch propio sin pool |
+| `nodeVersion: v18.x` | Node 18 sin auto-selección de familia + host dual-stack | Vercel → Settings → Node.js Version ≥ 20 |
+
+**Chequeo manual de 60 segundos (en paralelo):** desde tu máquina, correr
+`curl -sI https://spgrjhlwmyjfwiwsgqvn.supabase.co/rest/v1/` — si responde
+(aunque sea 401) el proyecto está vivo y el problema es del runtime de
+Vercel; si no responde tampoco desde tu máquina, el proyecto está
+pausado/incidentado (Supabase Dashboard lo mostrará como "Paused").
+También revisar que en Preview `/tienda` muestre productos reales: si
+tampoco carga catálogo, el bloqueo de red es global del deployment (misma
+causa) y no algo específico del diseñador.
+
+### Nota
+
+Desde este entorno de trabajo no es posible reproducir la ruta de red
+Vercel→Supabase (el proxy local bloquea la salida hacia `*.supabase.co`), por
+lo que la corrección definitiva depende de la firma que arroje la sonda en el
+próximo deploy de Preview. Los dos fixes candidatos embarcados cubren las dos
+causas más frecuentes de este error con configuración "correcta".
+
 ## Instrucciones exactas de producción
 
 1. **Supabase (SQL Editor):** ejecutar `supabase/seed_designer_base_v2.sql`

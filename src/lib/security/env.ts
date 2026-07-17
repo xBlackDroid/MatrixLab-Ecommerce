@@ -22,10 +22,18 @@ function clean(value: string | undefined): string | undefined {
  * rutas REST inválidas (PostgREST PGRST125 "Invalid path specified in request
  * URL") en TODOS los clientes (anon y service). Limpiarla en el origen evita
  * ese fallo en catálogo, diseños, carrito y admin por igual.
+ *
+ * Además elimina caracteres INVISIBLES que suelen colarse al copiar/pegar la
+ * URL en paneles de variables de entorno (zero-width space U+200B/200C/200D,
+ * word-joiner U+2060, BOM U+FEFF, NBSP U+00A0 y espacios internos). Un solo
+ * U+200B dentro del hostname NO lo elimina `trim()` y hace que el fetch del
+ * runtime falle con "TypeError: fetch failed" (DNS de un host corrupto),
+ * aunque la variable "se vea" correcta en el dashboard.
  */
 function normalizeSupabaseUrl(value: string | undefined): string | undefined {
   if (!value) return value;
   return value
+    .replace(/[\u0009-\u000d\u0020\u00a0\u200b-\u200f\u2028\u2029\u2060\ufeff]/g, "")
     .replace(/\/+$/, "")
     .replace(/\/rest\/v1\/?$/i, "")
     .replace(/\/+$/, "");
@@ -41,7 +49,13 @@ export function getServerEnv() {
     mpAccessToken: clean(process.env.MERCADOPAGO_ACCESS_TOKEN),
     mpWebhookSecret: clean(process.env.MERCADOPAGO_WEBHOOK_SECRET),
     databaseUrl: clean(process.env.DATABASE_URL),
-    supabaseUrl: normalizeSupabaseUrl(clean(process.env.SUPABASE_URL)),
+    // SUPABASE_URL es la fuente principal; NEXT_PUBLIC_SUPABASE_URL (misma
+    // URL pública del proyecto, nombre estándar de Supabase) actúa como
+    // respaldo si la privada falta en algún scope del deployment.
+    supabaseUrl: normalizeSupabaseUrl(
+      clean(process.env.SUPABASE_URL) ??
+        clean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    ),
     supabaseAnonKey: clean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     supabaseServiceRoleKey: clean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     adminAccessPassword: clean(process.env.ADMIN_ACCESS_PASSWORD),

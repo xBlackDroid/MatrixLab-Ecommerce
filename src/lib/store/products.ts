@@ -418,12 +418,13 @@ function getSchoolLabelsClient(): {
   client: SupabaseClient | null;
   usingServiceRole: boolean;
   projectRef: string | null;
+  origin: string | null;
 } {
   const env = getServerEnv();
   const rawUrl = env.supabaseUrl;
   const key = env.supabaseServiceRoleKey ?? env.supabaseAnonKey;
   if (!rawUrl || !key) {
-    return { client: null, usingServiceRole: false, projectRef: null };
+    return { client: null, usingServiceRole: false, projectRef: null, origin: null };
   }
   const url = rawUrl
     .trim()
@@ -443,7 +444,66 @@ function getSchoolLabelsClient(): {
     client: cachedSchoolClient,
     usingServiceRole: Boolean(env.supabaseServiceRoleKey),
     projectRef,
+    origin: url,
   };
+}
+
+/**
+ * Sonda de red de bajo nivel hacia el host de Supabase. SOLO corre cuando la
+ * lectura falló a nivel de red ("fetch failed" / timeout): convierte un error
+ * opaco en la causa exacta — DNS (ENOTFOUND), conexión (ECONNREFUSED/
+ * ETIMEDOUT), TLS (CERT_*) o respuesta HTTP del gateway. Acotada y sin
+ * imprimir llaves; el host del proyecto es información pública.
+ */
+async function probeSupabaseNetwork(origin: string): Promise<{
+  host: string;
+  hostClean: boolean;
+  dns: string;
+  connect: string;
+}> {
+  let host = "url-invalida";
+  try {
+    host = new URL(origin).hostname;
+  } catch {
+    return { host, hostClean: false, dns: "-", connect: "-" };
+  }
+  // Un carácter fuera de [a-z0-9.-] delata un invisible pegado al copiar.
+  const hostClean = /^[a-z0-9.-]+$/i.test(host);
+
+  let dns = "ok";
+  try {
+    const { lookup } = await import("node:dns/promises");
+    const results = (await Promise.race([
+      lookup(host, { all: true }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("dns-timeout")), 3000),
+      ),
+    ])) as Array<{ address: string; family: number }>;
+    // Familias presentes (v4/v6): si el host solo publica AAAA (v6) y el
+    // runtime no tiene egreso IPv6, el fetch falla aunque el DNS "funcione".
+    const families = [...new Set(results.map((r) => `v${r.family}`))].sort();
+    dns = `ok(${families.join(",")})`;
+  } catch (e) {
+    dns = (e as NodeJS.ErrnoException).code ?? (e as Error).message;
+  }
+
+  let connect = "ok";
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`${origin}/auth/v1/health`, {
+      signal: controller.signal,
+      cache: "no-store",
+    });
+    clearTimeout(timer);
+    connect = `http:${res.status}`;
+  } catch (e) {
+    const cause = (e as { cause?: { code?: string; message?: string } }).cause;
+    connect =
+      cause?.code ?? cause?.message ?? (e as Error).name ?? "error";
+  }
+
+  return { host, hostClean, dns, connect };
 }
 
 export async function getDesignerBaseProduct(
@@ -554,7 +614,8 @@ async function resolveDesignerBaseProduct(
 ): Promise<ProductWithVariants | null> {
   if (!isValidHandle(handle)) return null;
 
-  const { client, usingServiceRole, projectRef } = getSchoolLabelsClient();
+  const { client, usingServiceRole, projectRef, origin } =
+    getSchoolLabelsClient();
   if (!client) {
     return mockDesignerProduct(handle);
   }
@@ -595,10 +656,22 @@ async function resolveDesignerBaseProduct(
     ? (row.product_variants ?? []).filter((v) => v.status !== "oculto")
     : [];
 
+  // Fallo a NIVEL DE RED (el fetch ni siquiera obtuvo respuesta HTTP): corre
+  // la sonda de bajo nivel para exponer la causa exacta (DNS/TCP/TLS/HTTP).
+  const isNetworkLevelFailure =
+    !row &&
+    err !== null &&
+    /fetch failed|read-timeout|network|econn|socket|und_err/i.test(
+      err.message ?? "",
+    );
+  const netProbe =
+    isNetworkLevelFailure && origin ? await probeSupabaseNetwork(origin) : null;
+
   // TODO(diagnóstico temporal — retirar tras confirmar la corrección en
   // Preview): línea única y segura con commit del deployment, projectRef de
-  // la URL normalizada, cliente usado, tiempo real de la lectura, intentos y
-  // resultado. No imprime claves, URLs completas ni datos personales.
+  // la URL normalizada, cliente usado, tiempo real de la lectura, intentos,
+  // resultado y — si el fallo fue de red — la sonda con la causa exacta.
+  // No imprime claves, URLs completas ni datos personales.
   console.info("[designer runtime diagnostic]", {
     productType: context?.productType ?? null,
     resolvedHandle: handle,
@@ -614,6 +687,15 @@ async function resolveDesignerBaseProduct(
     variantSkus: variants.map((v) => v.sku),
     errorCode: err?.code ?? null,
     errorMessage: err?.message ?? null,
+    ...(netProbe
+      ? {
+          netHost: netProbe.host,
+          netHostClean: netProbe.hostClean,
+          netDns: netProbe.dns,
+          netConnect: netProbe.connect,
+          nodeVersion: process.version,
+        }
+      : {}),
   });
 
   if (!row) {
