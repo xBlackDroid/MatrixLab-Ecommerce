@@ -548,6 +548,30 @@ lo que la corrección definitiva depende de la firma que arroje la sonda en el
 próximo deploy de Preview. Los dos fixes candidatos embarcados cubren las dos
 causas más frecuentes de este error con configuración "correcta".
 
+## Release final — limpieza de diagnósticos y cierre
+
+Preview validado con Supabase real: los diseñadores resuelven productos
+reales, guardar y carrito funcionan, sin modo previsualización. Cierre:
+
+* **Retirado el log temporal** `[designer runtime diagnostic]` completo
+  (línea de consola, sonda de red `probeSupabaseNetwork`, contadores
+  `elapsedMs`/`attempts` y el parámetro `context` de
+  `getDesignerBaseProduct`). Verificado: 0 líneas de diagnóstico en runtime.
+* **Se conservan TODOS los fixes funcionales**: consulta única con variantes
+  embebidas + timeout de 15s + reintento transitorio único (Hotfix 4),
+  normalización de `SUPABASE_URL` con eliminación de caracteres invisibles y
+  respaldo `NEXT_PUBLIC_SUPABASE_URL` (Hotfix 5), mapa canónico de handles
+  (Hotfix 2), todos los fixes de UI/UX (Hotfix 1) y el copy de transferencia.
+* Se conserva el `console.warn` permanente "[designer] lookup de producto
+  base sin resultado" (solo se emite cuando el producto de verdad no
+  resuelve; no imprime secretos).
+
+QA de release: `type-check` ✓ · `lint` ✓ · `build` ✓ · `npm audit` 0
+vulnerabilidades · mapeo 66/66 ✓ · contratos 19/19 ✓ · links de la home
+19/19 sin 404 ✓ · QA de navegador 35/35 (desktop 1440×900 + móvil 390×844 y
+430×932) ✓ · smoke del resolver contra Supabase simulado: 8 rutas del
+diseñador sin banner, 1 request por resolución y 0 líneas de diagnóstico ✓.
+
 ## Instrucciones exactas de producción
 
 1. **Supabase (SQL Editor):** ejecutar `supabase/seed_designer_base_v2.sql`

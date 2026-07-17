@@ -417,24 +417,18 @@ let cachedSchoolClient: SupabaseClient | null = null;
 function getSchoolLabelsClient(): {
   client: SupabaseClient | null;
   usingServiceRole: boolean;
-  projectRef: string | null;
-  origin: string | null;
 } {
   const env = getServerEnv();
   const rawUrl = env.supabaseUrl;
   const key = env.supabaseServiceRoleKey ?? env.supabaseAnonKey;
   if (!rawUrl || !key) {
-    return { client: null, usingServiceRole: false, projectRef: null, origin: null };
+    return { client: null, usingServiceRole: false };
   }
   const url = rawUrl
     .trim()
     .replace(/\/+$/, "") // sin slash(es) final(es)
     .replace(/\/rest\/v1\/?$/i, "") // sin segmento /rest/v1 accidental
     .replace(/\/+$/, "");
-  // Ref del proyecto Supabase que este runtime está consultando REALMENTE
-  // (subdominio de la URL normalizada; no es secreto). Clave para detectar un
-  // deployment apuntando a otro proyecto (p. ej. Preview vs producción).
-  const projectRef = /^https?:\/\/([^./]+)/.exec(url)?.[1] ?? null;
   if (!cachedSchoolClient) {
     cachedSchoolClient = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
@@ -443,72 +437,11 @@ function getSchoolLabelsClient(): {
   return {
     client: cachedSchoolClient,
     usingServiceRole: Boolean(env.supabaseServiceRoleKey),
-    projectRef,
-    origin: url,
   };
-}
-
-/**
- * Sonda de red de bajo nivel hacia el host de Supabase. SOLO corre cuando la
- * lectura falló a nivel de red ("fetch failed" / timeout): convierte un error
- * opaco en la causa exacta — DNS (ENOTFOUND), conexión (ECONNREFUSED/
- * ETIMEDOUT), TLS (CERT_*) o respuesta HTTP del gateway. Acotada y sin
- * imprimir llaves; el host del proyecto es información pública.
- */
-async function probeSupabaseNetwork(origin: string): Promise<{
-  host: string;
-  hostClean: boolean;
-  dns: string;
-  connect: string;
-}> {
-  let host = "url-invalida";
-  try {
-    host = new URL(origin).hostname;
-  } catch {
-    return { host, hostClean: false, dns: "-", connect: "-" };
-  }
-  // Un carácter fuera de [a-z0-9.-] delata un invisible pegado al copiar.
-  const hostClean = /^[a-z0-9.-]+$/i.test(host);
-
-  let dns = "ok";
-  try {
-    const { lookup } = await import("node:dns/promises");
-    const results = (await Promise.race([
-      lookup(host, { all: true }),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("dns-timeout")), 3000),
-      ),
-    ])) as Array<{ address: string; family: number }>;
-    // Familias presentes (v4/v6): si el host solo publica AAAA (v6) y el
-    // runtime no tiene egreso IPv6, el fetch falla aunque el DNS "funcione".
-    const families = [...new Set(results.map((r) => `v${r.family}`))].sort();
-    dns = `ok(${families.join(",")})`;
-  } catch (e) {
-    dns = (e as NodeJS.ErrnoException).code ?? (e as Error).message;
-  }
-
-  let connect = "ok";
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 4000);
-    const res = await fetch(`${origin}/auth/v1/health`, {
-      signal: controller.signal,
-      cache: "no-store",
-    });
-    clearTimeout(timer);
-    connect = `http:${res.status}`;
-  } catch (e) {
-    const cause = (e as { cause?: { code?: string; message?: string } }).cause;
-    connect =
-      cause?.code ?? cause?.message ?? (e as Error).name ?? "error";
-  }
-
-  return { host, hostClean, dns, connect };
 }
 
 export async function getDesignerBaseProduct(
   handle: string,
-  context?: { productType?: string },
 ): Promise<ProductWithVariants | null> {
   // Normaliza SIEMPRE al handle real de producción vía el mapa canónico:
   // si llega un tipo de diseñador o alias de ruta ("playera", "laser",
@@ -523,13 +456,13 @@ export async function getDesignerBaseProduct(
   // existente en Supabase. Ahora el resolver hace UNA sola lectura con su
   // propio límite (15s) y máximo un reintento transitorio.
   const canonical = resolveDesignerHandle(handle);
-  const resolved = await resolveDesignerBaseProduct(canonical, context);
+  const resolved = await resolveDesignerBaseProduct(canonical);
   if (resolved) return resolved;
   // Último respaldo: si la entrada original era distinta al handle canónico
   // (caso anómalo: la base usa el alias como handle), intenta la consulta
   // literal antes de rendirse.
   if (canonical !== handle && isValidHandle(handle)) {
-    return resolveDesignerBaseProduct(handle, context);
+    return resolveDesignerBaseProduct(handle);
   }
   return null;
 }
@@ -610,24 +543,19 @@ type DesignerEmbeddedRow = ProductRow & {
 
 async function resolveDesignerBaseProduct(
   handle: string,
-  context?: { productType?: string },
 ): Promise<ProductWithVariants | null> {
   if (!isValidHandle(handle)) return null;
 
-  const { client, usingServiceRole, projectRef, origin } =
-    getSchoolLabelsClient();
+  const { client, usingServiceRole } = getSchoolLabelsClient();
   if (!client) {
     return mockDesignerProduct(handle);
   }
 
-  const startedAt = Date.now();
-
   // UNA SOLA lectura: producto + variantes embebidas por la FK real
   // (product_variants.product_id → products.id), el mismo embed que ya usa el
-  // catálogo público (getProductByHandle). Antes eran 2 lecturas secuenciales
-  // (producto y luego variantes) con timeout de 4s cada una + reintentos bajo
-  // un presupuesto global de 9s: en Preview la función moría a los 9.01s con
-  // un falso "read-timeout" aunque la fila existía.
+  // catálogo público (getProductByHandle). Un solo round-trip: las lecturas
+  // secuenciales bajo presupuesto global producían falsos timeouts con la
+  // fila existente (ver docs/PRODUCTION_QA_HOTFIX.md, Hotfix 4).
   const readOnce = () =>
     raceRead<DesignerEmbeddedRow[]>(
       client
@@ -638,7 +566,6 @@ async function resolveDesignerBaseProduct(
       DESIGNER_READ_TIMEOUT_MS,
     );
 
-  let attempts = 1;
   let { data: rows, error: readError } = await readOnce();
   // Reintento ÚNICO y solo ante fallos realmente transitorios (timeout,
   // conexión, 429, 5xx), con espera corta. Un resultado limpio sin fila
@@ -646,7 +573,6 @@ async function resolveDesignerBaseProduct(
   // consultar (las rutas del diseñador son force-dynamic).
   if (isTransientReadError(readError as { code?: string; message?: string } | null)) {
     await new Promise((resolve) => setTimeout(resolve, DESIGNER_RETRY_DELAY_MS));
-    attempts += 1;
     ({ data: rows, error: readError } = await readOnce());
   }
 
@@ -655,48 +581,6 @@ async function resolveDesignerBaseProduct(
   const variants = row
     ? (row.product_variants ?? []).filter((v) => v.status !== "oculto")
     : [];
-
-  // Fallo a NIVEL DE RED (el fetch ni siquiera obtuvo respuesta HTTP): corre
-  // la sonda de bajo nivel para exponer la causa exacta (DNS/TCP/TLS/HTTP).
-  const isNetworkLevelFailure =
-    !row &&
-    err !== null &&
-    /fetch failed|read-timeout|network|econn|socket|und_err/i.test(
-      err.message ?? "",
-    );
-  const netProbe =
-    isNetworkLevelFailure && origin ? await probeSupabaseNetwork(origin) : null;
-
-  // TODO(diagnóstico temporal — retirar tras confirmar la corrección en
-  // Preview): línea única y segura con commit del deployment, projectRef de
-  // la URL normalizada, cliente usado, tiempo real de la lectura, intentos,
-  // resultado y — si el fallo fue de red — la sonda con la causa exacta.
-  // No imprime claves, URLs completas ni datos personales.
-  console.info("[designer runtime diagnostic]", {
-    productType: context?.productType ?? null,
-    resolvedHandle: handle,
-    commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
-    projectRef,
-    usingServiceRole,
-    elapsedMs: Date.now() - startedAt,
-    attempts,
-    found: Boolean(row),
-    status: row?.status ?? null,
-    isCustomizable: row?.is_customizable ?? null,
-    variantCount: variants.length,
-    variantSkus: variants.map((v) => v.sku),
-    errorCode: err?.code ?? null,
-    errorMessage: err?.message ?? null,
-    ...(netProbe
-      ? {
-          netHost: netProbe.host,
-          netHostClean: netProbe.hostClean,
-          netDns: netProbe.dns,
-          netConnect: netProbe.connect,
-          nodeVersion: process.version,
-        }
-      : {}),
-  });
 
   if (!row) {
     console.warn("[designer] lookup de producto base sin resultado", {
