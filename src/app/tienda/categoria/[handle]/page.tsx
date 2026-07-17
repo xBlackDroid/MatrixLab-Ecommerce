@@ -18,6 +18,48 @@ import { ProductSortSchema } from "@/lib/validation/store";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Categorías CURADAS enlazadas desde la home / tienda. Si la base de datos aún
+ * no tiene la fila (p. ej. seed pendiente en producción), la ruta NO da 404:
+ * muestra una página "Próximamente" con CTA de WhatsApp. Cualquier handle
+ * fuera de esta whitelist sigue dando 404 normal.
+ */
+const CURATED_CATEGORY_FALLBACKS: Record<
+  string,
+  { title: string; description: string; whatsapp: string }
+> = {
+  stickers: {
+    title: "Stickers",
+    description:
+      "Stickers personalizados para marcas, eventos, regalos, campañas, empaques y colecciones.",
+    whatsapp: "Hola MatrixLab, quiero cotizar stickers personalizados.",
+  },
+  imanes: {
+    title: "Imanes",
+    description:
+      "Imanes personalizados para refrigerador, eventos, recuerdos, marcas y promociones.",
+    whatsapp: "Hola MatrixLab, quiero cotizar imanes personalizados.",
+  },
+  "impresion-3d": {
+    title: "Impresión 3D",
+    description:
+      "Piezas únicas, prototipos, decoración, accesorios y objetos personalizados capa por capa.",
+    whatsapp: "Hola MatrixLab, quiero cotizar una pieza de impresión 3D.",
+  },
+  "etiquetas-escolares": {
+    title: "Etiquetas escolares",
+    description:
+      "Packs personalizados para útiles, loncheras, termos, cuadernos y regreso a clases.",
+    whatsapp: "Hola MatrixLab, quiero cotizar etiquetas escolares personalizadas.",
+  },
+  [TUMBLER_PARENT_HANDLE]: {
+    title: "MatrixLab Tumbler",
+    description:
+      "Insumos, accesorios y materiales para vasos, termos y proyectos snow globe.",
+    whatsapp: "Hola MatrixLab, busco un insumo de MatrixLab Tumbler.",
+  },
+};
+
 interface CategoryPageProps {
   params: Promise<{ handle: string }>;
   searchParams: Promise<{ orden?: string }>;
@@ -28,7 +70,13 @@ export async function generateMetadata({
 }: CategoryPageProps): Promise<Metadata> {
   const { handle } = await params;
   const category = await getCategoryByHandle(handle);
-  if (!category) return { title: "Categoría" };
+  if (!category) {
+    const fallback = CURATED_CATEGORY_FALLBACKS[handle];
+    if (fallback) {
+      return { title: fallback.title, description: fallback.description };
+    }
+    return { title: "Categoría" };
+  }
   return {
     title: category.title,
     description:
@@ -55,7 +103,13 @@ export default async function CategoryPage({
   }
 
   const category = await getCategoryByHandle(handle);
-  if (!category) notFound();
+  if (!category) {
+    // Regla de QA: ningún CTA visible de la home puede terminar en 404. Las
+    // categorías curadas sin fila en la base muestran "Próximamente".
+    const fallback = CURATED_CATEGORY_FALLBACKS[handle];
+    if (fallback) return <CategoryComingSoon {...fallback} />;
+    notFound();
+  }
 
   // "MatrixLab Tumbler" (categoría madre) presenta sus subcategorías
   // comerciales como bloques; no tiene productos propios. El resto de
@@ -112,6 +166,50 @@ export default async function CategoryPage({
           <ProductGrid products={products} />
         </div>
       )}
+    </div>
+  );
+}
+
+/** Página "Próximamente" para categorías curadas sin fila en la base aún. */
+function CategoryComingSoon({
+  title,
+  description,
+  whatsapp,
+}: {
+  title: string;
+  description: string;
+  whatsapp: string;
+}) {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <Link
+        href="/tienda"
+        className="inline-flex items-center gap-1.5 text-sm text-ml-white/60 transition hover:text-ml-violet"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        Volver a la tienda
+      </Link>
+
+      <div className="glass mx-auto mt-10 max-w-lg rounded-3xl p-12 text-center">
+        <span className="glass inline-flex items-center rounded-full px-4 py-2 text-sm text-ml-cyan">
+          Próximamente
+        </span>
+        <h1 className="mt-5 text-3xl font-bold">{title}</h1>
+        <p className="mt-3 text-ml-white/65">{description}</p>
+        <p className="mt-3 text-sm text-ml-white/50">
+          Estamos preparando esta sección del catálogo. Mientras tanto,
+          cuéntanos tu idea y la cotizamos contigo directamente.
+        </p>
+        <a
+          href={buildWhatsAppUrl(whatsapp)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-7 inline-flex items-center gap-2 rounded-full bg-ml-green px-7 py-3.5 font-semibold text-ml-bg transition hover:bg-ml-green/90"
+        >
+          <MessageCircle className="h-5 w-5" aria-hidden />
+          Cotizar por WhatsApp
+        </a>
+      </div>
     </div>
   );
 }

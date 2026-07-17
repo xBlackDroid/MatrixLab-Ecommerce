@@ -23,10 +23,14 @@ export default async function AdminDisenosPage() {
 
   let views: AdminDesignView[] = [];
   if (client) {
+    // Un diseño GUARDADO por el cliente sigue en status 'draft' hasta que se
+    // agrega al carrito: debe aparecer aquí igual (QA: "guardar diseño →
+    // aparece en /admin/disenos"). Solo se ocultan los borradores vacíos
+    // (creados al subir la primera imagen, sin design_json guardado).
     const { data } = await client
       .from("design_projects")
       .select("*, orders(order_number)")
-      .neq("status", "draft")
+      .or("status.neq.draft,design_json.not.is.null")
       .order("updated_at", { ascending: false })
       .limit(80);
 

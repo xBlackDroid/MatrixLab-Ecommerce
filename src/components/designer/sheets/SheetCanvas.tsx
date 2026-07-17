@@ -136,38 +136,77 @@ export default function SheetCanvas({
               const h = repeatSizeCm.height * px;
               const x = pl.xCm * px;
               const y = pl.yCm * px;
-              const patternScaleX = w / repeatImage.width;
-              const patternScaleY = h / repeatImage.height;
+              // La imagen llena la pieza en modo "cover" (centrada, recorte
+              // uniforme) y la forma (círculo / cuadrado / rectángulo) actúa
+              // como máscara real vía clipFunc. Nota: NO usamos fillPattern
+              // porque su transform (offset/scale) desplazaba la imagen fuera
+              // del círculo y las piezas se veían vacías.
+              const cover = Math.max(w / repeatImage.width, h / repeatImage.height);
+              const drawW = repeatImage.width * cover;
+              const drawH = repeatImage.height * cover;
+              const drawX = x + (w - drawW) / 2;
+              const drawY = y + (h - drawH) / 2;
+              const radius = Math.min(w, h) / 2;
+              const cornerRadius = repeatShape === "square" ? 6 : 4;
+              return (
+                <Group
+                  key={i}
+                  clipFunc={(ctx) => {
+                    if (repeatShape === "circle") {
+                      ctx.arc(x + w / 2, y + h / 2, radius, 0, Math.PI * 2, false);
+                    } else {
+                      // Rectángulo con esquinas redondeadas (cuadrado/rect).
+                      const r = Math.min(cornerRadius, w / 2, h / 2);
+                      ctx.moveTo(x + r, y);
+                      ctx.arcTo(x + w, y, x + w, y + h, r);
+                      ctx.arcTo(x + w, y + h, x, y + h, r);
+                      ctx.arcTo(x, y + h, x, y, r);
+                      ctx.arcTo(x, y, x + w, y, r);
+                    }
+                  }}
+                >
+                  <KonvaImage
+                    image={repeatImage}
+                    x={drawX}
+                    y={drawY}
+                    width={drawW}
+                    height={drawH}
+                  />
+                </Group>
+              );
+            })}
+            {/* Línea de corte de referencia sobre cada pieza. */}
+            {repeatPlacements.map((pl, i) => {
+              const w = repeatSizeCm.width * px;
+              const h = repeatSizeCm.height * px;
+              const x = pl.xCm * px;
+              const y = pl.yCm * px;
               if (repeatShape === "circle") {
-                const r = Math.min(w, h) / 2;
                 return (
                   <Circle
-                    key={i}
+                    key={`cut-${i}`}
                     x={x + w / 2}
                     y={y + h / 2}
-                    radius={r}
-                    fillPatternImage={repeatImage}
-                    fillPatternRepeat="no-repeat"
-                    fillPatternScaleX={(2 * r) / repeatImage.width}
-                    fillPatternScaleY={(2 * r) / repeatImage.height}
-                    fillPatternOffset={{ x: repeatImage.width / 2, y: repeatImage.height / 2 }}
-                    fillPatternX={repeatImage.width / 2}
-                    fillPatternY={repeatImage.height / 2}
+                    radius={Math.min(w, h) / 2}
+                    stroke="#94A3B8"
+                    strokeWidth={1}
+                    dash={[4, 4]}
+                    opacity={0.7}
                   />
                 );
               }
               return (
                 <Rect
-                  key={i}
+                  key={`cut-${i}`}
                   x={x}
                   y={y}
                   width={w}
                   height={h}
                   cornerRadius={repeatShape === "square" ? 6 : 4}
-                  fillPatternImage={repeatImage}
-                  fillPatternRepeat="no-repeat"
-                  fillPatternScaleX={patternScaleX}
-                  fillPatternScaleY={patternScaleY}
+                  stroke="#94A3B8"
+                  strokeWidth={1}
+                  dash={[4, 4]}
+                  opacity={0.7}
                 />
               );
             })}

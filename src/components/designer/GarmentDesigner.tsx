@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Eye, Loader2, SlidersHorizontal, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Drawer } from "vaul";
@@ -65,6 +66,23 @@ interface GarmentDesignerProps {
    * se persiste nada (guardar/carrito deshabilitados con aviso claro).
    */
   previewOnly?: boolean;
+  /**
+   * Oculta el encabezado "1. Elige tu prenda" cuando el contenedor ya lo
+   * renderiza (p. ej. GorrasDesigner con su selector trucker/clásica).
+   */
+  showStepOne?: boolean;
+}
+
+/** Encabezado numerado de sección ("UX para dummies"): visible, no solo icono. */
+function StepHeading({ step, title }: { step: number; title: string }) {
+  return (
+    <h2 className="mb-3 flex items-center gap-2.5 text-sm font-bold text-ml-white">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ml-cyan/15 text-xs font-bold text-ml-cyan">
+        {step}
+      </span>
+      {title}
+    </h2>
+  );
 }
 
 type SideAssets = { front: PlacedAsset[]; back: PlacedAsset[] };
@@ -73,6 +91,7 @@ export default function GarmentDesigner({
   productType,
   product,
   previewOnly: catalogPreview = false,
+  showStepOne = true,
 }: GarmentDesignerProps) {
   const entry = getCatalogEntry(productType);
   const view = getGarmentView(productType);
@@ -412,15 +431,17 @@ export default function GarmentDesigner({
 
   /**
    * Genera previews locales de frente y espalda con el diseño aplicado, a
-   * partir del estado actual del lienzo (NO depende de nada persistido). Se usa
-   * al abrir la vista de giro para que nunca aparezca vacía después de guardar.
+   * partir del estado actual del lienzo (NO depende de nada persistido).
+   *
+   * SIEMPRE captura ambos lados (si la prenda tiene espalda): un lado sin
+   * diseño produce el mockup vacío, nunca una pantalla rota ni el mensaje de
+   * "guarda tu diseño". Así "Vista de giro" funciona desde el primer clic.
    */
   async function prepareSpinPreviews() {
     const original = side;
-    let front = previews.front;
-    let back = previews.back;
-    if (assets.front.length > 0) front = await captureSidePreview("front");
-    if (assets.back.length > 0) back = await captureSidePreview("back");
+    const hasBackZone = view.zones.some((z) => z.id === "back");
+    const front = await captureSidePreview("front");
+    const back = hasBackZone ? await captureSidePreview("back") : null;
     if (side !== original) {
       setSide(original);
       await new Promise<void>((r) => requestAnimationFrame(() => r()));
@@ -523,6 +544,10 @@ export default function GarmentDesigner({
     }
   }
 
+  const stepTwoTitle = entry.usesProfileSize
+    ? "Selecciona perfil, talla y color"
+    : "Selecciona el color";
+
   const productSelector = (
     <div className="flex flex-col gap-6">
       {entry.usesProfileSize && (
@@ -538,7 +563,7 @@ export default function GarmentDesigner({
                   markDirty();
                 }}
                 className={cn(
-                  "rounded-xl border px-2 py-2.5 text-xs font-medium transition",
+                  "min-h-11 rounded-xl border px-2 py-2.5 text-xs font-medium transition",
                   profile === p
                     ? "border-ml-cyan bg-ml-cyan/10 text-ml-cyan"
                     : "border-white/10 bg-white/5 text-ml-white/70 hover:border-white/25",
@@ -564,7 +589,7 @@ export default function GarmentDesigner({
                   markDirty();
                 }}
                 className={cn(
-                  "min-w-12 rounded-full border px-3 py-2 text-sm transition",
+                  "min-h-11 min-w-12 rounded-full border px-3 py-2 text-sm transition",
                   size === s
                     ? "border-ml-cyan bg-ml-cyan/10 text-ml-cyan"
                     : "border-white/15 bg-white/5 text-ml-white/75 hover:border-white/30",
@@ -593,14 +618,44 @@ export default function GarmentDesigner({
 
   return (
     <>
+      {/* Paso 1: qué prenda se está diseñando (con salida clara para cambiar). */}
+      {showStepOne && (
+        <div className="glass mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ml-cyan/15 text-xs font-bold text-ml-cyan">
+              1
+            </span>
+            <p className="text-sm font-bold">
+              Elige tu prenda:{" "}
+              <span className="font-semibold text-ml-cyan">
+                {entry.publicName}
+              </span>
+            </p>
+          </div>
+          <Link
+            href="/tienda/disenador"
+            className="inline-flex min-h-11 items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-ml-white/75 transition hover:border-white/30"
+          >
+            Cambiar prenda
+          </Link>
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)_320px]">
         {/* Panel izquierdo (desktop) */}
         <aside className="glass hidden h-fit rounded-2xl p-5 lg:block">
+          <StepHeading step={2} title={stepTwoTitle} />
           {productSelector}
         </aside>
 
         {/* Centro: lienzo */}
         <section className="glass-strong relative overflow-hidden rounded-3xl p-3 sm:p-5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <StepHeading step={4} title="Ajusta tamaño y posición" />
+            <p className="mb-3 text-xs text-ml-white/50">
+              Arrastra tu imagen; usa las esquinas para escalar y rotar.
+            </p>
+          </div>
           <MultiAssetCanvas
             stage={view.stage}
             mockupKey={view.mockupKey}
@@ -625,10 +680,13 @@ export default function GarmentDesigner({
               <Drawer.Trigger asChild>
                 <button
                   type="button"
-                  className="glass inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold"
+                  className="glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold"
                 >
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ml-cyan/15 text-[11px] font-bold text-ml-cyan">
+                    2
+                  </span>
                   <SlidersHorizontal className="h-4 w-4 text-ml-cyan" aria-hidden />
-                  Perfil, talla y color
+                  {entry.usesProfileSize ? "Perfil, talla y color" : "Color"}
                 </button>
               </Drawer.Trigger>
               <Drawer.Portal>
@@ -636,6 +694,7 @@ export default function GarmentDesigner({
                 <Drawer.Content className="glass-strong fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl p-6 pb-10">
                   <Drawer.Title className="sr-only">Opciones del producto</Drawer.Title>
                   <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-white/20" />
+                  <StepHeading step={2} title={stepTwoTitle} />
                   {productSelector}
                 </Drawer.Content>
               </Drawer.Portal>
@@ -643,8 +702,11 @@ export default function GarmentDesigner({
             <button
               type="button"
               onClick={toggleSpin}
-              className="glass inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold"
+              className="glass inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold"
             >
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ml-violet/15 text-[11px] font-bold text-ml-violet">
+                5
+              </span>
               <Eye className="h-4 w-4 text-ml-violet" aria-hidden />
               Vista de giro
             </button>
@@ -673,6 +735,7 @@ export default function GarmentDesigner({
         {/* Panel derecho: herramientas */}
         <aside className="flex flex-col gap-5">
           <div className="glass rounded-2xl p-5">
+            <StepHeading step={3} title="Sube tu diseño" />
             <PrintZoneSelector
               zones={view.zones}
               activeZone={side}
@@ -726,14 +789,30 @@ export default function GarmentDesigner({
                 onDelete={deleteAsset}
               />
             </div>
+            <div className="mt-4">
+              <PrintSizeHelper
+                areaCm={areaCm}
+                selectedCm={selectedCm}
+                withinBounds={sideWithinBounds}
+              />
+            </div>
           </div>
 
           <div className="glass rounded-2xl p-5">
-            <PrintSizeHelper
-              areaCm={areaCm}
-              selectedCm={selectedCm}
-              withinBounds={sideWithinBounds}
-            />
+            <StepHeading step={5} title="Revisa frente y espalda" />
+            <p className="text-xs leading-relaxed text-ml-white/55">
+              Usa los botones Frente / Espalda de arriba para editar cada lado,
+              y la vista de giro para revisar tu prenda completa antes de
+              guardar.
+            </p>
+            <button
+              type="button"
+              onClick={toggleSpin}
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-ml-white/80 transition hover:border-ml-violet/50"
+            >
+              <Eye className="h-4 w-4 text-ml-violet" aria-hidden />
+              {spinOpen ? "Ocultar" : "Abrir"} vista de giro
+            </button>
             <label
               htmlFor="garment-notes"
               className="mt-4 mb-1.5 block text-sm font-medium text-ml-white/70"
@@ -752,17 +831,11 @@ export default function GarmentDesigner({
               placeholder="Ej. quiero el diseño un poco más arriba…"
               className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-ml-white outline-none transition placeholder:text-ml-white/35 focus:border-ml-cyan"
             />
-            <button
-              type="button"
-              onClick={toggleSpin}
-              className="mt-3 hidden w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-ml-white/80 transition hover:border-ml-violet/50 lg:inline-flex"
-            >
-              <Eye className="h-4 w-4 text-ml-violet" aria-hidden />
-              {spinOpen ? "Ocultar" : "Ver"} vista de giro
-            </button>
           </div>
 
-          <DesignerCTA
+          <div className="glass rounded-2xl p-5">
+            <StepHeading step={6} title="Guarda o agrega al carrito" />
+            <DesignerCTA
             canSave={
               (assets.front.length > 0 || assets.back.length > 0) &&
               !uploading &&
@@ -786,7 +859,8 @@ export default function GarmentDesigner({
                   : "Estás en modo previsualización: puedes diseñar y acomodar tu imagen. Para guardar o agregar al carrito, termina de configurar el almacenamiento o escríbenos por WhatsApp."
                 : undefined
             }
-          />
+            />
+          </div>
         </aside>
       </div>
 

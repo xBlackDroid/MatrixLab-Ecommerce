@@ -144,7 +144,6 @@ export const SCHOOL_PAYMENTS: InfoSection = {
     {
       heading: "Transferencia bancaria",
       items: [
-        "Cuenta Banamex a nombre de Karla Elorza.",
         "Te compartimos los datos completos al confirmar tu pedido.",
         "Envía tu comprobante de pago por WhatsApp.",
       ],

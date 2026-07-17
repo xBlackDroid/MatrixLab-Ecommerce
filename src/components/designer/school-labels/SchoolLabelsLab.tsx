@@ -34,6 +34,7 @@ import {
   getSchoolPackage,
   type SchoolPackageId,
 } from "@/lib/designer/school-labels/config";
+import { DESIGNER_PRODUCT_HANDLE_MAP } from "@/lib/designer/product-handles";
 import { getBackgroundForPalette } from "@/lib/designer/school-labels/background-presets";
 import { renderSchoolLabelPreview } from "@/lib/designer/school-labels/preview";
 import { validateSchoolStudent } from "@/lib/validation/school-labels";
@@ -216,7 +217,8 @@ export default function SchoolLabelsLab({ product }: SchoolLabelsLabProps) {
       version: 1,
       designerType: "school-labels",
       productType: "etiquetas-escolares",
-      productHandle: product?.handle ?? "etiquetas-escolares-personalizadas",
+      productHandle:
+        product?.handle ?? DESIGNER_PRODUCT_HANDLE_MAP["etiquetas-escolares"],
       package: pkg,
       student: studentJson,
       typographyCode,
