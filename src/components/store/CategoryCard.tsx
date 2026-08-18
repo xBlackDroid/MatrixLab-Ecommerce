@@ -40,15 +40,16 @@ export default function CategoryCard({ category }: { category: CategoryRow }) {
       className="group glass flex flex-col gap-4 rounded-2xl p-6 transition hover:-translate-y-1 hover:border-ml-cyan/40 hover:shadow-glow-cyan"
     >
       {/* Si la categoría tiene logo/imagen (verificada en servidor: solo llega
-          aquí si el archivo existe o es una URL remota del admin) se muestra;
-          si no, cae al icono de la categoría. */}
+          aquí si el archivo existe o es una URL remota del admin) se muestra
+          con object-contain para no deformar el logo; si no, cae al icono de
+          la categoría. */}
       {category.image_url ? (
         <Image
           src={category.image_url}
           alt=""
           width={48}
           height={48}
-          className="h-12 w-12 rounded-xl border border-white/10 object-cover"
+          className="h-12 w-12 rounded-xl border border-white/10 bg-ml-violet/10 object-contain p-1.5"
           aria-hidden
         />
       ) : (

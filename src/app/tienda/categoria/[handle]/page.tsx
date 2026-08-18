@@ -135,16 +135,17 @@ export default async function CategoryPage({
 
       <div className="mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="flex items-start gap-4">
-          {/* Logo/imagen de la categoría (p. ej. matrixlab-tumbler.png). Si el
-              archivo aún no existe, image_url llega null y no se renderiza
-              nada: la página nunca muestra una imagen rota. */}
+          {/* Logo/imagen de la categoría (p. ej. matrixlab-tumbler.png,
+              matrixlab-3d.png, matrixlab-stickers.png). Si el archivo aún no
+              existe, image_url llega null y no se renderiza nada: la página
+              nunca muestra una imagen rota. */}
           {category.image_url && (
             <Image
               src={category.image_url}
               alt={category.title}
               width={72}
               height={72}
-              className="h-16 w-16 shrink-0 rounded-2xl border border-white/10 object-cover sm:h-[72px] sm:w-[72px]"
+              className="h-16 w-16 shrink-0 rounded-2xl border border-white/10 bg-ml-violet/10 object-contain p-2 sm:h-[72px] sm:w-[72px]"
             />
           )}
           <div>

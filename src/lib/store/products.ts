@@ -76,14 +76,37 @@ function normalizeTumblerCategory(c: CategoryRow): CategoryRow {
 }
 
 /**
- * Imagen de la categoría: si existe `public/images/categories/<handle>.png`
- * (o .webp) se usa esa; si el admin configuró una URL remota, se respeta; y si
- * no hay nada, queda null y la UI cae a su icono (nunca una imagen rota).
+ * Logos de marca por categoría. El nombre del archivo no siempre coincide con
+ * el handle público (la ruta de la categoría no cambia), así que aquí se mapea
+ * handle -> nombre base del archivo en `public/images/categories/`.
+ *
+ * Añadir una categoría nueva es solo agregar su entrada (o, si el archivo se
+ * llama igual que el handle, no hace falta ni eso: ver `resolveCategoryImage`).
+ */
+const CATEGORY_LOGO_BASENAMES: Record<string, string> = {
+  "matrixlab-tumbler": "matrixlab-tumbler",
+  "impresion-3d": "matrixlab-3d",
+  stickers: "matrixlab-stickers",
+};
+
+/** Extensiones aceptadas para el logo, en orden de preferencia. */
+const CATEGORY_LOGO_EXTENSIONS = ["png", "webp"] as const;
+
+/**
+ * Imagen de la categoría: si existe el logo de marca mapeado (o, por
+ * convención, `public/images/categories/<handle>.png` / `.webp`) se usa esa; si
+ * el admin configuró una URL remota, se respeta; y si no hay nada, queda null y
+ * la UI cae a su icono (nunca una imagen rota).
  */
 function resolveCategoryImage(c: CategoryRow): string | null {
-  for (const ext of ["png", "webp"] as const) {
-    const rel = `/images/categories/${c.handle}.${ext}`;
-    if (existsSync(join(process.cwd(), "public", rel))) return rel;
+  const basenames = [CATEGORY_LOGO_BASENAMES[c.handle], c.handle].filter(
+    (b): b is string => Boolean(b),
+  );
+  for (const basename of basenames) {
+    for (const ext of CATEGORY_LOGO_EXTENSIONS) {
+      const rel = `/images/categories/${basename}.${ext}`;
+      if (existsSync(join(process.cwd(), "public", rel))) return rel;
+    }
   }
   if (c.image_url && /^https?:\/\//.test(c.image_url)) return c.image_url;
   return null;
