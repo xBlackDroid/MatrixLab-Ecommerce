@@ -87,19 +87,28 @@ const CATEGORY_LOGO_BASENAMES: Record<string, string> = {
   "matrixlab-tumbler": "matrixlab-tumbler",
   "impresion-3d": "matrixlab-3d",
   stickers: "matrixlab-stickers",
+  "playeras-prendas": "matrixlab-playeras",
+  gorras: "matrixlab-gorras",
+  imanes: "matrixlab-imanes",
+  "disenador-tshirt-lab": "matrixlab-tshirt-lab",
+  // Acceso curado (no siempre tiene fila en la base): ver getCategoryLogo.
+  "etiquetas-escolares": "matrixlab-etiquetas-escolares",
 };
 
 /** Extensiones aceptadas para el logo, en orden de preferencia. */
 const CATEGORY_LOGO_EXTENSIONS = ["png", "webp"] as const;
 
 /**
- * Imagen de la categoría: si existe el logo de marca mapeado (o, por
- * convención, `public/images/categories/<handle>.png` / `.webp`) se usa esa; si
- * el admin configuró una URL remota, se respeta; y si no hay nada, queda null y
- * la UI cae a su icono (nunca una imagen rota).
+ * Ruta pública del logo de una categoría, o null si el archivo no existe.
+ *
+ * Se resuelve por handle (sin necesidad de una fila en la base), de modo que
+ * los accesos curados/tiles especiales —p. ej. "etiquetas-escolares", que vive
+ * como acceso de la tienda y como página "Próximamente"— puedan usar el mismo
+ * logo que las categorías estándar. Si el archivo no está, devuelve null y la
+ * UI conserva su icono actual: nunca se renderiza una imagen rota.
  */
-function resolveCategoryImage(c: CategoryRow): string | null {
-  const basenames = [CATEGORY_LOGO_BASENAMES[c.handle], c.handle].filter(
+export function getCategoryLogo(handle: string): string | null {
+  const basenames = [CATEGORY_LOGO_BASENAMES[handle], handle].filter(
     (b): b is string => Boolean(b),
   );
   for (const basename of basenames) {
@@ -108,6 +117,18 @@ function resolveCategoryImage(c: CategoryRow): string | null {
       if (existsSync(join(process.cwd(), "public", rel))) return rel;
     }
   }
+  return null;
+}
+
+/**
+ * Imagen de la categoría: si existe el logo de marca mapeado (o, por
+ * convención, `public/images/categories/<handle>.png` / `.webp`) se usa esa; si
+ * el admin configuró una URL remota, se respeta; y si no hay nada, queda null y
+ * la UI cae a su icono (nunca una imagen rota).
+ */
+function resolveCategoryImage(c: CategoryRow): string | null {
+  const logo = getCategoryLogo(c.handle);
+  if (logo) return logo;
   if (c.image_url && /^https?:\/\//.test(c.image_url)) return c.image_url;
   return null;
 }

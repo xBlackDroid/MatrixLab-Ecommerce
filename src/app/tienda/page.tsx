@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -20,7 +21,10 @@ import {
 import CategoryGrid from "@/components/store/CategoryGrid";
 import StoreCTA from "@/components/store/StoreCTA";
 import StoreHero from "@/components/store/StoreHero";
-import { getPublicStoreCategories } from "@/lib/store/products";
+import {
+  getCategoryLogo,
+  getPublicStoreCategories,
+} from "@/lib/store/products";
 
 // Catálogo público con cache razonable (5 min). Carrito y checkout son
 // siempre dinámicos en sus propias rutas.
@@ -73,6 +77,10 @@ const PRENDA_LAB_ITEMS: Array<{
 
 export default async function TiendaHomePage() {
   const categories = await getPublicStoreCategories();
+  // Acceso especial de regreso a clases: no es una categoría estándar del
+  // grid, pero acepta el mismo logo de marca. Si el archivo no existe queda
+  // null y la sección conserva su icono actual.
+  const schoolLabelsLogo = getCategoryLogo("etiquetas-escolares");
 
   return (
     <>
@@ -144,6 +152,15 @@ export default async function TiendaHomePage() {
         <div className="glass relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-3xl p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-ml-violet/10 blur-3xl" />
           <div className="relative">
+            {schoolLabelsLogo && (
+              <Image
+                src={schoolLabelsLogo}
+                alt="Etiquetas escolares"
+                width={72}
+                height={72}
+                className="mb-5 h-16 w-16 rounded-2xl border border-white/10 bg-ml-violet/10 object-contain p-2 sm:h-[72px] sm:w-[72px]"
+              />
+            )}
             <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
               <GraduationCap className="h-4 w-4" aria-hidden />
               Regreso a clases

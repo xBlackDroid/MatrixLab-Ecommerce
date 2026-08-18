@@ -7,6 +7,7 @@ import ProductGrid from "@/components/store/ProductGrid";
 import SortSelect from "@/components/store/SortSelect";
 import {
   getCategoryByHandle,
+  getCategoryLogo,
   getProductsByCategory,
   getTumblerSubcategories,
   LEGACY_TUMBLER_PARENT_HANDLE,
@@ -107,7 +108,8 @@ export default async function CategoryPage({
     // Regla de QA: ningún CTA visible de la home puede terminar en 404. Las
     // categorías curadas sin fila en la base muestran "Próximamente".
     const fallback = CURATED_CATEGORY_FALLBACKS[handle];
-    if (fallback) return <CategoryComingSoon {...fallback} />;
+    if (fallback)
+      return <CategoryComingSoon {...fallback} logo={getCategoryLogo(handle)} />;
     notFound();
   }
 
@@ -176,10 +178,13 @@ function CategoryComingSoon({
   title,
   description,
   whatsapp,
+  logo,
 }: {
   title: string;
   description: string;
   whatsapp: string;
+  /** Logo de marca de la categoría; null si el archivo no existe. */
+  logo?: string | null;
 }) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -192,6 +197,17 @@ function CategoryComingSoon({
       </Link>
 
       <div className="glass mx-auto mt-10 max-w-lg rounded-3xl p-12 text-center">
+        {/* Mismo logo/proporción que el resto de categorías. Si el archivo no
+            existe, `logo` llega null y la tarjeta queda como hasta ahora. */}
+        {logo && (
+          <Image
+            src={logo}
+            alt={title}
+            width={72}
+            height={72}
+            className="mx-auto mb-5 h-16 w-16 rounded-2xl border border-white/10 bg-ml-violet/10 object-contain p-2 sm:h-[72px] sm:w-[72px]"
+          />
+        )}
         <span className="glass inline-flex items-center rounded-full px-4 py-2 text-sm text-ml-cyan">
           Próximamente
         </span>
