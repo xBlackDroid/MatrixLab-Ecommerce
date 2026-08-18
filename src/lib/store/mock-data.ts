@@ -3,6 +3,12 @@ import type {
   ProductRow,
   ProductVariantRow,
 } from "@/lib/db/types";
+import {
+  sparkleDescription,
+  sparkleHandle,
+  sparkleSku,
+  TUMBLER_SPARKLES,
+} from "@/lib/store/tumbler-sparkles";
 
 /**
  * Datos mock espejo de supabase/seed.sql.
@@ -647,6 +653,53 @@ const P = {
   pieza3d: "d0000000-0000-4000-8000-000000000007",
 };
 
+
+// ---------------------------------------------------------------------------
+// MatrixLab Tumbler — Sparkles / Glitter Chunky (categoría Sparkle Mix).
+// Espejo de supabase/seed_tumbler_sparkles.sql: mismos ids, handles, SKUs,
+// precios e inventarios, generados desde la MISMA fuente (el Excel) para que
+// el preview sin Supabase muestre los 46 productos reales.
+// ---------------------------------------------------------------------------
+const SPARKLES_CATEGORY_ID = "c0000000-0000-4000-8000-00000000000e";
+
+/** Id determinista: mismo esquema que el seed (posición del Excel). */
+function sparkleMockId(prefix: string, position: number): string {
+  return `${prefix}-0000-4000-8000-${String(position).padStart(12, "0")}`;
+}
+
+const MOCK_SPARKLE_PRODUCTS: ProductRow[] = TUMBLER_SPARKLES.map((item) =>
+  product({
+    id: sparkleMockId("f1000000", item.position),
+    category_id: SPARKLES_CATEGORY_ID,
+    title: item.name,
+    handle: sparkleHandle(item.code),
+    description: sparkleDescription(item),
+    base_price: item.price,
+    compare_at_price: null,
+    status: item.inventory > 0 ? "disponible" : "agotado",
+    is_customizable: false,
+    production_time: null,
+    min_quantity: 1,
+    max_quantity: 50,
+    tags: ["sparkles", "glitter-chunky", "matrixlab-tumbler"],
+  }),
+);
+
+const MOCK_SPARKLE_VARIANTS: ProductVariantRow[] = TUMBLER_SPARKLES.map((item) =>
+  variant(
+    sparkleMockId("f2000000", item.position),
+    sparkleMockId("f1000000", item.position),
+    "Bote",
+    sparkleSku(item.code),
+    item.price,
+    item.inventory,
+    {
+      option_label: "Bote",
+      status: item.inventory > 0 ? "disponible" : "agotado",
+    },
+  ),
+);
+
 export const MOCK_VARIANTS: ProductVariantRow[] = [
   variant("e0000000-0000-4000-8000-000000000101", P.sticker, "Paquete 10 — 5 cm", "STK-5CM", 99, 120, { option_label: "Tamaño 5 cm" }),
   variant("e0000000-0000-4000-8000-000000000102", P.sticker, "Paquete 10 — 8 cm", "STK-8CM", 149, 90, { option_label: "Tamaño 8 cm" }),
@@ -703,3 +756,6 @@ export const MOCK_VARIANTS: ProductVariantRow[] = [
   variant("e0000000-0000-4000-8000-000000000b01", "d0000000-0000-4000-8000-000000000030", "Elementary", "ESC-ELEM", 199, 0, { option_label: "Elementary", status: "sobre_pedido" }),
   variant("e0000000-0000-4000-8000-000000000b02", "d0000000-0000-4000-8000-000000000030", "Ultra", "ESC-ULTRA", 299, 0, { option_label: "Ultra", status: "sobre_pedido" }),
 ];
+
+MOCK_VARIANTS.push(...MOCK_SPARKLE_VARIANTS);
+MOCK_PRODUCTS.push(...MOCK_SPARKLE_PRODUCTS);

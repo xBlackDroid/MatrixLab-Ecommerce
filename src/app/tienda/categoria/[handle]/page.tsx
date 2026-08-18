@@ -4,16 +4,19 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import ProductGrid from "@/components/store/ProductGrid";
+import SparklesCatalog from "@/components/store/SparklesCatalog";
 import SortSelect from "@/components/store/SortSelect";
 import {
   getCategoryByHandle,
   getCategoryLogo,
   getProductsByCategory,
+  getSparkleCatalog,
   getTumblerSubcategories,
   LEGACY_TUMBLER_PARENT_HANDLE,
   TUMBLER_PARENT_HANDLE,
 } from "@/lib/store/products";
 import type { CategoryRow } from "@/lib/db/types";
+import { SPARKLES_CATEGORY_HANDLE } from "@/lib/store/tumbler-sparkles";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { ProductSortSchema } from "@/lib/validation/store";
 
@@ -119,11 +122,17 @@ export default async function CategoryPage({
   const isTumblerParent = handle === TUMBLER_PARENT_HANDLE;
   const subcategories = isTumblerParent ? await getTumblerSubcategories() : [];
 
+  // Sparkle Mix es un catálogo propio: 46 Sparkles individuales con buscador,
+  // filtros por colección y orden fijo del Excel (no usa el selector de orden).
+  const isSparkles = handle === SPARKLES_CATEGORY_HANDLE;
+  const sparkles = isSparkles ? await getSparkleCatalog(category.id) : null;
+
   // Whitelist de ordenamiento: cualquier valor extraño cae en "newest".
   const sort = ProductSortSchema.parse(orden ?? "newest");
-  const products = isTumblerParent
-    ? []
-    : await getProductsByCategory(category.id, sort);
+  const products =
+    isTumblerParent || isSparkles
+      ? []
+      : await getProductsByCategory(category.id, sort);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -152,6 +161,14 @@ export default async function CategoryPage({
           )}
           <div>
             <h1 className="text-3xl font-bold sm:text-4xl">{category.title}</h1>
+            {/* Alineación de marca SOLO a nivel de presentación: el título y
+                el handle de la categoría en base no se tocan (la ruta
+                /tienda/categoria/repuestos-consumibles no cambia). */}
+            {isSparkles && sparkles && (
+              <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-ml-cyan">
+                Sparkles · Glitter Chunky — {sparkles.entries.length} colores
+              </p>
+            )}
             {category.description && (
               <p className="mt-3 max-w-2xl text-ml-white/65">
                 {category.description}
@@ -159,11 +176,27 @@ export default async function CategoryPage({
             )}
           </div>
         </div>
-        {!isTumblerParent && <SortSelect current={sort} />}
+        {!isTumblerParent && !isSparkles && <SortSelect current={sort} />}
       </div>
 
       {isTumblerParent ? (
         <TumblerBlocks subcategories={subcategories} />
+      ) : sparkles ? (
+        <>
+          <SparklesCatalog entries={sparkles.entries} />
+          {/* Otros productos de la categoría (no Sparkles): siguen visibles,
+              no se ocultan ni se borran. */}
+          {sparkles.others.length > 0 && (
+            <section className="mt-14">
+              <h2 className="text-xl font-bold">
+                Otros productos de Sparkle Mix
+              </h2>
+              <div className="mt-6">
+                <ProductGrid products={sparkles.others} />
+              </div>
+            </section>
+          )}
+        </>
       ) : (
         <div className="mt-10">
           <ProductGrid products={products} />
