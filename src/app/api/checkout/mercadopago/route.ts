@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
         quantity: item.quantity,
         unitPrice: Number(item.unit_price),
       })),
+      shipping: Number(order.shipping ?? 0),
       customerName: order.customer_name,
       customerEmail: order.customer_email ?? undefined,
       sessionHash: hashSessionId(sessionId),

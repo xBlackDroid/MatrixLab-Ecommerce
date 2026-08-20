@@ -1,14 +1,19 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
 import { getServerEnv, getSiteUrl, isProduction } from "@/lib/security/env";
+import {
+  buildSignatureManifest,
+  parseSignatureHeader,
+  signatureMatches,
+} from "@/lib/payments/mercadopago-core";
 import type {
   CreatePreferenceInput,
   CreatePreferenceResult,
-  NormalizedPayment,
-  PaymentStatusMapping,
+  FetchPaymentResult,
 } from "@/lib/payments/types";
+
+export { mapPaymentStatus } from "@/lib/payments/mercadopago-core";
 
 /**
  * Integración Mercado Pago Checkout Pro.
@@ -39,6 +44,8 @@ export async function createCheckoutPreference(
   const siteUrl = getSiteUrl();
   if (!client || !siteUrl) return { ok: false, error: "NOT_CONFIGURED" };
 
+  const shipping = Math.round((input.shipping ?? 0) * 100) / 100;
+
   try {
     const preference = new Preference(client);
     const successUrl = `${siteUrl}/tienda/checkout/success?orderId=${input.orderId}`;
@@ -51,6 +58,12 @@ export async function createCheckoutPreference(
           unit_price: line.unitPrice,
           currency_id: "MXN",
         })),
+        // El cobro de Mercado Pago debe coincidir con el total del pedido.
+        // Si algún día el envío deja de ser 0, va como costo de envío en la
+        // preferencia en lugar de quedarse sin cobrar.
+        ...(shipping > 0
+          ? { shipments: { cost: shipping, mode: "not_specified" as const } }
+          : {}),
         payer: {
           name: input.customerName.slice(0, 80),
           ...(input.customerEmail ? { email: input.customerEmail } : {}),
@@ -86,29 +99,51 @@ export async function createCheckoutPreference(
   }
 }
 
-/** Consulta el estado REAL del pago en Mercado Pago. */
+/** Lee el `status` HTTP de un error del SDK sin exponer su contenido. */
+function errorStatus(error: unknown): number | null {
+  if (typeof error !== "object" || error === null) return null;
+  const candidate = (error as { status?: unknown; statusCode?: unknown });
+  const value = candidate.status ?? candidate.statusCode;
+  return typeof value === "number" ? value : null;
+}
+
+/**
+ * Consulta el estado REAL del pago en Mercado Pago.
+ *
+ * Distingue "no existe" de "fallo transitorio": un id inexistente (404) no
+ * debe provocar 5xx eternos en el webhook, mientras que un timeout o un 5xx
+ * del proveedor sí debe pedirle a Mercado Pago que reintente.
+ */
 export async function fetchPayment(
   paymentId: string,
-): Promise<NormalizedPayment | null> {
+): Promise<FetchPaymentResult> {
   const client = getMpClient();
-  if (!client) return null;
-  if (!/^\d{1,32}$/.test(paymentId)) return null;
+  if (!client) return { ok: false, reason: "TRANSIENT" };
+  if (!/^\d{1,32}$/.test(paymentId)) return { ok: false, reason: "NOT_FOUND" };
   try {
     const payment = await new Payment(client).get({ id: paymentId });
-    if (!payment.id || !payment.status) return null;
+    if (!payment.id || !payment.status) {
+      return { ok: false, reason: "TRANSIENT" };
+    }
     return {
-      paymentId: String(payment.id),
-      status: payment.status,
-      externalReference: payment.external_reference ?? null,
+      ok: true,
+      payment: {
+        paymentId: String(payment.id),
+        status: payment.status,
+        externalReference: payment.external_reference ?? null,
+      },
     };
-  } catch {
-    return null;
+  } catch (error) {
+    const status = errorStatus(error);
+    if (status === 400 || status === 404) {
+      return { ok: false, reason: "NOT_FOUND" };
+    }
+    return { ok: false, reason: "TRANSIENT" };
   }
 }
 
 /**
  * Verifica la firma `x-signature` de webhooks de Mercado Pago.
- * Manifest oficial: "id:[data.id];request-id:[x-request-id];ts:[ts];"
  * Si MERCADOPAGO_WEBHOOK_SECRET no está configurado:
  *   - en producción se rechaza el webhook (estricto);
  *   - en desarrollo se permite (modo test) porque igual se confirma el pago
@@ -121,48 +156,17 @@ export function verifyWebhookSignature(params: {
 }): boolean {
   const secret = getServerEnv().mpWebhookSecret;
   if (!secret) return !isProduction();
-  const { xSignature, xRequestId, dataId } = params;
-  if (!xSignature || !dataId) return false;
+  if (!params.dataId) return false;
+  const parsed = parseSignatureHeader(params.xSignature);
+  if (!parsed) return false;
 
-  const parts = Object.fromEntries(
-    xSignature
-      .split(",")
-      .map((part) => part.split("=").map((s) => s.trim()))
-      .filter((pair) => pair.length === 2),
-  ) as Record<string, string>;
-  const ts = parts.ts;
-  const v1 = parts.v1;
-  if (!ts || !v1) return false;
-
-  const manifest = `id:${dataId.toLowerCase()};request-id:${xRequestId ?? ""};ts:${ts};`;
-  const expected = createHmac("sha256", secret).update(manifest).digest("hex");
-  const a = Buffer.from(expected);
-  const b = Buffer.from(v1);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
-
-/** Mapea estados de Mercado Pago a estados locales (whitelist). */
-export function mapPaymentStatus(mpStatus: string): PaymentStatusMapping {
-  switch (mpStatus) {
-    case "approved":
-      return { paymentStatus: "approved", orderStatus: "pagado" };
-    case "pending":
-    case "authorized":
-    case "in_process":
-    case "in_mediation":
-      return {
-        paymentStatus: mpStatus === "in_process" ? "in_process" : "pending",
-        orderStatus: "pendiente_pago",
-      };
-    case "rejected":
-      return { paymentStatus: "rejected", orderStatus: "pago_rechazado" };
-    case "cancelled":
-      return { paymentStatus: "cancelled", orderStatus: "cancelado" };
-    case "refunded":
-    case "charged_back":
-      return { paymentStatus: "refunded", orderStatus: "cancelado" };
-    default:
-      return { paymentStatus: "pending", orderStatus: "pendiente_pago" };
-  }
+  return signatureMatches({
+    secret,
+    manifest: buildSignatureManifest({
+      dataId: params.dataId,
+      requestId: params.xRequestId,
+      ts: parsed.ts,
+    }),
+    v1: parsed.v1,
+  });
 }
