@@ -27,9 +27,11 @@ export const dynamic = "force-dynamic";
  * - Valida firma x-signature si MERCADOPAGO_WEBHOOK_SECRET está configurado.
  * - NUNCA confía en el payload: consulta el pago real a Mercado Pago con el
  *   Access Token (solo backend).
- * - Idempotente: payment_events.event_id es único; un evento repetido no
- *   duplica efectos. El descuento de inventario es transaccional (función
- *   SQL process_paid_order) y solo ocurre con pago aprobado.
+ * - Idempotente: payment_events.event_id es único y `processed_at` marca los
+ *   eventos ya aplicados, así un reenvío no duplica efectos pero un evento
+ *   que quedó registrado sin aplicarse sí se reintenta. El descuento de
+ *   inventario es transaccional (función SQL process_paid_order) y solo
+ *   ocurre con pago aprobado.
  * - Responde 200 en eventos ignorables para evitar reintentos infinitos y
  *   5xx solo cuando conviene que Mercado Pago reintente.
  */
@@ -105,16 +107,25 @@ export async function POST(request: NextRequest) {
   }
 
   // Confirmar el estado REAL del pago contra Mercado Pago.
-  const payment = await fetchPayment(paymentId);
-  if (!payment) {
-    // Transitorio (o id desconocido): 500 para que MP reintente con backoff.
+  const fetched = await fetchPayment(paymentId);
+  if (!fetched.ok) {
+    if (fetched.reason === "NOT_FOUND") {
+      // El id no corresponde a un pago: reintentar no cambiaría nada.
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+    // Transitorio: 500 para que MP reintente con backoff.
     return NextResponse.json({ ok: false }, { status: 500 });
   }
+  const payment = fetched.payment;
 
   const client = requireServiceClient();
   const eventId = `mp:payment:${payment.paymentId}:${payment.status}`;
 
-  // Idempotencia: insertar el evento primero; si ya existe, no repetir nada.
+  // Idempotencia: se registra el evento antes de aplicarlo y se marca
+  // `processed_at` al terminar. Un evento YA aplicado se ignora; uno
+  // registrado pero sin aplicar (p. ej. la entrega anterior falló al
+  // descontar inventario y devolvió 500) se vuelve a procesar en el
+  // reintento de Mercado Pago, en vez de darse por bueno y perder el pago.
   const { error: insertError } = await client.from("payment_events").insert({
     provider: "mercadopago",
     event_id: eventId,
@@ -129,11 +140,23 @@ export async function POST(request: NextRequest) {
     },
   });
   if (insertError) {
-    if (insertError.code === "23505") {
-      // Evento ya procesado.
+    if (insertError.code !== "23505") {
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
+    const { data: existing, error: existingError } = await client
+      .from("payment_events")
+      .select("processed_at")
+      .eq("event_id", eventId)
+      .maybeSingle();
+    if (existingError) {
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
+    if (existing?.processed_at) {
+      // Evento ya aplicado: nada que repetir.
       return NextResponse.json({ received: true }, { status: 200 });
     }
-    return NextResponse.json({ ok: false }, { status: 500 });
+    // Registrado pero sin aplicar: continuar. Los efectos son idempotentes
+    // (process_paid_order usa lock de fila y no repite el pago).
   }
 
   // external_reference = orderId interno (uuid).
@@ -182,7 +205,7 @@ export async function POST(request: NextRequest) {
     } else if (order.paid_at && mapping.paymentStatus !== "refunded") {
       // No degradar un pedido ya pagado por eventos tardíos.
     } else {
-      await client
+      const { error: updateError } = await client
         .from("orders")
         .update({
           payment_status: mapping.paymentStatus,
@@ -190,6 +213,10 @@ export async function POST(request: NextRequest) {
           payment_reference: payment.paymentId,
         })
         .eq("id", order.id);
+      if (updateError) {
+        // Sin marcar processed_at: el reintento de MP vuelve a aplicarlo.
+        return NextResponse.json({ ok: false }, { status: 500 });
+      }
     }
 
     await client

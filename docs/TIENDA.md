@@ -65,10 +65,29 @@ Flujo: `POST /api/checkout/mercadopago` valida sesión + carrito, **recalcula
 precios e inventario en backend**, crea el pedido (`pendiente_pago`), crea la
 preferencia (`external_reference = orderId`) y devuelve solo
 `{ redirectUrl, orderId }`. El webhook re-consulta el pago a Mercado Pago con
-el Access Token, registra el evento en `payment_events` (idempotente por
-`event_id` único) y, si está aprobado, ejecuta `process_paid_order`
-(transaccional: marca pagado, descuenta stock, registra movimientos, pasa
-diseños a `production_ready` y convierte el carrito).
+el Access Token, registra el evento en `payment_events` y, si está aprobado,
+ejecuta `process_paid_order` (transaccional: marca pagado, descuenta stock,
+registra movimientos, pasa diseños a `production_ready` y convierte el
+carrito).
+
+**Idempotencia y reintentos.** `payment_events.event_id` es único y
+`processed_at` marca los eventos ya aplicados:
+
+- evento repetido **ya aplicado** → 200 sin repetir efectos;
+- evento registrado pero **sin aplicar** (la entrega anterior falló a mitad y
+  devolvió 5xx) → se vuelve a procesar en el reintento de Mercado Pago, así un
+  fallo transitorio de base de datos no deja un pago aprobado sin aplicar;
+- pago inexistente o id inválido → 200 (reintentar no cambiaría nada);
+- fallo transitorio consultando a Mercado Pago → 500 para que reintente.
+
+La firma `x-signature` se valida con el manifest oficial
+`id:[data.id];request-id:[x-request-id];ts:[ts];`, **omitiendo el segmento
+`request-id` completo** cuando la notificación no trae esa cabecera (como
+especifica Mercado Pago). Cubierto por QA:
+
+```bash
+npx tsx scripts/qa/mercadopago-webhook.test.ts
+```
 
 ## 3. Correr el proyecto
 

@@ -13,6 +13,8 @@ export interface CreatePreferenceInput {
   orderId: string;
   orderNumber: string;
   lines: CheckoutLineInput[];
+  /** Costo de envío del pedido (0 en Etapa 1). Se cobra en la preferencia. */
+  shipping?: number;
   customerName: string;
   customerEmail?: string;
   /** Hash anónimo de la sesión (nunca el sessionId crudo). */
@@ -28,6 +30,15 @@ export interface NormalizedPayment {
   status: string;
   externalReference: string | null;
 }
+
+/**
+ * Resultado de consultar un pago al proveedor.
+ * `NOT_FOUND` = el id no corresponde a un pago (no reintentar);
+ * `TRANSIENT` = fallo de red/proveedor (conviene que el webhook reintente).
+ */
+export type FetchPaymentResult =
+  | { ok: true; payment: NormalizedPayment }
+  | { ok: false; reason: "NOT_FOUND" | "TRANSIENT" };
 
 export interface PaymentStatusMapping {
   paymentStatus: PaymentStatus;
