@@ -9,6 +9,12 @@ import {
   sparkleSku,
   TUMBLER_SPARKLES,
 } from "@/lib/store/tumbler-sparkles";
+import {
+  stickerDescription,
+  stickerHandle,
+  stickerSku,
+  TUMBLER_STICKERS,
+} from "@/lib/store/tumbler-stickers";
 
 /**
  * Datos mock espejo de supabase/seed.sql.
@@ -700,6 +706,53 @@ const MOCK_SPARKLE_VARIANTS: ProductVariantRow[] = TUMBLER_SPARKLES.map((item) =
   ),
 );
 
+// ---------------------------------------------------------------------------
+// MatrixLab Tumbler — UV Stickers (categoría Wraps & Glow Finish).
+// Espejo de supabase/seed_tumbler_stickers.sql: mismos ids, handles, SKUs,
+// precios e inventarios, generados desde la MISMA fuente (el Excel) para que
+// el preview sin Supabase muestre los 209 productos reales.
+// ---------------------------------------------------------------------------
+const STICKERS_CATEGORY_ID = "c0000000-0000-4000-8000-000000000010";
+
+/** Id determinista: mismo esquema que el seed (posición del Excel). */
+function stickerMockId(prefix: string, position: number): string {
+  return `${prefix}-0000-4000-8000-${String(position).padStart(12, "0")}`;
+}
+
+const MOCK_STICKER_PRODUCTS: ProductRow[] = TUMBLER_STICKERS.map((item) =>
+  product({
+    id: stickerMockId("f3000000", item.position),
+    category_id: STICKERS_CATEGORY_ID,
+    title: item.name,
+    handle: stickerHandle(item.code),
+    description: stickerDescription(item),
+    base_price: item.price,
+    compare_at_price: null,
+    status: item.inventory > 0 ? "disponible" : "agotado",
+    is_customizable: false,
+    production_time: null,
+    min_quantity: 1,
+    // Tope duro por producto: nunca más piezas que el inventario real.
+    max_quantity: Math.max(item.inventory, 1),
+    tags: ["uv-stickers", "stickers", "matrixlab-tumbler"],
+  }),
+);
+
+const MOCK_STICKER_VARIANTS: ProductVariantRow[] = TUMBLER_STICKERS.map((item) =>
+  variant(
+    stickerMockId("f4000000", item.position),
+    stickerMockId("f3000000", item.position),
+    "Pieza",
+    stickerSku(item.code),
+    item.price,
+    item.inventory,
+    {
+      option_label: "Pieza",
+      status: item.inventory > 0 ? "disponible" : "agotado",
+    },
+  ),
+);
+
 export const MOCK_VARIANTS: ProductVariantRow[] = [
   variant("e0000000-0000-4000-8000-000000000101", P.sticker, "Paquete 10 — 5 cm", "STK-5CM", 99, 120, { option_label: "Tamaño 5 cm" }),
   variant("e0000000-0000-4000-8000-000000000102", P.sticker, "Paquete 10 — 8 cm", "STK-8CM", 149, 90, { option_label: "Tamaño 8 cm" }),
@@ -759,3 +812,5 @@ export const MOCK_VARIANTS: ProductVariantRow[] = [
 
 MOCK_VARIANTS.push(...MOCK_SPARKLE_VARIANTS);
 MOCK_PRODUCTS.push(...MOCK_SPARKLE_PRODUCTS);
+MOCK_VARIANTS.push(...MOCK_STICKER_VARIANTS);
+MOCK_PRODUCTS.push(...MOCK_STICKER_PRODUCTS);

@@ -5,17 +5,23 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import ProductGrid from "@/components/store/ProductGrid";
 import SparklesCatalog from "@/components/store/SparklesCatalog";
+import TumblerStickersCatalog from "@/components/store/TumblerStickersCatalog";
 import SortSelect from "@/components/store/SortSelect";
 import {
   getCategoryByHandle,
   getProductsByCategory,
   getSparkleCatalog,
+  getStickerCatalog,
   getTumblerSubcategories,
   LEGACY_TUMBLER_PARENT_HANDLE,
   TUMBLER_PARENT_HANDLE,
 } from "@/lib/store/products";
 import type { CategoryRow } from "@/lib/db/types";
 import { SPARKLES_CATEGORY_HANDLE } from "@/lib/store/tumbler-sparkles";
+import {
+  STICKERS_CATEGORY_HANDLE,
+  STICKERS_PUBLIC_TITLE,
+} from "@/lib/store/tumbler-stickers";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { ProductSortSchema } from "@/lib/validation/store";
 
@@ -128,10 +134,16 @@ export default async function CategoryPage({
   const isSparkles = handle === SPARKLES_CATEGORY_HANDLE;
   const sparkles = isSparkles ? await getSparkleCatalog(category.id) : null;
 
+  // Wraps & Glow Finish presenta el catálogo real de UV Stickers: productos
+  // individuales con buscador, filtros por acabado y orden fijo del Excel
+  // (A001 → A209), por lo que tampoco usa el selector de orden.
+  const isStickers = handle === STICKERS_CATEGORY_HANDLE;
+  const stickers = isStickers ? await getStickerCatalog(category.id) : null;
+
   // Whitelist de ordenamiento: cualquier valor extraño cae en "newest".
   const sort = ProductSortSchema.parse(orden ?? "newest");
   const products =
-    isTumblerParent || isSparkles
+    isTumblerParent || isSparkles || isStickers
       ? []
       : await getProductsByCategory(category.id, sort);
 
@@ -160,13 +172,24 @@ export default async function CategoryPage({
             />
           )}
           <div>
-            <h1 className="text-3xl font-bold sm:text-4xl">{category.title}</h1>
+            {/* Encabezado público más claro para UV Stickers. Es SOLO
+                presentación: el título y el handle de la categoría en base no
+                se tocan, así que /tienda/categoria/wraps-glow-finish y las
+                referencias internas a "Wraps & Glow Finish" siguen sirviendo. */}
+            <h1 className="text-3xl font-bold sm:text-4xl">
+              {isStickers ? STICKERS_PUBLIC_TITLE : category.title}
+            </h1>
             {/* Alineación de marca SOLO a nivel de presentación: el título y
                 el handle de la categoría en base no se tocan (la ruta
                 /tienda/categoria/repuestos-consumibles no cambia). */}
             {isSparkles && sparkles && (
               <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-ml-cyan">
                 Sparkles · Glitter Chunky — {sparkles.entries.length} colores
+              </p>
+            )}
+            {isStickers && stickers && (
+              <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-ml-cyan">
+                {category.title} — {stickers.entries.length} diseños disponibles
               </p>
             )}
             {category.description && (
@@ -176,11 +199,19 @@ export default async function CategoryPage({
             )}
           </div>
         </div>
-        {!isTumblerParent && !isSparkles && <SortSelect current={sort} />}
+        {!isTumblerParent && !isSparkles && !isStickers && (
+          <SortSelect current={sort} />
+        )}
       </div>
 
       {isTumblerParent ? (
         <TumblerBlocks subcategories={subcategories} />
+      ) : stickers ? (
+        /* Solo los UV Stickers del Excel. Los productos genéricos anteriores
+           de la categoría (Wrap UV decorativo, Lámina decorativa para vaso,
+           Resina UV) siguen en la base y en el admin: únicamente se ocultan de
+           ESTA presentación para no mezclarse con el catálogo por código. */
+        <TumblerStickersCatalog entries={stickers.entries} />
       ) : sparkles ? (
         /* Solo los 46 Sparkles. Los productos genéricos anteriores de la
            categoría (glitter chunky, mezcla de brillos, mica) siguen en la
