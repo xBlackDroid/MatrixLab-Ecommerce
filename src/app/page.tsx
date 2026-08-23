@@ -74,7 +74,9 @@ const LAB_CARDS: Array<{
   hover: string;
 }> = [
   {
-    title: "Stickers",
+    // Nombre público de marca, alineado con /tienda (PUBLIC_CATEGORY_TITLES).
+    // El handle y la ruta /tienda/categoria/stickers no cambian.
+    title: "MatrixLabStickers",
     description:
       "Resistentes al agua, con corte perfecto y acabados profesionales. Para marcas, empaques, laptops, eventos y colecciones.",
     href: "/tienda/categoria/stickers",
@@ -134,7 +136,9 @@ const LAB_CARDS: Array<{
     hover: "hover:border-ml-violet/50 hover:shadow-glow-violet",
   },
   {
-    title: "Impresión 3D",
+    // Nombre público de marca, alineado con /tienda. El handle y la ruta
+    // /tienda/categoria/impresion-3d no cambian.
+    title: "MatrixLab 3D",
     description:
       "Piezas únicas, prototipos, decoración y objetos personalizados construidos capa por capa.",
     href: "/tienda/categoria/impresion-3d",

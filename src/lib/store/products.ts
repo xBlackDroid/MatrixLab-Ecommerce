@@ -23,6 +23,14 @@ import {
   MOCK_VARIANTS,
 } from "@/lib/store/mock-data";
 import { repairMojibake, repairMojibakeNullable } from "@/lib/store/text";
+import {
+  SPARKLE_PLACEHOLDER_IMAGE,
+  sparkleByHandle,
+  sparkleHandle,
+  sparkleImagePath,
+  TUMBLER_SPARKLES,
+  type SparkleItem,
+} from "@/lib/store/tumbler-sparkles";
 import { isValidHandle } from "@/lib/security/sanitize";
 import type { ProductSort } from "@/lib/validation/store";
 
@@ -44,6 +52,28 @@ function fixProductText(p: ProductRow): ProductRow {
     title: repairMojibake(p.title),
     description: repairMojibakeNullable(p.description),
   };
+}
+
+/**
+ * Imagen de un Sparkle (MatrixLab Tumbler), resuelta por CÓDIGO en servidor:
+ *
+ *   1. si el admin ya curó imágenes en la base, se respetan tal cual;
+ *   2. si existe `public/images/tumbler/sparkles/<codigo>.webp`, se usa esa —
+ *      subir el archivo basta para que aparezca, sin tocar código ni base;
+ *   3. si no, se usa el placeholder de marca. Nunca una imagen rota.
+ */
+function resolveSparkleImages(p: ProductRow): ProductRow {
+  const sparkle = sparkleByHandle(p.handle);
+  if (!sparkle) return p;
+  if (Array.isArray(p.images) && p.images.length > 0) return p;
+  const rel = sparkleImagePath(sparkle.code);
+  const photo = existsSync(join(process.cwd(), "public", rel));
+  return { ...p, images: [photo ? rel : SPARKLE_PLACEHOLDER_IMAGE] };
+}
+
+/** Pipeline de presentación pública de un producto. */
+function presentProduct(p: ProductRow): ProductRow {
+  return resolveSparkleImages(fixProductText(p));
 }
 
 // ---------------------------------------------------------------------------
@@ -76,6 +106,26 @@ function normalizeTumblerCategory(c: CategoryRow): CategoryRow {
 }
 
 /**
+ * Rebrand de presentación por categoría: nombre público que se muestra en la
+ * tienda cuando difiere del `title` de la base.
+ *
+ * Mismo patrón que `normalizeTumblerCategory`: se cambia SOLO lo que ve el
+ * cliente. El handle, el id, la ruta `/tienda/categoria/<handle>`, los
+ * productos y el admin siguen usando el dato real, así que ningún enlace ni
+ * referencia interna se rompe.
+ */
+const PUBLIC_CATEGORY_TITLES: Record<string, string> = {
+  stickers: "MatrixLabStickers",
+  "impresion-3d": "MatrixLab 3D",
+};
+
+/** Aplica el nombre público de la categoría (si tiene uno definido). */
+function applyPublicCategoryTitle(c: CategoryRow): CategoryRow {
+  const title = PUBLIC_CATEGORY_TITLES[c.handle];
+  return title ? { ...c, title } : c;
+}
+
+/**
  * Imagen de la categoría: si existe `public/images/categories/<handle>.png`
  * (o .webp) se usa esa; si el admin configuró una URL remota, se respeta; y si
  * no hay nada, queda null y la UI cae a su icono (nunca una imagen rota).
@@ -91,7 +141,9 @@ function resolveCategoryImage(c: CategoryRow): string | null {
 
 /** Pipeline de presentación pública de una categoría. */
 function presentCategory(c: CategoryRow): CategoryRow {
-  const branded = normalizeTumblerCategory(fixCategoryText(c));
+  const branded = applyPublicCategoryTitle(
+    normalizeTumblerCategory(fixCategoryText(c)),
+  );
   return { ...branded, image_url: resolveCategoryImage(branded) };
 }
 
@@ -184,14 +236,41 @@ export async function getCategories(): Promise<CategoryRow[]> {
 }
 
 /**
+ * Orden comercial EXACTO de las tarjetas de "Categorías principales" en
+ * /tienda. Es orden de PRESENTACIÓN: no toca `sort_order` en la base (que el
+ * admin sigue controlando) ni el orden de ninguna otra vista.
+ *
+ * Una categoría pública que no esté en esta lista no desaparece: se muestra
+ * después, conservando su `sort_order`.
+ */
+export const PUBLIC_STORE_CATEGORY_ORDER: readonly string[] = [
+  "matrixlab-tumbler", // 1. MatrixLab Tumbler
+  "stickers", // 2. MatrixLabStickers
+  "impresion-3d", // 3. MatrixLab 3D
+  "imanes", // 4. Imanes
+  "playeras-prendas", // 5. Playeras y prendas
+  "gorras", // 6. Gorras
+  "grabado-laser", // 7. Grabado láser
+  "disenador-tshirt-lab", // 8. Diseñador T-Shirt Lab
+  "etiquetas-escolares", // 9. Etiquetas escolares
+];
+
+/**
  * Categorías para el GRID público de /tienda: las activas menos las
  * subcategorías internas de MatrixLab Tumbler (ver
- * PUBLIC_HIDDEN_CATEGORY_HANDLES). Las rutas de esas categorías siguen vivas;
+ * PUBLIC_HIDDEN_CATEGORY_HANDLES), en el orden comercial de
+ * PUBLIC_STORE_CATEGORY_ORDER. Las rutas de esas categorías siguen vivas;
  * solo no aparecen como tarjetas en el catálogo.
  */
 export async function getPublicStoreCategories(): Promise<CategoryRow[]> {
   const all = await getCategories();
-  return all.filter((c) => !PUBLIC_HIDDEN_CATEGORY_HANDLES.has(c.handle));
+  const rank = (handle: string) => {
+    const i = PUBLIC_STORE_CATEGORY_ORDER.indexOf(handle);
+    return i === -1 ? PUBLIC_STORE_CATEGORY_ORDER.length : i;
+  };
+  return all
+    .filter((c) => !PUBLIC_HIDDEN_CATEGORY_HANDLES.has(c.handle))
+    .sort((a, b) => rank(a.handle) - rank(b.handle) || a.sort_order - b.sort_order);
 }
 
 export async function getCategoryByHandle(
@@ -250,6 +329,160 @@ export const TUMBLER_SUBCATEGORY_HANDLES = [
   "wraps-glow-finish", // 8. Wraps & Glow Finish
 ] as const;
 
+/**
+ * ---------------------------------------------------------------------------
+ * Sparkles / Glitter Chunky (categoría `repuestos-consumibles`)
+ * ---------------------------------------------------------------------------
+ * Cada Sparkle es un producto independiente con UNA variante ("Bote") que
+ * lleva SKU, precio e inventario. Esta lectura junta el producto real de la
+ * base con su fila del Excel (`TUMBLER_SPARKLES`) para poder mostrar nombre,
+ * precio, inventario y referencia en una sola tarjeta.
+ *
+ * El precio y el stock que se muestran vienen SIEMPRE de la base (variante →
+ * producto), nunca del frontend: el carrito los vuelve a resolver en servidor.
+ */
+export interface SparkleCatalogEntry {
+  /** Fila del Excel (nombre público, código, colección). */
+  item: SparkleItem;
+  productId: string;
+  handle: string;
+  /** Título real en base (puede diferir si el admin lo editó). */
+  title: string;
+  variantId: string | null;
+  sku: string | null;
+  /** Precio unitario resuelto en servidor (variante → producto). */
+  price: number;
+  /** Inventario real de la variante. */
+  stock: number;
+  /** Imagen resuelta por código (foto real o placeholder de marca). */
+  image: string;
+  /** Producto vendible: estado válido y con inventario (o sobre pedido). */
+  sellable: boolean;
+}
+
+export interface SparkleCatalog {
+  /** Sparkles del Excel presentes en la base, en el orden EXACTO del Excel. */
+  entries: SparkleCatalogEntry[];
+  /** Códigos del Excel que aún no existen en la base (seed pendiente). */
+  missingCodes: string[];
+  /**
+   * Productos genéricos anteriores de la categoría (p. ej. "Glitter chunky
+   * para vasos", "Mezcla de brillos decorativos", "Mica efecto brillo").
+   *
+   * NO se borran de la base ni del admin: siguen existiendo como registros
+   * históricos y conservan su ficha en /tienda/producto/<handle>. Solo se
+   * separan aquí para que la vista pública de la categoría muestre
+   * exclusivamente los 46 Sparkles del Excel, sin mezclarlos.
+   */
+  legacyHidden: ProductRow[];
+}
+
+type ProductWithVariantRows = ProductRow & {
+  product_variants: ProductVariantRow[] | null;
+};
+
+/** Arma una entrada del catálogo a partir del producto y sus variantes. */
+function buildSparkleEntry(
+  item: SparkleItem,
+  product: ProductRow,
+  variants: ProductVariantRow[],
+): SparkleCatalogEntry {
+  const variant =
+    variants.find((v) => v.status !== "oculto") ?? variants[0] ?? null;
+  const price =
+    variant?.price !== null && variant?.price !== undefined
+      ? Number(variant.price)
+      : Number(product.base_price);
+  const stock = variant ? variant.stock : 0;
+  const onDemand =
+    product.status === "sobre_pedido" || variant?.status === "sobre_pedido";
+  const sellable =
+    ["disponible", "sobre_pedido"].includes(product.status) &&
+    !["agotado", "oculto"].includes(variant?.status ?? "disponible") &&
+    (onDemand || stock > 0);
+  const images = presentProduct(product).images;
+  return {
+    item,
+    productId: product.id,
+    handle: product.handle,
+    title: product.title,
+    variantId: variant?.id ?? null,
+    sku: variant?.sku ?? null,
+    price,
+    stock,
+    image: images[0] ?? SPARKLE_PLACEHOLDER_IMAGE,
+    sellable,
+  };
+}
+
+/** Junta productos + variantes con el Excel, respetando el orden del Excel. */
+function assembleSparkleCatalog(
+  products: ProductRow[],
+  variantsByProduct: Map<string, ProductVariantRow[]>,
+): SparkleCatalog {
+  const byHandle = new Map(products.map((p) => [p.handle, p]));
+  const entries: SparkleCatalogEntry[] = [];
+  const missingCodes: string[] = [];
+  for (const item of TUMBLER_SPARKLES) {
+    const product = byHandle.get(sparkleHandle(item.code));
+    if (!product) {
+      missingCodes.push(item.code);
+      continue;
+    }
+    entries.push(
+      buildSparkleEntry(item, product, variantsByProduct.get(product.id) ?? []),
+    );
+  }
+  const legacyHidden = products
+    .filter((p) => !sparkleByHandle(p.handle))
+    .map(presentProduct);
+  return { entries, missingCodes, legacyHidden };
+}
+
+/** Catálogo Sparkles de la categoría (productos + variante de cada uno). */
+export async function getSparkleCatalog(
+  categoryId: string,
+): Promise<SparkleCatalog> {
+  const client = getCatalogClient();
+  if (!client) {
+    const products = MOCK_PRODUCTS.filter(
+      (p) => p.category_id === categoryId && p.status !== "oculto",
+    ).map(fixProductText);
+    const variantsByProduct = new Map<string, ProductVariantRow[]>();
+    for (const v of MOCK_VARIANTS) {
+      if (v.status === "oculto") continue;
+      variantsByProduct.set(v.product_id, [
+        ...(variantsByProduct.get(v.product_id) ?? []),
+        v,
+      ]);
+    }
+    return assembleSparkleCatalog(products, variantsByProduct);
+  }
+  const { data, error } = await raceRead<ProductWithVariantRows[]>(
+    client
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("category_id", categoryId)
+      .in("status", [...VISIBLE_PRODUCT_FILTER]) as unknown as PromiseLike<
+      ReadResult<ProductWithVariantRows[]>
+    >,
+  );
+  if (error || !data) {
+    return { entries: [], missingCodes: [], legacyHidden: [] };
+  }
+  const variantsByProduct = new Map<string, ProductVariantRow[]>();
+  const products: ProductRow[] = [];
+  for (const row of data) {
+    const { product_variants, ...product } = row;
+    products.push(fixProductText(product as ProductRow));
+    variantsByProduct.set(
+      product.id,
+      (product_variants ?? []).filter((v) => v.status !== "oculto"),
+    );
+  }
+  return assembleSparkleCatalog(products, variantsByProduct);
+}
+
 /** Subcategorías de MatrixLab Tumbler, en orden comercial (para su landing). */
 export async function getTumblerSubcategories(): Promise<CategoryRow[]> {
   const all = await getCategories();
@@ -293,7 +526,7 @@ export async function getProductsByCategory(
     return sortProducts(
       MOCK_PRODUCTS.filter((p) => p.category_id === categoryId),
       sort,
-    ).map(fixProductText);
+    ).map(presentProduct);
   }
   let query = client
     .from("products")
@@ -322,12 +555,12 @@ export async function getProductsByCategory(
     query as unknown as PromiseLike<ReadResult<ProductRow[]>>,
   );
   if (error || !data) return [];
-  return data.map(fixProductText);
+  return data.map(presentProduct);
 }
 
 export async function getAllVisibleProducts(): Promise<ProductRow[]> {
   const client = getCatalogClient();
-  if (!client) return [...MOCK_PRODUCTS].map(fixProductText);
+  if (!client) return [...MOCK_PRODUCTS].map(presentProduct);
   const { data, error } = await raceRead<ProductRow[]>(
     client
       .from("products")
@@ -337,7 +570,7 @@ export async function getAllVisibleProducts(): Promise<ProductRow[]> {
       .limit(60) as unknown as PromiseLike<ReadResult<ProductRow[]>>,
   );
   if (error || !data) return [];
-  return data.map(fixProductText);
+  return data.map(presentProduct);
 }
 
 export async function getProductByHandle(
@@ -350,7 +583,7 @@ export async function getProductByHandle(
     if (!mock || mock.status === "oculto") return null;
     const mockCategory = MOCK_CATEGORIES.find((c) => c.id === mock.category_id);
     return {
-      ...fixProductText(mock),
+      ...presentProduct(mock),
       variants: MOCK_VARIANTS.filter(
         (v) => v.product_id === mock.id && v.status !== "oculto",
       ),
@@ -374,7 +607,7 @@ export async function getProductByHandle(
 
   const row = data;
   return {
-    ...fixProductText(row),
+    ...presentProduct(row),
     variants: (row.product_variants ?? []).filter((v) => v.status !== "oculto"),
     category: row.categories
       ? { ...row.categories, title: repairMojibake(row.categories.title) }
