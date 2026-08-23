@@ -32,7 +32,9 @@ const CURATED_CATEGORY_FALLBACKS: Record<
   { title: string; description: string; whatsapp: string }
 > = {
   stickers: {
-    title: "Stickers",
+    // Nombre público (mismo rebrand de presentación que aplica
+    // PUBLIC_CATEGORY_TITLES; el handle /categoria/stickers no cambia).
+    title: "MatrixLabStickers",
     description:
       "Stickers personalizados para marcas, eventos, regalos, campañas, empaques y colecciones.",
     whatsapp: "Hola MatrixLab, quiero cotizar stickers personalizados.",
@@ -44,7 +46,8 @@ const CURATED_CATEGORY_FALLBACKS: Record<
     whatsapp: "Hola MatrixLab, quiero cotizar imanes personalizados.",
   },
   "impresion-3d": {
-    title: "Impresión 3D",
+    // Nombre público; el handle /categoria/impresion-3d no cambia.
+    title: "MatrixLab 3D",
     description:
       "Piezas únicas, prototipos, decoración, accesorios y objetos personalizados capa por capa.",
     whatsapp: "Hola MatrixLab, quiero cotizar una pieza de impresión 3D.",

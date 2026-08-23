@@ -106,6 +106,26 @@ function normalizeTumblerCategory(c: CategoryRow): CategoryRow {
 }
 
 /**
+ * Rebrand de presentación por categoría: nombre público que se muestra en la
+ * tienda cuando difiere del `title` de la base.
+ *
+ * Mismo patrón que `normalizeTumblerCategory`: se cambia SOLO lo que ve el
+ * cliente. El handle, el id, la ruta `/tienda/categoria/<handle>`, los
+ * productos y el admin siguen usando el dato real, así que ningún enlace ni
+ * referencia interna se rompe.
+ */
+const PUBLIC_CATEGORY_TITLES: Record<string, string> = {
+  stickers: "MatrixLabStickers",
+  "impresion-3d": "MatrixLab 3D",
+};
+
+/** Aplica el nombre público de la categoría (si tiene uno definido). */
+function applyPublicCategoryTitle(c: CategoryRow): CategoryRow {
+  const title = PUBLIC_CATEGORY_TITLES[c.handle];
+  return title ? { ...c, title } : c;
+}
+
+/**
  * Imagen de la categoría: si existe `public/images/categories/<handle>.png`
  * (o .webp) se usa esa; si el admin configuró una URL remota, se respeta; y si
  * no hay nada, queda null y la UI cae a su icono (nunca una imagen rota).
@@ -121,7 +141,9 @@ function resolveCategoryImage(c: CategoryRow): string | null {
 
 /** Pipeline de presentación pública de una categoría. */
 function presentCategory(c: CategoryRow): CategoryRow {
-  const branded = normalizeTumblerCategory(fixCategoryText(c));
+  const branded = applyPublicCategoryTitle(
+    normalizeTumblerCategory(fixCategoryText(c)),
+  );
   return { ...branded, image_url: resolveCategoryImage(branded) };
 }
 
@@ -214,14 +236,41 @@ export async function getCategories(): Promise<CategoryRow[]> {
 }
 
 /**
+ * Orden comercial EXACTO de las tarjetas de "Categorías principales" en
+ * /tienda. Es orden de PRESENTACIÓN: no toca `sort_order` en la base (que el
+ * admin sigue controlando) ni el orden de ninguna otra vista.
+ *
+ * Una categoría pública que no esté en esta lista no desaparece: se muestra
+ * después, conservando su `sort_order`.
+ */
+export const PUBLIC_STORE_CATEGORY_ORDER: readonly string[] = [
+  "matrixlab-tumbler", // 1. MatrixLab Tumbler
+  "stickers", // 2. MatrixLabStickers
+  "impresion-3d", // 3. MatrixLab 3D
+  "imanes", // 4. Imanes
+  "playeras-prendas", // 5. Playeras y prendas
+  "gorras", // 6. Gorras
+  "grabado-laser", // 7. Grabado láser
+  "disenador-tshirt-lab", // 8. Diseñador T-Shirt Lab
+  "etiquetas-escolares", // 9. Etiquetas escolares
+];
+
+/**
  * Categorías para el GRID público de /tienda: las activas menos las
  * subcategorías internas de MatrixLab Tumbler (ver
- * PUBLIC_HIDDEN_CATEGORY_HANDLES). Las rutas de esas categorías siguen vivas;
+ * PUBLIC_HIDDEN_CATEGORY_HANDLES), en el orden comercial de
+ * PUBLIC_STORE_CATEGORY_ORDER. Las rutas de esas categorías siguen vivas;
  * solo no aparecen como tarjetas en el catálogo.
  */
 export async function getPublicStoreCategories(): Promise<CategoryRow[]> {
   const all = await getCategories();
-  return all.filter((c) => !PUBLIC_HIDDEN_CATEGORY_HANDLES.has(c.handle));
+  const rank = (handle: string) => {
+    const i = PUBLIC_STORE_CATEGORY_ORDER.indexOf(handle);
+    return i === -1 ? PUBLIC_STORE_CATEGORY_ORDER.length : i;
+  };
+  return all
+    .filter((c) => !PUBLIC_HIDDEN_CATEGORY_HANDLES.has(c.handle))
+    .sort((a, b) => rank(a.handle) - rank(b.handle) || a.sort_order - b.sort_order);
 }
 
 export async function getCategoryByHandle(
