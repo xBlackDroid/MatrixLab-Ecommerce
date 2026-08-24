@@ -69,8 +69,45 @@ type FamilyRight =
   /** Opciones reales pero sin ruta propia (p. ej. plantillas dentro de un
    * diseñador de un solo lienzo): se muestran, no se inventan links falsos. */
   | { kind: "chips"; heading: string; items: FamilyChip[] }
-  /** Cuando no hay suficientes accesos reales para forzar un grid. */
-  | { kind: "visual"; src: string; alt?: string };
+  /** Sin columna derecha: el bloque se apoya en el watermark de fondo. */
+  | { kind: "none" };
+
+export type FamilyBackgroundLogo =
+  /** Logo real de la línea (asset existente en public/images/categories). */
+  | { kind: "image"; src: string; alt?: string }
+  /** Sin logo oficial: recurso vectorial ya usado como icono de la familia. */
+  | { kind: "icon"; icon: IconComponent };
+
+/**
+ * Marca de agua decorativa de familia: logo o icono grande y muy tenue,
+ * detrás del contenido. Reusada por StoreFamilySection y por el bloque
+ * "Etiquetas Escolares Lab" (que no usa StoreFamilySection porque conserva
+ * su estructura propia), para no duplicar las mismas clases dos veces.
+ */
+export function FamilyWatermark({ logo }: { logo?: FamilyBackgroundLogo }) {
+  if (!logo) return null;
+  const positionClasses =
+    "pointer-events-none absolute right-0 top-1/2 h-56 w-56 -translate-y-[40%] select-none sm:h-72 sm:w-72 lg:h-80 lg:w-80";
+  if (logo.kind === "image") {
+    return (
+      <div className={`${positionClasses} opacity-10`} aria-hidden="true">
+        <Image
+          src={logo.src}
+          alt={logo.alt ?? ""}
+          fill
+          sizes="320px"
+          className="object-contain"
+        />
+      </div>
+    );
+  }
+  return (
+    <logo.icon
+      className={`${positionClasses} opacity-[0.08]`}
+      aria-hidden="true"
+    />
+  );
+}
 
 export interface StoreFamilySectionProps {
   id?: string;
@@ -84,6 +121,8 @@ export interface StoreFamilySectionProps {
   right: FamilyRight;
   /** Lado del blur decorativo, para alternar el ritmo visual entre bloques. */
   blurSide?: "left" | "right";
+  /** Marca de agua decorativa detrás del contenido (logo o icono grande, muy tenue). */
+  backgroundLogo?: FamilyBackgroundLogo;
 }
 
 /**
@@ -102,8 +141,10 @@ export default function StoreFamilySection({
   ctaHref,
   right,
   blurSide = "left",
+  backgroundLogo,
 }: StoreFamilySectionProps) {
   const s = ACCENT_STYLES[accent];
+  const hasRight = right.kind !== "none";
 
   return (
     <section id={id} className="scroll-mt-24 px-4 pb-6 sm:px-6">
@@ -113,7 +154,13 @@ export default function StoreFamilySection({
           aria-hidden
         />
 
-        <div className="relative grid items-center gap-10 lg:grid-cols-2">
+        {/* Watermark de marca: detrás del contenido (menor en el DOM = pinta
+            primero = queda debajo), muy tenue, no interactivo. */}
+        <FamilyWatermark logo={backgroundLogo} />
+
+        <div
+          className={`relative grid items-center gap-10 ${hasRight ? "lg:grid-cols-2" : ""}`}
+        >
           <div>
             <span
               className={`glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${s.badgeText}`}
@@ -169,20 +216,6 @@ export default function StoreFamilySection({
                     {chip.label}
                   </span>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {right.kind === "visual" && (
-            <div className="flex items-center justify-center">
-              <div className="relative h-48 w-48 sm:h-56 sm:w-56">
-                <Image
-                  src={right.src}
-                  alt={right.alt ?? ""}
-                  fill
-                  sizes="224px"
-                  className="object-contain"
-                />
               </div>
             </div>
           )}

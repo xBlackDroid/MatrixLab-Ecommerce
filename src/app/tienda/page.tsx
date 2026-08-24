@@ -22,7 +22,9 @@ import {
   HoodieIcon,
   ToteIcon,
 } from "@/components/icons/GarmentIcons";
-import StoreFamilySection from "@/components/store/StoreFamilySection";
+import StoreFamilySection, {
+  FamilyWatermark,
+} from "@/components/store/StoreFamilySection";
 import StoreCTA from "@/components/store/StoreCTA";
 import StoreHero from "@/components/store/StoreHero";
 
@@ -103,6 +105,10 @@ export default function TiendaHomePage() {
         ctaLabel="Explorar MatrixLab Tumbler"
         ctaHref="/tienda/categoria/matrixlab-tumbler"
         blurSide="left"
+        backgroundLogo={{
+          kind: "image",
+          src: "/images/categories/matrixlab-tumbler.png",
+        }}
         right={{
           kind: "items",
           items: [
@@ -139,6 +145,7 @@ export default function TiendaHomePage() {
         ctaLabel="Explorar MatrixLab Stickers"
         ctaHref="/tienda/categoria/stickers"
         blurSide="right"
+        backgroundLogo={{ kind: "icon", icon: Sticker }}
         right={{
           kind: "items",
           items: [
@@ -161,6 +168,7 @@ export default function TiendaHomePage() {
         ctaLabel="Diseñar mi prenda"
         ctaHref="/tienda/disenador"
         blurSide="left"
+        backgroundLogo={{ kind: "icon", icon: Shirt }}
         right={{
           kind: "items",
           items: PRENDA_LAB_ITEMS.map((item) => ({
@@ -184,7 +192,11 @@ export default function TiendaHomePage() {
         ctaLabel="Explorar MatrixLab 3D"
         ctaHref="/tienda/categoria/impresion-3d"
         blurSide="right"
-        right={{ kind: "visual", src: "/images/categories/impresion-3d.png" }}
+        backgroundLogo={{
+          kind: "image",
+          src: "/images/categories/impresion-3d.png",
+        }}
+        right={{ kind: "none" }}
       />
 
       <StoreFamilySection
@@ -200,6 +212,7 @@ export default function TiendaHomePage() {
         ctaLabel="Explorar MatrixLab Laser"
         ctaHref="/tienda/disenador/laser"
         blurSide="left"
+        backgroundLogo={{ kind: "icon", icon: Zap }}
         right={{ kind: "chips", heading: "Disponible en el diseñador", items: LASER_CHIPS }}
       />
 
@@ -209,6 +222,8 @@ export default function TiendaHomePage() {
       <section className="px-4 pb-20 pt-6 sm:px-6">
         <div className="glass relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-3xl p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-ml-violet/10 blur-3xl" />
+          {/* Watermark de marca, mismo lenguaje visual que los bloques de arriba. */}
+          <FamilyWatermark logo={{ kind: "icon", icon: GraduationCap }} />
           <div className="relative">
             <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
               <GraduationCap className="h-4 w-4" aria-hidden />
