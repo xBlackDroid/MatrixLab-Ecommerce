@@ -1,8 +1,19 @@
+import type { ComponentType, SVGProps } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CupSoda,
+  Droplets,
+  Gem,
+  Layers,
+  MessageCircle,
+  Sparkles,
+  Sticker,
+} from "lucide-react";
 import ProductGrid from "@/components/store/ProductGrid";
 import SparklesCatalog from "@/components/store/SparklesCatalog";
 import TumblerCupsCatalog from "@/components/store/TumblerCupsCatalog";
@@ -287,27 +298,145 @@ function CategoryComingSoon({
   );
 }
 
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+interface TumblerBlockDisplay {
+  /** Handle real de la categoría (no se toca en DB; solo se usa para el href
+   * y para verificar que la fila exista antes de mostrar la card). */
+  handle: string;
+  title: string;
+  description: string;
+  icon: IconComponent;
+  accentText: string;
+  iconClasses: string;
+  gradient: string;
+  hover: string;
+}
+
+/**
+ * Presentación curada de las subcategorías de MatrixLab Tumbler: nombre
+ * visible, copy y acento propios por línea, en el orden comercial deseado.
+ * SOLO afecta esta página — el título/descripción real en base (y el resto
+ * de la app) no cambian. Los handles son los reales de
+ * `TUMBLER_SUBCATEGORY_HANDLES`; "llaveros" y "tags-acrilico" quedan fuera a
+ * propósito (Tags de acrílico se integra conceptualmente en Acrylab, y
+ * Llaveros deja de tener tarjeta propia), pero sus rutas y datos siguen
+ * vivos sin cambios.
+ */
+const TUMBLER_BLOCKS_DISPLAY: TumblerBlockDisplay[] = [
+  {
+    handle: SPARKLES_CATEGORY_HANDLE, // "repuestos-consumibles"
+    title: "Sparkle Mix",
+    description:
+      "Sparkles, glitter y mezclas decorativas para crear efectos únicos en vasos y proyectos personalizados.",
+    icon: Sparkles,
+    accentText: "text-ml-violet",
+    iconClasses: "bg-ml-violet/15 text-ml-violet",
+    gradient: "from-ml-violet/25 via-ml-coral/10 to-transparent",
+    hover: "hover:border-ml-violet/50 hover:shadow-glow-violet",
+  },
+  {
+    handle: CUPS_CATEGORY_HANDLE, // "snowglobe"
+    title: "SnowGlobe Cups",
+    description:
+      "Vasos y bases para crear proyectos SnowGlobe, tumblers personalizados y diseños creativos.",
+    icon: CupSoda,
+    accentText: "text-ml-cyan",
+    iconClasses: "bg-ml-cyan/15 text-ml-cyan",
+    gradient: "from-ml-cyan/25 via-ml-violet/10 to-transparent",
+    hover: "hover:border-ml-cyan/50 hover:shadow-glow-cyan",
+  },
+  {
+    handle: STICKERS_CATEGORY_HANDLE, // "wraps-glow-finish"
+    title: "Wraps & Glow Studio",
+    description:
+      "Stickers UV y wraps premium para transformar vasos y superficies con diseños de alta definición y acabados especiales.",
+    icon: Sticker,
+    accentText: "text-ml-coral",
+    iconClasses: "bg-ml-coral/15 text-ml-coral",
+    gradient: "from-ml-coral/25 via-ml-violet/10 to-transparent",
+    hover: "hover:border-ml-coral/50 hover:shadow-glow-coral",
+  },
+  {
+    handle: "magic-flow",
+    title: "Magic Flow",
+    description:
+      "Líquidos, bases y mezclas especiales para efectos, movimiento y acabados en proyectos SnowGlobe y Tumbler.",
+    icon: Droplets,
+    accentText: "text-ml-cyan",
+    iconClasses: "bg-ml-cyan/15 text-ml-cyan",
+    gradient: "from-ml-cyan/25 via-ml-green/10 to-transparent",
+    hover: "hover:border-ml-cyan/50 hover:shadow-glow-cyan",
+  },
+  {
+    handle: "acrilicos",
+    title: "Acrylab",
+    description:
+      "Piezas de acrílico precortadas para llaveros, tags, figuras y proyectos creativos listos para personalizar.",
+    icon: Gem,
+    accentText: "text-ml-violet",
+    iconClasses: "bg-ml-violet/15 text-ml-violet",
+    gradient: "from-ml-violet/25 via-ml-cyan/10 to-transparent",
+    hover: "hover:border-ml-violet/50 hover:shadow-glow-violet",
+  },
+  {
+    handle: "accesorios-personalizacion",
+    title: "Creator Tools",
+    description:
+      "Herramientas, repuestos y consumibles para tu estación creativa MatrixLab Tumbler.",
+    icon: Layers,
+    accentText: "text-ml-green",
+    iconClasses: "bg-ml-green/15 text-ml-green",
+    gradient: "from-ml-green/25 via-ml-violet/10 to-transparent",
+    hover: "hover:border-ml-green/50 hover:shadow-glow-green",
+  },
+];
+
 /** Bloques de las subcategorías comerciales de MatrixLab Tumbler. */
 function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
+  // Defensivo: solo se muestra una card si su fila realmente existe en base
+  // (mismo criterio que el resto de la app — ningún link visible da 404).
+  const realHandles = new Set(subcategories.map((c) => c.handle));
+  const blocks = TUMBLER_BLOCKS_DISPLAY.filter((item) =>
+    realHandles.has(item.handle),
+  );
+
   return (
     <div className="mt-10">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {subcategories.map((c) => (
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {blocks.map((item) => (
           <Link
-            key={c.id}
-            href={`/tienda/categoria/${c.handle}`}
-            className="group glass flex flex-col rounded-2xl p-6 transition hover:border-ml-violet/50"
+            key={item.handle}
+            href={`/tienda/categoria/${item.handle}`}
+            className={`group glass relative flex h-full min-h-60 flex-col overflow-hidden rounded-[1.75rem] p-7 transition hover:-translate-y-1 ${item.hover}`}
           >
-            <h2 className="text-lg font-bold text-ml-white transition group-hover:text-ml-violet">
-              {c.title}
-            </h2>
-            {c.description && (
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-ml-white/65">
-                {c.description}
+            <div
+              className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-80 transition group-hover:opacity-100`}
+              aria-hidden
+            />
+            <item.icon
+              className={`pointer-events-none absolute -bottom-6 -right-6 h-36 w-36 ${item.accentText} opacity-[0.08] transition duration-300 group-hover:scale-110 group-hover:opacity-[0.16]`}
+              aria-hidden
+            />
+            <span
+              className={`relative flex h-14 w-14 items-center justify-center rounded-2xl ${item.iconClasses}`}
+            >
+              <item.icon className="h-7 w-7" aria-hidden />
+            </span>
+            <div className="relative mt-5 flex-1">
+              <h2 className="text-lg font-bold text-ml-white">{item.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-ml-white/65">
+                {item.description}
               </p>
-            )}
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-ml-cyan">
-              Explorar →
+            </div>
+            <span
+              className={`relative mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${item.accentText}`}
+            >
+              Explorar
+              <ArrowRight
+                className="h-4 w-4 transition group-hover:translate-x-1"
+                aria-hidden
+              />
             </span>
           </Link>
         ))}
