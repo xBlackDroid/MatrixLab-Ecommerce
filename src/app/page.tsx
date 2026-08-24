@@ -62,7 +62,7 @@ const HERO_CHIPS: Array<{ label: string; href: string }> = [
  * mismo sistema visual (ver FamilyCard), tomado 1:1 de las cards que ya
  * funcionaban en la home: MatrixLab Tumbler y Etiquetas escolares.
  *
- * Stickers agrupa Stickers + Imanes, y Apparel agrupa Playeras + Gorras: esas
+ * Stickers agrupa Stickers + Imanes, y Wear agrupa Playeras + Gorras: esas
  * cuatro rutas siguen vivas, solo dejan de tener tarjeta propia en la home.
  */
 const FAMILY_CARDS: Array<{
@@ -97,12 +97,12 @@ const FAMILY_CARDS: Array<{
     visual: { kind: "icon", icon: Sticker },
   },
   {
-    id: "apparel",
+    id: "wear",
     href: "/tienda/disenador",
     badgeIcon: Shirt,
     badgeLabel: "Prendas",
     titlePrefix: "MatrixLab",
-    titleHighlight: "Apparel",
+    titleHighlight: "Wear",
     description:
       "Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas.",
     cta: "Explorar la línea",

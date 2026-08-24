@@ -173,7 +173,7 @@ function normalizeTumblerCategory(c: CategoryRow): CategoryRow {
  * referencia interna se rompe.
  */
 const PUBLIC_CATEGORY_TITLES: Record<string, string> = {
-  stickers: "MatrixLabStickers",
+  stickers: "MatrixLab Stickers",
   "impresion-3d": "MatrixLab 3D",
 };
 
@@ -208,11 +208,17 @@ function presentCategory(c: CategoryRow): CategoryRow {
 /**
  * Categorías que NO se muestran como tarjetas públicas en /tienda. No se borran
  * de la base de datos ni de sus rutas: solo se ocultan del grid del catálogo.
- * Son las subcategorías internas de "MatrixLab Tumbler" (SnowGlobe Bar,
- * Llaveros, Tags de acrílico, Acrylab, Creator Tools, Sparkle Mix, Magic Flow,
- * Wraps & Glow Finish): siguen vivas como handles/seeds/productos y como
- * bloques dentro de la landing de MatrixLab Tumbler, pero la única tarjeta
- * pública de la línea es la categoría madre.
+ *
+ * - Subcategorías internas de "MatrixLab Tumbler" (SnowGlobe Bar, Llaveros,
+ *   Tags de acrílico, Acrylab, Creator Tools, Sparkle Mix, Magic Flow, Wraps
+ *   & Glow Finish): siguen vivas como handles/seeds/productos y como bloques
+ *   dentro de la landing de MatrixLab Tumbler; la única tarjeta pública de la
+ *   línea es la categoría madre.
+ * - "disenador-tshirt-lab" y "etiquetas-escolares": se repiten como sección
+ *   dedicada más abajo en /tienda ("Diseña en el laboratorio" y "Regreso a
+ *   clases"), así que ya no necesitan tarjeta propia en la grilla superior.
+ *   Sus rutas (/tienda/disenador, /tienda/categoria/etiquetas-escolares,
+ *   /tienda/disenador/etiquetas-escolares) siguen vivas sin cambios.
  */
 export const PUBLIC_HIDDEN_CATEGORY_HANDLES: ReadonlySet<string> = new Set([
   "snowglobe",
@@ -223,6 +229,8 @@ export const PUBLIC_HIDDEN_CATEGORY_HANDLES: ReadonlySet<string> = new Set([
   "repuestos-consumibles",
   "magic-flow",
   "wraps-glow-finish",
+  "disenador-tshirt-lab",
+  "etiquetas-escolares",
 ]);
 
 /**
@@ -303,14 +311,15 @@ export async function getCategories(): Promise<CategoryRow[]> {
  */
 export const PUBLIC_STORE_CATEGORY_ORDER: readonly string[] = [
   "matrixlab-tumbler", // 1. MatrixLab Tumbler
-  "stickers", // 2. MatrixLabStickers
-  "impresion-3d", // 3. MatrixLab 3D
-  "imanes", // 4. Imanes
-  "playeras-prendas", // 5. Playeras y prendas
-  "gorras", // 6. Gorras
+  "stickers", // 2. MatrixLab Stickers
+  "imanes", // 3. Imanes
+  "playeras-prendas", // 4. Playeras y prendas
+  "gorras", // 5. Gorras
+  "impresion-3d", // 6. MatrixLab 3D
   "grabado-laser", // 7. Grabado láser
-  "disenador-tshirt-lab", // 8. Diseñador T-Shirt Lab
-  "etiquetas-escolares", // 9. Etiquetas escolares
+  // "disenador-tshirt-lab" y "etiquetas-escolares" ya no aparecen en la
+  // grilla (ver PUBLIC_HIDDEN_CATEGORY_HANDLES): se repiten como sección
+  // dedicada más abajo en /tienda.
 ];
 
 /**
