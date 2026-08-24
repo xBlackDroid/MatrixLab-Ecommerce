@@ -5,11 +5,13 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import ProductGrid from "@/components/store/ProductGrid";
 import SparklesCatalog from "@/components/store/SparklesCatalog";
+import TumblerCupsCatalog from "@/components/store/TumblerCupsCatalog";
 import TumblerStickersCatalog from "@/components/store/TumblerStickersCatalog";
 import SortSelect from "@/components/store/SortSelect";
 import {
   getCategoryByHandle,
   getProductsByCategory,
+  getCupCatalog,
   getSparkleCatalog,
   getStickerCatalog,
   getTumblerSubcategories,
@@ -22,6 +24,7 @@ import {
   STICKERS_CATEGORY_HANDLE,
   STICKERS_PUBLIC_TITLE,
 } from "@/lib/store/tumbler-stickers";
+import { CUPS_CATEGORY_HANDLE } from "@/lib/store/tumbler-cups";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { ProductSortSchema } from "@/lib/validation/store";
 
@@ -140,10 +143,17 @@ export default async function CategoryPage({
   const isStickers = handle === STICKERS_CATEGORY_HANDLE;
   const stickers = isStickers ? await getStickerCatalog(category.id) : null;
 
+  // SnowGlobe Bar presenta el catálogo real de vasos: 5 productos en el orden
+  // del Excel (V001 → V005). Son pocos y caben en pantalla, así que no lleva
+  // buscador ni filtros; tampoco usa el selector de orden. El nombre visible
+  // de la categoría NO cambia.
+  const isCups = handle === CUPS_CATEGORY_HANDLE;
+  const cups = isCups ? await getCupCatalog(category.id) : null;
+
   // Whitelist de ordenamiento: cualquier valor extraño cae en "newest".
   const sort = ProductSortSchema.parse(orden ?? "newest");
   const products =
-    isTumblerParent || isSparkles || isStickers
+    isTumblerParent || isSparkles || isStickers || isCups
       ? []
       : await getProductsByCategory(category.id, sort);
 
@@ -199,13 +209,19 @@ export default async function CategoryPage({
             )}
           </div>
         </div>
-        {!isTumblerParent && !isSparkles && !isStickers && (
+        {!isTumblerParent && !isSparkles && !isStickers && !isCups && (
           <SortSelect current={sort} />
         )}
       </div>
 
       {isTumblerParent ? (
         <TumblerBlocks subcategories={subcategories} />
+      ) : cups ? (
+        /* Solo los vasos del Excel. Los productos SnowGlobe históricos (kit
+           base, vaso para rellenar, vaso de vidrio) siguen en la base y en el
+           admin: únicamente se ocultan de ESTA presentación para no mezclarse
+           con el catálogo por código. */
+        <TumblerCupsCatalog entries={cups.entries} />
       ) : stickers ? (
         /* Solo los UV Stickers del Excel. Los productos genéricos anteriores
            de la categoría (Wrap UV decorativo, Lámina decorativa para vaso,
