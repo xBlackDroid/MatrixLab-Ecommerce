@@ -173,7 +173,7 @@ function normalizeTumblerCategory(c: CategoryRow): CategoryRow {
  * referencia interna se rompe.
  */
 const PUBLIC_CATEGORY_TITLES: Record<string, string> = {
-  stickers: "MatrixLabStickers",
+  stickers: "MatrixLab Stickers",
   "impresion-3d": "MatrixLab 3D",
 };
 
@@ -204,26 +204,6 @@ function presentCategory(c: CategoryRow): CategoryRow {
   );
   return { ...branded, image_url: resolveCategoryImage(branded) };
 }
-
-/**
- * Categorías que NO se muestran como tarjetas públicas en /tienda. No se borran
- * de la base de datos ni de sus rutas: solo se ocultan del grid del catálogo.
- * Son las subcategorías internas de "MatrixLab Tumbler" (SnowGlobe Bar,
- * Llaveros, Tags de acrílico, Acrylab, Creator Tools, Sparkle Mix, Magic Flow,
- * Wraps & Glow Finish): siguen vivas como handles/seeds/productos y como
- * bloques dentro de la landing de MatrixLab Tumbler, pero la única tarjeta
- * pública de la línea es la categoría madre.
- */
-export const PUBLIC_HIDDEN_CATEGORY_HANDLES: ReadonlySet<string> = new Set([
-  "snowglobe",
-  "llaveros",
-  "tags-acrilico",
-  "acrilicos",
-  "accesorios-personalizacion",
-  "repuestos-consumibles",
-  "magic-flow",
-  "wraps-glow-finish",
-]);
 
 /**
  * Catálogo público. Lee vía anon key (RLS limita a contenido visible).
@@ -291,44 +271,6 @@ export async function getCategories(): Promise<CategoryRow[]> {
   );
   if (error || !data) return [];
   return data.map(presentCategory);
-}
-
-/**
- * Orden comercial EXACTO de las tarjetas de "Categorías principales" en
- * /tienda. Es orden de PRESENTACIÓN: no toca `sort_order` en la base (que el
- * admin sigue controlando) ni el orden de ninguna otra vista.
- *
- * Una categoría pública que no esté en esta lista no desaparece: se muestra
- * después, conservando su `sort_order`.
- */
-export const PUBLIC_STORE_CATEGORY_ORDER: readonly string[] = [
-  "matrixlab-tumbler", // 1. MatrixLab Tumbler
-  "stickers", // 2. MatrixLabStickers
-  "impresion-3d", // 3. MatrixLab 3D
-  "imanes", // 4. Imanes
-  "playeras-prendas", // 5. Playeras y prendas
-  "gorras", // 6. Gorras
-  "grabado-laser", // 7. Grabado láser
-  "disenador-tshirt-lab", // 8. Diseñador T-Shirt Lab
-  "etiquetas-escolares", // 9. Etiquetas escolares
-];
-
-/**
- * Categorías para el GRID público de /tienda: las activas menos las
- * subcategorías internas de MatrixLab Tumbler (ver
- * PUBLIC_HIDDEN_CATEGORY_HANDLES), en el orden comercial de
- * PUBLIC_STORE_CATEGORY_ORDER. Las rutas de esas categorías siguen vivas;
- * solo no aparecen como tarjetas en el catálogo.
- */
-export async function getPublicStoreCategories(): Promise<CategoryRow[]> {
-  const all = await getCategories();
-  const rank = (handle: string) => {
-    const i = PUBLIC_STORE_CATEGORY_ORDER.indexOf(handle);
-    return i === -1 ? PUBLIC_STORE_CATEGORY_ORDER.length : i;
-  };
-  return all
-    .filter((c) => !PUBLIC_HIDDEN_CATEGORY_HANDLES.has(c.handle))
-    .sort((a, b) => rank(a.handle) - rank(b.handle) || a.sort_order - b.sort_order);
 }
 
 export async function getCategoryByHandle(

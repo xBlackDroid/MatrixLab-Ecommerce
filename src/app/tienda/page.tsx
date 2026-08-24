@@ -2,29 +2,31 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
+  Box,
   Building2,
+  CupSoda,
+  Droplets,
   Gift,
   GraduationCap,
+  Magnet,
   Package,
   PartyPopper,
   Shirt,
   Sparkles,
+  Sticker,
   User,
-  Wand2,
+  Zap,
 } from "lucide-react";
 import {
   CapIcon,
   HoodieIcon,
   ToteIcon,
 } from "@/components/icons/GarmentIcons";
-import CategoryGrid from "@/components/store/CategoryGrid";
+import StoreFamilySection, {
+  FamilyWatermark,
+} from "@/components/store/StoreFamilySection";
 import StoreCTA from "@/components/store/StoreCTA";
 import StoreHero from "@/components/store/StoreHero";
-import { getPublicStoreCategories } from "@/lib/store/products";
-
-// Catálogo público con cache razonable (5 min). Carrito y checkout son
-// siempre dinámicos en sus propias rutas.
-export const revalidate = 300;
 
 const VOLUME_ITEMS = [
   {
@@ -60,6 +62,7 @@ const VOLUME_ITEMS = [
 ];
 
 // Prendas del laboratorio, cada una con su icono específico (no genérico).
+// Mismos tipos/rutas que usaba el bloque "T-Shirt Lab": /tienda/disenador/<type>.
 const PRENDA_LAB_ITEMS: Array<{
   label: string;
   type: string;
@@ -71,78 +74,156 @@ const PRENDA_LAB_ITEMS: Array<{
   { label: "Tote bag", type: "tote", Icon: ToteIcon },
 ];
 
-export default async function TiendaHomePage() {
-  const categories = await getPublicStoreCategories();
+// Plantillas reales del Laboratorio láser (src/lib/designer/laser-config.ts):
+// el láser es un solo lienzo, no tiene rutas propias por material, así que se
+// muestran como opciones informativas (no como links) en vez de inventar
+// navegación falsa.
+const LASER_CHIPS = [
+  { label: "Tabla de madera" },
+  { label: "Placa acrílica" },
+  { label: "Termo" },
+  { label: "Tag" },
+];
 
+export default function TiendaHomePage() {
   return (
     <>
       <StoreHero />
 
-      {/* 1. Categorías principales */}
-      <section id="catalogo" className="px-4 pb-20 sm:px-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold sm:text-3xl">
-                Categorías principales
-              </h2>
-              <p className="mt-2 text-ml-white/60">
-                Todo sale del mismo laboratorio creativo.
-              </p>
-            </div>
-          </div>
-          <CategoryGrid categories={categories} />
-        </div>
-      </section>
+      {/* 1. Grandes bloques de familias MatrixLab */}
+      <StoreFamilySection
+        id="catalogo"
+        accent="cyan"
+        badgeIcon={CupSoda}
+        badgeLabel="Línea creativa"
+        title={
+          <>
+            MatrixLab <span className="text-gradient">Tumbler</span>
+          </>
+        }
+        description="Vasos, materiales e insumos creativos para personalizar tumblers, snow globe y proyectos únicos."
+        ctaLabel="Explorar MatrixLab Tumbler"
+        ctaHref="/tienda/categoria/matrixlab-tumbler"
+        blurSide="left"
+        backgroundLogo={{
+          kind: "image",
+          src: "/images/categories/matrixlab-tumbler.png",
+        }}
+        right={{
+          kind: "items",
+          items: [
+            { label: "Vasos", href: "/tienda/categoria/snowglobe", icon: CupSoda },
+            {
+              label: "Sparkles",
+              href: "/tienda/categoria/repuestos-consumibles",
+              icon: Sparkles,
+            },
+            {
+              label: "UV Stickers",
+              href: "/tienda/categoria/wraps-glow-finish",
+              icon: Sticker,
+            },
+            {
+              label: "Magic Flow",
+              href: "/tienda/categoria/magic-flow",
+              icon: Droplets,
+            },
+          ],
+        }}
+      />
 
-      {/* 2. Diseña en el laboratorio */}
-      <section className="px-4 pb-20 sm:px-6">
-        <div className="glass relative mx-auto max-w-7xl overflow-hidden rounded-3xl p-10 sm:p-14">
-          <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-ml-cyan/10 blur-3xl" />
-          <div className="relative grid items-center gap-10 lg:grid-cols-2">
-            <div>
-              <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
-                <Wand2 className="h-4 w-4" aria-hidden />
-                T-Shirt Lab
-              </span>
-              <h2 className="mt-5 text-3xl font-bold sm:text-4xl">
-                Diseña tu prenda{" "}
-                <span className="text-gradient">en el laboratorio</span>
-              </h2>
-              <p className="mt-4 max-w-lg text-ml-white/65">
-                Sube tu imagen PNG, acomódala, ajusta tamaño y posición, elige
-                producto base y envía tu diseño listo para producir.
-              </p>
-              <Link
-                href="/tienda/disenador"
-                className="mt-8 inline-flex items-center gap-2 rounded-full bg-ml-cyan px-7 py-3.5 font-semibold text-ml-bg shadow-glow-cyan transition hover:scale-[1.02] hover:bg-ml-cyan/90"
-              >
-                Abrir diseñador
-                <ArrowRight className="h-5 w-5" aria-hidden />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-2">
-              {PRENDA_LAB_ITEMS.map((item) => (
-                <Link
-                  key={item.type}
-                  href={`/tienda/disenador/${item.type}`}
-                  className="glass group flex flex-col items-center justify-center gap-2 rounded-xl px-3 py-4 transition hover:-translate-y-0.5 hover:border-ml-cyan/50"
-                >
-                  <item.Icon className="h-6 w-6 text-ml-violet transition group-hover:text-ml-cyan" />
-                  <span className="text-xs font-semibold sm:text-sm">
-                    {item.label}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <StoreFamilySection
+        accent="coral"
+        badgeIcon={Sticker}
+        badgeLabel="Personalización"
+        title={
+          <>
+            MatrixLab <span className="text-gradient">Stickers</span>
+          </>
+        }
+        description="Stickers e imanes personalizados para marcas, eventos, regalos, colecciones y proyectos creativos."
+        ctaLabel="Explorar MatrixLab Stickers"
+        ctaHref="/tienda/categoria/stickers"
+        blurSide="right"
+        backgroundLogo={{ kind: "icon", icon: Sticker }}
+        right={{
+          kind: "items",
+          items: [
+            { label: "Stickers", href: "/tienda/categoria/stickers", icon: Sticker },
+            { label: "Imanes", href: "/tienda/categoria/imanes", icon: Magnet },
+          ],
+        }}
+      />
 
-      {/* 2.b Regreso a clases — Etiquetas Escolares Lab */}
-      <section className="px-4 pb-20 sm:px-6">
+      <StoreFamilySection
+        accent="violet"
+        badgeIcon={Shirt}
+        badgeLabel="Prendas"
+        title={
+          <>
+            MatrixLab <span className="text-gradient">Wear</span>
+          </>
+        }
+        description="Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas."
+        ctaLabel="Diseñar mi prenda"
+        ctaHref="/tienda/disenador"
+        blurSide="left"
+        backgroundLogo={{ kind: "icon", icon: Shirt }}
+        right={{
+          kind: "items",
+          items: PRENDA_LAB_ITEMS.map((item) => ({
+            label: item.label,
+            href: `/tienda/disenador/${item.type}`,
+            icon: item.Icon,
+          })),
+        }}
+      />
+
+      <StoreFamilySection
+        accent="green"
+        badgeIcon={Box}
+        badgeLabel="Fabricación digital"
+        title={
+          <>
+            MatrixLab <span className="text-gradient">3D</span>
+          </>
+        }
+        description="Impresión 3D, prototipos, decoración y productos personalizados creados capa por capa."
+        ctaLabel="Explorar MatrixLab 3D"
+        ctaHref="/tienda/categoria/impresion-3d"
+        blurSide="right"
+        backgroundLogo={{
+          kind: "image",
+          src: "/images/categories/impresion-3d.png",
+        }}
+        right={{ kind: "none" }}
+      />
+
+      <StoreFamilySection
+        accent="violet"
+        badgeIcon={Zap}
+        badgeLabel="Corte & grabado"
+        title={
+          <>
+            MatrixLab <span className="text-gradient">Laser</span>
+          </>
+        }
+        description="Grabado y corte personalizado en madera, acrílico y materiales especiales para piezas y regalos únicos."
+        ctaLabel="Explorar MatrixLab Laser"
+        ctaHref="/tienda/disenador/laser"
+        blurSide="left"
+        backgroundLogo={{ kind: "icon", icon: Zap }}
+        right={{ kind: "chips", heading: "Disponible en el diseñador", items: LASER_CHIPS }}
+      />
+
+      {/* 2. Regreso a clases — Etiquetas Escolares Lab (sección dedicada,
+          sin cambios de copy/CTA/ruta/lógica; solo se reubica dentro del
+          nuevo sistema de bloques). */}
+      <section className="px-4 pb-20 pt-6 sm:px-6">
         <div className="glass relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-3xl p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-ml-violet/10 blur-3xl" />
+          {/* Watermark de marca, mismo lenguaje visual que los bloques de arriba. */}
+          <FamilyWatermark logo={{ kind: "icon", icon: GraduationCap }} />
           <div className="relative">
             <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
               <GraduationCap className="h-4 w-4" aria-hidden />

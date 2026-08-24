@@ -1,6 +1,5 @@
 import type { ComponentType, SVGProps } from "react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,7 +9,6 @@ import {
   CupSoda,
   FlaskConical,
   GraduationCap,
-  Magnet,
   MessageCircle,
   Shirt,
   ShoppingBag,
@@ -21,6 +19,9 @@ import {
   Zap,
 } from "lucide-react";
 import { CapIcon, HoodieIcon, ToteIcon } from "@/components/icons/GarmentIcons";
+import FamilyCard, {
+  type FamilyAccent,
+} from "@/components/landing/FamilyCard";
 import LandingNav from "@/components/landing/LandingNav";
 import Reveal from "@/components/landing/Reveal";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
@@ -57,97 +58,116 @@ const HERO_CHIPS: Array<{ label: string; href: string }> = [
 ];
 
 /**
- * Cards grandes del laboratorio: las seis líneas del sitio original, cada una
- * con su icono y acento propio (cyan, morado, rosa, verde), adaptadas a la
- * identidad actual. Las clases de acento van completas en los datos porque
- * Tailwind necesita los nombres estáticos.
+ * Seis familias MatrixLab de la sección "El laboratorio". Todas comparten el
+ * mismo sistema visual (ver FamilyCard), tomado 1:1 de las cards que ya
+ * funcionaban en la home: MatrixLab Tumbler y Etiquetas escolares.
+ *
+ * Stickers agrupa Stickers + Imanes, y Wear agrupa Playeras + Gorras: esas
+ * cuatro rutas siguen vivas, solo dejan de tener tarjeta propia en la home.
  */
-const LAB_CARDS: Array<{
-  title: string;
-  description: string;
+const FAMILY_CARDS: Array<{
+  id: string;
   href: string;
-  icon: IconComponent;
+  badgeIcon: IconComponent;
+  badgeLabel: string;
+  titlePrefix: string;
+  titleHighlight: string;
+  description: string;
   cta: string;
-  accentText: string;
-  iconClasses: string;
+  accent: FamilyAccent;
   gradient: string;
-  hover: string;
+  visual:
+    | { kind: "image"; src: string }
+    | { kind: "icon"; icon: IconComponent };
+  /** Ancla para preservar los enlaces existentes de nav/footer (#tumbler). */
+  anchorId?: string;
 }> = [
   {
-    // Nombre público de marca, alineado con /tienda (PUBLIC_CATEGORY_TITLES).
-    // El handle y la ruta /tienda/categoria/stickers no cambian.
-    title: "MatrixLabStickers",
-    description:
-      "Resistentes al agua, con corte perfecto y acabados profesionales. Para marcas, empaques, laptops, eventos y colecciones.",
+    id: "stickers",
     href: "/tienda/categoria/stickers",
-    icon: Sticker,
-    cta: "Ver stickers",
-    accentText: "text-ml-coral",
-    iconClasses: "bg-ml-coral/15 text-ml-coral",
-    gradient: "from-ml-coral/25 via-ml-coral/5 to-transparent",
-    hover: "hover:border-ml-coral/50 hover:shadow-glow-coral",
-  },
-  {
-    title: "Imanes",
+    badgeIcon: Sticker,
+    badgeLabel: "Personalización",
+    titlePrefix: "MatrixLab",
+    titleHighlight: "Stickers",
     description:
-      "Imanes personalizados para refrigerador, recuerdos de eventos, marcas y promociones que la gente conserva.",
-    href: "/tienda/categoria/imanes",
-    icon: Magnet,
-    cta: "Ver imanes",
-    accentText: "text-ml-cyan",
-    iconClasses: "bg-ml-cyan/15 text-ml-cyan",
-    gradient: "from-ml-cyan/25 via-ml-cyan/5 to-transparent",
-    hover: "hover:border-ml-cyan/50 hover:shadow-glow-cyan",
+      "Stickers e imanes personalizados para marcas, eventos, colecciones y proyectos creativos.",
+    cta: "Explorar la línea",
+    accent: "coral",
+    gradient: "from-ml-coral/20 via-ml-violet/10 to-transparent",
+    visual: { kind: "icon", icon: Sticker },
   },
   {
-    title: "Playeras",
+    id: "wear",
+    href: "/tienda/disenador",
+    badgeIcon: Shirt,
+    badgeLabel: "Prendas",
+    titlePrefix: "MatrixLab",
+    titleHighlight: "Wear",
     description:
-      "Diséñalas en el T-Shirt Lab con tu propia imagen: mueve, escala y rota tu diseño con acabado premium.",
-    href: "/tienda/disenador/playera",
-    icon: Shirt,
-    cta: "Diseñar playera",
-    accentText: "text-ml-violet",
-    iconClasses: "bg-ml-violet/15 text-ml-violet",
-    gradient: "from-ml-violet/25 via-ml-violet/5 to-transparent",
-    hover: "hover:border-ml-violet/50 hover:shadow-glow-violet",
+      "Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas.",
+    cta: "Explorar la línea",
+    accent: "violet",
+    gradient: "from-ml-violet/20 via-ml-cyan/10 to-transparent",
+    visual: { kind: "icon", icon: Shirt },
   },
   {
-    title: "Gorras",
+    id: "tumbler",
+    href: "/tienda/categoria/matrixlab-tumbler",
+    badgeIcon: CupSoda,
+    badgeLabel: "Línea creativa",
+    titlePrefix: "MatrixLab",
+    titleHighlight: "Tumbler",
     description:
-      "Gorras personalizadas para eventos, marcas, equipos y activaciones, listas para diseñar en el laboratorio.",
-    href: "/tienda/disenador/gorra-clasica",
-    icon: CapIcon,
-    cta: "Diseñar gorra",
-    accentText: "text-ml-green",
-    iconClasses: "bg-ml-green/15 text-ml-green",
-    gradient: "from-ml-green/25 via-ml-green/5 to-transparent",
-    hover: "hover:border-ml-green/50 hover:shadow-glow-green",
+      "Vasos, termos, snow globe e insumos creativos para personalización.",
+    cta: "Explorar la línea",
+    accent: "cyan",
+    gradient: "from-ml-cyan/20 via-ml-violet/10 to-transparent",
+    visual: { kind: "image", src: "/images/categories/matrixlab-tumbler.png" },
+    anchorId: "tumbler",
   },
   {
-    title: "Grabado Láser",
-    description:
-      "Madera, acrílico, metal y materiales especiales grabados con precisión para piezas y regalos únicos.",
-    href: "/tienda/disenador/laser",
-    icon: Zap,
-    cta: "Cotizar grabado",
-    accentText: "text-ml-violet",
-    iconClasses: "bg-ml-violet/15 text-ml-violet",
-    gradient: "from-ml-violet/25 via-ml-coral/10 to-transparent",
-    hover: "hover:border-ml-violet/50 hover:shadow-glow-violet",
-  },
-  {
+    id: "3d",
     // Nombre público de marca, alineado con /tienda. El handle y la ruta
     // /tienda/categoria/impresion-3d no cambian.
-    title: "MatrixLab 3D",
-    description:
-      "Piezas únicas, prototipos, decoración y objetos personalizados construidos capa por capa.",
     href: "/tienda/categoria/impresion-3d",
-    icon: Box,
-    cta: "Ver impresión 3D",
-    accentText: "text-ml-green",
-    iconClasses: "bg-ml-green/15 text-ml-green",
+    badgeIcon: Box,
+    badgeLabel: "Fabricación digital",
+    titlePrefix: "MatrixLab",
+    titleHighlight: "3D",
+    description:
+      "Impresión 3D, prototipos, decoración y productos personalizados creados capa por capa.",
+    cta: "Explorar 3D",
+    accent: "green",
     gradient: "from-ml-cyan/20 via-ml-green/10 to-transparent",
-    hover: "hover:border-ml-green/50 hover:shadow-glow-green",
+    visual: { kind: "image", src: "/images/categories/impresion-3d.png" },
+  },
+  {
+    id: "laser",
+    href: "/tienda/disenador/laser",
+    badgeIcon: Zap,
+    badgeLabel: "Corte & grabado",
+    titlePrefix: "MatrixLab",
+    titleHighlight: "Laser",
+    description:
+      "Grabado y corte personalizado en madera, acrílico y materiales especiales.",
+    cta: "Explorar Laser",
+    accent: "violet",
+    gradient: "from-ml-violet/20 via-ml-coral/10 to-transparent",
+    visual: { kind: "icon", icon: Zap },
+  },
+  {
+    id: "etiquetas-escolares",
+    href: "/tienda/disenador/etiquetas-escolares",
+    badgeIcon: GraduationCap,
+    badgeLabel: "De regreso a clases",
+    titlePrefix: "Etiquetas",
+    titleHighlight: "escolares",
+    description:
+      "Paquetes personalizados con tipografías y diseños editables, listos para ropa, útiles y más.",
+    cta: "Crear etiquetas",
+    accent: "green",
+    gradient: "from-ml-green/20 via-ml-coral/10 to-transparent",
+    visual: { kind: "icon", icon: GraduationCap },
   },
 ];
 
@@ -241,7 +261,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ================= LABORATORIO (cards grandes) ================= */}
+        {/* ================= LABORATORIO (6 familias, cards grandes) ================= */}
         <section id="laboratorio" className="scroll-mt-24 px-4 py-20 sm:px-6">
           <div className="mx-auto max-w-7xl">
             <Reveal>
@@ -253,137 +273,52 @@ export default function LandingPage() {
                   ¿Qué quieres <span className="text-gradient">crear hoy?</span>
                 </h2>
                 <p className="mt-5 text-ml-white/65">
-                  Stickers, imanes, prendas, gorras, grabado láser e impresión
-                  3D: todo se diseña y se produce en el mismo laboratorio,
-                  desde una pieza hasta miles.
+                  Stickers, prendas, vasos y termos, impresión 3D, grabado
+                  láser y etiquetas escolares: todo se diseña y se produce en
+                  el mismo laboratorio, desde una pieza hasta miles.
                 </p>
               </div>
             </Reveal>
 
-            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {LAB_CARDS.map((card, index) => (
-                <Reveal key={card.title} delay={index * 0.06} className="h-full">
-                  <Link
-                    href={card.href}
-                    className={`glass group relative flex h-full min-h-60 flex-col justify-between overflow-hidden rounded-[1.75rem] p-7 transition hover:-translate-y-1.5 ${card.hover}`}
+            <div className="mt-12 grid gap-5 md:grid-cols-2">
+              {FAMILY_CARDS.map((card, index) => {
+                const cardEl = (
+                  <Reveal delay={index * 0.06} className="h-full">
+                    <FamilyCard
+                      href={card.href}
+                      badgeIcon={card.badgeIcon}
+                      badgeLabel={card.badgeLabel}
+                      titlePrefix={card.titlePrefix}
+                      titleHighlight={card.titleHighlight}
+                      description={card.description}
+                      cta={card.cta}
+                      accent={card.accent}
+                      gradient={card.gradient}
+                      visual={
+                        card.visual.kind === "image"
+                          ? { kind: "image", src: card.visual.src }
+                          : { kind: "icon", Icon: card.visual.icon }
+                      }
+                    />
+                  </Reveal>
+                );
+                // El wrapper con id preserva el ancla #tumbler existente en
+                // nav/footer sin tocar esos componentes.
+                return card.anchorId ? (
+                  <div
+                    key={card.id}
+                    id={card.anchorId}
+                    className="h-full scroll-mt-24"
                   >
-                    <div
-                      className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-80 transition group-hover:opacity-100`}
-                      aria-hidden
-                    />
-                    <card.icon
-                      className={`pointer-events-none absolute -bottom-7 -right-7 h-40 w-40 ${card.accentText} opacity-[0.08] transition duration-300 group-hover:scale-110 group-hover:opacity-[0.16]`}
-                      aria-hidden
-                    />
-                    <span
-                      className={`relative flex h-14 w-14 items-center justify-center rounded-2xl ${card.iconClasses}`}
-                    >
-                      <card.icon className="h-7 w-7" aria-hidden />
-                    </span>
-                    <div className="relative mt-6">
-                      <h3 className="text-2xl font-bold">{card.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-ml-white/65">
-                        {card.description}
-                      </p>
-                      <span
-                        className={`mt-5 inline-flex items-center gap-2 text-sm font-semibold ${card.accentText}`}
-                      >
-                        {card.cta}
-                        <ArrowRight
-                          className="h-4 w-4 transition group-hover:translate-x-1"
-                          aria-hidden
-                        />
-                      </span>
-                    </div>
-                  </Link>
-                </Reveal>
-              ))}
+                    {cardEl}
+                  </div>
+                ) : (
+                  <div key={card.id} className="h-full">
+                    {cardEl}
+                  </div>
+                );
+              })}
             </div>
-          </div>
-        </section>
-
-        {/* ============ MATRIXLAB TUMBLER + ETIQUETAS ESCOLARES ============ */}
-        <section id="tumbler" className="scroll-mt-24 px-4 py-20 sm:px-6">
-          <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-2">
-            <Reveal className="h-full">
-              <Link
-                href="/tienda/categoria/matrixlab-tumbler"
-                className="glass group relative flex h-full min-h-64 flex-col justify-between overflow-hidden rounded-[2rem] p-8 transition hover:-translate-y-1 hover:border-ml-cyan/50 hover:shadow-glow-cyan sm:p-10"
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-ml-cyan/20 via-ml-violet/10 to-transparent"
-                  aria-hidden
-                />
-                <div
-                  className="pointer-events-none absolute -bottom-12 -right-8 h-64 w-64 opacity-25 transition duration-300 group-hover:scale-105 group-hover:opacity-40"
-                  aria-hidden
-                >
-                  <Image
-                    src="/images/categories/matrixlab-tumbler.png"
-                    alt=""
-                    fill
-                    sizes="256px"
-                    className="object-contain"
-                  />
-                </div>
-                <span className="glass relative inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
-                  <CupSoda className="h-4 w-4" aria-hidden />
-                  Línea creativa
-                </span>
-                <div className="relative mt-8 max-w-sm">
-                  <h3 className="text-3xl font-bold">
-                    MatrixLab <span className="text-gradient">Tumbler</span>
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-ml-white/70 sm:text-base">
-                    Vasos, termos, snow globe e insumos creativos para
-                    personalización.
-                  </p>
-                  <span className="mt-6 inline-flex items-center gap-2 font-semibold text-ml-cyan">
-                    Explorar la línea
-                    <ArrowRight
-                      className="h-5 w-5 transition group-hover:translate-x-1"
-                      aria-hidden
-                    />
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
-
-            <Reveal delay={0.08} className="h-full">
-              <Link
-                href="/tienda/disenador/etiquetas-escolares"
-                className="glass group relative flex h-full min-h-64 flex-col justify-between overflow-hidden rounded-[2rem] p-8 transition hover:-translate-y-1 hover:border-ml-green/50 hover:shadow-glow-green sm:p-10"
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-ml-green/20 via-ml-coral/10 to-transparent"
-                  aria-hidden
-                />
-                <GraduationCap
-                  className="pointer-events-none absolute -bottom-8 -right-8 h-48 w-48 text-ml-green opacity-[0.08] transition duration-300 group-hover:scale-110 group-hover:opacity-[0.16]"
-                  aria-hidden
-                />
-                <span className="glass relative inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-green">
-                  <GraduationCap className="h-4 w-4" aria-hidden />
-                  De regreso a clases
-                </span>
-                <div className="relative mt-8 max-w-sm">
-                  <h3 className="text-3xl font-bold">
-                    Etiquetas <span className="text-gradient">escolares</span>
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-ml-white/70 sm:text-base">
-                    Paquetes personalizados con tipografías y diseños
-                    editables, listos para ropa, útiles y más.
-                  </p>
-                  <span className="mt-6 inline-flex items-center gap-2 font-semibold text-ml-green">
-                    Crear etiquetas
-                    <ArrowRight
-                      className="h-5 w-5 transition group-hover:translate-x-1"
-                      aria-hidden
-                    />
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
           </div>
         </section>
 

@@ -43,7 +43,7 @@ const CURATED_CATEGORY_FALLBACKS: Record<
   stickers: {
     // Nombre público (mismo rebrand de presentación que aplica
     // PUBLIC_CATEGORY_TITLES; el handle /categoria/stickers no cambia).
-    title: "MatrixLabStickers",
+    title: "MatrixLab Stickers",
     description:
       "Stickers personalizados para marcas, eventos, regalos, campañas, empaques y colecciones.",
     whatsapp: "Hola MatrixLab, quiero cotizar stickers personalizados.",
