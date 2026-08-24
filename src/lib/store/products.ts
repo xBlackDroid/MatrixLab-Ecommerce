@@ -31,6 +31,22 @@ import {
   TUMBLER_SPARKLES,
   type SparkleItem,
 } from "@/lib/store/tumbler-sparkles";
+import {
+  STICKER_PLACEHOLDER_IMAGE,
+  stickerByHandle,
+  stickerHandle,
+  stickerImagePath,
+  TUMBLER_STICKERS,
+  type StickerItem,
+} from "@/lib/store/tumbler-stickers";
+import {
+  CUP_PLACEHOLDER_IMAGE,
+  cupByHandle,
+  cupHandle,
+  cupImagePath,
+  TUMBLER_CUPS,
+  type CupItem,
+} from "@/lib/store/tumbler-cups";
 import { isValidHandle } from "@/lib/security/sanitize";
 import type { ProductSort } from "@/lib/validation/store";
 
@@ -71,9 +87,51 @@ function resolveSparkleImages(p: ProductRow): ProductRow {
   return { ...p, images: [photo ? rel : SPARKLE_PLACEHOLDER_IMAGE] };
 }
 
-/** Pipeline de presentación pública de un producto. */
+/**
+ * Imagen de un UV Sticker (MatrixLab Tumbler), resuelta por CÓDIGO en
+ * servidor, con la misma regla que los Sparkles:
+ *
+ *   1. si el admin ya curó imágenes en la base, se respetan tal cual;
+ *   2. si existe `public/images/tumbler/stickers/<codigo>.webp`, se usa esa —
+ *      copiar el archivo basta para que aparezca, sin tocar código ni base;
+ *   3. si no, se usa el placeholder de marca. Nunca una imagen rota.
+ */
+function resolveStickerImages(p: ProductRow): ProductRow {
+  const sticker = stickerByHandle(p.handle);
+  if (!sticker) return p;
+  if (Array.isArray(p.images) && p.images.length > 0) return p;
+  const rel = stickerImagePath(sticker.code);
+  const photo = existsSync(join(process.cwd(), "public", rel));
+  return { ...p, images: [photo ? rel : STICKER_PLACEHOLDER_IMAGE] };
+}
+
+/**
+ * Imagen de un vaso (MatrixLab Tumbler), resuelta por CÓDIGO en servidor, con
+ * la misma regla que Sparkles y UV Stickers:
+ *
+ *   1. si el admin ya curó imágenes en la base, se respetan tal cual;
+ *   2. si existe `public/images/tumbler/vasos/<codigo>.webp`, se usa esa —
+ *      copiar el archivo basta para que aparezca, sin tocar código ni base;
+ *   3. si no, se usa el placeholder de marca. Nunca una imagen rota.
+ */
+function resolveCupImages(p: ProductRow): ProductRow {
+  const cup = cupByHandle(p.handle);
+  if (!cup) return p;
+  if (Array.isArray(p.images) && p.images.length > 0) return p;
+  const rel = cupImagePath(cup.code);
+  const photo = existsSync(join(process.cwd(), "public", rel));
+  return { ...p, images: [photo ? rel : CUP_PLACEHOLDER_IMAGE] };
+}
+
+/**
+ * Pipeline de presentación pública de un producto. Cada resolver devuelve el
+ * producto intacto si el handle no le corresponde, así que encadenarlos es
+ * seguro: un Sparkle nunca entra al resolver de stickers ni al de vasos.
+ */
 function presentProduct(p: ProductRow): ProductRow {
-  return resolveSparkleImages(fixProductText(p));
+  return resolveCupImages(
+    resolveStickerImages(resolveSparkleImages(fixProductText(p))),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -481,6 +539,313 @@ export async function getSparkleCatalog(
     );
   }
   return assembleSparkleCatalog(products, variantsByProduct);
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * UV Stickers (categoría `wraps-glow-finish`)
+ * ---------------------------------------------------------------------------
+ * Implementación PARALELA a la de Sparkles, no compartida: cada línea puede
+ * cambiar de precio, acabado o inventario sin arrastrar a la otra.
+ *
+ * Cada UV Sticker es un producto independiente con UNA variante ("Pieza") que
+ * lleva SKU, precio e inventario. Esta lectura junta el producto real de la
+ * base con su fila del Excel (`TUMBLER_STICKERS`) para poder mostrar nombre,
+ * precio, inventario, acabado y referencia en una sola tarjeta.
+ *
+ * El precio y el stock que se muestran vienen SIEMPRE de la base (variante →
+ * producto), nunca del frontend: el carrito los vuelve a resolver en servidor.
+ */
+export interface StickerCatalogEntry {
+  /** Fila del Excel (nombre público, código, acabado). */
+  item: StickerItem;
+  productId: string;
+  handle: string;
+  /** Título real en base (puede diferir si el admin lo editó). */
+  title: string;
+  variantId: string | null;
+  sku: string | null;
+  /** Precio unitario resuelto en servidor (variante → producto). */
+  price: number;
+  /** Inventario real de la variante. */
+  stock: number;
+  /** Imagen resuelta por código (foto real o placeholder de marca). */
+  image: string;
+  /** Producto vendible: estado válido y con inventario (o sobre pedido). */
+  sellable: boolean;
+}
+
+export interface StickerCatalog {
+  /** Stickers del Excel presentes en la base, en el orden EXACTO del Excel. */
+  entries: StickerCatalogEntry[];
+  /** Códigos del Excel que aún no existen en la base (seed pendiente). */
+  missingCodes: string[];
+  /**
+   * Productos genéricos anteriores de la categoría (p. ej. "Wrap UV
+   * decorativo", "Lámina decorativa para vaso", "Resina UV para acabado
+   * brillante").
+   *
+   * NO se borran de la base ni del admin: siguen existiendo como registros
+   * históricos y conservan su ficha en /tienda/producto/<handle>. Solo se
+   * separan aquí para que la vista pública de la categoría muestre
+   * exclusivamente los UV Stickers del Excel, sin mezclarlos.
+   */
+  legacyHidden: ProductRow[];
+}
+
+/** Arma una entrada del catálogo a partir del producto y sus variantes. */
+function buildStickerEntry(
+  item: StickerItem,
+  product: ProductRow,
+  variants: ProductVariantRow[],
+): StickerCatalogEntry {
+  const variant =
+    variants.find((v) => v.status !== "oculto") ?? variants[0] ?? null;
+  const price =
+    variant?.price !== null && variant?.price !== undefined
+      ? Number(variant.price)
+      : Number(product.base_price);
+  const stock = variant ? variant.stock : 0;
+  const onDemand =
+    product.status === "sobre_pedido" || variant?.status === "sobre_pedido";
+  const sellable =
+    ["disponible", "sobre_pedido"].includes(product.status) &&
+    !["agotado", "oculto"].includes(variant?.status ?? "disponible") &&
+    (onDemand || stock > 0);
+  const images = presentProduct(product).images;
+  return {
+    item,
+    productId: product.id,
+    handle: product.handle,
+    title: product.title,
+    variantId: variant?.id ?? null,
+    sku: variant?.sku ?? null,
+    price,
+    stock,
+    image: images[0] ?? STICKER_PLACEHOLDER_IMAGE,
+    sellable,
+  };
+}
+
+/** Junta productos + variantes con el Excel, respetando el orden del Excel. */
+function assembleStickerCatalog(
+  products: ProductRow[],
+  variantsByProduct: Map<string, ProductVariantRow[]>,
+): StickerCatalog {
+  const byHandle = new Map(products.map((p) => [p.handle, p]));
+  const entries: StickerCatalogEntry[] = [];
+  const missingCodes: string[] = [];
+  for (const item of TUMBLER_STICKERS) {
+    const product = byHandle.get(stickerHandle(item.code));
+    if (!product) {
+      missingCodes.push(item.code);
+      continue;
+    }
+    entries.push(
+      buildStickerEntry(item, product, variantsByProduct.get(product.id) ?? []),
+    );
+  }
+  const legacyHidden = products
+    .filter((p) => !stickerByHandle(p.handle))
+    .map(presentProduct);
+  return { entries, missingCodes, legacyHidden };
+}
+
+/** Catálogo UV Stickers de la categoría (productos + variante de cada uno). */
+export async function getStickerCatalog(
+  categoryId: string,
+): Promise<StickerCatalog> {
+  const client = getCatalogClient();
+  if (!client) {
+    const products = MOCK_PRODUCTS.filter(
+      (p) => p.category_id === categoryId && p.status !== "oculto",
+    ).map(fixProductText);
+    const variantsByProduct = new Map<string, ProductVariantRow[]>();
+    for (const v of MOCK_VARIANTS) {
+      if (v.status === "oculto") continue;
+      variantsByProduct.set(v.product_id, [
+        ...(variantsByProduct.get(v.product_id) ?? []),
+        v,
+      ]);
+    }
+    return assembleStickerCatalog(products, variantsByProduct);
+  }
+  const { data, error } = await raceRead<ProductWithVariantRows[]>(
+    client
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("category_id", categoryId)
+      .in("status", [...VISIBLE_PRODUCT_FILTER]) as unknown as PromiseLike<
+      ReadResult<ProductWithVariantRows[]>
+    >,
+  );
+  if (error || !data) {
+    return { entries: [], missingCodes: [], legacyHidden: [] };
+  }
+  const variantsByProduct = new Map<string, ProductVariantRow[]>();
+  const products: ProductRow[] = [];
+  for (const row of data) {
+    const { product_variants, ...product } = row;
+    products.push(fixProductText(product as ProductRow));
+    variantsByProduct.set(
+      product.id,
+      (product_variants ?? []).filter((v) => v.status !== "oculto"),
+    );
+  }
+  return assembleStickerCatalog(products, variantsByProduct);
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * Vasos (categoría `snowglobe`)
+ * ---------------------------------------------------------------------------
+ * Implementación PARALELA a la de Sparkles y UV Stickers, no compartida: cada
+ * línea puede cambiar de precio, capacidad o inventario sin arrastrar a las
+ * otras.
+ *
+ * Cada vaso es un producto independiente con UNA variante ("Pieza") que lleva
+ * SKU, precio e inventario. Esta lectura junta el producto real de la base con
+ * su fila del Excel (`TUMBLER_CUPS`) para poder mostrar nombre, precio,
+ * capacidad, inventario y referencia en una sola tarjeta.
+ *
+ * El precio y el stock que se muestran vienen SIEMPRE de la base (variante →
+ * producto), nunca del frontend: el carrito los vuelve a resolver en servidor.
+ */
+export interface CupCatalogEntry {
+  /** Fila del Excel (nombre público, código, capacidad, colección). */
+  item: CupItem;
+  productId: string;
+  handle: string;
+  /** Título real en base (puede diferir si el admin lo editó). */
+  title: string;
+  variantId: string | null;
+  sku: string | null;
+  /** Precio unitario resuelto en servidor (variante → producto). */
+  price: number;
+  /** Inventario real de la variante. */
+  stock: number;
+  /** Imagen resuelta por código (foto real o placeholder de marca). */
+  image: string;
+  /** Producto vendible: estado válido y con inventario (o sobre pedido). */
+  sellable: boolean;
+}
+
+export interface CupCatalog {
+  /** Vasos del Excel presentes en la base, en el orden EXACTO del Excel. */
+  entries: CupCatalogEntry[];
+  /** Códigos del Excel que aún no existen en la base (seed pendiente). */
+  missingCodes: string[];
+  /**
+   * Productos SnowGlobe anteriores de la categoría (p. ej. "Kit base para
+   * vaso SnowGlobe", "Vaso SnowGlobe listo para rellenar", "Vaso SnowGlobe de
+   * vidrio").
+   *
+   * NO se borran de la base ni del admin: siguen existiendo como registros
+   * históricos y conservan su ficha en /tienda/producto/<handle>. Solo se
+   * separan aquí para que la vista pública de la categoría muestre
+   * exclusivamente los vasos del Excel, sin mezclarlos.
+   */
+  legacyHidden: ProductRow[];
+}
+
+/** Arma una entrada del catálogo a partir del producto y sus variantes. */
+function buildCupEntry(
+  item: CupItem,
+  product: ProductRow,
+  variants: ProductVariantRow[],
+): CupCatalogEntry {
+  const variant =
+    variants.find((v) => v.status !== "oculto") ?? variants[0] ?? null;
+  const price =
+    variant?.price !== null && variant?.price !== undefined
+      ? Number(variant.price)
+      : Number(product.base_price);
+  const stock = variant ? variant.stock : 0;
+  const onDemand =
+    product.status === "sobre_pedido" || variant?.status === "sobre_pedido";
+  const sellable =
+    ["disponible", "sobre_pedido"].includes(product.status) &&
+    !["agotado", "oculto"].includes(variant?.status ?? "disponible") &&
+    (onDemand || stock > 0);
+  const images = presentProduct(product).images;
+  return {
+    item,
+    productId: product.id,
+    handle: product.handle,
+    title: product.title,
+    variantId: variant?.id ?? null,
+    sku: variant?.sku ?? null,
+    price,
+    stock,
+    image: images[0] ?? CUP_PLACEHOLDER_IMAGE,
+    sellable,
+  };
+}
+
+/** Junta productos + variantes con el Excel, respetando el orden del Excel. */
+function assembleCupCatalog(
+  products: ProductRow[],
+  variantsByProduct: Map<string, ProductVariantRow[]>,
+): CupCatalog {
+  const byHandle = new Map(products.map((p) => [p.handle, p]));
+  const entries: CupCatalogEntry[] = [];
+  const missingCodes: string[] = [];
+  for (const item of TUMBLER_CUPS) {
+    const product = byHandle.get(cupHandle(item.code));
+    if (!product) {
+      missingCodes.push(item.code);
+      continue;
+    }
+    entries.push(
+      buildCupEntry(item, product, variantsByProduct.get(product.id) ?? []),
+    );
+  }
+  const legacyHidden = products
+    .filter((p) => !cupByHandle(p.handle))
+    .map(presentProduct);
+  return { entries, missingCodes, legacyHidden };
+}
+
+/** Catálogo de vasos de la categoría (productos + variante de cada uno). */
+export async function getCupCatalog(categoryId: string): Promise<CupCatalog> {
+  const client = getCatalogClient();
+  if (!client) {
+    const products = MOCK_PRODUCTS.filter(
+      (p) => p.category_id === categoryId && p.status !== "oculto",
+    ).map(fixProductText);
+    const variantsByProduct = new Map<string, ProductVariantRow[]>();
+    for (const v of MOCK_VARIANTS) {
+      if (v.status === "oculto") continue;
+      variantsByProduct.set(v.product_id, [
+        ...(variantsByProduct.get(v.product_id) ?? []),
+        v,
+      ]);
+    }
+    return assembleCupCatalog(products, variantsByProduct);
+  }
+  const { data, error } = await raceRead<ProductWithVariantRows[]>(
+    client
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("category_id", categoryId)
+      .in("status", [...VISIBLE_PRODUCT_FILTER]) as unknown as PromiseLike<
+      ReadResult<ProductWithVariantRows[]>
+    >,
+  );
+  if (error || !data) {
+    return { entries: [], missingCodes: [], legacyHidden: [] };
+  }
+  const variantsByProduct = new Map<string, ProductVariantRow[]>();
+  const products: ProductRow[] = [];
+  for (const row of data) {
+    const { product_variants, ...product } = row;
+    products.push(fixProductText(product as ProductRow));
+    variantsByProduct.set(
+      product.id,
+      (product_variants ?? []).filter((v) => v.status !== "oculto"),
+    );
+  }
+  return assembleCupCatalog(products, variantsByProduct);
 }
 
 /** Subcategorías de MatrixLab Tumbler, en orden comercial (para su landing). */
