@@ -71,34 +71,31 @@ function fixProductText(p: ProductRow): ProductRow {
 }
 
 /**
- * Índice (por carpeta) de nombres de archivo en minúsculas, para chequear
- * existencia sin depender de mayúsc./minúsc.
+ * Existencia de un archivo público sin depender de mayúsc./minúsc.
  *
  * Necesario porque el filesystem de desarrollo (Windows/macOS) es
  * case-insensitive, pero el de producción (Vercel/Linux) NO lo es: un
  * archivo subido como "C08R.webp" pasa `existsSync` en local y falla en
  * producción si el código busca "c08r.webp" (la convención de nombres real).
- * Cachea la carpeta completa para no hacer un readdir por producto.
+ *
+ * El chequeo directo (`existsSync`) sigue siendo el camino rápido y en vivo
+ * — así un archivo nuevo en dev aparece en el siguiente render, sin caché
+ * que lo oculte. Solo si ese chequeo falla se hace un listado de la carpeta
+ * (sin cachear: son carpetas de decenas de archivos, no vale la pena la
+ * complejidad de invalidar una caché por esto) para recuperar el archivo
+ * aunque su nombre real tenga otra capitalización.
  */
-const publicImageDirCache = new Map<string, Set<string> | null>();
-
 function publicImageExists(rel: string): boolean {
-  const dir = dirname(rel);
+  const abs = join(process.cwd(), "public", rel);
+  if (existsSync(abs)) return true;
   const filename = basename(rel).toLowerCase();
-  let files = publicImageDirCache.get(dir);
-  if (files === undefined) {
-    try {
-      files = new Set(
-        readdirSync(join(process.cwd(), "public", dir)).map((f) =>
-          f.toLowerCase(),
-        ),
-      );
-    } catch {
-      files = null;
-    }
-    publicImageDirCache.set(dir, files);
+  try {
+    return readdirSync(join(process.cwd(), "public", dirname(rel))).some(
+      (f) => f.toLowerCase() === filename,
+    );
+  } catch {
+    return false;
   }
-  return files?.has(filename) ?? false;
 }
 
 /**
@@ -222,7 +219,7 @@ function applyPublicCategoryTitle(c: CategoryRow): CategoryRow {
 function resolveCategoryImage(c: CategoryRow): string | null {
   for (const ext of ["png", "webp"] as const) {
     const rel = `/images/categories/${c.handle}.${ext}`;
-    if (existsSync(join(process.cwd(), "public", rel))) return rel;
+    if (publicImageExists(rel)) return rel;
   }
   if (c.image_url && /^https?:\/\//.test(c.image_url)) return c.image_url;
   return null;
