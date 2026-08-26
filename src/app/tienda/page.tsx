@@ -145,7 +145,10 @@ export default function TiendaHomePage() {
         ctaLabel="Explorar MatrixLab Stickers"
         ctaHref="/tienda/categoria/stickers"
         blurSide="right"
-        backgroundLogo={{ kind: "icon", icon: Sticker }}
+        backgroundLogo={{
+          kind: "image",
+          src: "/images/categories/matrixlab-stickers.png",
+        }}
         right={{
           kind: "items",
           items: [
