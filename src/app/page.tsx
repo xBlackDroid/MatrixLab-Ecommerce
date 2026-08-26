@@ -94,7 +94,7 @@ const FAMILY_CARDS: Array<{
     cta: "Explorar la línea",
     accent: "coral",
     gradient: "from-ml-coral/20 via-ml-violet/10 to-transparent",
-    visual: { kind: "icon", icon: Sticker },
+    visual: { kind: "image", src: "/images/categories/matrixlab-stickers.png" },
   },
   {
     id: "wear",
