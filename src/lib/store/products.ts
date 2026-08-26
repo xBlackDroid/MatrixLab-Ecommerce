@@ -1,7 +1,7 @@
 import "server-only";
 
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getAnonClient } from "@/lib/db/client";
 import { getServiceClient } from "@/lib/db/admin";
@@ -71,6 +71,34 @@ function fixProductText(p: ProductRow): ProductRow {
 }
 
 /**
+ * Existencia de un archivo público sin depender de mayúsc./minúsc.
+ *
+ * Necesario porque el filesystem de desarrollo (Windows/macOS) es
+ * case-insensitive, pero el de producción (Vercel/Linux) NO lo es: un
+ * archivo subido como "C08R.webp" pasa `existsSync` en local y falla en
+ * producción si el código busca "c08r.webp" (la convención de nombres real).
+ *
+ * El chequeo directo (`existsSync`) sigue siendo el camino rápido y en vivo
+ * — así un archivo nuevo en dev aparece en el siguiente render, sin caché
+ * que lo oculte. Solo si ese chequeo falla se hace un listado de la carpeta
+ * (sin cachear: son carpetas de decenas de archivos, no vale la pena la
+ * complejidad de invalidar una caché por esto) para recuperar el archivo
+ * aunque su nombre real tenga otra capitalización.
+ */
+function publicImageExists(rel: string): boolean {
+  const abs = join(process.cwd(), "public", rel);
+  if (existsSync(abs)) return true;
+  const filename = basename(rel).toLowerCase();
+  try {
+    return readdirSync(join(process.cwd(), "public", dirname(rel))).some(
+      (f) => f.toLowerCase() === filename,
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Imagen de un Sparkle (MatrixLab Tumbler), resuelta por CÓDIGO en servidor:
  *
  *   1. si el admin ya curó imágenes en la base, se respetan tal cual;
@@ -83,7 +111,7 @@ function resolveSparkleImages(p: ProductRow): ProductRow {
   if (!sparkle) return p;
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const rel = sparkleImagePath(sparkle.code);
-  const photo = existsSync(join(process.cwd(), "public", rel));
+  const photo = publicImageExists(rel);
   return { ...p, images: [photo ? rel : SPARKLE_PLACEHOLDER_IMAGE] };
 }
 
@@ -101,7 +129,7 @@ function resolveStickerImages(p: ProductRow): ProductRow {
   if (!sticker) return p;
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const rel = stickerImagePath(sticker.code);
-  const photo = existsSync(join(process.cwd(), "public", rel));
+  const photo = publicImageExists(rel);
   return { ...p, images: [photo ? rel : STICKER_PLACEHOLDER_IMAGE] };
 }
 
@@ -119,7 +147,7 @@ function resolveCupImages(p: ProductRow): ProductRow {
   if (!cup) return p;
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const rel = cupImagePath(cup.code);
-  const photo = existsSync(join(process.cwd(), "public", rel));
+  const photo = publicImageExists(rel);
   return { ...p, images: [photo ? rel : CUP_PLACEHOLDER_IMAGE] };
 }
 
@@ -191,7 +219,7 @@ function applyPublicCategoryTitle(c: CategoryRow): CategoryRow {
 function resolveCategoryImage(c: CategoryRow): string | null {
   for (const ext of ["png", "webp"] as const) {
     const rel = `/images/categories/${c.handle}.${ext}`;
-    if (existsSync(join(process.cwd(), "public", rel))) return rel;
+    if (publicImageExists(rel)) return rel;
   }
   if (c.image_url && /^https?:\/\//.test(c.image_url)) return c.image_url;
   return null;
