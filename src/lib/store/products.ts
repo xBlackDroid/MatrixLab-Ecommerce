@@ -1,7 +1,7 @@
 import "server-only";
 
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getAnonClient } from "@/lib/db/client";
 import { getServiceClient } from "@/lib/db/admin";
@@ -71,6 +71,37 @@ function fixProductText(p: ProductRow): ProductRow {
 }
 
 /**
+ * Índice (por carpeta) de nombres de archivo en minúsculas, para chequear
+ * existencia sin depender de mayúsc./minúsc.
+ *
+ * Necesario porque el filesystem de desarrollo (Windows/macOS) es
+ * case-insensitive, pero el de producción (Vercel/Linux) NO lo es: un
+ * archivo subido como "C08R.webp" pasa `existsSync` en local y falla en
+ * producción si el código busca "c08r.webp" (la convención de nombres real).
+ * Cachea la carpeta completa para no hacer un readdir por producto.
+ */
+const publicImageDirCache = new Map<string, Set<string> | null>();
+
+function publicImageExists(rel: string): boolean {
+  const dir = dirname(rel);
+  const filename = basename(rel).toLowerCase();
+  let files = publicImageDirCache.get(dir);
+  if (files === undefined) {
+    try {
+      files = new Set(
+        readdirSync(join(process.cwd(), "public", dir)).map((f) =>
+          f.toLowerCase(),
+        ),
+      );
+    } catch {
+      files = null;
+    }
+    publicImageDirCache.set(dir, files);
+  }
+  return files?.has(filename) ?? false;
+}
+
+/**
  * Imagen de un Sparkle (MatrixLab Tumbler), resuelta por CÓDIGO en servidor:
  *
  *   1. si el admin ya curó imágenes en la base, se respetan tal cual;
@@ -83,7 +114,7 @@ function resolveSparkleImages(p: ProductRow): ProductRow {
   if (!sparkle) return p;
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const rel = sparkleImagePath(sparkle.code);
-  const photo = existsSync(join(process.cwd(), "public", rel));
+  const photo = publicImageExists(rel);
   return { ...p, images: [photo ? rel : SPARKLE_PLACEHOLDER_IMAGE] };
 }
 
@@ -101,7 +132,7 @@ function resolveStickerImages(p: ProductRow): ProductRow {
   if (!sticker) return p;
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const rel = stickerImagePath(sticker.code);
-  const photo = existsSync(join(process.cwd(), "public", rel));
+  const photo = publicImageExists(rel);
   return { ...p, images: [photo ? rel : STICKER_PLACEHOLDER_IMAGE] };
 }
 
@@ -119,7 +150,7 @@ function resolveCupImages(p: ProductRow): ProductRow {
   if (!cup) return p;
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const rel = cupImagePath(cup.code);
-  const photo = existsSync(join(process.cwd(), "public", rel));
+  const photo = publicImageExists(rel);
   return { ...p, images: [photo ? rel : CUP_PLACEHOLDER_IMAGE] };
 }
 
