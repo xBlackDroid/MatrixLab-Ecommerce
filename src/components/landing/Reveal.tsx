@@ -3,7 +3,20 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
-/** Animación sutil de entrada al hacer scroll (estilo laboratorio premium). */
+/**
+ * Animación sutil de entrada al hacer scroll (estilo laboratorio premium).
+ *
+ * Es un envoltorio de CLIENTE con hijos de SERVIDOR: lo que envuelve se sigue
+ * renderizando en el servidor y sólo el contenedor hidrata. Por eso /tienda y
+ * la home lo usan sin volver `use client` sus secciones.
+ *
+ * La clase `reveal-motion` es el punto de anclaje del respaldo en CSS
+ * (globals.css + el <noscript> del layout): framer-motion escribe el estado
+ * inicial como estilo EN LÍNEA —`opacity:0` ya viene en el HTML del
+ * servidor—, así que sin ese respaldo un usuario con JS bloqueado, o con
+ * `prefers-reduced-motion`, se quedaría mirando una sección invisible. Las
+ * reglas de respaldo llevan `!important`, que gana sobre el estilo en línea.
+ */
 export default function Reveal({
   children,
   delay = 0,
@@ -19,7 +32,7 @@ export default function Reveal({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.55, delay, ease: "easeOut" }}
-      className={className}
+      className={className ? `reveal-motion ${className}` : "reveal-motion"}
     >
       {children}
     </motion.div>

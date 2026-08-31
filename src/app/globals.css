@@ -45,6 +45,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * Respaldo del reveal de entrada (ver components/landing/Reveal.tsx).
+ *
+ * framer-motion emite el estado inicial como estilo EN LÍNEA, así que el HTML
+ * del servidor ya trae `opacity:0`. Con reducción de movimiento activada eso
+ * dejaría el contenido oculto hasta que hidrate —y hasta ahí ya habría habido
+ * un salto—, así que aquí se fuerza el estado final. `!important` es
+ * deliberado: es lo único que gana sobre un estilo en línea.
+ *
+ * El caso "JS bloqueado" lo cubre el <noscript> del layout con esta misma
+ * regla. Nunca se deja una sección invisible.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-motion {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 ::selection {
   background-color: rgba(177, 151, 252, 0.4);
   color: var(--color-ml-white);

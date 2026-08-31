@@ -26,6 +26,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="min-h-screen bg-ml-bg text-ml-white antialiased">
+        {/* Sin JS, framer-motion nunca anima y el `opacity:0` en línea que ya
+            viene en el HTML dejaría secciones enteras invisibles. Esto las
+            devuelve a su estado final; con JS activo el bloque ni se aplica. */}
+        <noscript>
+          <style>{`.reveal-motion{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
         {children}
         <Toaster
           theme="dark"
