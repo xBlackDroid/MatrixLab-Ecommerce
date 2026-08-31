@@ -130,6 +130,7 @@ export default function CartPageClient() {
       <CartSummary
         totals={cart.totals}
         count={cart.count}
+        items={cart.items}
         canCheckout={canCheckout}
       />
     </div>

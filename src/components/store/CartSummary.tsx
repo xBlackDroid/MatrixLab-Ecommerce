@@ -2,27 +2,34 @@
 
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import type { CartTotals } from "@/lib/db/types";
-import { formatPrice } from "@/lib/utils";
+import type { CartTotals, CartLineView } from "@/lib/db/types";
+import {
+  formatPrice,
+  formatQuantityWithUnit,
+  sharedCommercialUnit,
+} from "@/lib/utils";
 import CheckoutButton from "@/components/store/CheckoutButton";
 
 export default function CartSummary({
   totals,
   count,
+  items,
   canCheckout,
 }: {
   totals: CartTotals;
   count: number;
+  items: CartLineView[];
   canCheckout: boolean;
 }) {
+  // El subtotal suma todo el carrito: sólo puede nombrar una unidad si todas
+  // las líneas comparten la misma; si no, el genérico de siempre.
+  const unitCount = formatQuantityWithUnit(count, sharedCommercialUnit(items));
   return (
     <aside className="glass sticky top-24 flex flex-col gap-4 rounded-2xl p-6">
       <h2 className="text-lg font-semibold">Resumen</h2>
       <div className="flex flex-col gap-2 text-sm">
         <div className="flex justify-between text-ml-white/70">
-          <span>
-            Subtotal estimado ({count} {count === 1 ? "pieza" : "piezas"})
-          </span>
+          <span>Subtotal estimado ({unitCount})</span>
           <span className="font-medium text-ml-white">
             {formatPrice(totals.subtotal)}
           </span>

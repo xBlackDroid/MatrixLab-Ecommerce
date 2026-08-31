@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
+import type { CartView } from "@/lib/db/types";
+import { formatQuantityWithUnit, sharedCommercialUnit } from "@/lib/utils";
 
 export const CART_UPDATED_EVENT = "ml:cart-updated";
 
@@ -15,13 +17,19 @@ export function emitCartUpdated() {
 
 export default function CartBadge() {
   const [count, setCount] = useState(0);
+  // Unidad del carrito completo, resuelta en servidor línea por línea. Un
+  // carrito de puras planillas se anuncia "2 planillas"; uno mixto o de
+  // productos por pieza conserva el "piezas" de siempre.
+  const [unit, setUnit] = useState<CartView["items"][number]["unitLabel"]>(null);
 
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/cart", { cache: "no-store" });
       if (!res.ok) return;
       const data = await res.json();
-      setCount(data?.cart?.count ?? 0);
+      const cart = data?.cart as CartView | undefined;
+      setCount(cart?.count ?? 0);
+      setUnit(sharedCommercialUnit(cart?.items ?? []));
     } catch {
       // Silencioso: el badge es decorativo.
     }
@@ -37,7 +45,7 @@ export default function CartBadge() {
   return (
     <Link
       href="/tienda/carrito"
-      aria-label={`Carrito (${count} piezas)`}
+      aria-label={`Carrito (${formatQuantityWithUnit(count, unit)})`}
       className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-ml-white transition hover:border-ml-violet/60 hover:text-ml-violet"
     >
       <ShoppingBag className="h-5 w-5" aria-hidden />

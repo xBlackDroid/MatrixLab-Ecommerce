@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2, Minus, Plus, Trash2, Wand2 } from "lucide-react";
 import type { CartLineView } from "@/lib/db/types";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn, formatPrice, formatUnitQuantity } from "@/lib/utils";
 import ProductImagePlaceholder from "@/components/store/ProductImagePlaceholder";
 
 interface CartLineItemProps {
@@ -22,6 +22,9 @@ export default function CartLineItem({
 }: CartLineItemProps) {
   const image = line.designPreviewUrl ?? line.image;
   const displayTitle = line.customTitle ?? line.title;
+  // Unidad comercial resuelta en servidor. `null` en todo lo que se vende por
+  // pieza (Tumbler, Laboratorio, resto del catálogo): ahí el copy no cambia.
+  const unitQuantity = formatUnitQuantity(line.quantity, line.unitLabel);
 
   return (
     <div className="glass flex gap-4 rounded-2xl p-4">
@@ -75,7 +78,7 @@ export default function CartLineItem({
         {line.availability !== "ok" && (
           <p className="text-xs text-ml-coral">
             {line.availability === "stock_insuficiente"
-              ? "Quedan menos piezas disponibles. Ajusta la cantidad."
+              ? `Quedan menos ${line.unitLabel?.many ?? "piezas"} disponibles. Ajusta la cantidad.`
               : "Este producto ya no está disponible. Elimínalo para continuar."}
           </p>
         )}
@@ -114,11 +117,25 @@ export default function CartLineItem({
             </button>
           </div>
           <div className="text-right">
+            {/* "2 planillas" al lado del stepper: el número solo no dice qué
+                se está contando. Sin unidad propia no se agrega nada. */}
+            {unitQuantity && (
+              <p className="text-xs text-ml-white/55">{unitQuantity}</p>
+            )}
             <p className="font-bold">{formatPrice(line.lineTotal)}</p>
-            {line.quantity > 1 && (
+            {/* Con unidad propia el precio unitario se muestra siempre y lleva
+                la unidad ("$85.00 / planilla"): "c/u" se leería como "cada
+                sticker". Sin unidad propia, el copy de siempre. */}
+            {line.unitLabel ? (
               <p className="text-xs text-ml-white/45">
-                {formatPrice(line.unitPrice)} c/u
+                {formatPrice(line.unitPrice)} / {line.unitLabel.one}
               </p>
+            ) : (
+              line.quantity > 1 && (
+                <p className="text-xs text-ml-white/45">
+                  {formatPrice(line.unitPrice)} c/u
+                </p>
+              )
             )}
           </div>
         </div>

@@ -280,6 +280,13 @@ export interface CartLineView {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  /**
+   * Unidad comercial de la línea, RESUELTA EN SERVIDOR a partir del producto
+   * (ver `commercialUnitOf`). `null` = producto sin unidad propia: la UI
+   * conserva su copy genérico ("pieza", "c/u"). El cliente nunca la envía: el
+   * carrito sólo acepta ids y cantidad, así que no puede falsificarse.
+   */
+  unitLabel: CommercialUnit | null;
   image: string | null;
   isCustom: boolean;
   designProjectId: string | null;
@@ -287,6 +294,17 @@ export interface CartLineView {
   minQuantity: number;
   maxQuantity: number;
   availability: "ok" | "stock_insuficiente" | "no_disponible";
+}
+
+/**
+ * Unidad comercial de un producto, en singular y plural ("planilla" /
+ * "planillas"). Vive aquí, con el resto de modelos de vista, para que este
+ * archivo —que importan componentes de cliente— no dependa de los módulos de
+ * catálogo. Quién la resuelve: `commercialUnitOf` en store/curated-lines.
+ */
+export interface CommercialUnit {
+  one: string;
+  many: string;
 }
 
 export interface CartTotals {

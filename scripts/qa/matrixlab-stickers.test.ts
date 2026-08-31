@@ -15,6 +15,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  commercialUnitOf,
+  curatedLineIdOf,
+  isRelatedProductVisible,
+} from "../../src/lib/store/curated-lines";
+import { MATRIXLAB_WEAR, matrixLabWearHandle } from "../../src/lib/store/matrixlab-wear";
+import { MATRIXLAB_3D, matrixLab3dHandle } from "../../src/lib/store/matrixlab-3d";
+import { TUMBLER_SPARKLES, sparkleHandle } from "../../src/lib/store/tumbler-sparkles";
+import {
   MATRIXLAB_STICKER_CATEGORY_LABELS,
   MATRIXLAB_STICKER_CATEGORY_ORDER,
   MATRIXLAB_STICKER_PLACEHOLDER_IMAGE,
@@ -479,6 +487,128 @@ check(
 check(
   "ningún handle colisiona con los UV Stickers de Tumbler",
   handles.every((h) => !/^sticker-a\d{3}$/.test(h)),
+);
+
+// ---------------------------------------------------------------------------
+// 10) Relacionados: la ficha de una planilla NO recomienda lo que la vitrina
+//     esconde. El producto histórico del Laboratorio ("Planilla de stickers",
+//     $199) vive en la MISMA categoría `stickers` y aparecía como relacionado
+//     junto a una planilla de $85.
+// ---------------------------------------------------------------------------
+/** Handle real del producto genérico previo (supabase/seed_designer_base_v2.sql). */
+const LEGACY_SHEET_HANDLE = "planilla-stickers";
+/** Otros genéricos históricos que la categoría `stickers` puede contener. */
+const LEGACY_CATEGORY_HANDLES = [
+  LEGACY_SHEET_HANDLE,
+  "sticker-personalizado",
+  "stickers-personalizados",
+];
+
+check(
+  "las 110 planillas pertenecen a la línea curada",
+  handles.every((h) => curatedLineIdOf(h) === "matrixlab-stickers"),
+);
+check(
+  `ninguna de las ${EXPECTED_TOTAL} planillas recomienda ${LEGACY_SHEET_HANDLE}`,
+  handles.every((h) => !isRelatedProductVisible(h, LEGACY_SHEET_HANDLE)),
+);
+check(
+  "ningún genérico legacy de la categoría entra como relacionado",
+  handles.every((h) =>
+    LEGACY_CATEGORY_HANDLES.every((legacy) => !isRelatedProductVisible(h, legacy)),
+  ),
+);
+// El producto legacy NO se toca: sigue existiendo y su propia ficha conserva
+// el comportamiento anterior (no se le filtra nada).
+check(
+  "la ficha del producto legacy conserva sus relacionados de siempre",
+  curatedLineIdOf(LEGACY_SHEET_HANDLE) === null &&
+    isRelatedProductVisible(LEGACY_SHEET_HANDLE, handles[0]) &&
+    isRelatedProductVisible(LEGACY_SHEET_HANDLE, "cualquier-otro-handle"),
+);
+// Entre ellas SÍ se recomiendan: el filtro no vacía la sección.
+check(
+  "las planillas se recomiendan entre sí",
+  isRelatedProductVisible(handles[0], handles[1]) &&
+    isRelatedProductVisible(handles[0], handles[EXPECTED_TOTAL - 1]),
+);
+// Y no se cuelan diseños de otra línea MatrixLab aunque compartieran categoría.
+check(
+  "una planilla no recomienda un diseño de MatrixLab Wear",
+  !isRelatedProductVisible(handles[0], matrixLabWearHandle(MATRIXLAB_WEAR[0].code)),
+);
+// El filtro es EXCLUSIVO de Stickers: es la única categoría donde el genérico
+// histórico compite de frente (dos "planillas" a $199 y a $85). En Wear y 3D
+// los genéricos son las piezas personalizables del Laboratorio —la entrada al
+// diseñador desde la ficha— y sus relacionados NO se tocan.
+const wearSample = matrixLabWearHandle(MATRIXLAB_WEAR[0].code);
+check(
+  "MatrixLab Wear conserva sus relacionados del Laboratorio",
+  curatedLineIdOf(wearSample) === "matrixlab-wear" &&
+    isRelatedProductVisible(wearSample, "playera-personalizada") &&
+    isRelatedProductVisible(wearSample, "sudadera-personalizada") &&
+    isRelatedProductVisible(wearSample, "tote-bag-personalizada"),
+);
+check(
+  "MatrixLab 3D conserva sus relacionados del Laboratorio",
+  isRelatedProductVisible(
+    matrixLab3dHandle(MATRIXLAB_3D[0].code),
+    "pieza-3d-personalizada",
+  ),
+);
+// REGRESIÓN: nada de Tumbler ni de otras categorías queda filtrado. Sus fichas
+// no pertenecen a ninguna línea registrada, así que no se les aplica política.
+const sparkleSample = sparkleHandle(TUMBLER_SPARKLES[0].code);
+check(
+  "Tumbler y el resto del catálogo no cambian de relacionados",
+  curatedLineIdOf(sparkleSample) === null &&
+    isRelatedProductVisible(sparkleSample, "glitter-chunky-para-vasos") &&
+    isRelatedProductVisible("sticker-a001", LEGACY_SHEET_HANDLE) &&
+    isRelatedProductVisible("vaso-24oz", "cualquier-otro-handle"),
+);
+check(
+  "el filtro no depende de handles escritos a mano",
+  !/planilla-stickers/.test(
+    readFileSync(join(ROOT, "src", "lib", "store", "curated-lines.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, ""),
+  ),
+);
+check(
+  "getRelatedProducts aplica la política pública de la categoría",
+  /isRelatedProductVisible\(product\.handle, p\.handle\)/.test(productsSource),
+);
+
+// ---------------------------------------------------------------------------
+// 11) Unidad comercial resuelta en servidor (la usa el carrito).
+// ---------------------------------------------------------------------------
+check(
+  "las 110 planillas resuelven unidad planilla/planillas",
+  handles.every((h) => {
+    const unit = commercialUnitOf(h);
+    return unit?.one === "planilla" && unit?.many === "planillas";
+  }),
+);
+check(
+  "Tumbler, Wear, 3D y el resto siguen SIN unidad propia",
+  commercialUnitOf(sparkleSample) === null &&
+    commercialUnitOf("sticker-a001") === null &&
+    commercialUnitOf(matrixLabWearHandle(MATRIXLAB_WEAR[0].code)) === null &&
+    commercialUnitOf(LEGACY_SHEET_HANDLE) === null &&
+    commercialUnitOf("") === null,
+);
+// La unidad NO puede deducirse del precio: otro producto puede costar $85 sin
+// ser una planilla. Se revisa el CÓDIGO, no los comentarios (que sí citan los
+// precios para explicar el porqué del filtro).
+const curatedSource = readFileSync(
+  join(ROOT, "src", "lib", "store", "curated-lines.ts"),
+  "utf8",
+);
+const curatedCode = curatedSource
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .replace(/(^|\s)\/\/.*$/gm, "$1");
+check(
+  "la unidad no se infiere del precio",
+  !/price|base_price|85/.test(curatedCode),
 );
 
 console.log(

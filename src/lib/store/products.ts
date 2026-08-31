@@ -22,6 +22,7 @@ import {
   MOCK_PRODUCTS,
   MOCK_VARIANTS,
 } from "@/lib/store/mock-data";
+import { isRelatedProductVisible } from "@/lib/store/curated-lines";
 import { repairMojibake, repairMojibakeNullable } from "@/lib/store/text";
 import {
   SPARKLE_PLACEHOLDER_IMAGE,
@@ -1018,14 +1019,27 @@ export async function getProductByHandle(
   };
 }
 
-/** Productos relacionados: misma categoría, excluyendo el actual. */
+/**
+ * Productos relacionados: misma categoría, excluyendo el actual.
+ *
+ * Respeta además la política pública de la categoría: si la ficha abierta es
+ * de una línea curada, sólo se recomiendan productos de esa misma línea, para
+ * no reintroducir por la puerta de atrás lo que el catálogo declara
+ * `legacyHidden`. Ver `isRelatedProductVisible`. Una ficha fuera de toda línea
+ * curada conserva el comportamiento anterior sin filtro alguno.
+ */
 export async function getRelatedProducts(
   product: ProductRow,
   limit = 4,
 ): Promise<ProductRow[]> {
   if (!product.category_id) return [];
   const all = await getProductsByCategory(product.category_id, "featured");
-  return all.filter((p) => p.id !== product.id).slice(0, limit);
+  return all
+    .filter(
+      (p) =>
+        p.id !== product.id && isRelatedProductVisible(product.handle, p.handle),
+    )
+    .slice(0, limit);
 }
 
 /**
