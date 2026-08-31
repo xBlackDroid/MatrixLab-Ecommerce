@@ -171,7 +171,10 @@ export default function TiendaHomePage() {
         ctaLabel="Diseñar mi prenda"
         ctaHref="/tienda/disenador"
         blurSide="left"
-        backgroundLogo={{ kind: "icon", icon: Shirt }}
+        backgroundLogo={{
+          kind: "image",
+          src: "/images/categories/matrixlab-wear.png",
+        }}
         right={{
           kind: "items",
           items: PRENDA_LAB_ITEMS.map((item) => ({
@@ -215,7 +218,10 @@ export default function TiendaHomePage() {
         ctaLabel="Explorar MatrixLab Laser"
         ctaHref="/tienda/disenador/laser"
         blurSide="left"
-        backgroundLogo={{ kind: "icon", icon: Zap }}
+        backgroundLogo={{
+          kind: "image",
+          src: "/images/categories/matrixlab-laser.png",
+        }}
         right={{ kind: "chips", heading: "Disponible en el diseñador", items: LASER_CHIPS }}
       />
 
@@ -226,7 +232,12 @@ export default function TiendaHomePage() {
         <div className="glass relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-3xl p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-ml-violet/10 blur-3xl" />
           {/* Watermark de marca, mismo lenguaje visual que los bloques de arriba. */}
-          <FamilyWatermark logo={{ kind: "icon", icon: GraduationCap }} />
+          <FamilyWatermark
+            logo={{
+              kind: "image",
+              src: "/images/categories/etiquetas-escolares.png",
+            }}
+          />
           <div className="relative">
             <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
               <GraduationCap className="h-4 w-4" aria-hidden />

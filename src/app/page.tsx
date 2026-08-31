@@ -108,7 +108,7 @@ const FAMILY_CARDS: Array<{
     cta: "Explorar la línea",
     accent: "violet",
     gradient: "from-ml-violet/20 via-ml-cyan/10 to-transparent",
-    visual: { kind: "icon", icon: Shirt },
+    visual: { kind: "image", src: "/images/categories/matrixlab-wear.png" },
   },
   {
     id: "tumbler",
@@ -153,7 +153,7 @@ const FAMILY_CARDS: Array<{
     cta: "Explorar Laser",
     accent: "violet",
     gradient: "from-ml-violet/20 via-ml-coral/10 to-transparent",
-    visual: { kind: "icon", icon: Zap },
+    visual: { kind: "image", src: "/images/categories/matrixlab-laser.png" },
   },
   {
     id: "etiquetas-escolares",
@@ -167,7 +167,10 @@ const FAMILY_CARDS: Array<{
     cta: "Crear etiquetas",
     accent: "green",
     gradient: "from-ml-green/20 via-ml-coral/10 to-transparent",
-    visual: { kind: "icon", icon: GraduationCap },
+    visual: {
+      kind: "image",
+      src: "/images/categories/etiquetas-escolares.png",
+    },
   },
 ];
 
