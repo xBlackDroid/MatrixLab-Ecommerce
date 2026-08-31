@@ -227,7 +227,9 @@ export default async function CategoryPage({
           title={title}
           description={description}
           imageUrl={category?.image_url ?? null}
-          summary={`${catalog.entries.length} diseños`}
+          // Cada entrada es una COLECCIÓN que se vende como planilla, no un
+          // sticker suelto: el resumen no puede decir "110 stickers".
+          summary={`${catalog.entries.length} diseños de planilla`}
         >
           <MatrixLabStickersCatalog
             entries={catalog.entries}

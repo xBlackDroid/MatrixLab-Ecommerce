@@ -193,20 +193,44 @@ def sql_string(value):
     return "'%s'" % value.replace("'", "''")
 
 
-def build_stickers_seed(src_dir):
-    """Filas VALUES del seed de MatrixLab Stickers.
+def read_stickers_commercials():
+    """Precio por planilla y copy de contenido, leidos del modulo TS.
 
-    El precio NO sale del Excel (columna J vacía): es el precio único
-    confirmado comercialmente para la línea, declarado en
-    src/lib/store/matrixlab-stickers.ts como MATRIXLAB_STICKERS_UNIT_PRICE.
-    Se lee de ahí para que exista UNA sola fuente del precio.
+    Ninguno de los dos sale del Excel (la columna J llega vacia y el conteo de
+    stickers por planilla no existe por SKU). Viven en
+    src/lib/store/matrixlab-stickers.ts y de ahi los toma el seed, para que la
+    UI y la base no puedan divergir.
     """
     module = (ROOT / 'src/lib/store/matrixlab-stickers.ts').read_text(encoding='utf-8')
-    match = re.search(r'MATRIXLAB_STICKERS_UNIT_PRICE\s*=\s*(\d+(?:\.\d+)?)', module)
-    if not match:
-        raise SystemExit('No se encontro MATRIXLAB_STICKERS_UNIT_PRICE en el modulo.')
-    price = match.group(1)
 
+    def one(name, pattern):
+        match = re.search(pattern, module)
+        if not match:
+            raise SystemExit('No se encontro %s en el modulo.' % name)
+        return match.group(1)
+
+    price = one('MATRIXLAB_STICKERS_SHEET_PRICE',
+                r'MATRIXLAB_STICKERS_SHEET_PRICE\s*=\s*(\d+(?:\.\d+)?)')
+    low = one('MATRIXLAB_STICKERS_PER_SHEET_MIN',
+              r'MATRIXLAB_STICKERS_PER_SHEET_MIN\s*=\s*(\d+)')
+    high = one('MATRIXLAB_STICKERS_PER_SHEET_MAX',
+               r'MATRIXLAB_STICKERS_PER_SHEET_MAX\s*=\s*(\d+)')
+    copy = one('MATRIXLAB_STICKERS_SHEET_CONTENTS_COPY_LONG',
+               r'MATRIXLAB_STICKERS_SHEET_CONTENTS_COPY_LONG\s*=\s*`([^`]*)`')
+    copy = (copy.replace('${MATRIXLAB_STICKERS_PER_SHEET_MIN}', low)
+                .replace('${MATRIXLAB_STICKERS_PER_SHEET_MAX}', high))
+    if '${' in copy:
+        raise SystemExit('El copy de la planilla tiene interpolaciones sin resolver.')
+    return price, copy
+
+
+def build_stickers_seed(src_dir, price):
+    """Filas VALUES del seed de MatrixLab Stickers.
+
+    Cada fila es una PLANILLA / coleccion completa, no un sticker suelto: la
+    columna H (99) son planillas disponibles y `price` es por planilla, ya
+    resuelto por read_stickers_commercials().
+    """
     _, rows = read_sheet(
         src_dir / 'Inventario_MatrixLab_Stickers.xlsx', 'Inventario Stickers')
     out = []
@@ -218,7 +242,7 @@ def build_stickers_seed(src_dir):
             sql_string(handle), sql_string(code), sql_string(name),
             sql_string(description), sql_string(finish), units,
             sql_string('STK-' + code), price, comma))
-    return out, price
+    return out
 
 
 TARGETS = [
@@ -245,10 +269,18 @@ def main():
 
     # Seed de MatrixLab Stickers: es la unica linea con precio confirmado, asi
     # que es la unica cuyo seed lleva datos. Wear y 3D siguen bloqueados.
-    seed_rows, price = build_stickers_seed(src_dir)
-    print('Seed MatrixLab Stickers: %d filas a $%s c/u' % (len(seed_rows), price))
+    price, sheet_copy = read_stickers_commercials()
+    seed_rows = build_stickers_seed(src_dir, price)
+    print('Seed MatrixLab Stickers: %d planillas a $%s c/u' % (len(seed_rows), price))
     write_block('supabase/seed_matrixlab_stickers.sql',
                 'matrixlab-stickers-seed', seed_rows, comment='--')
+    # El precio y el copy tambien se generan: si vivieran a mano dentro del SQL,
+    # cambiar el modulo y regenerar dejaria la guardia exigiendo el precio viejo
+    # y la ficha publica anunciando un rango que ya no es.
+    write_block('supabase/seed_matrixlab_stickers.sql',
+                'matrixlab-stickers-precio', [price], comment='--')
+    write_block('supabase/seed_matrixlab_stickers.sql',
+                'matrixlab-stickers-copy', [sql_string(sheet_copy)], comment='--')
 
 
 if __name__ == '__main__':

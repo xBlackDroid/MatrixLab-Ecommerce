@@ -9,18 +9,24 @@
  *   columna D -> `category`     (familia temática, normalizada a id de filtro)
  *   columna F -> `description`  (descripción comercial)
  *   columna G -> `finishLabel`  (acabado / tamaño)
- *   columna H -> `inventory`    (unidades por SKU)
+ *   columna H -> `inventory`    (planillas por SKU)
  *   columna L -> `handle`       (handle público, YA definido en el Excel)
  *
  * La columna I (SKU) se deriva con `matrixLabStickerSku` y coincide con el
  * Excel en las 110 filas. La columna K ("Valor total") NO se usa.
  *
- * PRECIO — BLOQUEO DE SEGURIDAD
- * La columna J (Precio) llega VACÍA en las 110 filas. Este módulo NO define
- * ningún campo de precio: no hay lugar donde un 0, un 1 ni un precio histórico
- * puedan colarse. El precio se resuelve SIEMPRE contra la variante real en
- * Supabase, y mientras esa variante no exista la tarjeta muestra "Precio por
- * confirmar" en vez de una cifra inventada. Ver `MATRIXLAB_STICKERS_PRICE_PENDING`.
+ * UNIDAD COMERCIAL — PLANILLA, NO STICKER SUELTO
+ * Cada una de las 110 filas es una COLECCIÓN completa que se imprime y se
+ * vende como PLANILLA: GE001 no es "un sticker Geek", es la planilla Geek
+ * GE001. Cantidad 1 en el carrito = 1 planilla completa. Ver
+ * `MATRIXLAB_STICKERS_UNIT_LABEL` y `MATRIXLAB_STICKERS_SHEET_PRICE`.
+ *
+ * PRECIO
+ * La columna J (Precio) llega VACÍA en las 110 filas: el precio NO sale del
+ * Excel. Ninguna fila declara precio propio, así que no hay lugar donde un 0
+ * ni un precio histórico puedan colarse por diseño. El precio que se COBRA se
+ * resuelve SIEMPRE contra la variante real en Supabase; el constante de este
+ * módulo es el precio de catálogo con el que se siembra esa variante.
  *
  * ESTA LÍNEA NO ES MatrixLab Tumbler. Los 209 UV Stickers de Tumbler viven en
  * `tumbler-stickers.ts` y son otro catálogo, otra categoría y otros precios.
@@ -45,12 +51,16 @@ export const MATRIXLAB_STICKER_PLACEHOLDER_IMAGE = `${MATRIXLAB_STICKERS_IMAGE_D
 export const MATRIXLAB_STICKERS_PUBLIC_TITLE = "MatrixLab Stickers";
 
 /**
- * PRECIO ÚNICO DE LA LÍNEA — $10 MXN por pieza.
+ * PRECIO ÚNICO DE LA LÍNEA — $85 MXN por PLANILLA.
  *
  * El Excel entregó las 110 celdas de Precio VACÍAS (columna J). Este valor NO
  * sale del Excel ni de ninguna otra línea: es el precio único CONFIRMADO
- * comercialmente para este release, igual que en su momento el inventario de
- * los vasos se confirmó a mano cuando su columna llegó vacía.
+ * comercialmente para este release.
+ *
+ * LA UNIDAD ES LA PLANILLA, NO EL STICKER. El nombre lleva `SHEET` justamente
+ * para que nadie lo lea como precio por pieza: cada SKU es una colección
+ * completa (15 a 21 stickers según el tamaño de los diseños), y el cliente
+ * que pide cantidad 2 recibe 2 planillas completas de esa colección.
  *
  * Aplica a los 110 diseños sin variar por colección (GE001…LE010). Si algún
  * día el precio varía por familia, este constante deja de servir y hay que
@@ -60,7 +70,28 @@ export const MATRIXLAB_STICKERS_PUBLIC_TITLE = "MatrixLab Stickers";
  * Supabase; este valor es el precio de catálogo con el que se siembra esa
  * variante y el que se muestra mientras el seed no se haya ejecutado.
  */
-export const MATRIXLAB_STICKERS_UNIT_PRICE = 10;
+export const MATRIXLAB_STICKERS_SHEET_PRICE = 85;
+
+/**
+ * Unidad comercial de la línea, en singular y en plural. La UI y el seed la
+ * usan en vez de escribir "pieza" a mano: una planilla NO es un sticker.
+ */
+export const MATRIXLAB_STICKERS_UNIT_LABEL = "planilla";
+export const MATRIXLAB_STICKERS_UNIT_LABEL_PLURAL = "planillas";
+
+/**
+ * Cuántos stickers trae una planilla. Es un RANGO declarado, no un dato por
+ * colección: hoy no existe el conteo exacto por SKU y no se inventa. Depende
+ * del tamaño de los diseños que integran cada planilla.
+ */
+export const MATRIXLAB_STICKERS_PER_SHEET_MIN = 15;
+export const MATRIXLAB_STICKERS_PER_SHEET_MAX = 21;
+
+/** Copy público del contenido de la planilla. Fuente única del texto. */
+export const MATRIXLAB_STICKERS_SHEET_CONTENTS_COPY = `${MATRIXLAB_STICKERS_PER_SHEET_MIN} a ${MATRIXLAB_STICKERS_PER_SHEET_MAX} stickers aprox.`;
+
+/** Copy largo, para descripciones y fichas donde cabe la explicación. */
+export const MATRIXLAB_STICKERS_SHEET_CONTENTS_COPY_LONG = `Cada planilla incluye aproximadamente ${MATRIXLAB_STICKERS_PER_SHEET_MIN} a ${MATRIXLAB_STICKERS_PER_SHEET_MAX} stickers, dependiendo del tamaño de los diseños.`;
 
 /**
  * Precio confirmado: la línea ya NO está bloqueada. El seed puede crear
@@ -95,7 +126,7 @@ export interface MatrixLabStickerItem {
   description: string;
   /** Acabado / tamaño tal como lo declara el Excel (columna G). */
   finishLabel: string;
-  /** Unidades por SKU (columna H). */
+  /** Planillas por SKU (columna H): capacidad declarada, no stickers. */
   inventory: number;
   /** Handle público (columna L), tal cual viene del Excel. */
   handle: string;
@@ -264,22 +295,23 @@ export function matrixLabStickerHandle(item: MatrixLabStickerItem): string {
   return item.handle;
 }
 
-/** SKU de la variante (columna I). Prefijo STK- definido por el Excel. */
+/** SKU de la planilla (columna I). Prefijo STK- definido por el Excel. */
 export function matrixLabStickerSku(code: string): string {
   return `STK-${code.toUpperCase()}`;
 }
 
 /**
- * Precio de catálogo de un diseño. Hoy es el mismo para los 110 (precio único
- * de la línea); la función existe para que un futuro precio por familia se
- * resuelva en UN solo lugar y no haya que tocar la UI ni el seed.
+ * Precio de catálogo de UNA PLANILLA. Hoy es el mismo para las 110 colecciones
+ * (precio único de la línea); la función existe para que un futuro precio por
+ * familia se resuelva en UN solo lugar y no haya que tocar la UI ni el seed.
  */
-export function matrixLabStickerPrice(): number {
-  return MATRIXLAB_STICKERS_UNIT_PRICE;
+export function matrixLabStickerSheetPrice(): number {
+  return MATRIXLAB_STICKERS_SHEET_PRICE;
 }
 
 /**
- * Ruta determinista de la fotografía, vinculada por código y en MINÚSCULAS.
+ * Ruta determinista de la fotografía de la PLANILLA, vinculada por código y en
+ * MINÚSCULAS. La imagen representa la colección completa, no un sticker suelto.
  * La convención oficial es lowercase para que el filesystem case-sensitive de
  * Vercel/Linux resuelva igual que el de Windows/macOS en desarrollo.
  * Publicar una foto es copiar `public/images/matrixlab-stickers/<codigo>.webp`.

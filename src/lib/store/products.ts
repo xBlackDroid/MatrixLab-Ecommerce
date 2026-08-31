@@ -52,7 +52,7 @@ import {
   MATRIXLAB_STICKERS,
   matrixLabStickerByHandle,
   matrixLabStickerImagePath,
-  matrixLabStickerPrice,
+  matrixLabStickerSheetPrice,
   matrixLabStickerSku,
   type MatrixLabStickerItem,
 } from "@/lib/store/matrixlab-stickers";
@@ -1436,7 +1436,7 @@ export function resolveMatrixLabWearImage(code: string): string {
 // --- MatrixLab Stickers ----------------------------------------------------
 
 export interface MatrixLabStickerCatalogEntry {
-  /** Fila del Excel (nombre, categoría, descripción, acabado, handle). */
+  /** Fila del Excel: UNA planilla/colección (nombre, categoría, acabado…). */
   item: MatrixLabStickerItem;
   /** Handle público del Excel (columna L). */
   handle: string;
@@ -1447,20 +1447,20 @@ export interface MatrixLabStickerCatalogEntry {
   variantId: string | null;
   /** SKU determinista (STK-<código>), siempre presente. */
   sku: string;
-  /** Precio resuelto en servidor. `null` = pendiente de confirmar. */
+  /** Precio POR PLANILLA resuelto en servidor. `null` = por confirmar. */
   price: number | null;
-  /** Inventario real de la variante; `null` si aún no hay variante. */
+  /** Planillas reales de la variante; `null` si aún no hay variante. */
   stock: number | null;
-  /** Unidades declaradas en el Excel (columna H). */
+  /** Planillas declaradas en el Excel (columna H). */
   declaredInventory: number;
-  /** Imagen resuelta por código (foto real o placeholder de marca). */
+  /** Imagen resuelta por código: la planilla completa, no un sticker suelto. */
   image: string;
   /** Producto vendible: producto + variante + precio confirmado. */
   sellable: boolean;
 }
 
 export interface MatrixLabStickerCatalog {
-  /** Los 110 diseños del Excel, en el orden EXACTO del Excel. */
+  /** Las 110 planillas del Excel, en el orden EXACTO del Excel. */
   entries: MatrixLabStickerCatalogEntry[];
   /** Cuántos diseños siguen sin precio confirmado. */
   pricePending: number;
@@ -1468,7 +1468,7 @@ export interface MatrixLabStickerCatalog {
   legacyHidden: ProductRow[];
 }
 
-/** Catálogo MatrixLab Stickers: 110 diseños del Excel + datos reales de base. */
+/** Catálogo MatrixLab Stickers: 110 planillas del Excel + datos de base. */
 export async function getMatrixLabStickersCatalog(
   categoryId: string,
 ): Promise<MatrixLabStickerCatalog> {
@@ -1480,8 +1480,9 @@ export async function getMatrixLabStickersCatalog(
     const pricing = resolvePendingPricing(
       product,
       product ? (variantsByProduct.get(product.id) ?? []) : [],
-      // Precio único confirmado de la línea ($10/pieza): ya no está pendiente.
-      matrixLabStickerPrice(),
+      // Precio único confirmado de la línea ($85 por PLANILLA completa, no por
+      // sticker suelto): la línea ya no está pendiente de precio.
+      matrixLabStickerSheetPrice(),
     );
     entries.push({
       item,

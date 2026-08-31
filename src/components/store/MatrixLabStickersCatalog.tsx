@@ -8,6 +8,9 @@ import type { MatrixLabStickerCatalogEntry } from "@/lib/store/products";
 import {
   MATRIXLAB_STICKER_CATEGORY_LABELS,
   MATRIXLAB_STICKER_CATEGORY_ORDER,
+  MATRIXLAB_STICKERS_SHEET_CONTENTS_COPY,
+  MATRIXLAB_STICKERS_UNIT_LABEL,
+  MATRIXLAB_STICKERS_UNIT_LABEL_PLURAL,
   matchesMatrixLabStickerFilter,
   matchesMatrixLabStickerQuery,
   matrixLabStickerCategoryCounts,
@@ -17,7 +20,7 @@ import {
 import { cn, formatPrice } from "@/lib/utils";
 
 /**
- * Tope de piezas por pedido cuando el producto es "sobre pedido" (sin
+ * Tope de PLANILLAS por pedido cuando el producto es "sobre pedido" (sin
  * inventario que descontar). El servidor vuelve a validar cantidad y precio al
  * agregar al carrito; esto sólo evita un stepper bloqueado en la tarjeta.
  */
@@ -31,8 +34,8 @@ interface StickerFilter {
 
 /**
  * Filtros derivados EXCLUSIVAMENTE del Excel: las 11 familias temáticas reales
- * con su conteo (10 cada una). Una familia sin diseños no se muestra; no se
- * inventa ninguna otra.
+ * con su conteo (10 planillas cada una). Una familia sin diseños no se
+ * muestra; no se inventa ninguna otra.
  */
 function buildFilters(entries: MatrixLabStickerCatalogEntry[]): StickerFilter[] {
   const counts = matrixLabStickerCategoryCounts(entries.map((e) => e.item));
@@ -56,7 +59,7 @@ export default function MatrixLabStickersCatalog({
   whatsappUrl,
 }: {
   entries: MatrixLabStickerCatalogEntry[];
-  /** CTA de cotización mientras el precio no esté confirmado. */
+  /** CTA de cotización mientras la planilla no exista como producto en base. */
   whatsappUrl: string;
 }) {
   const [query, setQuery] = useState("");
@@ -65,7 +68,8 @@ export default function MatrixLabStickersCatalog({
   const filters = useMemo(() => buildFilters(entries), [entries]);
 
   // El orden base es el del Excel (GE001 → LE010, ya viene así del servidor):
-  // no se reordena alfabéticamente ni por precio.
+  // no se reordena alfabéticamente ni por precio. Cada entrada es UNA planilla
+  // completa, no un sticker suelto.
   const visible = useMemo(
     () =>
       entries.filter(
@@ -81,7 +85,7 @@ export default function MatrixLabStickersCatalog({
       <div className="flex flex-col gap-4">
         <label className="relative block">
           <span className="sr-only">
-            Buscar sticker por código, SKU, nombre o categoría
+            Buscar planilla por código, SKU, nombre o categoría
           </span>
           <Search
             className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ml-white/40"
@@ -127,13 +131,13 @@ export default function MatrixLabStickersCatalog({
         </div>
 
         <p className="text-sm text-ml-white/50" aria-live="polite">
-          {visible.length} de {entries.length} stickers
+          {visible.length} de {entries.length} diseños de planilla
         </p>
       </div>
 
       {visible.length === 0 ? (
         <div className="glass mt-6 rounded-2xl p-10 text-center text-ml-white/60">
-          No encontramos stickers con esa búsqueda. Prueba con el código o el
+          No encontramos planillas con esa búsqueda. Prueba con el código o el
           SKU (por ejemplo: GE001 o STK-GE001).
         </div>
       ) : (
@@ -152,9 +156,13 @@ export default function MatrixLabStickersCatalog({
 }
 
 /**
- * Tarjeta de un diseño. Jerarquía: foto → nombre → categoría → descripción →
- * disponibilidad → precio (SOLO si está confirmado) → referencia discreta.
- * El código interno nunca compite visualmente con el nombre.
+ * Tarjeta de una PLANILLA. Jerarquía: foto → nombre → categoría → descripción →
+ * disponibilidad → precio por planilla → qué trae la planilla → referencia
+ * discreta. El código interno nunca compite visualmente con el nombre.
+ *
+ * La unidad comercial se dice explícitamente ("/ planilla", "Planilla de
+ * stickers", "15 a 21 stickers aprox.") para que $85 no pueda leerse como el
+ * precio de un sticker individual.
  */
 function StickerCard({
   entry,
@@ -164,10 +172,11 @@ function StickerCard({
   whatsappUrl: string;
 }) {
   const { item } = entry;
-  // El precio unitario está confirmado ($10). Si aun así llegara sin resolver
-  // (línea futura sin precio), la tarjeta lo dice en vez de inventar cifra.
+  // El precio por planilla está confirmado ($85). Si aun así llegara sin
+  // resolver (línea futura sin precio), la tarjeta lo dice en vez de inventar
+  // una cifra.
   const priceConfirmed = entry.price !== null;
-  // Un producto "sobre pedido" es vendible con stock 0: no hay inventario que
+  // Una planilla "sobre pedido" es vendible con stock 0: no hay inventario que
   // contar, pero sí se puede pedir. Sin este caso el "+" quedaría bloqueado y
   // la tarjeta diría "Disponible: 0" junto a un botón de agregar activo.
   const onDemand = entry.sellable && (entry.stock ?? 0) <= 0;
@@ -187,7 +196,7 @@ function StickerCard({
       <div className="relative aspect-square w-full overflow-hidden">
         <Image
           src={entry.image}
-          alt={entry.title}
+          alt={`${entry.title} — planilla de stickers`}
           fill
           sizes="(max-width: 420px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition duration-500 hover:scale-105"
@@ -223,7 +232,11 @@ function StickerCard({
             : onDemand
               ? "Sobre pedido"
               : entry.sellable
-                ? `Disponible: ${entry.stock}`
+                ? `Disponible: ${entry.stock} ${
+                    entry.stock === 1
+                      ? MATRIXLAB_STICKERS_UNIT_LABEL
+                      : MATRIXLAB_STICKERS_UNIT_LABEL_PLURAL
+                  }`
                 : "Agotado"}
         </p>
 
@@ -231,7 +244,7 @@ function StickerCard({
           <p className="text-xl font-bold text-ml-white">
             {formatPrice(entry.price as number)}{" "}
             <span className="text-sm font-medium text-ml-white/50">
-              / pieza
+              / {MATRIXLAB_STICKERS_UNIT_LABEL}
             </span>
           </p>
         ) : (
@@ -240,11 +253,22 @@ function StickerCard({
           </p>
         )}
 
+        {/* Qué se lleva el cliente por ese precio. El rango es declarado para
+            toda la línea: hoy NO existe el conteo exacto por colección y no se
+            inventa uno por SKU. */}
+        <p className="text-sm font-semibold text-ml-white/75">
+          Planilla de stickers
+          <span className="block text-xs font-medium text-ml-white/50">
+            {MATRIXLAB_STICKERS_SHEET_CONTENTS_COPY}
+          </span>
+        </p>
+
         <p className="text-xs text-ml-white/40">
           {matrixLabStickerRefLabel(item.code)} · {entry.sku}
         </p>
 
-        {/* Se agrega al carrito SÓLO cuando el producto existe de verdad en
+        {/* Cantidad = PLANILLAS completas: 1 = 1 planilla, 2 = 2 planillas.
+            Se agrega al carrito SÓLO cuando el producto existe de verdad en
             base y es vendible; el servidor vuelve a resolver precio y stock al
             agregar. Mientras el seed no se haya ejecutado no hay producto que
             agregar, así que la tarjeta cotiza por WhatsApp. */}
@@ -256,7 +280,7 @@ function StickerCard({
                   type="button"
                   onClick={() => step(-1)}
                   disabled={quantity <= 1}
-                  aria-label="Quitar una unidad"
+                  aria-label="Quitar una planilla"
                   className="flex h-11 w-11 items-center justify-center rounded-full text-ml-white/80 transition hover:bg-white/10 disabled:opacity-30"
                 >
                   <Minus className="h-4 w-4" aria-hidden />
@@ -268,7 +292,7 @@ function StickerCard({
                   type="button"
                   onClick={() => step(1)}
                   disabled={quantity >= maxQuantity}
-                  aria-label="Agregar una unidad"
+                  aria-label="Agregar una planilla"
                   className="flex h-11 w-11 items-center justify-center rounded-full text-ml-white/80 transition hover:bg-white/10 disabled:opacity-30"
                 >
                   <Plus className="h-4 w-4" aria-hidden />
