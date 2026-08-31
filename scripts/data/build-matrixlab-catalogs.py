@@ -102,12 +102,16 @@ def ts_string(value):
     return '"%s"' % escaped
 
 
-def write_block(rel_path, marker, lines):
-    """Reescribe el bloque generado del módulo, conservando el resto."""
+def write_block(rel_path, marker, lines, comment='//'):
+    """Reescribe el bloque generado del archivo, conservando el resto.
+
+    `comment` es el prefijo de comentario del lenguaje destino: `//` para los
+    módulos TypeScript y `--` para el seed SQL.
+    """
     path = ROOT / rel_path
     src = path.read_text(encoding='utf-8')
-    start = '// <generated:%s>' % marker
-    end = '// </generated:%s>' % marker
+    start = '%s <generated:%s>' % (comment, marker)
+    end = '%s </generated:%s>' % (comment, marker)
     pattern = re.compile(re.escape(start) + r'.*?' + re.escape(end), re.S)
     if not pattern.search(src):
         raise SystemExit('Marcadores %s no encontrados en %s' % (marker, rel_path))
@@ -184,6 +188,39 @@ def build_3d(src_dir):
     return out, cats
 
 
+def sql_string(value):
+    """Literal de string SQL: se duplican las comillas simples."""
+    return "'%s'" % value.replace("'", "''")
+
+
+def build_stickers_seed(src_dir):
+    """Filas VALUES del seed de MatrixLab Stickers.
+
+    El precio NO sale del Excel (columna J vacía): es el precio único
+    confirmado comercialmente para la línea, declarado en
+    src/lib/store/matrixlab-stickers.ts como MATRIXLAB_STICKERS_UNIT_PRICE.
+    Se lee de ahí para que exista UNA sola fuente del precio.
+    """
+    module = (ROOT / 'src/lib/store/matrixlab-stickers.ts').read_text(encoding='utf-8')
+    match = re.search(r'MATRIXLAB_STICKERS_UNIT_PRICE\s*=\s*(\d+(?:\.\d+)?)', module)
+    if not match:
+        raise SystemExit('No se encontro MATRIXLAB_STICKERS_UNIT_PRICE en el modulo.')
+    price = match.group(1)
+
+    _, rows = read_sheet(
+        src_dir / 'Inventario_MatrixLab_Stickers.xlsx', 'Inventario Stickers')
+    out = []
+    for index, r in enumerate(rows):
+        code, name, description = r[1], r[2], r[5]
+        finish, units, handle = r[6], int(r[7]), r[11]
+        comma = ',' if index < len(rows) - 1 else ''
+        out.append('(%s, %s, %s, %s, %s, %d, %s, %s)%s' % (
+            sql_string(handle), sql_string(code), sql_string(name),
+            sql_string(description), sql_string(finish), units,
+            sql_string('STK-' + code), price, comma))
+    return out, price
+
+
 TARGETS = [
     ('MatrixLab Stickers', build_stickers,
      'src/lib/store/matrixlab-stickers.ts', 'matrixlab-stickers'),
@@ -205,6 +242,13 @@ def main():
         for key, original in cats:
             print('     %-22s %s' % (key, original))
         write_block(rel_path, marker, lines)
+
+    # Seed de MatrixLab Stickers: es la unica linea con precio confirmado, asi
+    # que es la unica cuyo seed lleva datos. Wear y 3D siguen bloqueados.
+    seed_rows, price = build_stickers_seed(src_dir)
+    print('Seed MatrixLab Stickers: %d filas a $%s c/u' % (len(seed_rows), price))
+    write_block('supabase/seed_matrixlab_stickers.sql',
+                'matrixlab-stickers-seed', seed_rows, comment='--')
 
 
 if __name__ == '__main__':

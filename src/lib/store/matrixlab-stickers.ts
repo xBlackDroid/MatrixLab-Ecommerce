@@ -45,11 +45,28 @@ export const MATRIXLAB_STICKER_PLACEHOLDER_IMAGE = `${MATRIXLAB_STICKERS_IMAGE_D
 export const MATRIXLAB_STICKERS_PUBLIC_TITLE = "MatrixLab Stickers";
 
 /**
- * El Excel entregó las 110 celdas de Precio vacías. Mientras esta bandera sea
- * `true` el catálogo se publica como vitrina (sin precio y sin agregar al
- * carrito) y el seed SQL se niega a crear variantes vendibles.
+ * PRECIO ÚNICO DE LA LÍNEA — $10 MXN por pieza.
+ *
+ * El Excel entregó las 110 celdas de Precio VACÍAS (columna J). Este valor NO
+ * sale del Excel ni de ninguna otra línea: es el precio único CONFIRMADO
+ * comercialmente para este release, igual que en su momento el inventario de
+ * los vasos se confirmó a mano cuando su columna llegó vacía.
+ *
+ * Aplica a los 110 diseños sin variar por colección (GE001…LE010). Si algún
+ * día el precio varía por familia, este constante deja de servir y hay que
+ * mover el precio a la fila del Excel: no se parchea aquí caso por caso.
+ *
+ * El precio que se COBRA sigue saliendo siempre de la variante real en
+ * Supabase; este valor es el precio de catálogo con el que se siembra esa
+ * variante y el que se muestra mientras el seed no se haya ejecutado.
  */
-export const MATRIXLAB_STICKERS_PRICE_PENDING = true;
+export const MATRIXLAB_STICKERS_UNIT_PRICE = 10;
+
+/**
+ * Precio confirmado: la línea ya NO está bloqueada. El seed puede crear
+ * variantes vendibles y la tarjeta muestra precio real.
+ */
+export const MATRIXLAB_STICKERS_PRICE_PENDING = false;
 
 /** Familias temáticas reales del Excel (columna D). No se inventa ninguna. */
 export type MatrixLabStickerCategoryId =
@@ -250,6 +267,15 @@ export function matrixLabStickerHandle(item: MatrixLabStickerItem): string {
 /** SKU de la variante (columna I). Prefijo STK- definido por el Excel. */
 export function matrixLabStickerSku(code: string): string {
   return `STK-${code.toUpperCase()}`;
+}
+
+/**
+ * Precio de catálogo de un diseño. Hoy es el mismo para los 110 (precio único
+ * de la línea); la función existe para que un futuro precio por familia se
+ * resuelva en UN solo lugar y no haya que tocar la UI ni el seed.
+ */
+export function matrixLabStickerPrice(): number {
+  return MATRIXLAB_STICKERS_UNIT_PRICE;
 }
 
 /**

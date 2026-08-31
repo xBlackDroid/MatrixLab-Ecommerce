@@ -52,6 +52,7 @@ import {
   MATRIXLAB_STICKERS,
   matrixLabStickerByHandle,
   matrixLabStickerImagePath,
+  matrixLabStickerPrice,
   matrixLabStickerSku,
   type MatrixLabStickerItem,
 } from "@/lib/store/matrixlab-stickers";
@@ -1311,6 +1312,13 @@ async function readCategoryProducts(categoryId: string): Promise<{
 function resolvePendingPricing(
   product: ProductRow | null,
   variants: ProductVariantRow[],
+  /**
+   * Precio de catálogo YA confirmado comercialmente para la línea. Se usa
+   * SÓLO para mostrar precio mientras el producto no existe en base (seed sin
+   * ejecutar). Nunca sustituye al precio real de la variante: si la variante
+   * existe, manda la variante. `null` = línea con precio aún pendiente.
+   */
+  catalogPrice: number | null = null,
 ): {
   variantId: string | null;
   price: number | null;
@@ -1318,7 +1326,14 @@ function resolvePendingPricing(
   sellable: boolean;
 } {
   if (!product) {
-    return { variantId: null, price: null, stock: null, sellable: false };
+    // Sin producto en base no hay nada vendible, pero sí puede haber un precio
+    // de catálogo confirmado que mostrar (no es un precio inventado).
+    return {
+      variantId: null,
+      price: catalogPrice,
+      stock: null,
+      sellable: false,
+    };
   }
   const variant =
     variants.find((v) => v.status !== "oculto") ?? variants[0] ?? null;
@@ -1403,6 +1418,8 @@ export async function getMatrixLabStickersCatalog(
     const pricing = resolvePendingPricing(
       product,
       product ? (variantsByProduct.get(product.id) ?? []) : [],
+      // Precio único confirmado de la línea ($10/pieza): ya no está pendiente.
+      matrixLabStickerPrice(),
     );
     entries.push({
       item,

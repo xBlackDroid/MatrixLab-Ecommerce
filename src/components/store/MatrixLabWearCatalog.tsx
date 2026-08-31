@@ -8,10 +8,10 @@ import type { MatrixLabWearCatalogEntry } from "@/lib/store/products";
 import {
   MATRIXLAB_WEAR_CATEGORY_LABELS,
   MATRIXLAB_WEAR_CATEGORY_ORDER,
-  MATRIXLAB_WEAR_DESIGNER_HREF,
   matchesMatrixLabWearFilter,
   matchesMatrixLabWearQuery,
   matrixLabWearCategoryCounts,
+  matrixLabWearDesignerHref,
   matrixLabWearRefLabel,
   type MatrixLabWearCategoryId,
 } from "@/lib/store/matrixlab-wear";
@@ -197,8 +197,10 @@ function WearCard({ entry }: { entry: MatrixLabWearCatalogEntry }) {
         </p>
 
         <div className="mt-auto pt-2">
+          {/* Conserva el diseño elegido (?design=wear-ge001). El Laboratorio
+              lo valida contra la allowlist y lo muestra como referencia. */}
           <Link
-            href={MATRIXLAB_WEAR_DESIGNER_HREF}
+            href={matrixLabWearDesignerHref(item.code)}
             className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-ml-violet px-4 py-2.5 text-sm font-semibold text-ml-white transition hover:bg-ml-violet/90"
           >
             <Wand2 className="h-4 w-4" aria-hidden />

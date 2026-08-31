@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { MessageCircle, Search } from "lucide-react";
+import { MessageCircle, Minus, Plus, Search } from "lucide-react";
+import AddToCartButton from "@/components/store/AddToCartButton";
 import type { MatrixLabStickerCatalogEntry } from "@/lib/store/products";
 import {
   MATRIXLAB_STICKER_CATEGORY_LABELS,
@@ -156,9 +157,17 @@ function StickerCard({
   whatsappUrl: string;
 }) {
   const { item } = entry;
-  // Mientras el Excel no traiga precio no hay cifra que mostrar ni carrito que
-  // ofrecer: la tarjeta invita a cotizar en vez de inventar un precio.
+  // El precio unitario está confirmado ($10). Si aun así llegara sin resolver
+  // (línea futura sin precio), la tarjeta lo dice en vez de inventar cifra.
   const priceConfirmed = entry.price !== null;
+  const maxQuantity = Math.max(0, entry.stock ?? 0);
+  const [quantity, setQuantity] = useState(1);
+
+  function step(delta: number) {
+    setQuantity((current) =>
+      Math.min(Math.max(current + delta, 1), Math.max(1, maxQuantity)),
+    );
+  }
 
   return (
     <article className="glass flex flex-col overflow-hidden rounded-2xl transition hover:border-ml-violet/40">
@@ -220,16 +229,55 @@ function StickerCard({
           {matrixLabStickerRefLabel(item.code)} · {entry.sku}
         </p>
 
-        <div className="mt-auto pt-2">
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-ml-green px-4 py-2.5 text-sm font-semibold text-ml-bg transition hover:bg-ml-green/90"
-          >
-            <MessageCircle className="h-4 w-4" aria-hidden />
-            Cotizar por WhatsApp
-          </a>
+        {/* Se agrega al carrito SÓLO cuando el producto existe de verdad en
+            base y es vendible; el servidor vuelve a resolver precio y stock al
+            agregar. Mientras el seed no se haya ejecutado no hay producto que
+            agregar, así que la tarjeta cotiza por WhatsApp. */}
+        <div className="mt-auto flex flex-col gap-2 pt-2">
+          {entry.sellable && entry.productId ? (
+            <>
+              <div className="flex items-center justify-between gap-2 rounded-full border border-white/10 bg-white/5 p-1">
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  disabled={quantity <= 1}
+                  aria-label="Quitar una unidad"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-ml-white/80 transition hover:bg-white/10 disabled:opacity-30"
+                >
+                  <Minus className="h-4 w-4" aria-hidden />
+                </button>
+                <span className="min-w-8 text-center text-base font-semibold">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  disabled={quantity >= maxQuantity}
+                  aria-label="Agregar una unidad"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-ml-white/80 transition hover:bg-white/10 disabled:opacity-30"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+              <AddToCartButton
+                productId={entry.productId}
+                variantId={entry.variantId}
+                quantity={quantity}
+                label="Agregar"
+                className="min-h-11 px-4 py-2.5 text-sm"
+              />
+            </>
+          ) : (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-ml-green px-4 py-2.5 text-sm font-semibold text-ml-bg transition hover:bg-ml-green/90"
+            >
+              <MessageCircle className="h-4 w-4" aria-hidden />
+              Cotizar por WhatsApp
+            </a>
+          )}
         </div>
       </div>
     </article>

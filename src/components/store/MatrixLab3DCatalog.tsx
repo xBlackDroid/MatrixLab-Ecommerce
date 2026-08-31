@@ -195,6 +195,9 @@ function ThreeDCard({
                 : "bg-ml-green text-ml-bg hover:bg-ml-green/90",
             )}
           >
+            {/* Los 7 precios siguen pendientes: el CTA pide precio en vez de
+                mostrar una cifra. Las piezas personalizables se atienden por
+                WhatsApp en esta versión (no hay configurador 3D). */}
             {item.customizable ? (
               <>
                 <Sparkles className="h-4 w-4" aria-hidden />
@@ -203,7 +206,7 @@ function ThreeDCard({
             ) : (
               <>
                 <MessageCircle className="h-4 w-4" aria-hidden />
-                Cotizar por WhatsApp
+                Consultar precio
               </>
             )}
           </a>

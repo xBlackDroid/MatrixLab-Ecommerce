@@ -62,6 +62,44 @@ export const MATRIXLAB_WEAR_PUBLIC_TITLE = "MatrixLab Wear";
 export const MATRIXLAB_WEAR_DESIGNER_HREF = "/tienda/disenador/playera";
 
 /**
+ * Nombre del query param que lleva el diseño elegido al Laboratorio.
+ * Su valor SIEMPRE es un handle de esta línea (`wear-<código>`), nunca una URL
+ * ni una ruta: el diseñador lo valida contra la allowlist de los 100 handles
+ * y descarta cualquier otra cosa.
+ */
+export const MATRIXLAB_WEAR_DESIGN_PARAM = "design";
+
+/**
+ * Enlace al Laboratorio conservando el diseño elegido.
+ *
+ * El handle se codifica siempre (aunque el patrón `^[a-z0-9-]+$` no lo exija)
+ * para que la construcción del enlace no dependa de esa suposición.
+ */
+export function matrixLabWearDesignerHref(code: string): string {
+  const handle = matrixLabWearHandle(code);
+  return `${MATRIXLAB_WEAR_DESIGNER_HREF}?${MATRIXLAB_WEAR_DESIGN_PARAM}=${encodeURIComponent(handle)}`;
+}
+
+/**
+ * Resuelve el diseño que llega por query param.
+ *
+ * ES LA FRONTERA DE CONFIANZA: el valor viene del cliente y puede ser
+ * cualquier cosa (otra URL, `../../etc/passwd`, HTML, un array de Next si el
+ * param se repite). Sólo se acepta si es EXACTAMENTE uno de los 100 handles
+ * conocidos; en cualquier otro caso devuelve `null` y el Laboratorio abre
+ * normal, como si no se hubiera pasado nada.
+ *
+ * Nunca se usa el texto recibido para construir rutas ni para renderizar: lo
+ * que se muestra sale de la fila del Excel que encontró este lookup.
+ */
+export function resolveMatrixLabWearDesignParam(
+  value: string | string[] | undefined,
+): MatrixLabWearItem | null {
+  if (typeof value !== "string") return null;
+  return matrixLabWearByHandle(value);
+}
+
+/**
  * El Excel entregó las 100 celdas de Precio vacías, y color/talla como "Por
  * definir". Mientras esta bandera sea `true` el catálogo es una vitrina de
  * diseños: sin precio, sin agregar al carrito y sin variantes de talla/color.

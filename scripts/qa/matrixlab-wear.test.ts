@@ -15,6 +15,7 @@ import {
   MATRIXLAB_WEAR_CATEGORY_HANDLE,
   MATRIXLAB_WEAR_CATEGORY_LABELS,
   MATRIXLAB_WEAR_CATEGORY_ORDER,
+  MATRIXLAB_WEAR_DESIGN_PARAM,
   MATRIXLAB_WEAR_DESIGNER_HREF,
   MATRIXLAB_WEAR_IMAGE_DIR,
   MATRIXLAB_WEAR_PLACEHOLDER_IMAGE,
@@ -24,10 +25,12 @@ import {
   matrixLabWearByCode,
   matrixLabWearByHandle,
   matrixLabWearCategoryCounts,
+  matrixLabWearDesignerHref,
   matrixLabWearHandle,
   matrixLabWearImagePath,
   matrixLabWearNeedsDefinition,
   matrixLabWearSku,
+  resolveMatrixLabWearDesignParam,
   type MatrixLabWearCategoryId,
 } from "../../src/lib/store/matrixlab-wear";
 
@@ -193,6 +196,74 @@ check(
 );
 
 // ---------------------------------------------------------------------------
+// 6.b) El CTA conserva el diseño elegido, y SOLO acepta handles conocidos.
+// ---------------------------------------------------------------------------
+check(
+  "el CTA conserva el diseño elegido (?design=wear-<código>)",
+  MATRIXLAB_WEAR.every(
+    (w) =>
+      matrixLabWearDesignerHref(w.code) ===
+      `${MATRIXLAB_WEAR_DESIGNER_HREF}?${MATRIXLAB_WEAR_DESIGN_PARAM}=wear-${w.code.toLowerCase()}`,
+  ),
+);
+check(
+  `${EXPECTED_TOTAL} enlaces de personalización únicos`,
+  new Set(codes.map(matrixLabWearDesignerHref)).size === EXPECTED_TOTAL,
+);
+// Ida y vuelta: lo que genera el catálogo lo resuelve el Laboratorio.
+check(
+  "los 100 handles se resuelven de vuelta al diseño correcto",
+  MATRIXLAB_WEAR.every(
+    (w) =>
+      resolveMatrixLabWearDesignParam(matrixLabWearHandle(w.code))?.code ===
+      w.code,
+  ),
+);
+// FRONTERA DE CONFIANZA: el param viene del cliente. Nada fuera de la
+// allowlist puede pasar, y ningún valor raro puede tumbar la página.
+const HOSTILE_PARAMS: (string | string[] | undefined)[] = [
+  undefined,
+  "",
+  "wear-ge999",
+  "playera-personalizada",
+  "../../etc/passwd",
+  "..%2F..%2Fetc%2Fpasswd",
+  "https://evil.example.com/art.png",
+  "//evil.example.com",
+  "javascript:alert(1)",
+  "data:text/html,<script>alert(1)</script>",
+  "<img src=x onerror=alert(1)>",
+  "wear-ge001' or '1'='1",
+  "WEAR-GE001",
+  "wear-ge001 ",
+  "__proto__",
+  "constructor",
+  "toString",
+  ["wear-ge001", "wear-ge002"],
+];
+const rejected = HOSTILE_PARAMS.filter(
+  (value) => resolveMatrixLabWearDesignParam(value) === null,
+);
+check(
+  "rechaza todo lo que no sea un handle conocido (URLs, paths, HTML, arrays, prototipo)",
+  rejected.length === HOSTILE_PARAMS.length,
+  `aceptados: ${HOSTILE_PARAMS.filter((v) => !rejected.includes(v)).join(" | ")}`,
+);
+// Sin param válido el Laboratorio abre igual que siempre.
+check(
+  "sin param el diseñador no recibe diseño (no rompe el flujo normal)",
+  resolveMatrixLabWearDesignParam(undefined) === null,
+);
+// El handle es lo único que viaja: nunca una ruta de imagen ni una URL.
+check(
+  "el enlace sólo lleva el handle, nunca una ruta de imagen",
+  MATRIXLAB_WEAR.every((w) => {
+    const href = matrixLabWearDesignerHref(w.code);
+    return !href.includes("/images/") && !href.includes(".webp");
+  }),
+);
+
+// ---------------------------------------------------------------------------
 // 7) Rutas de imagen deterministas y en minúsculas.
 // ---------------------------------------------------------------------------
 const imagePaths = codes.map(matrixLabWearImagePath);
@@ -230,13 +301,28 @@ check(
   `precios pendientes = ${EXPECTED_TOTAL}`,
   MATRIXLAB_WEAR.length === EXPECTED_TOTAL,
 );
+const seedSource = readFileSync(
+  join(ROOT, "supabase", "seed_matrixlab_wear.sql"),
+  "utf8",
+);
 check(
   "el módulo no declara ningún campo de precio",
   !/^\s*price\s*[:?]/m.test(moduleSource),
 );
-const seedSource = readFileSync(
-  join(ROOT, "supabase", "seed_matrixlab_wear.sql"),
-  "utf8",
+// El precio comercial es el del producto base del Laboratorio
+// (`playera-personalizada`, $349). NO se replica a 100 productos: si alguien
+// copia esa cifra a este módulo o a su seed, este QA lo detecta.
+check(
+  "el módulo NO replica el precio del producto base ($349)",
+  !/\b349\b/.test(moduleSource),
+);
+check(
+  "el seed NO replica el precio del producto base ($349)",
+  !/\b349\b/.test(seedSource),
+);
+check(
+  "el seed no crea productos vendibles mientras siga bloqueado",
+  /SEED BLOQUEADO/i.test(seedSource),
 );
 check(
   "el seed está bloqueado con raise exception",

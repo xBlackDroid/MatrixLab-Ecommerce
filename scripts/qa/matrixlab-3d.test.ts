@@ -203,6 +203,47 @@ check(
   "el seed está bloqueado con raise exception",
   /raise exception\s*\n?\s*'SEED BLOQUEADO/i.test(seedSource),
 );
+// El seed no puede crear productos comerciales mientras falten los 7 precios.
+check(
+  "el seed no siembra ninguna fila con precio",
+  !/ML3D-3D\d{3}',\s*\d/.test(seedSource),
+);
+
+// La tarjeta nunca puede mostrar $0 ni un precio inventado: mientras el precio
+// sea null la UI muestra "Precio por confirmar" y un CTA de consulta.
+const catalogSource = readFileSync(
+  join(ROOT, "src", "components", "store", "MatrixLab3DCatalog.tsx"),
+  "utf8",
+);
+check(
+  "la UI muestra 'Precio por confirmar' cuando no hay precio",
+  /Precio por confirmar/.test(catalogSource),
+);
+check(
+  "la UI no imprime un precio por defecto (0 / $0)",
+  !/formatPrice\(\s*0\s*\)/.test(catalogSource) &&
+    !/\$0/.test(catalogSource),
+);
+check(
+  "el CTA pide precio o personalización en lugar de vender",
+  /Consultar precio/.test(catalogSource) &&
+    /Consultar personalizaci/.test(catalogSource),
+);
+check(
+  "las piezas personalizables se destacan con badge",
+  /Personalizable/.test(catalogSource),
+);
+// No se construyó un configurador 3D nuevo: la personalización se atiende por
+// WhatsApp. Se revisa el CÓDIGO, no los comentarios (que sí mencionan la
+// palabra "configurador" para explicar justamente que no existe).
+const catalogCode = catalogSource
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "")
+  .replace(/^\s*\/\/.*$/gm, "");
+check(
+  "no se introdujo un configurador 3D (sin ruta de diseñador)",
+  !/\/tienda\/disenador/.test(catalogCode),
+);
 // Se revisa el SQL EJECUTABLE, no los comentarios del encabezado.
 const seedStatements = seedSource
   .split("\n")

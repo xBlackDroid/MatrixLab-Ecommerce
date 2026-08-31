@@ -3,7 +3,7 @@
  *
  * Valida el módulo fuente (`src/lib/store/matrixlab-stickers.ts`) contra las
  * cifras confirmadas del Excel (`Inventario_MatrixLab_Stickers.xlsx`), las
- * rutas deterministas de imagen y el bloqueo de precio.
+ * rutas deterministas de imagen y el precio único confirmado de la línea.
  *
  * Correr con: npx tsx scripts/qa/matrixlab-stickers.test.ts
  */
@@ -17,11 +17,13 @@ import {
   MATRIXLAB_STICKERS_CATEGORY_HANDLE,
   MATRIXLAB_STICKERS_IMAGE_DIR,
   MATRIXLAB_STICKERS_PRICE_PENDING,
+  MATRIXLAB_STICKERS_UNIT_PRICE,
   matchesMatrixLabStickerQuery,
   matrixLabStickerByCode,
   matrixLabStickerByHandle,
   matrixLabStickerCategoryCounts,
   matrixLabStickerImagePath,
+  matrixLabStickerPrice,
   matrixLabStickerSku,
   type MatrixLabStickerCategoryId,
 } from "../../src/lib/store/matrixlab-stickers";
@@ -40,6 +42,8 @@ const EXPECTED_CATEGORIES = 11;
 const EXPECTED_PER_CATEGORY = 10;
 const EXPECTED_STOCK_EACH = 99;
 const EXPECTED_STOCK_TOTAL = 10890;
+/** Precio único CONFIRMADO de la línea para este release. */
+const EXPECTED_UNIT_PRICE = 10;
 /** Prefijo de código de cada familia, en el orden del Excel. */
 const EXPECTED_PREFIXES: Record<MatrixLabStickerCategoryId, string> = {
   geek: "GE",
@@ -178,29 +182,86 @@ check(
 );
 
 // ---------------------------------------------------------------------------
-// 7) Precio pendiente detectado y bloqueado.
+// 7) Precio único CONFIRMADO ($10) y seed desbloqueado y coherente.
 // ---------------------------------------------------------------------------
 check(
-  "la línea está marcada como precio pendiente",
-  MATRIXLAB_STICKERS_PRICE_PENDING === true,
+  "la línea ya NO está marcada como precio pendiente",
+  MATRIXLAB_STICKERS_PRICE_PENDING === false,
 );
-// El módulo no debe tener NINGÚN campo de precio: si alguien agrega uno, este
-// QA falla antes de que un precio inventado llegue a producción.
+check(
+  `precio único de la línea = $${EXPECTED_UNIT_PRICE}`,
+  MATRIXLAB_STICKERS_UNIT_PRICE === EXPECTED_UNIT_PRICE,
+  `${MATRIXLAB_STICKERS_UNIT_PRICE}`,
+);
+// El precio es el mismo para los 110, sin variar por colección.
+check(
+  `los ${EXPECTED_TOTAL} diseños resuelven $${EXPECTED_UNIT_PRICE}`,
+  MATRIXLAB_STICKERS.every(
+    () => matrixLabStickerPrice() === EXPECTED_UNIT_PRICE,
+  ),
+);
+check(
+  "ningún precio pendiente",
+  MATRIXLAB_STICKERS.filter(() => matrixLabStickerPrice() === null).length === 0,
+);
+// Un precio en 0, negativo o no finito nunca puede pasar como válido.
+check(
+  "el precio es un número positivo",
+  Number.isFinite(MATRIXLAB_STICKERS_UNIT_PRICE) &&
+    MATRIXLAB_STICKERS_UNIT_PRICE > 0,
+);
+// El precio vive en el módulo, no repartido por fila: si alguien mete un
+// `price:` por diseño, este QA lo detecta antes de que diverja del seed.
 const moduleSource = readFileSync(
   join(ROOT, "src", "lib", "store", "matrixlab-stickers.ts"),
   "utf8",
 );
 check(
-  "el módulo no declara ningún campo de precio",
+  "el módulo no declara precio por fila (precio único de línea)",
   !/^\s*price\s*[:?]/m.test(moduleSource),
 );
+
 const seedSource = readFileSync(
   join(ROOT, "supabase", "seed_matrixlab_stickers.sql"),
   "utf8",
 );
 check(
-  "el seed está bloqueado con raise exception",
-  /raise exception\s*\n?\s*'SEED BLOQUEADO/i.test(seedSource),
+  "el seed ya NO está bloqueado",
+  !/SEED BLOQUEADO/i.test(seedSource),
+);
+// El seed siembra las 110 filas con el MISMO precio del módulo: si alguien
+// cambia el constante y no regenera, el seed y la UI divergirían.
+const seedPrices = [...seedSource.matchAll(/'STK-[A-Z]{2}\d{3}', (\d+)\)/g)].map(
+  (m) => Number(m[1]),
+);
+check(
+  `el seed tiene ${EXPECTED_TOTAL} filas`,
+  seedPrices.length === EXPECTED_TOTAL,
+  `${seedPrices.length}`,
+);
+check(
+  `las ${EXPECTED_TOTAL} filas del seed valen $${EXPECTED_UNIT_PRICE}`,
+  seedPrices.every((p) => p === MATRIXLAB_STICKERS_UNIT_PRICE),
+  `distintos: ${[...new Set(seedPrices)].join(", ")}`,
+);
+// El seed debe sembrar exactamente los 110 SKU del módulo, sin sobrantes.
+const seedSkus = [...seedSource.matchAll(/'(STK-[A-Z]{2}\d{3})'/g)].map(
+  (m) => m[1],
+);
+check(
+  "el seed siembra exactamente los SKU del módulo",
+  new Set(seedSkus).size === EXPECTED_TOTAL &&
+    skus.every((s) => seedSkus.includes(s)),
+);
+// Debe seguir siendo re-ejecutable: upsert por handle y por sku.
+check(
+  "el seed es idempotente (on conflict handle + sku)",
+  /on conflict \(handle\) do update/i.test(seedSource) &&
+    /on conflict \(sku\) do update/i.test(seedSource),
+);
+check(
+  "el seed valida el resultado antes de dar por buena la siembra",
+  /raise exception/i.test(seedSource) && /10890/.test(seedSource),
 );
 // Se revisa el SQL EJECUTABLE, no los comentarios: el encabezado del seed
 // menciona "sin DELETE, sin TRUNCATE, sin DROP" como garantía escrita.
@@ -250,7 +311,7 @@ check(
 
 console.log(
   failures === 0
-    ? `\n✓ QA MatrixLab Stickers OK — ${MATRIXLAB_STICKERS.length} diseños, ${stockTotal} piezas, ${EXPECTED_TOTAL} precios pendientes.`
+    ? `\n✓ QA MatrixLab Stickers OK — ${MATRIXLAB_STICKERS.length} diseños, ${stockTotal} piezas, precio único $${MATRIXLAB_STICKERS_UNIT_PRICE}, 0 precios pendientes.`
     : `\n✗ QA MatrixLab Stickers: ${failures} fallo(s).`,
 );
 process.exit(failures === 0 ? 0 : 1);
