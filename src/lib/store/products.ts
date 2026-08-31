@@ -47,6 +47,33 @@ import {
   TUMBLER_CUPS,
   type CupItem,
 } from "@/lib/store/tumbler-cups";
+import {
+  MATRIXLAB_STICKER_PLACEHOLDER_IMAGE,
+  MATRIXLAB_STICKERS,
+  matrixLabStickerByHandle,
+  matrixLabStickerImagePath,
+  matrixLabStickerSku,
+  type MatrixLabStickerItem,
+} from "@/lib/store/matrixlab-stickers";
+import {
+  MATRIXLAB_WEAR,
+  MATRIXLAB_WEAR_PLACEHOLDER_IMAGE,
+  matrixLabWearByHandle,
+  matrixLabWearHandle,
+  matrixLabWearImagePath,
+  matrixLabWearNeedsDefinition,
+  matrixLabWearSku,
+  type MatrixLabWearItem,
+} from "@/lib/store/matrixlab-wear";
+import {
+  MATRIXLAB_3D,
+  MATRIXLAB_3D_PLACEHOLDER_IMAGE,
+  matrixLab3dByHandle,
+  matrixLab3dHandle,
+  matrixLab3dImagePath,
+  matrixLab3dSku,
+  type MatrixLab3dItem,
+} from "@/lib/store/matrixlab-3d";
 import { isValidHandle } from "@/lib/security/sanitize";
 import type { ProductSort } from "@/lib/validation/store";
 
@@ -1201,3 +1228,355 @@ export {
   DESIGNER_PRODUCT_HANDLE_MAP,
   resolveDesignerHandle,
 } from "@/lib/designer/product-handles";
+
+// ---------------------------------------------------------------------------
+// MatrixLab Stickers / Wear / 3D — catálogos por CÓDIGO
+// ---------------------------------------------------------------------------
+/**
+ * Estas tres líneas comparten una diferencia IMPORTANTE con Sparkles, UV
+ * Stickers de Tumbler y Vasos: sus Excel llegaron con la columna Precio VACÍA
+ * en las 217 filas, así que todavía NO existen como productos vendibles en la
+ * base (el seed está bloqueado hasta que se confirmen precios).
+ *
+ * Por eso el ensamblado es una VITRINA COMPLETA y no un join estricto: emite
+ * SIEMPRE una tarjeta por cada fila del Excel, y le adjunta el producto real
+ * de Supabase sólo cuando ya existe. Consecuencias:
+ *
+ *   * el Preview muestra los 110 / 100 / 7 diseños aunque el seed no se haya
+ *     ejecutado nunca;
+ *   * el precio y el stock que se muestran vienen SIEMPRE de la variante real
+ *     (nunca del Excel ni del frontend), y si no hay variante la tarjeta dice
+ *     "Precio por confirmar" en lugar de inventar una cifra;
+ *   * `sellable` exige producto + variante + precio resuelto, así que ninguna
+ *     tarjeta puede agregarse al carrito mientras el precio esté pendiente.
+ *
+ * Cada línea tiene su propia implementación (igual que Sparkles/Stickers/Vasos
+ * ya son paralelas entre sí): una puede resolver precios sin arrastrar a las
+ * otras dos.
+ */
+
+/** Productos genéricos previos de la categoría, que NO se borran. */
+type LegacyProducts = ProductRow[];
+
+/** Lee productos + variantes visibles de una categoría (base o mocks). */
+async function readCategoryProducts(categoryId: string): Promise<{
+  products: ProductRow[];
+  variantsByProduct: Map<string, ProductVariantRow[]>;
+}> {
+  const client = getCatalogClient();
+  if (!client) {
+    const products = MOCK_PRODUCTS.filter(
+      (p) => p.category_id === categoryId && p.status !== "oculto",
+    ).map(fixProductText);
+    const variantsByProduct = new Map<string, ProductVariantRow[]>();
+    for (const v of MOCK_VARIANTS) {
+      if (v.status === "oculto") continue;
+      variantsByProduct.set(v.product_id, [
+        ...(variantsByProduct.get(v.product_id) ?? []),
+        v,
+      ]);
+    }
+    return { products, variantsByProduct };
+  }
+  const { data, error } = await raceRead<ProductWithVariantRows[]>(
+    client
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("category_id", categoryId)
+      .in("status", [...VISIBLE_PRODUCT_FILTER]) as unknown as PromiseLike<
+      ReadResult<ProductWithVariantRows[]>
+    >,
+  );
+  if (error || !data) {
+    return { products: [], variantsByProduct: new Map() };
+  }
+  const variantsByProduct = new Map<string, ProductVariantRow[]>();
+  const products: ProductRow[] = [];
+  for (const row of data) {
+    const { product_variants, ...product } = row;
+    products.push(fixProductText(product as ProductRow));
+    variantsByProduct.set(
+      product.id,
+      (product_variants ?? []).filter((v) => v.status !== "oculto"),
+    );
+  }
+  return { products, variantsByProduct };
+}
+
+/**
+ * Precio y estado de venta de una fila, resueltos SIEMPRE contra la base.
+ * Devuelve `price: null` cuando el precio aún no está confirmado: la tarjeta
+ * muestra "Precio por confirmar" y no se puede agregar al carrito.
+ */
+function resolvePendingPricing(
+  product: ProductRow | null,
+  variants: ProductVariantRow[],
+): {
+  variantId: string | null;
+  price: number | null;
+  stock: number | null;
+  sellable: boolean;
+} {
+  if (!product) {
+    return { variantId: null, price: null, stock: null, sellable: false };
+  }
+  const variant =
+    variants.find((v) => v.status !== "oculto") ?? variants[0] ?? null;
+  const rawPrice = variant?.price ?? product.base_price;
+  const price =
+    rawPrice === null || rawPrice === undefined ? null : Number(rawPrice);
+  // Un precio de 0 o negativo NO es un precio confirmado: es una celda vacía
+  // que llegó hasta la base. Se trata como pendiente, nunca como gratis.
+  const priceConfirmed = price !== null && Number.isFinite(price) && price > 0;
+  const stock = variant ? variant.stock : 0;
+  const onDemand =
+    product.status === "sobre_pedido" || variant?.status === "sobre_pedido";
+  const sellable =
+    priceConfirmed &&
+    variant !== null &&
+    ["disponible", "sobre_pedido"].includes(product.status) &&
+    !["agotado", "oculto"].includes(variant.status ?? "disponible") &&
+    (onDemand || stock > 0);
+  return {
+    variantId: variant?.id ?? null,
+    price: priceConfirmed ? price : null,
+    stock,
+    sellable,
+  };
+}
+
+/** Foto resuelta por CÓDIGO: archivo real si existe, si no el placeholder. */
+function resolveCodeImage(
+  product: ProductRow | null,
+  rel: string,
+  placeholder: string,
+): string {
+  const curated = product?.images;
+  if (Array.isArray(curated) && curated.length > 0) return curated[0];
+  return publicImageExists(rel) ? rel : placeholder;
+}
+
+// --- MatrixLab Stickers ----------------------------------------------------
+
+export interface MatrixLabStickerCatalogEntry {
+  /** Fila del Excel (nombre, categoría, descripción, acabado, handle). */
+  item: MatrixLabStickerItem;
+  /** Handle público del Excel (columna L). */
+  handle: string;
+  /** Título real en base si el producto existe; si no, el nombre del Excel. */
+  title: string;
+  /** Producto en Supabase; `null` mientras el seed siga bloqueado. */
+  productId: string | null;
+  variantId: string | null;
+  /** SKU determinista (STK-<código>), siempre presente. */
+  sku: string;
+  /** Precio resuelto en servidor. `null` = pendiente de confirmar. */
+  price: number | null;
+  /** Inventario real de la variante; `null` si aún no hay variante. */
+  stock: number | null;
+  /** Unidades declaradas en el Excel (columna H). */
+  declaredInventory: number;
+  /** Imagen resuelta por código (foto real o placeholder de marca). */
+  image: string;
+  /** Producto vendible: producto + variante + precio confirmado. */
+  sellable: boolean;
+}
+
+export interface MatrixLabStickerCatalog {
+  /** Los 110 diseños del Excel, en el orden EXACTO del Excel. */
+  entries: MatrixLabStickerCatalogEntry[];
+  /** Cuántos diseños siguen sin precio confirmado. */
+  pricePending: number;
+  /** Productos genéricos previos de la categoría: se ocultan, NO se borran. */
+  legacyHidden: ProductRow[];
+}
+
+/** Catálogo MatrixLab Stickers: 110 diseños del Excel + datos reales de base. */
+export async function getMatrixLabStickersCatalog(
+  categoryId: string,
+): Promise<MatrixLabStickerCatalog> {
+  const { products, variantsByProduct } = await readCategoryProducts(categoryId);
+  const byHandle = new Map(products.map((p) => [p.handle, p]));
+  const entries: MatrixLabStickerCatalogEntry[] = [];
+  for (const item of MATRIXLAB_STICKERS) {
+    const product = byHandle.get(item.handle) ?? null;
+    const pricing = resolvePendingPricing(
+      product,
+      product ? (variantsByProduct.get(product.id) ?? []) : [],
+    );
+    entries.push({
+      item,
+      handle: item.handle,
+      title: product?.title ?? item.name,
+      productId: product?.id ?? null,
+      variantId: pricing.variantId,
+      sku: matrixLabStickerSku(item.code),
+      price: pricing.price,
+      stock: pricing.stock,
+      declaredInventory: item.inventory,
+      image: resolveCodeImage(
+        product,
+        matrixLabStickerImagePath(item.code),
+        MATRIXLAB_STICKER_PLACEHOLDER_IMAGE,
+      ),
+      sellable: pricing.sellable,
+    });
+  }
+  const legacyHidden: LegacyProducts = products.filter(
+    (p) => !matrixLabStickerByHandle(p.handle),
+  );
+  return {
+    entries,
+    pricePending: entries.filter((e) => e.price === null).length,
+    legacyHidden,
+  };
+}
+
+// --- MatrixLab Wear --------------------------------------------------------
+
+export interface MatrixLabWearCatalogEntry {
+  /** Fila del Excel (nombre, categoría, descripción, prenda, color, talla). */
+  item: MatrixLabWearItem;
+  /** Handle estable derivado del CÓDIGO (`wear-<código>`). */
+  handle: string;
+  title: string;
+  productId: string | null;
+  variantId: string | null;
+  /** SKU determinista (WEAR-<código>), siempre presente. */
+  sku: string;
+  /** Precio resuelto en servidor. `null` = pendiente de confirmar. */
+  price: number | null;
+  stock: number | null;
+  /** Unidades declaradas por DISEÑO (columna J), no por talla/color. */
+  declaredInventory: number;
+  image: string;
+  sellable: boolean;
+  /** Color y/o talla siguen como "Por definir" en el Excel. */
+  needsDefinition: boolean;
+}
+
+export interface MatrixLabWearCatalog {
+  /** Los 100 diseños del Excel, en el orden EXACTO del Excel. */
+  entries: MatrixLabWearCatalogEntry[];
+  pricePending: number;
+  legacyHidden: ProductRow[];
+}
+
+/**
+ * Catálogo MatrixLab Wear: 100 DISEÑOS del Excel.
+ *
+ * No crea ni consulta variantes de talla/color por diseño: la talla y el color
+ * se eligen en el Laboratorio (`/tienda/disenador/playera`), que ya tiene ese
+ * modelo (variantes reales del producto base `playera-personalizada`).
+ */
+export async function getMatrixLabWearCatalog(
+  categoryId: string,
+): Promise<MatrixLabWearCatalog> {
+  const { products, variantsByProduct } = await readCategoryProducts(categoryId);
+  const byHandle = new Map(products.map((p) => [p.handle, p]));
+  const entries: MatrixLabWearCatalogEntry[] = [];
+  for (const item of MATRIXLAB_WEAR) {
+    const handle = matrixLabWearHandle(item.code);
+    const product = byHandle.get(handle) ?? null;
+    const pricing = resolvePendingPricing(
+      product,
+      product ? (variantsByProduct.get(product.id) ?? []) : [],
+    );
+    entries.push({
+      item,
+      handle,
+      title: product?.title ?? item.name,
+      productId: product?.id ?? null,
+      variantId: pricing.variantId,
+      sku: matrixLabWearSku(item.code),
+      price: pricing.price,
+      stock: pricing.stock,
+      declaredInventory: item.inventory,
+      image: resolveCodeImage(
+        product,
+        matrixLabWearImagePath(item.code),
+        MATRIXLAB_WEAR_PLACEHOLDER_IMAGE,
+      ),
+      sellable: pricing.sellable,
+      needsDefinition: matrixLabWearNeedsDefinition(item),
+    });
+  }
+  const legacyHidden: LegacyProducts = products.filter(
+    (p) => !matrixLabWearByHandle(p.handle),
+  );
+  return {
+    entries,
+    pricePending: entries.filter((e) => e.price === null).length,
+    legacyHidden,
+  };
+}
+
+// --- MatrixLab 3D ----------------------------------------------------------
+
+export interface MatrixLab3dCatalogEntry {
+  /** Fila del Excel (nombre, categoría, uso, acabado, personalizable). */
+  item: MatrixLab3dItem;
+  /** Handle estable derivado del CÓDIGO (`ml3d-<código>`). */
+  handle: string;
+  title: string;
+  productId: string | null;
+  variantId: string | null;
+  /** SKU determinista (ML3D-<código>), siempre presente. */
+  sku: string;
+  /** Precio resuelto en servidor. `null` = pendiente de confirmar. */
+  price: number | null;
+  stock: number | null;
+  /** Unidades declaradas en el Excel (columna I). */
+  declaredInventory: number;
+  image: string;
+  sellable: boolean;
+}
+
+export interface MatrixLab3dCatalog {
+  /** Las 7 piezas del Excel, en el orden EXACTO del Excel. */
+  entries: MatrixLab3dCatalogEntry[];
+  pricePending: number;
+  legacyHidden: ProductRow[];
+}
+
+/** Catálogo MatrixLab 3D: 7 piezas del Excel + datos reales de base. */
+export async function getMatrixLab3dCatalog(
+  categoryId: string,
+): Promise<MatrixLab3dCatalog> {
+  const { products, variantsByProduct } = await readCategoryProducts(categoryId);
+  const byHandle = new Map(products.map((p) => [p.handle, p]));
+  const entries: MatrixLab3dCatalogEntry[] = [];
+  for (const item of MATRIXLAB_3D) {
+    const handle = matrixLab3dHandle(item.code);
+    const product = byHandle.get(handle) ?? null;
+    const pricing = resolvePendingPricing(
+      product,
+      product ? (variantsByProduct.get(product.id) ?? []) : [],
+    );
+    entries.push({
+      item,
+      handle,
+      title: product?.title ?? item.name,
+      productId: product?.id ?? null,
+      variantId: pricing.variantId,
+      sku: matrixLab3dSku(item.code),
+      price: pricing.price,
+      stock: pricing.stock,
+      declaredInventory: item.inventory,
+      image: resolveCodeImage(
+        product,
+        matrixLab3dImagePath(item.code),
+        MATRIXLAB_3D_PLACEHOLDER_IMAGE,
+      ),
+      sellable: pricing.sellable,
+    });
+  }
+  const legacyHidden: LegacyProducts = products.filter(
+    (p) => !matrixLab3dByHandle(p.handle),
+  );
+  return {
+    entries,
+    pricePending: entries.filter((e) => e.price === null).length,
+    legacyHidden,
+  };
+}

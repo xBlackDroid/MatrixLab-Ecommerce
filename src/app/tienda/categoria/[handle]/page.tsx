@@ -18,6 +18,9 @@ import ProductGrid from "@/components/store/ProductGrid";
 import SparklesCatalog from "@/components/store/SparklesCatalog";
 import TumblerCupsCatalog from "@/components/store/TumblerCupsCatalog";
 import TumblerStickersCatalog from "@/components/store/TumblerStickersCatalog";
+import MatrixLabStickersCatalog from "@/components/store/MatrixLabStickersCatalog";
+import MatrixLabWearCatalog from "@/components/store/MatrixLabWearCatalog";
+import MatrixLab3DCatalog from "@/components/store/MatrixLab3DCatalog";
 import SortSelect from "@/components/store/SortSelect";
 import {
   getCategoryByHandle,
@@ -25,6 +28,9 @@ import {
   getCupCatalog,
   getSparkleCatalog,
   getStickerCatalog,
+  getMatrixLabStickersCatalog,
+  getMatrixLabWearCatalog,
+  getMatrixLab3dCatalog,
   getTumblerSubcategories,
   LEGACY_TUMBLER_PARENT_HANDLE,
   TUMBLER_PARENT_HANDLE,
@@ -36,6 +42,18 @@ import {
   STICKERS_PUBLIC_TITLE,
 } from "@/lib/store/tumbler-stickers";
 import { CUPS_CATEGORY_HANDLE } from "@/lib/store/tumbler-cups";
+import {
+  MATRIXLAB_STICKERS_CATEGORY_HANDLE,
+  MATRIXLAB_STICKERS_PUBLIC_TITLE,
+} from "@/lib/store/matrixlab-stickers";
+import {
+  MATRIXLAB_WEAR_CATEGORY_HANDLE,
+  MATRIXLAB_WEAR_PUBLIC_TITLE,
+} from "@/lib/store/matrixlab-wear";
+import {
+  MATRIXLAB_3D_CATEGORY_HANDLE,
+  MATRIXLAB_3D_PUBLIC_TITLE,
+} from "@/lib/store/matrixlab-3d";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { ProductSortSchema } from "@/lib/validation/store";
 
@@ -86,6 +104,18 @@ const CURATED_CATEGORY_FALLBACKS: Record<
   },
 };
 
+/**
+ * Nombre público de marca de las tres líneas nuevas. Es SOLO presentación: ni
+ * el handle ni la fila de `categories` cambian, así que
+ * /tienda/categoria/stickers, /playeras-prendas e /impresion-3d siguen siendo
+ * las mismas rutas de siempre.
+ */
+const MATRIXLAB_PUBLIC_TITLES: Record<string, string> = {
+  [MATRIXLAB_STICKERS_CATEGORY_HANDLE]: MATRIXLAB_STICKERS_PUBLIC_TITLE,
+  [MATRIXLAB_WEAR_CATEGORY_HANDLE]: MATRIXLAB_WEAR_PUBLIC_TITLE,
+  [MATRIXLAB_3D_CATEGORY_HANDLE]: MATRIXLAB_3D_PUBLIC_TITLE,
+};
+
 interface CategoryPageProps {
   params: Promise<{ handle: string }>;
   searchParams: Promise<{ orden?: string }>;
@@ -96,6 +126,16 @@ export async function generateMetadata({
 }: CategoryPageProps): Promise<Metadata> {
   const { handle } = await params;
   const category = await getCategoryByHandle(handle);
+  // Las tres líneas nuevas publican su nombre de marca aunque la categoría
+  // todavía no tenga fila en la base (su seed sigue bloqueado por precios).
+  const matrixLabTitle = MATRIXLAB_PUBLIC_TITLES[handle];
+  if (matrixLabTitle) {
+    return {
+      title: matrixLabTitle,
+      description:
+        category?.description ?? CURATED_CATEGORY_FALLBACKS[handle]?.description,
+    };
+  }
   if (!category) {
     const fallback = CURATED_CATEGORY_FALLBACKS[handle];
     if (fallback) {
@@ -129,6 +169,85 @@ export default async function CategoryPage({
   }
 
   const category = await getCategoryByHandle(handle);
+
+  // MatrixLab Stickers / Wear / 3D publican el catálogo real del Excel. A
+  // diferencia de las líneas de Tumbler, su seed sigue BLOQUEADO por precios
+  // pendientes, así que el catálogo NO depende de que existan filas en
+  // `products`: se arma desde el Excel y toma de la base sólo lo que ya
+  // exista. Por eso se resuelve ANTES del "Próximamente": aunque la categoría
+  // aún no esté sembrada, la vitrina se ve completa.
+  const isMatrixLabStickers = handle === MATRIXLAB_STICKERS_CATEGORY_HANDLE;
+  const isMatrixLabWear = handle === MATRIXLAB_WEAR_CATEGORY_HANDLE;
+  const isMatrixLab3d = handle === MATRIXLAB_3D_CATEGORY_HANDLE;
+
+  if (isMatrixLabStickers || isMatrixLabWear || isMatrixLab3d) {
+    const fallback = CURATED_CATEGORY_FALLBACKS[handle];
+    const title =
+      isMatrixLabStickers
+        ? MATRIXLAB_STICKERS_PUBLIC_TITLE
+        : isMatrixLabWear
+          ? MATRIXLAB_WEAR_PUBLIC_TITLE
+          : MATRIXLAB_3D_PUBLIC_TITLE;
+    const description =
+      category?.description ?? fallback?.description ?? null;
+    // Sin fila en base no hay categoryId: el catálogo se arma igual desde el
+    // Excel y simplemente no encuentra productos que adjuntar.
+    const categoryId = category?.id ?? "";
+
+    if (isMatrixLabStickers) {
+      const catalog = await getMatrixLabStickersCatalog(categoryId);
+      return (
+        <MatrixLabCategoryShell
+          title={title}
+          description={description}
+          imageUrl={category?.image_url ?? null}
+          summary={`${catalog.entries.length} diseños`}
+        >
+          <MatrixLabStickersCatalog
+            entries={catalog.entries}
+            whatsappUrl={buildWhatsAppUrl(
+              "Hola MatrixLab, quiero cotizar stickers de MatrixLab Stickers.",
+            )}
+          />
+        </MatrixLabCategoryShell>
+      );
+    }
+
+    if (isMatrixLabWear) {
+      const catalog = await getMatrixLabWearCatalog(categoryId);
+      return (
+        <MatrixLabCategoryShell
+          title={title}
+          description={description}
+          imageUrl={category?.image_url ?? null}
+          summary={`${catalog.entries.length} diseños`}
+        >
+          <MatrixLabWearCatalog entries={catalog.entries} />
+        </MatrixLabCategoryShell>
+      );
+    }
+
+    const catalog = await getMatrixLab3dCatalog(categoryId);
+    return (
+      <MatrixLabCategoryShell
+        title={title}
+        description={description}
+        imageUrl={category?.image_url ?? null}
+        summary={`${catalog.entries.length} piezas`}
+      >
+        <MatrixLab3DCatalog
+          entries={catalog.entries}
+          whatsappUrl={buildWhatsAppUrl(
+            "Hola MatrixLab, quiero cotizar una pieza de MatrixLab 3D.",
+          )}
+          customizationWhatsappUrl={buildWhatsAppUrl(
+            "Hola MatrixLab, quiero personalizar una pieza de MatrixLab 3D.",
+          )}
+        />
+      </MatrixLabCategoryShell>
+    );
+  }
+
   if (!category) {
     // Regla de QA: ningún CTA visible de la home puede terminar en 404. Las
     // categorías curadas sin fila en la base muestran "Próximamente".
@@ -250,6 +369,62 @@ export default async function CategoryPage({
           <ProductGrid products={products} />
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Encabezado común de las tres líneas nuevas (MatrixLab Stickers / Wear / 3D).
+ *
+ * Reutiliza la misma estructura visual que el resto de categorías (volver a la
+ * tienda, logo opcional, título, resumen, descripción) pero NO depende de que
+ * exista la fila de `categories`: el catálogo se arma desde el Excel.
+ */
+function MatrixLabCategoryShell({
+  title,
+  description,
+  imageUrl,
+  summary,
+  children,
+}: {
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  summary: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <Link
+        href="/tienda"
+        className="inline-flex items-center gap-1.5 text-sm text-ml-white/60 transition hover:text-ml-violet"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        Volver a la tienda
+      </Link>
+
+      <div className="mt-6 flex items-start gap-4">
+        {imageUrl && (
+          <Image
+            src={imageUrl}
+            alt={title}
+            width={72}
+            height={72}
+            className="h-16 w-16 shrink-0 rounded-2xl border border-white/10 object-cover sm:h-[72px] sm:w-[72px]"
+          />
+        )}
+        <div>
+          <h1 className="text-3xl font-bold sm:text-4xl">{title}</h1>
+          <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-ml-cyan">
+            {title} — {summary}
+          </p>
+          {description && (
+            <p className="mt-3 max-w-2xl text-ml-white/65">{description}</p>
+          )}
+        </div>
+      </div>
+
+      {children}
     </div>
   );
 }
