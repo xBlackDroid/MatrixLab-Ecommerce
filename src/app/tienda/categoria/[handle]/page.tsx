@@ -151,10 +151,15 @@ export async function generateMetadata({
     ? MATRIXLAB_PUBLIC_TITLES[handle]
     : null;
   if (matrixLabTitle) {
+    const description =
+      category?.description ?? curatedFallback(handle)?.description;
     return {
       title: matrixLabTitle,
-      description:
-        category?.description ?? curatedFallback(handle)?.description,
+      description,
+      openGraph: {
+        title: `${matrixLabTitle} | Tienda MatrixLab`,
+        description,
+      },
     };
   }
   if (!category) {
@@ -437,7 +442,7 @@ function MatrixLabCategoryShell({
         <div>
           <h1 className="text-3xl font-bold sm:text-4xl">{title}</h1>
           <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-ml-cyan">
-            {title} — {summary}
+            {summary}
           </p>
           {description && (
             <p className="mt-3 max-w-2xl text-ml-white/65">{description}</p>

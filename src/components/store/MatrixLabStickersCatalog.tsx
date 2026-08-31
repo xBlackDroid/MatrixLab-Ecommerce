@@ -16,6 +16,13 @@ import {
 } from "@/lib/store/matrixlab-stickers";
 import { cn, formatPrice } from "@/lib/utils";
 
+/**
+ * Tope de piezas por pedido cuando el producto es "sobre pedido" (sin
+ * inventario que descontar). El servidor vuelve a validar cantidad y precio al
+ * agregar al carrito; esto sólo evita un stepper bloqueado en la tarjeta.
+ */
+const ON_DEMAND_MAX_QUANTITY = 99;
+
 interface StickerFilter {
   id: MatrixLabStickerCategoryId | null;
   label: string;
@@ -160,7 +167,13 @@ function StickerCard({
   // El precio unitario está confirmado ($10). Si aun así llegara sin resolver
   // (línea futura sin precio), la tarjeta lo dice en vez de inventar cifra.
   const priceConfirmed = entry.price !== null;
-  const maxQuantity = Math.max(0, entry.stock ?? 0);
+  // Un producto "sobre pedido" es vendible con stock 0: no hay inventario que
+  // contar, pero sí se puede pedir. Sin este caso el "+" quedaría bloqueado y
+  // la tarjeta diría "Disponible: 0" junto a un botón de agregar activo.
+  const onDemand = entry.sellable && (entry.stock ?? 0) <= 0;
+  const maxQuantity = onDemand
+    ? ON_DEMAND_MAX_QUANTITY
+    : Math.max(0, entry.stock ?? 0);
   const [quantity, setQuantity] = useState(1);
 
   function step(delta: number) {
@@ -207,9 +220,11 @@ function StickerCard({
         >
           {entry.stock === null
             ? "Disponibilidad por confirmar"
-            : entry.sellable
-              ? `Disponible: ${entry.stock}`
-              : "Agotado"}
+            : onDemand
+              ? "Sobre pedido"
+              : entry.sellable
+                ? `Disponible: ${entry.stock}`
+                : "Agotado"}
         </p>
 
         {priceConfirmed ? (

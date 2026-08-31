@@ -41,6 +41,11 @@
 --   * NO toca Tumbler, pedidos, diseños, usuarios ni Mercado Pago.
 -- ============================================================================
 
+-- Todo el seed corre en UNA transacción: si cualquier guardia falla, no queda
+-- nada a medias. Sin esto, `psql -f` autocommitea sentencia por sentencia y
+-- seguiria adelante tras un error (docs/TIENDA.md documenta ese modo de uso).
+begin;
+
 -- ---------------------------------------------------------------------------
 -- BLOQUEO DE PRECIO — falla ANTES de cualquier escritura
 -- ---------------------------------------------------------------------------
@@ -143,3 +148,5 @@ on conflict (sku) do update set
 --   (select count(*) from public.product_variants where sku like 'ML3D-%') as variantes,
 --   (select coalesce(sum(stock), 0) from public.product_variants
 --     where sku like 'ML3D-%') as piezas;
+
+commit;

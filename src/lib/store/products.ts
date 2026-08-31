@@ -185,9 +185,49 @@ function resolveCupImages(p: ProductRow): ProductRow {
  * seguro: un Sparkle nunca entra al resolver de stickers ni al de vasos.
  */
 function presentProduct(p: ProductRow): ProductRow {
-  return resolveCupImages(
-    resolveStickerImages(resolveSparkleImages(fixProductText(p))),
+  return resolveMatrixLabImages(
+    resolveCupImages(
+      resolveStickerImages(resolveSparkleImages(fixProductText(p))),
+    ),
   );
+}
+
+/**
+ * Imagen de las tres líneas MatrixLab (Stickers / Wear / 3D), resuelta por
+ * CÓDIGO con la misma regla que Tumbler. Sin esto, los productos sembrados
+ * saldrían sin foto en /tienda/producto/<handle>, en la búsqueda y en las
+ * grillas de relacionados, aunque el catálogo de la categoría sí muestre el
+ * placeholder de marca: el seed no escribe `images` a propósito.
+ */
+function resolveMatrixLabImages(p: ProductRow): ProductRow {
+  if (Array.isArray(p.images) && p.images.length > 0) return p;
+  const sticker = matrixLabStickerByHandle(p.handle);
+  if (sticker) {
+    const rel = matrixLabStickerImagePath(sticker.code);
+    return {
+      ...p,
+      images: [
+        publicImageExists(rel) ? rel : MATRIXLAB_STICKER_PLACEHOLDER_IMAGE,
+      ],
+    };
+  }
+  const wear = matrixLabWearByHandle(p.handle);
+  if (wear) {
+    const rel = matrixLabWearImagePath(wear.code);
+    return {
+      ...p,
+      images: [publicImageExists(rel) ? rel : MATRIXLAB_WEAR_PLACEHOLDER_IMAGE],
+    };
+  }
+  const piece = matrixLab3dByHandle(p.handle);
+  if (piece) {
+    const rel = matrixLab3dImagePath(piece.code);
+    return {
+      ...p,
+      images: [publicImageExists(rel) ? rel : MATRIXLAB_3D_PLACEHOLDER_IMAGE],
+    };
+  }
+  return p;
 }
 
 // ---------------------------------------------------------------------------
@@ -1264,6 +1304,12 @@ async function readCategoryProducts(categoryId: string): Promise<{
   products: ProductRow[];
   variantsByProduct: Map<string, ProductVariantRow[]>;
 }> {
+  // Sin fila de categoría no hay nada que consultar. Se corta ANTES de pegarle
+  // a la base: `category_id` es `uuid`, así que filtrar por "" devolvería un
+  // 400 ("invalid input syntax for type uuid") en cada render.
+  if (!categoryId) {
+    return { products: [], variantsByProduct: new Map() };
+  }
   const client = getCatalogClient();
   if (!client) {
     const products = MOCK_PRODUCTS.filter(
@@ -1369,6 +1415,22 @@ function resolveCodeImage(
   const curated = product?.images;
   if (Array.isArray(curated) && curated.length > 0) return curated[0];
   return publicImageExists(rel) ? rel : placeholder;
+}
+
+/**
+ * Foto de un diseño de MatrixLab Wear resuelta por CÓDIGO, para usarse FUERA
+ * del catálogo (hoy: la referencia del diseño elegido dentro del Laboratorio).
+ *
+ * Existe para que ningún consumidor arme la ruta a mano: mientras no se suban
+ * las fotos reales, `public/images/matrixlab-wear/` sólo tiene el placeholder,
+ * así que apuntar directo a `<codigo>.webp` daría una imagen rota.
+ */
+export function resolveMatrixLabWearImage(code: string): string {
+  return resolveCodeImage(
+    null,
+    matrixLabWearImagePath(code),
+    MATRIXLAB_WEAR_PLACEHOLDER_IMAGE,
+  );
 }
 
 // --- MatrixLab Stickers ----------------------------------------------------

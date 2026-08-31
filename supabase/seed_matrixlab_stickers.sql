@@ -48,6 +48,11 @@
 -- RESULTADO ESPERADO: 110 productos, 110 variantes, 10 890 piezas.
 -- ============================================================================
 
+-- Todo el seed corre en UNA transacción: si cualquier guardia falla, no queda
+-- nada a medias. Sin esto, `psql -f` autocommitea sentencia por sentencia y
+-- seguiria adelante tras un error (docs/TIENDA.md documenta ese modo de uso).
+begin;
+
 -- ---------------------------------------------------------------------------
 -- La categoría debe existir: este seed NUNCA crea una segunda categoría ni
 -- cambia el handle público /tienda/categoria/stickers.
@@ -282,3 +287,5 @@ end $$;
 --     where sku ~ '^STK-[A-Z]{2}[0-9]{3}$') as piezas,
 --   (select distinct price from public.product_variants
 --     where sku ~ '^STK-[A-Z]{2}[0-9]{3}$') as precio_unico;
+
+commit;

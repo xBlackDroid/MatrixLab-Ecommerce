@@ -13,11 +13,11 @@ import { DESIGNER_PRODUCT_HANDLE_MAP } from "@/lib/designer/product-handles";
 import {
   getDesignerBaseProduct,
   getDesignerFallbackProduct,
+  resolveMatrixLabWearImage,
 } from "@/lib/store/products";
 import {
   MATRIXLAB_WEAR_CATEGORY_LABELS,
   MATRIXLAB_WEAR_DESIGN_PARAM,
-  matrixLabWearImagePath,
   matrixLabWearSku,
   resolveMatrixLabWearDesignParam,
   type MatrixLabWearItem,
@@ -185,8 +185,10 @@ export default async function DesignerProductPage({
         </h1>
       </div>
 
-      {/* Sólo tiene sentido en prendas: es de donde viene el catálogo Wear. */}
-      {wearDesign && entry.kind === "garment" && (
+      {/* Sólo en playera: es el único destino que enlaza el catálogo Wear.
+          Con `kind === "garment"` una URL editada a mano mostraría un diseño
+          de playera dentro del diseñador de sudadera o tote. */}
+      {wearDesign && productType === "playera" && (
         <WearDesignReference item={wearDesign} />
       )}
       {!product && viewProduct && <PreviewModeBanner />}
@@ -221,7 +223,7 @@ function WearDesignReference({ item }: { item: MatrixLabWearItem }) {
   return (
     <div className="mb-6 flex items-start gap-4 rounded-2xl border border-ml-violet/30 bg-ml-violet/10 p-4">
       <Image
-        src={matrixLabWearImagePath(item.code)}
+        src={resolveMatrixLabWearImage(item.code)}
         alt={item.name}
         width={72}
         height={72}
