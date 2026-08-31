@@ -99,9 +99,14 @@ export default function TiendaHomePage() {
           renderizando en el servidor, así que /tienda no gana ni un
           `use client` ni un IntersectionObserver propio.
 
-          El stagger es de 0.06 s por bloque, la misma escala que ya usa la
-          home. Cada bloque se anima cuando ÉL entra al viewport, así que el
-          delay sólo escalona lo que se ve junto en una misma pantalla. */}
+          El stagger es de 0.06 s, la misma escala de la home, pero CICLADO
+          cada tres bloques (0 / .06 / .12) en vez de acumulado hasta 0.30.
+          El motivo es que cada bloque tiene su propio observer: uno que entra
+          solo a la pantalla —lo normal en móvil, donde un bloque ocupa casi
+          todo el alto— pagaría su delay completo y se quedaría transparente
+          ese tiempo antes de empezar a aparecer. Ciclado, ningún bloque
+          espera más de 0.12 s y los 2-3 que sí se ven juntos en escritorio
+          siguen entrando escalonados. */}
       <Reveal>
         <StoreFamilySection
           id="catalogo"
@@ -202,7 +207,7 @@ export default function TiendaHomePage() {
         />
       </Reveal>
 
-      <Reveal delay={0.18}>
+      <Reveal>
         <StoreFamilySection
           accent="green"
           badgeIcon={Box}
@@ -224,7 +229,7 @@ export default function TiendaHomePage() {
         />
       </Reveal>
 
-      <Reveal delay={0.24}>
+      <Reveal delay={0.06}>
         <StoreFamilySection
           accent="violet"
           badgeIcon={Zap}
@@ -249,7 +254,7 @@ export default function TiendaHomePage() {
       {/* 2. Regreso a clases — Etiquetas Escolares Lab (sección dedicada,
           sin cambios de copy/CTA/ruta/lógica; solo se reubica dentro del
           nuevo sistema de bloques). */}
-      <Reveal delay={0.3}>
+      <Reveal delay={0.12}>
         <section className="px-4 pb-20 pt-6 sm:px-6">
           <div className="glass relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-3xl p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-ml-violet/10 blur-3xl" />

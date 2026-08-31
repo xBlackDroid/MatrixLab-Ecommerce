@@ -46,7 +46,8 @@ body {
 }
 
 /*
- * Respaldo del reveal de entrada (ver components/landing/Reveal.tsx).
+ * Respaldo de los elementos animados con framer-motion: los envueltos en
+ * `Reveal` (home y tienda) y el hero de la tienda.
  *
  * framer-motion emite el estado inicial como estilo EN LÍNEA, así que el HTML
  * del servidor ya trae `opacity:0`. Con reducción de movimiento activada eso

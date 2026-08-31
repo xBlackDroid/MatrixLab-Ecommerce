@@ -16,6 +16,10 @@ import type { ReactNode } from "react";
  * servidor—, así que sin ese respaldo un usuario con JS bloqueado, o con
  * `prefers-reduced-motion`, se quedaría mirando una sección invisible. Las
  * reglas de respaldo llevan `!important`, que gana sobre el estilo en línea.
+ *
+ * La clase NO es exclusiva de este componente: la lleva CUALQUIER elemento
+ * cuyo estado inicial oculto lo escriba framer-motion. Ver StoreHero, que
+ * anima al montar y necesita el mismo respaldo.
  */
 export default function Reveal({
   children,
