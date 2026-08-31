@@ -116,6 +116,22 @@ const MATRIXLAB_PUBLIC_TITLES: Record<string, string> = {
   [MATRIXLAB_3D_CATEGORY_HANDLE]: MATRIXLAB_3D_PUBLIC_TITLE,
 };
 
+/**
+ * Lookup seguro en la whitelist de categorías curadas.
+ *
+ * Un índice directo heredaría claves del prototipo: `isValidHandle` acepta
+ * `/^[a-z0-9-]+$/`, así que /tienda/categoria/constructor devolvía la función
+ * `Object` —un valor truthy— y la ruta respondía 200 con una página sin
+ * título en lugar del 404 que corresponde.
+ */
+function curatedFallback(
+  handle: string,
+): { title: string; description: string; whatsapp: string } | null {
+  return Object.hasOwn(CURATED_CATEGORY_FALLBACKS, handle)
+    ? CURATED_CATEGORY_FALLBACKS[handle]
+    : null;
+}
+
 interface CategoryPageProps {
   params: Promise<{ handle: string }>;
   searchParams: Promise<{ orden?: string }>;
@@ -128,16 +144,21 @@ export async function generateMetadata({
   const category = await getCategoryByHandle(handle);
   // Las tres líneas nuevas publican su nombre de marca aunque la categoría
   // todavía no tenga fila en la base (su seed sigue bloqueado por precios).
-  const matrixLabTitle = MATRIXLAB_PUBLIC_TITLES[handle];
+  // `Object.hasOwn` y no un índice directo: un handle válido según
+  // `isValidHandle` como "constructor" heredaría una clave del prototipo y
+  // devolvería una función como título.
+  const matrixLabTitle = Object.hasOwn(MATRIXLAB_PUBLIC_TITLES, handle)
+    ? MATRIXLAB_PUBLIC_TITLES[handle]
+    : null;
   if (matrixLabTitle) {
     return {
       title: matrixLabTitle,
       description:
-        category?.description ?? CURATED_CATEGORY_FALLBACKS[handle]?.description,
+        category?.description ?? curatedFallback(handle)?.description,
     };
   }
   if (!category) {
-    const fallback = CURATED_CATEGORY_FALLBACKS[handle];
+    const fallback = curatedFallback(handle);
     if (fallback) {
       return { title: fallback.title, description: fallback.description };
     }
@@ -181,7 +202,7 @@ export default async function CategoryPage({
   const isMatrixLab3d = handle === MATRIXLAB_3D_CATEGORY_HANDLE;
 
   if (isMatrixLabStickers || isMatrixLabWear || isMatrixLab3d) {
-    const fallback = CURATED_CATEGORY_FALLBACKS[handle];
+    const fallback = curatedFallback(handle);
     const title =
       isMatrixLabStickers
         ? MATRIXLAB_STICKERS_PUBLIC_TITLE
@@ -251,7 +272,7 @@ export default async function CategoryPage({
   if (!category) {
     // Regla de QA: ningún CTA visible de la home puede terminar en 404. Las
     // categorías curadas sin fila en la base muestran "Próximamente".
-    const fallback = CURATED_CATEGORY_FALLBACKS[handle];
+    const fallback = curatedFallback(handle);
     if (fallback) return <CategoryComingSoon {...fallback} />;
     notFound();
   }

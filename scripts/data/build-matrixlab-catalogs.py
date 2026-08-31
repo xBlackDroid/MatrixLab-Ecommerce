@@ -133,6 +133,13 @@ def build_stickers(src_dir):
     out, cats = [], []
     for position, r in enumerate(rows, start=1):
         category = collect_categories(r, 3, cats)
+        # El handle es la identidad pública: una celda L vacía produciría un
+        # handle "" (clave duplicada en React y producto sin URL en el seed).
+        # Se falla de inmediato en vez de emitir datos rotos en silencio.
+        if not r[11].strip():
+            raise SystemExit(
+                'Fila %d (%s): la columna L (Handle) esta vacia en el Excel.'
+                % (position, r[1]))
         out.append(
             '{ position: %d, code: %s, name: %s, category: %s, description: %s, '
             'finishLabel: %s, inventory: %d, handle: %s },' % (

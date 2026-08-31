@@ -182,13 +182,25 @@ function StickerCard({
 
         <p className="text-sm text-ml-white/60">{item.description}</p>
 
+        {/* La disponibilidad sale SIEMPRE de la variante real, nunca de la
+            columna H del Excel (que es 99 en las 110 filas y afirmaría "hay
+            stock" incluso sin producto en base). Mientras no exista variante
+            no se afirma nada: se declara pendiente, igual que el precio. */}
         <p
           className={cn(
             "text-sm font-semibold",
-            entry.sellable ? "text-ml-cyan" : "text-ml-white/60",
+            entry.stock === null
+              ? "text-ml-white/70"
+              : entry.sellable
+                ? "text-ml-cyan"
+                : "text-ml-white/50",
           )}
         >
-          {entry.declaredInventory > 0 ? "Disponible" : "Sobre pedido"}
+          {entry.stock === null
+            ? "Disponibilidad por confirmar"
+            : entry.sellable
+              ? `Disponible: ${entry.stock}`
+              : "Agotado"}
         </p>
 
         {priceConfirmed ? (
