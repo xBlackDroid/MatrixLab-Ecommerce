@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { CartView } from "@/lib/db/types";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatUnitQuantity } from "@/lib/utils";
 
 /** Validación cliente (espejo de CheckoutSchema del servidor, sin cartId). */
 const CheckoutFormSchema = z.object({
@@ -242,7 +242,12 @@ export default function CheckoutForm() {
           {cart.items.map((line) => (
             <li key={line.id} className="flex justify-between gap-3">
               <span className="text-ml-white/70">
-                {line.quantity}× {line.title}
+                {/* Con unidad propia: "2 planillas × …". Sin ella, el "2× …"
+                    de siempre. */}
+                {line.unitLabel
+                  ? `${formatUnitQuantity(line.quantity, line.unitLabel)} ×`
+                  : `${line.quantity}×`}{" "}
+                {line.title}
                 {line.variantTitle ? ` (${line.variantTitle})` : ""}
                 {line.isCustom ? " · Personalizado" : ""}
               </span>

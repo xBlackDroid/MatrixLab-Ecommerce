@@ -37,3 +37,6 @@ next-env.d.ts
 
 # uploads locales de desarrollo (storage real vive en Supabase)
 /.uploads
+
+# Cache de Python (generadores de datos en scripts/data).
+__pycache__/

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Info, MessageCircle } from "lucide-react";
@@ -12,13 +13,28 @@ import { DESIGNER_PRODUCT_HANDLE_MAP } from "@/lib/designer/product-handles";
 import {
   getDesignerBaseProduct,
   getDesignerFallbackProduct,
+  resolveMatrixLabWearImage,
 } from "@/lib/store/products";
+import {
+  MATRIXLAB_WEAR_CATEGORY_LABELS,
+  MATRIXLAB_WEAR_DESIGN_PARAM,
+  matrixLabWearSku,
+  resolveMatrixLabWearDesignParam,
+  type MatrixLabWearItem,
+} from "@/lib/store/matrixlab-wear";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
 interface DesignerPageProps {
   params: Promise<{ productType: string }>;
+  /**
+   * `design` (opcional) lleva el diseño elegido en el catálogo de MatrixLab
+   * Wear. Es texto del cliente: se valida contra la allowlist de los 100
+   * handles antes de usarse. Sin él, el Laboratorio abre exactamente igual
+   * que siempre.
+   */
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 // Rutas legado → ruta pública nueva. No aparecen en UI; redirigen.
@@ -53,8 +69,18 @@ export async function generateMetadata({
 
 export default async function DesignerProductPage({
   params,
+  searchParams,
 }: DesignerPageProps) {
   const { productType } = await params;
+  const query = (await searchParams) ?? {};
+
+  // Diseño elegido en el catálogo de MatrixLab Wear. `resolve…` sólo devuelve
+  // algo si el valor es EXACTAMENTE uno de los 100 handles conocidos: un
+  // handle inventado, una URL o un path se descartan y el Laboratorio abre
+  // normal. Se muestra como REFERENCIA, no se carga al lienzo.
+  const wearDesign = resolveMatrixLabWearDesignParam(
+    query[MATRIXLAB_WEAR_DESIGN_PARAM],
+  );
 
   // 1) Redirects de rutas legado (no rompen, no se promocionan).
   const legacy = LEGACY_REDIRECTS[productType];
@@ -159,6 +185,12 @@ export default async function DesignerProductPage({
         </h1>
       </div>
 
+      {/* Sólo en playera: es el único destino que enlaza el catálogo Wear.
+          Con `kind === "garment"` una URL editada a mano mostraría un diseño
+          de playera dentro del diseñador de sudadera o tote. */}
+      {wearDesign && productType === "playera" && (
+        <WearDesignReference item={wearDesign} />
+      )}
       {!product && viewProduct && <PreviewModeBanner />}
       {viewProduct ? (
         <DesignerRouter
@@ -170,6 +202,46 @@ export default async function DesignerProductPage({
       ) : (
         <UnavailableNotice />
       )}
+    </div>
+  );
+}
+
+/**
+ * Referencia del diseño elegido en el catálogo de MatrixLab Wear.
+ *
+ * MUESTRA, NO IMPRIME. La foto de `public/images/matrixlab-wear/<código>.webp`
+ * es material de catálogo (una foto o un mockup de la prenda), NO un archivo
+ * de arte listo para impresión: cargarla al lienzo imprimiría el mockup —con
+ * su prenda, sus sombras y su fondo— en lugar del diseño. Por eso aquí sólo se
+ * enseña como referencia y el editor sigue funcionando igual que siempre.
+ *
+ * Para precargar el arte de verdad haría falta un segundo asset imprimible
+ * (PNG con transparencia y resolución de impresión), que hoy NO existe. En
+ * cuanto exista, este bloque es el punto donde se engancha.
+ */
+function WearDesignReference({ item }: { item: MatrixLabWearItem }) {
+  return (
+    <div className="mb-6 flex items-start gap-4 rounded-2xl border border-ml-violet/30 bg-ml-violet/10 p-4">
+      <Image
+        src={resolveMatrixLabWearImage(item.code)}
+        alt={item.name}
+        width={72}
+        height={72}
+        className="h-16 w-16 shrink-0 rounded-xl border border-white/10 object-cover sm:h-[72px] sm:w-[72px]"
+      />
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ml-violet">
+          Diseño elegido · {MATRIXLAB_WEAR_CATEGORY_LABELS[item.category]}
+        </p>
+        <p className="mt-0.5 truncate font-bold text-ml-white">{item.name}</p>
+        <p className="mt-0.5 text-xs text-ml-white/50">
+          Ref. {item.code} · {matrixLabWearSku(item.code)}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-ml-white/70">
+          Lo traemos como referencia de lo que elegiste. Confírmanos este
+          diseño al cotizar y define aquí tu talla y color.
+        </p>
+      </div>
     </div>
   );
 }
