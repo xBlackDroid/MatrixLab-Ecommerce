@@ -4,6 +4,15 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, FlaskConical, Wand2 } from "lucide-react";
 
+/**
+ * El hero anima AL MONTAR (initial/animate), no al entrar al viewport, pero
+ * comparte el problema de `Reveal`: framer-motion escribe `opacity:0` como
+ * estilo en línea, así que sale ya oculto en el HTML del servidor. Por eso
+ * cada elemento animado lleva `reveal-motion`, la clase que activa los
+ * respaldos de globals.css (reducción de movimiento) y del <noscript> del
+ * layout. Sin ella, un usuario con JS bloqueado se quedaba sin título y sin
+ * los dos CTA de la tienda.
+ */
 export default function StoreHero() {
   return (
     <section className="relative overflow-hidden px-4 pb-16 pt-14 sm:px-6 sm:pt-20">
@@ -16,7 +25,7 @@ export default function StoreHero() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="glass mb-6 flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-violet"
+          className="reveal-motion glass mb-6 flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-violet"
         >
           <FlaskConical className="h-4 w-4" aria-hidden />
           Laboratorio creativo MatrixLab
@@ -26,7 +35,7 @@ export default function StoreHero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.05 }}
-          className="text-4xl font-bold tracking-tight sm:text-6xl"
+          className="reveal-motion text-4xl font-bold tracking-tight sm:text-6xl"
         >
           Tienda <span className="text-gradient">MatrixLab</span>
         </motion.h1>
@@ -35,7 +44,7 @@ export default function StoreHero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.12 }}
-          className="mt-5 max-w-2xl text-lg text-ml-white/85 sm:text-xl"
+          className="reveal-motion mt-5 max-w-2xl text-lg text-ml-white/85 sm:text-xl"
         >
           Productos personalizados, pedidos especiales y experiencias creativas
           listas para llevar de una pieza hasta miles.
@@ -45,7 +54,7 @@ export default function StoreHero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.18 }}
-          className="mt-3 max-w-2xl text-ml-white/60"
+          className="reveal-motion mt-3 max-w-2xl text-ml-white/60"
         >
           Compra productos personalizados, crea pedidos especiales o diseña
           prendas y accesorios textiles directamente desde nuestro laboratorio
@@ -56,7 +65,7 @@ export default function StoreHero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.24 }}
-          className="mt-9 flex flex-col gap-4 sm:flex-row"
+          className="reveal-motion mt-9 flex flex-col gap-4 sm:flex-row"
         >
           <Link
             href="/tienda/disenador"
