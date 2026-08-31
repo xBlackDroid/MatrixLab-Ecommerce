@@ -14,6 +14,7 @@ import {
   SESSION_COOKIE,
   sessionCookieOptions,
 } from "@/lib/security/session";
+import { canCreateDesign, QUOTA_MESSAGES } from "@/lib/security/quota";
 import { getCatalogEntry } from "@/lib/designer/product-catalog";
 import { DesignerCreateSchema } from "@/lib/validation/designer";
 
@@ -39,6 +40,12 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return jsonError("Datos inválidos.", 400);
 
   const { sessionId, isNew } = ensureSessionId(request);
+
+  // Techo de diseños por sesión: sin él, el flujo normal permite crear filas
+  // sin límite (una sesión se obtiene gratis pidiendo la cookie).
+  const quota = await canCreateDesign(sessionId);
+  if (quota) return jsonError(QUOTA_MESSAGES[quota], 409, quota);
+
   const client = requireServiceClient();
 
   // El producto debe existir, ser visible y permitir personalización.

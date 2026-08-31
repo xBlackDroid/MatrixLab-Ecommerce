@@ -1,9 +1,15 @@
 import "server-only";
 
 import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
-import { getServerEnv, getSiteUrl, isProduction } from "@/lib/security/env";
+import {
+  getServerEnv,
+  getSiteUrl,
+  isProduction,
+  usesLiveMercadoPagoCredentials,
+} from "@/lib/security/env";
 import {
   buildSignatureManifest,
+  isSignatureTimestampFresh,
   parseSignatureHeader,
   signatureMatches,
 } from "@/lib/payments/mercadopago-core";
@@ -13,7 +19,7 @@ import type {
   FetchPaymentResult,
 } from "@/lib/payments/types";
 
-export { mapPaymentStatus } from "@/lib/payments/mercadopago-core";
+export { mapPaymentStatus, paymentMismatchReason } from "@/lib/payments/mercadopago-core";
 
 /**
  * Integración Mercado Pago Checkout Pro.
@@ -131,6 +137,17 @@ export async function fetchPayment(
         paymentId: String(payment.id),
         status: payment.status,
         externalReference: payment.external_reference ?? null,
+        // Datos de INTEGRIDAD del cobro: el webhook los compara contra el
+        // pedido antes de marcarlo pagado. Un campo ausente queda en null y
+        // el webhook rechaza aplicar el pago (fail-closed).
+        transactionAmount:
+          typeof payment.transaction_amount === "number"
+            ? payment.transaction_amount
+            : null,
+        currencyId:
+          typeof payment.currency_id === "string" ? payment.currency_id : null,
+        liveMode:
+          typeof payment.live_mode === "boolean" ? payment.live_mode : null,
       },
     };
   } catch (error) {
@@ -144,21 +161,33 @@ export async function fetchPayment(
 
 /**
  * Verifica la firma `x-signature` de webhooks de Mercado Pago.
- * Si MERCADOPAGO_WEBHOOK_SECRET no está configurado:
- *   - en producción se rechaza el webhook (estricto);
- *   - en desarrollo se permite (modo test) porque igual se confirma el pago
- *     consultando a Mercado Pago con el Access Token.
+ *
+ * Si MERCADOPAGO_WEBHOOK_SECRET no está configurado el webhook se rechaza en
+ * producción Y en cualquier despliegue que use credenciales REALES de Mercado
+ * Pago (`APP_USR-…`), aunque NODE_ENV no diga "production". El puente de
+ * desarrollo sin secreto sólo aplica a credenciales de prueba: así una
+ * instancia de staging apuntando a la cuenta real nunca acepta notificaciones
+ * sin firmar.
+ *
+ * Además de la firma se valida la FRESCURA del `ts`: un HMAC válido no caduca
+ * por sí solo, y sin ventana de tiempo una notificación capturada podría
+ * reenviarse indefinidamente.
  */
 export function verifyWebhookSignature(params: {
   xSignature: string | null;
   xRequestId: string | null;
   dataId: string | null;
+  /** Inyectable para pruebas; por defecto el reloj del servidor. */
+  nowMs?: number;
 }): boolean {
   const secret = getServerEnv().mpWebhookSecret;
-  if (!secret) return !isProduction();
+  if (!secret) return !isProduction() && !usesLiveMercadoPagoCredentials();
   if (!params.dataId) return false;
   const parsed = parseSignatureHeader(params.xSignature);
   if (!parsed) return false;
+  if (!isSignatureTimestampFresh(parsed.ts, params.nowMs ?? Date.now())) {
+    return false;
+  }
 
   return signatureMatches({
     secret,
@@ -169,4 +198,15 @@ export function verifyWebhookSignature(params: {
     }),
     v1: parsed.v1,
   });
+}
+
+/**
+ * ¿El webhook debe exigir `live_mode`?
+ *
+ * En producción siempre. Además, en cualquier despliegue con credenciales
+ * reales: aplicar un pago de sandbox sobre la cuenta real marcaría pedidos
+ * como pagados sin dinero de por medio.
+ */
+export function requireLivePayments(): boolean {
+  return isProduction() || usesLiveMercadoPagoCredentials();
 }

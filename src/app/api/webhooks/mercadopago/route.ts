@@ -5,6 +5,8 @@ import type { OrderRow } from "@/lib/db/types";
 import {
   fetchPayment,
   mapPaymentStatus,
+  paymentMismatchReason,
+  requireLivePayments,
   verifyWebhookSignature,
 } from "@/lib/payments/mercadopago";
 import {
@@ -20,13 +22,20 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/** Moneda única de la tienda. Todo cobro debe llegar en esta moneda. */
+const ORDER_CURRENCY = "MXN";
+
 /**
  * Webhook de Mercado Pago (configurado vía notification_url).
  *
  * Seguridad:
- * - Valida firma x-signature si MERCADOPAGO_WEBHOOK_SECRET está configurado.
+ * - Valida firma x-signature si MERCADOPAGO_WEBHOOK_SECRET está configurado,
+ *   incluida la FRESCURA del `ts` (un HMAC válido no caduca por sí solo).
  * - NUNCA confía en el payload: consulta el pago real a Mercado Pago con el
  *   Access Token (solo backend).
+ * - Valida la INTEGRIDAD del cobro antes de marcar pagado: monto ≥ total del
+ *   pedido, moneda MXN y `live_mode` real. Un pago parcial, en otra moneda o
+ *   de sandbox no libera producción ni descuenta inventario.
  * - Idempotente: payment_events.event_id es único y `processed_at` marca los
  *   eventos ya aplicados, así un reenvío no duplica efectos pero un evento
  *   que quedó registrado sin aplicarse sí se reintenta. El descuento de
@@ -190,6 +199,47 @@ export async function POST(request: NextRequest) {
     .eq("event_id", eventId);
 
   const mapping = mapPaymentStatus(payment.status);
+
+  // ---------------------------------------------------------------------
+  // INTEGRIDAD DEL COBRO. `external_reference` dice a QUÉ pedido apunta el
+  // pago, no CUÁNTO se cobró. Antes de marcar pagado se exige que el dinero
+  // recibido cubra el total del pedido, en MXN y en modo real. Un pago
+  // parcial, en otra moneda o de sandbox NO libera producción: el pedido se
+  // queda en revisión manual y queda registrado en la bitácora.
+  // ---------------------------------------------------------------------
+  if (mapping.paymentStatus === "approved") {
+    const mismatch = paymentMismatchReason({
+      transactionAmount: payment.transactionAmount,
+      currencyId: payment.currencyId,
+      liveMode: payment.liveMode,
+      orderTotal: Number(order.total),
+      expectedCurrency: ORDER_CURRENCY,
+      requireLiveMode: requireLivePayments(),
+    });
+    if (mismatch) {
+      await logAudit({
+        actor: "webhook:mercadopago",
+        action: "payment.rejected_mismatch",
+        entityType: "order",
+        entityId: order.id,
+        metadata: {
+          orderNumber: order.order_number,
+          reason: mismatch,
+          // Sólo importes/moneda: nunca datos del pagador ni del proveedor.
+          paidAmount: payment.transactionAmount,
+          paidCurrency: payment.currencyId,
+          expectedAmount: Number(order.total),
+        },
+      });
+      // Evento consumido: reintentarlo daría el mismo resultado. El pedido
+      // NO se marca pagado y queda para revisión manual en el panel.
+      await client
+        .from("payment_events")
+        .update({ processed_at: new Date().toISOString() })
+        .eq("event_id", eventId);
+      return NextResponse.json({ received: true }, { status: 200 });
+    }
+  }
 
   try {
     if (mapping.paymentStatus === "approved") {

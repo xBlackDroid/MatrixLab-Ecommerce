@@ -11,6 +11,7 @@ import {
   getClientIp,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
+import { canUploadAsset, QUOTA_MESSAGES } from "@/lib/security/quota";
 import { hashSessionId, readSessionId } from "@/lib/security/session";
 import { safeFileName } from "@/lib/security/sanitize";
 import {
@@ -31,6 +32,23 @@ export const dynamic = "force-dynamic";
  *   metadata. La ruta incluye hash de sesión: nadie puede adivinar/listar.
  * - Se genera preview optimizada (webp) en bucket privado aparte.
  */
+
+/**
+ * Techo de píxeles al DECODIFICAR.
+ *
+ * El chequeo de dimensiones ocurre después de leer la metadata, pero quien
+ * decodifica es `sharp`, y una "bomba de descompresión" (pocos KB comprimidos
+ * que se expanden a cientos de megapíxeles) agota memoria en el decoder antes
+ * de que ninguna validación de la app llegue a ejecutarse. Con este límite
+ * libvips se niega a decodificar por encima del máximo legítimo
+ * (UPLOAD_MAX_DIMENSION²) y el archivo se rechaza como imagen inválida.
+ */
+const SHARP_DECODE_OPTIONS = {
+  limitInputPixels: UPLOAD_MAX_DIMENSION * UPLOAD_MAX_DIMENSION,
+  // Cualquier aviso del decoder (archivo truncado o malformado) es motivo de
+  // rechazo: no se guarda arte que ni siquiera se puede leer del todo.
+  failOn: "warning" as const,
+};
 
 const FORMAT_TO_MIME: Record<string, { mime: string; ext: string }> = {
   png: { mime: "image/png", ext: "png" },
@@ -97,6 +115,15 @@ export async function POST(request: NextRequest) {
     return jsonError("Este diseño ya está ligado a un pedido.", 409);
   }
 
+  // Techo por sesión/diseño: crear sesiones es gratis, así que sin cuota el
+  // flujo normal basta para llenar el storage de Supabase. Los límites son muy
+  // holgados respecto al uso real; ningún cliente legítimo los alcanza.
+  const quota = await canUploadAsset({
+    sessionId,
+    designProjectId: design.id,
+  });
+  if (quota) return jsonError(QUOTA_MESSAGES[quota], 409, quota);
+
   let buffer: Buffer;
   try {
     buffer = Buffer.from(await file.arrayBuffer());
@@ -111,7 +138,7 @@ export async function POST(request: NextRequest) {
   let previewBuffer: Buffer;
   try {
     const sharp = (await import("sharp")).default;
-    const metadata = await sharp(buffer).metadata();
+    const metadata = await sharp(buffer, SHARP_DECODE_OPTIONS).metadata();
     detected = metadata.format ? FORMAT_TO_MIME[metadata.format] : undefined;
     width = metadata.width ?? 0;
     height = metadata.height ?? 0;
@@ -133,7 +160,7 @@ export async function POST(request: NextRequest) {
         422,
       );
     }
-    previewBuffer = await sharp(buffer)
+    previewBuffer = await sharp(buffer, SHARP_DECODE_OPTIONS)
       .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
       .webp({ quality: 80 })
       .toBuffer();

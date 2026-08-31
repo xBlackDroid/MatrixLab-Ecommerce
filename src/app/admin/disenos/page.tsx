@@ -63,10 +63,14 @@ export default async function AdminDisenosPage() {
             rawAssets.map(async (asset) => ({
               id: asset.id,
               fileName: asset.original_file_name,
+              // Enlace de DESCARGA: se fuerza `attachment` para que el
+              // binario original del cliente (que se guarda sin recodificar)
+              // nunca se interprete como documento en el navegador del admin.
               signedUrl: await createSignedUrl(
                 BUCKETS.designAssets,
                 asset.original_file_url,
                 3600,
+                { forceDownload: true },
               ),
             })),
           ),
@@ -78,6 +82,7 @@ export default async function AdminDisenosPage() {
                 BUCKETS.designAssets,
                 design.uploaded_asset_url,
                 3600,
+                { forceDownload: true },
               )
             : null;
         return {

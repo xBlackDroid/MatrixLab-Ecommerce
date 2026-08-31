@@ -29,6 +29,16 @@ export interface NormalizedPayment {
   paymentId: string;
   status: string;
   externalReference: string | null;
+  /**
+   * Monto realmente cobrado por el proveedor. `null` si el proveedor no lo
+   * declara: el webhook lo trata como no verificable y NO marca el pedido
+   * pagado (fail-closed).
+   */
+  transactionAmount: number | null;
+  /** Moneda del cobro (ISO-4217, p. ej. "MXN"). */
+  currencyId: string | null;
+  /** `false` = pago de sandbox/prueba; jamás debe aplicarse en producción. */
+  liveMode: boolean | null;
 }
 
 /**
