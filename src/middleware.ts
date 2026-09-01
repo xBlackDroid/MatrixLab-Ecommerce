@@ -66,6 +66,44 @@ export const STATIC_PRERENDERED_PATHS = new Set([
   "/tienda/disenador",
 ]);
 
+/**
+ * Rutas que Next renderiza EN LA PETICIÓN (todas declaran `force-dynamic`).
+ * SÓLO estas reciben la política estricta con nonce.
+ *
+ * El reparto está en POSITIVO a propósito. Antes se hacía al revés —todo lo
+ * que no estuviera en `STATIC_PRERENDERED_PATHS` recibía la política
+ * estricta—, y eso metía en el saco estricto a las URLs que NO EXISTEN: Next
+ * las sirve con su 404 prerenderizada (`/_not-found`), cuyo HTML sale del
+ * caché con los scripts en línea SIN nonce. Como `strict-dynamic` hace que el
+ * navegador ignore `'self'`, la 404 se quedaba sin ejecutar un solo script
+ * (sin hidratación, sin navegación de cliente) y llenaba la consola de
+ * violaciones de CSP. Con la lista en positivo, una URL desconocida cae en la
+ * política compatible, que es justo la que su HTML prerenderizado necesita.
+ *
+ * Efecto secundario buscado: añadir mañana un `not-found.tsx` o un
+ * `error.tsx` —que también se prerenderizan y tampoco son `page.tsx`, así que
+ * el QA no los vería— deja de ser una trampa.
+ *
+ * `scripts/qa/security-headers.test.ts` verifica la equivalencia en los dos
+ * sentidos: una página declara `force-dynamic` si y sólo si su ruta cae aquí.
+ * Así ni una página dinámica se queda sin la política estricta, ni una
+ * prerenderizada la recibe por error.
+ */
+export const DYNAMIC_ROUTE_PATTERNS: readonly RegExp[] = [
+  /^\/admin(?:\/|$)/,
+  /^\/api(?:\/|$)/,
+  /^\/tienda\/carrito$/,
+  /^\/tienda\/checkout(?:\/|$)/,
+  /^\/tienda\/categoria\/[^/]+$/,
+  /^\/tienda\/producto\/[^/]+$/,
+  /^\/tienda\/disenador\/[^/]+$/,
+];
+
+/** ¿Esta ruta la renderiza Next en la petición (y por tanto lleva nonce)? */
+export function isDynamicRoute(path: string): boolean {
+  return DYNAMIC_ROUTE_PATTERNS.some((pattern) => pattern.test(path));
+}
+
 function directivesFor(scriptSrc: string): string[] {
   return [
     "default-src 'self'",
@@ -117,7 +155,10 @@ export function middleware(request: NextRequest) {
   const isDev = process.env.NODE_ENV === "development";
   const path = normalizePath(request.nextUrl.pathname);
 
-  if (STATIC_PRERENDERED_PATHS.has(path)) {
+  // Sólo lo que Next renderiza en la petición puede llevar nonce. Todo lo
+  // demás —las 3 páginas prerenderizadas y cualquier URL inexistente, que se
+  // sirve con la 404 también prerenderizada— recibe la política compatible.
+  if (!isDynamicRoute(path)) {
     const response = NextResponse.next();
     response.headers.set("Content-Security-Policy", buildCompatibleCsp(isDev));
     return response;

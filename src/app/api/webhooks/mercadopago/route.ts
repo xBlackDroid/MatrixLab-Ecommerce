@@ -208,6 +208,29 @@ export async function POST(request: NextRequest) {
   // queda en revisión manual y queda registrado en la bitácora.
   // ---------------------------------------------------------------------
   if (mapping.paymentStatus === "approved") {
+    // NO SE PUEDE DECIDIR ≠ NO CUADRA. Si el proveedor no declaró monto o
+    // moneda, el cobro no es verificable: no es un pago malo, es una
+    // respuesta incompleta. Consumir el evento aquí sería definitivo —el
+    // `event_id` lleva el estado, así que todo reintento de Mercado Pago
+    // corta arriba contra `processed_at` y devuelve 200—, y un pedido
+    // legítimamente pagado se quedaría en `pendiente_pago` para siempre, sin
+    // inventario descontado y sin forma de recuperarlo. Se responde 500 SIN
+    // marcar el evento para que Mercado Pago lo reintente.
+    if (payment.transactionAmount === null || payment.currencyId === null) {
+      await logAudit({
+        actor: "webhook:mercadopago",
+        action: "payment.unverifiable",
+        entityType: "order",
+        entityId: order.id,
+        metadata: {
+          orderNumber: order.order_number,
+          hasAmount: payment.transactionAmount !== null,
+          hasCurrency: payment.currencyId !== null,
+        },
+      });
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
+
     const mismatch = paymentMismatchReason({
       transactionAmount: payment.transactionAmount,
       currencyId: payment.currencyId,

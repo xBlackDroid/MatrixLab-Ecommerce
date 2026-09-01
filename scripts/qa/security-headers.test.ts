@@ -21,6 +21,7 @@ import { join, sep } from "node:path";
 import {
   buildCompatibleCsp,
   buildStrictCsp,
+  isDynamicRoute,
   normalizePath,
   STATIC_PRERENDERED_PATHS,
 } from "../../src/middleware";
@@ -64,29 +65,76 @@ const pages = walk(join(ROOT, "src", "app")).filter((f) =>
 );
 check("se encontraron páginas que auditar", pages.length > 0);
 
+/**
+ * Equivalencia en LOS DOS SENTIDOS: una página declara `force-dynamic` si y
+ * sólo si su ruta cae en `DYNAMIC_ROUTE_PATTERNS`.
+ *
+ *   →  Dinámica sin patrón que la cubra: recibiría la política COMPATIBLE,
+ *      es decir `unsafe-inline` en una ruta con sesión, datos personales o
+ *      dinero. Se pierde la protección justo donde importa.
+ *   →  Cubierta por un patrón pero sin `force-dynamic`: Next puede
+ *      prerenderizarla y sus scripts saldrían del caché SIN nonce, así que
+ *      `strict-dynamic` los bloquearía todos y la página quedaría muerta.
+ *
+ * Comprobar un solo sentido deja pasar el otro fallo, y ninguno de los dos
+ * se nota hasta producción.
+ */
 for (const file of pages) {
   const route = routeOf(file);
   const source = readFileSync(file, "utf8");
   const isForcedDynamic = /export const dynamic\s*=\s*"force-dynamic"/.test(source);
-  const isListedStatic = STATIC_PRERENDERED_PATHS.has(normalizePath(route));
+  const matchesDynamic = isDynamicRoute(normalizePath(route));
 
-  if (isListedStatic) {
-    check(
-      `${route} está en la lista estática y recibe CSP compatible`,
-      !isForcedDynamic,
-      isForcedDynamic
-        ? "declara force-dynamic: quítalo de STATIC_PRERENDERED_PATHS para que reciba la CSP estricta"
-        : "",
-    );
-  } else {
-    check(
-      `${route} declara force-dynamic (requisito de la CSP con nonce)`,
-      isForcedDynamic,
-      isForcedDynamic
-        ? ""
-        : "sin force-dynamic la página puede prerenderizarse y sus scripts quedarían bloqueados",
-    );
-  }
+  check(
+    `${route}: force-dynamic (${isForcedDynamic}) coincide con la lista dinámica (${matchesDynamic})`,
+    isForcedDynamic === matchesDynamic,
+    isForcedDynamic === matchesDynamic
+      ? ""
+      : isForcedDynamic
+        ? "declara force-dynamic pero NINGÚN patrón la cubre: recibiría unsafe-inline. Añádela a DYNAMIC_ROUTE_PATTERNS"
+        : "un patrón la cubre pero no declara force-dynamic: si se prerenderiza, sus scripts quedan sin nonce y bloqueados",
+  );
+}
+
+/**
+ * Regresión fijada: una URL que NO EXISTE se sirve con la 404
+ * PRERENDERIZADA (`/_not-found`), cuyo HTML sale del caché con los scripts
+ * sin nonce. Si cayera en la política estricta, `strict-dynamic` los
+ * bloquearía todos. `/_not-found` no es un `page.tsx`, así que el bucle de
+ * arriba nunca lo vería: hay que comprobarlo aparte.
+ */
+for (const unknownPath of [
+  "/esta-ruta-no-existe",
+  "/tienda/no-existe",
+  "/_not-found",
+  "/tienda/disenador-falso",
+]) {
+  check(
+    `${unknownPath} (404 prerenderizada) recibe la CSP compatible, no la de nonce`,
+    !isDynamicRoute(normalizePath(unknownPath)),
+  );
+}
+
+// Las 3 páginas prerenderizadas conocidas siguen fuera de la política estricta.
+for (const staticPath of STATIC_PRERENDERED_PATHS) {
+  check(
+    `${staticPath} (prerenderizada) recibe la CSP compatible`,
+    !isDynamicRoute(normalizePath(staticPath)),
+  );
+}
+
+// Y las rutas donde viven la sesión y el dinero SÍ reciben la estricta.
+for (const sensitivePath of [
+  "/admin",
+  "/admin/pedidos",
+  "/tienda/checkout",
+  "/tienda/carrito",
+  "/api/checkout/mercadopago",
+]) {
+  check(
+    `${sensitivePath} recibe la CSP estricta con nonce`,
+    isDynamicRoute(normalizePath(sensitivePath)),
+  );
 }
 
 // ---------------------------------------------------------------------------
