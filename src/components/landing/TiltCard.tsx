@@ -113,7 +113,11 @@ export default function TiltCard({
         onPointerLeave={reset}
         onBlur={reset}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="glass group relative flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl px-3 py-6 transition-colors duration-300 hover:border-ml-cyan/50 focus-visible:border-ml-cyan/60 focus-visible:outline-none active:scale-[0.97]"
+        /* Utilidades en vez de `.glass`, aunque el aspecto sea idéntico:
+           `.glass` está sin capa en globals.css y su atajo `border` gana en la
+           cascada a cualquier utilidad `border-*`, así que con `.glass` el
+           `hover:border-ml-cyan/50` de esta tarjeta NO se veía. */
+        className="group relative flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-ml-white/10 bg-ml-white/[0.04] px-3 py-6 backdrop-blur-[14px] transition-colors duration-300 hover:border-ml-cyan/50 focus-visible:border-ml-cyan/60 focus-visible:outline-none active:scale-[0.97]"
       >
         {/* Brillo que sigue al cursor. Aparece sólo en hover para que en
             móvil (donde no hay cursor) no pinte nada. */}

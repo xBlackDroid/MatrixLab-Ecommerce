@@ -23,8 +23,12 @@ import type { SVGProps } from "react";
  *   veces: watermark y primer plano), y dos IDs iguales en el documento hacen
  *   que el navegador resuelva el degradado equivocado. El color y el brillo se
  *   ponen desde CSS, que además los hace animables en hover.
- * - `vectorEffect="non-scaling-stroke"` para que el trazo mantenga su grosor
- *   óptico tanto en el watermark de 9rem como en la pieza de 3.5rem.
+ * - El trazo escala con la figura (NO se usa `vectorEffect="non-scaling-stroke"`).
+ *   Se probó y hacía lo contrario de lo que se buscaba: fija el trazo en 2px
+ *   CSS pase lo que pase, así que el watermark de 14rem se dibujaba con el
+ *   mismo pelo de 2px que la pieza de 3.5rem y, al 9% de opacidad, casi no se
+ *   veía. Dejando que escale, el watermark engorda con la figura y se lee como
+ *   fondo, que es su trabajo.
  * - SIN área de impresión punteada. Se probó y se quitó: a 56px reales el
  *   rectángulo de guiones chocaba con los cordones y el bolsillo de la sudadera
  *   y con la costura de la gorra, y se leía como suciedad en vez de como
@@ -50,12 +54,10 @@ export function TeeSilhouette(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>
       <path
-        vectorEffect="non-scaling-stroke"
         d="M23.5 12.5 L13.5 16.8 L6.5 26.5 L14.8 32.2 L18 27.5 L18 54 Q18 56.5 20.5 56.5 L43.5 56.5 Q46 56.5 46 54 L46 27.5 L49.2 32.2 L57.5 26.5 L50.5 16.8 L40.5 12.5 C39 18.8 25 18.8 23.5 12.5 Z"
       />
       {/* costura del cuello */}
       <path
-        vectorEffect="non-scaling-stroke"
         strokeWidth={1.4}
         d="M24.8 14.6 C26.6 19.8 37.4 19.8 39.2 14.6"
       />
@@ -76,7 +78,6 @@ export function HoodieSilhouette(props: SVGProps<SVGSVGElement>) {
     <svg {...base(props)}>
       {/* cuerpo y mangas, cerrado por el escote */}
       <path
-        vectorEffect="non-scaling-stroke"
         d="M22.5 19 L12.5 22.5 L5.5 32 L13.8 37.5 L17.5 32.5 L17.5 53.5 Q17.5 56 20 56 L44 56 Q46.5 56 46.5 53.5 L46.5 32.5 L50.2 37.5 L58.5 32 L51.5 22.5 L41.5 19 C40 24 24 24 22.5 19 Z"
       />
       {/* Capucha: DOS arcos concéntricos, no uno.
@@ -85,23 +86,19 @@ export function HoodieSilhouette(props: SVGProps<SVGSVGElement>) {
           El par exterior/interior le da grosor de tela: lo que se ve entre las
           dos líneas es la capucha, y lo de dentro, su abertura. */}
       <path
-        vectorEffect="non-scaling-stroke"
         d="M21.5 19.5 C21.5 11.5 26.5 8 32 8 C37.5 8 42.5 11.5 42.5 19.5"
       />
       <path
-        vectorEffect="non-scaling-stroke"
         strokeWidth={1.5}
         d="M25.2 19.5 C25.2 14.6 28.2 12.2 32 12.2 C35.8 12.2 38.8 14.6 38.8 19.5"
       />
       {/* cordones */}
       <path
-        vectorEffect="non-scaling-stroke"
         strokeWidth={1.5}
         d="M28.8 24 V29.5 M35.2 24 V29.5"
       />
       {/* bolsillo canguro */}
       <path
-        vectorEffect="non-scaling-stroke"
         strokeWidth={1.5}
         d="M21.5 41 Q21.5 50.5 27 50.5 L37 50.5 Q42.5 50.5 42.5 41"
       />
@@ -119,13 +116,16 @@ export function HoodieSilhouette(props: SVGProps<SVGSVGElement>) {
 export function CapSilhouette(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>
-      {/* copa */}
-      <path
-        vectorEffect="non-scaling-stroke"
-        d="M13 37.5 C13 19.5 47 19.5 47 37.5"
-      />
+      {/* Copa.
+          El vértice de una cúbica NO está a la altura de sus puntos de
+          control: para C(y0=45, y1=11, y2=11, y3=45) el punto más alto es
+          (45 + 3·11 + 3·11 + 45)/8 = 19.5, no 11. La versión anterior colocaba
+          la costura y el botón a la altura de los controles, así que ambos
+          quedaban FUERA de la copa y la gorra se leía como una cúpula con
+          antena. Aquí todo lo de arriba se ancla a 19.5. */}
+      <path d="M8 45 C8 11 42 11 42 45" />
       {/* banda inferior */}
-      <path vectorEffect="non-scaling-stroke" d="M12.6 37.5 H46.6" />
+      <path d="M7.5 45 H41.6" />
       {/* Visera RELLENA, no de contorno.
           Dibujada como línea, un contorno cerrado y alargado se lee como un
           lazo o un asa: el ojo ve el hueco de dentro, no el volumen. Rellena
@@ -134,21 +134,11 @@ export function CapSilhouette(props: SVGProps<SVGSVGElement>) {
       <path
         fill="currentColor"
         stroke="none"
-        d="M45 37.5 C53.5 37.5 60 39.4 61.4 41.5 C62 42.5 61 43.4 58.8 43.4 C51.5 43.4 46.8 41.8 45 40 Z"
+        d="M40 45 C48.5 45 55 46.9 56.4 49 C57 50 56 50.9 53.8 50.9 C46.5 50.9 41.8 49.3 40 47.5 Z"
       />
-      {/* costura central y botón */}
-      <path
-        vectorEffect="non-scaling-stroke"
-        strokeWidth={1.4}
-        d="M30 20.6 V37.5"
-      />
-      <circle
-        cx="30"
-        cy="19.4"
-        r="1.9"
-        vectorEffect="non-scaling-stroke"
-        strokeWidth={1.4}
-      />
+      {/* costura central y botón, apoyados en el vértice real de la copa */}
+      <path strokeWidth={1.4} d="M25 20 V45" />
+      <circle cx="25" cy="18.4" r="1.7" strokeWidth={1.4} />
     </svg>
   );
 }
@@ -159,17 +149,14 @@ export function ToteSilhouette(props: SVGProps<SVGSVGElement>) {
     <svg {...base(props)}>
       {/* cuerpo */}
       <path
-        vectorEffect="non-scaling-stroke"
         d="M15.5 23 L48.5 23 L45.8 53.6 Q45.6 55.6 43.6 55.6 L20.4 55.6 Q18.4 55.6 18.2 53.6 Z"
       />
       {/* asa */}
       <path
-        vectorEffect="non-scaling-stroke"
         d="M25 23 V18.4 C25 13.9 28.1 11.4 32 11.4 C35.9 11.4 39 13.9 39 18.4 V23"
       />
       {/* pliegue superior */}
       <path
-        vectorEffect="non-scaling-stroke"
         strokeWidth={1.4}
         d="M16.2 28 H47.8"
       />

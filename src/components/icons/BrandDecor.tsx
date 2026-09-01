@@ -38,24 +38,20 @@ export function GiftBoxSilhouette(props: SVGProps<SVGSVGElement>) {
     <svg {...base(props)}>
       {/* tapa */}
       <path
-        vectorEffect="non-scaling-stroke"
         d="M11 20.5 H53 A2 2 0 0 1 55 22.5 V28 A2 2 0 0 1 53 30 H11 A2 2 0 0 1 9 28 V22.5 A2 2 0 0 1 11 20.5 Z"
       />
       {/* cuerpo */}
       <path
-        vectorEffect="non-scaling-stroke"
         d="M13 30 V51.5 A3 3 0 0 0 16 54.5 H48 A3 3 0 0 0 51 51.5 V30"
       />
       {/* cinta */}
-      <path vectorEffect="non-scaling-stroke" d="M32 30 V54.5" />
+      <path d="M32 30 V54.5" />
       {/* moño */}
       <path
-        vectorEffect="non-scaling-stroke"
         strokeWidth={1.8}
         d="M32 20.4 C27.4 13.4 20.6 11.2 19 14.6 C17.6 17.6 23.4 19.8 32 20.4 Z"
       />
       <path
-        vectorEffect="non-scaling-stroke"
         strokeWidth={1.8}
         d="M32 20.4 C36.6 13.4 43.4 11.2 45 14.6 C46.4 17.6 40.6 19.8 32 20.4 Z"
       />
@@ -70,39 +66,21 @@ export function GiftBoxSilhouette(props: SVGProps<SVGSVGElement>) {
 export function BoxStackSilhouette(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>
-      {/* caja de atrás */}
-      <path
-        vectorEffect="non-scaling-stroke"
-        d="M32 13.5 H50.5 A2 2 0 0 1 52.5 15.5 V29.5 A2 2 0 0 1 50.5 31.5 H32"
-      />
-      <path
-        vectorEffect="non-scaling-stroke"
-        strokeWidth={1.5}
-        d="M42.5 13.5 V31.5"
-      />
-      {/* caja de delante */}
-      <path
-        vectorEffect="non-scaling-stroke"
-        d="M13.5 31.5 H39.5 A2 2 0 0 1 41.5 33.5 V51.5 A2 2 0 0 1 39.5 53.5 H13.5 A2 2 0 0 1 11.5 51.5 V33.5 A2 2 0 0 1 13.5 31.5 Z"
-      />
+      {/* DOS cajas cerradas, apiladas y sin solaparse.
+          La versión anterior tenía tres cajas a las que les faltaba la pared
+          izquierda, contando con que la de delante las taparía. No las tapaba:
+          con `fill: none` no hay nada que oculte, y además ni siquiera se
+          solapaban, así que se veían tres letras C sueltas. Dos rectángulos
+          completos, uno encima del otro, se leen como pila a la primera. */}
+      {/* caja de arriba */}
+      <path d="M20 13 H38 A2 2 0 0 1 40 15 V28 A2 2 0 0 1 38 30 H20 A2 2 0 0 1 18 28 V15 A2 2 0 0 1 20 13 Z" />
+      <path strokeWidth={1.5} d="M29 13 V30" />
+      {/* caja de abajo, más ancha */}
+      <path d="M14 32 H42 A2 2 0 0 1 44 34 V51 A2 2 0 0 1 42 53 H14 A2 2 0 0 1 12 51 V34 A2 2 0 0 1 14 32 Z" />
       {/* cinta de embalaje */}
-      <path
-        vectorEffect="non-scaling-stroke"
-        strokeWidth={1.5}
-        d="M26.5 31.5 V53.5"
-      />
-      {/* etiqueta de marca */}
-      <path
-        vectorEffect="non-scaling-stroke"
-        strokeWidth={1.5}
-        d="M15.5 37 H23 V43 H15.5 Z"
-      />
-      {/* pila: la tercera insinuada */}
-      <path
-        vectorEffect="non-scaling-stroke"
-        strokeWidth={1.5}
-        d="M45 34.5 H52.5 A2 2 0 0 1 54.5 36.5 V51.5 A2 2 0 0 1 52.5 53.5 H45"
-      />
+      <path strokeWidth={1.5} d="M28 32 V53" />
+      {/* etiqueta de marca: lo que convierte una caja en un lote rotulado */}
+      <path strokeWidth={1.5} d="M16.5 37.5 H24.5 V44 H16.5 Z" />
     </svg>
   );
 }

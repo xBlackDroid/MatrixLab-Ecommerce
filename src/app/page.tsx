@@ -311,6 +311,21 @@ const FAMILY_CARDS: Array<{
  * El servicio integral se dice ahora en el subtítulo, que es su sitio, y esta
  * fila pasa a ser un menú de categorías que se pueden cotizar.
  */
+/*
+ * OJO con `.glass` y los bordes de color.
+ *
+ * `.glass` (globals.css) está SIN capa y declara el atajo `border: 1px solid
+ * rgba(248,249,250,.1)`. Las utilidades de Tailwind v4 viven en
+ * `@layer utilities`, y en la cascada lo no-encapado gana a cualquier capa: si
+ * a un elemento con `.glass` le pones `border-ml-violet/30`, el borde sigue
+ * saliendo gris. Por eso estos chips NO usan `.glass` sino sus utilidades
+ * equivalentes, que sí se dejan sobrescribir.
+ *
+ * El mismo choque deja mudos los `hover:border-*` de cualquier `.glass` del
+ * proyecto (hay ~113 usos, varios en /tienda y admin con bordes de color que
+ * hoy no se ven). Arreglarlo de raíz es mover `.glass` a `@layer components`,
+ * pero eso cambia el render fuera de la home y se sale de este encargo.
+ */
 const B2B_CAPABILITIES: Array<{ label: string; tone: string }> = [
   { label: "Branding", tone: "border-ml-violet/30" },
   { label: "Uniformes", tone: "border-ml-cyan/30" },
@@ -323,10 +338,20 @@ const B2B_CAPABILITIES: Array<{ label: string; tone: string }> = [
 ];
 
 /**
- * Los dos frentes del negocio. Se pasan a datos (antes eran dos bloques de JSX
- * casi idénticos) para que la única diferencia entre las tarjetas sea el
- * contenido y no haya que tocar dos marcados en paralelo cada vez que cambie el
- * estilo.
+ * Los dos frentes de la venta a EMPRESAS: lo que se regala a una persona
+ * (kits, detalles, ediciones) y lo que se produce para un equipo entero
+ * (uniformes, merch, lotes).
+ *
+ * Antes la primera tarjeta era el frente de PARTICULARES (bodas, XV años,
+ * graduaciones). Al reorientar la sección a B2B, ese acceso desapareció de la
+ * portada aunque el sitio lo sigue prometiendo en el hero y en /tienda
+ * ("Desde personas hasta empresas"). No es un bug —la sección se pidió B2B a
+ * propósito— pero conviene decidir dónde vive el cliente particular: hoy sólo
+ * llega por el catálogo, no por un bloque propio.
+ *
+ * Se pasan a datos (antes eran dos bloques de JSX casi idénticos) para que la
+ * única diferencia entre las tarjetas sea el contenido y no haya que tocar dos
+ * marcados en paralelo cada vez que cambie el estilo.
  *
  * Las clases de color van completas por acento: Tailwind necesita ver el nombre
  * literal en el código, no puede resolver `text-ml-${tone}`.
@@ -348,7 +373,7 @@ const AUDIENCE_CARDS: Array<{
   chipBorder: string;
 }> = [
   {
-    id: "personas",
+    id: "regalos",
     Icon: GiftBoxSilhouette,
     eyebrow: "Para regalar y celebrar",
     title: "Regalos y ediciones que la gente conserva",
@@ -777,7 +802,7 @@ export default function LandingPage() {
                 {B2B_CAPABILITIES.map((capability) => (
                   <li
                     key={capability.label}
-                    className={`glass rounded-full border px-4 py-2 text-sm font-medium text-ml-white/80 ${capability.tone}`}
+                    className={`rounded-full border bg-ml-white/[0.04] px-4 py-2 text-sm font-medium text-ml-white/80 backdrop-blur-[14px] ${capability.tone}`}
                   >
                     {capability.label}
                   </li>
@@ -793,7 +818,10 @@ export default function LandingPage() {
                   className="h-full"
                 >
                   <div
-                    className={`glass group relative flex h-full flex-col overflow-hidden rounded-[2rem] p-8 transition duration-300 hover:-translate-y-1 sm:p-10 ${card.hoverBorder}`}
+                    /* Utilidades en vez de `.glass`: si no, su `border` sin
+                       capa gana en la cascada y el `hover:border-*` de la
+                       tarjeta nunca llega a verse. */
+                    className={`group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-ml-white/10 bg-ml-white/[0.04] p-8 backdrop-blur-[14px] transition duration-300 hover:-translate-y-1 sm:p-10 ${card.hoverBorder}`}
                   >
                     <div
                       className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.gradient}`}
