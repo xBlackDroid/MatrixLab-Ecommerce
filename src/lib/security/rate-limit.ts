@@ -64,11 +64,38 @@ export function checkRateLimit(
   };
 }
 
-/** IP del cliente detrás de proxy/CDN. Solo para rate limiting, no para auth. */
+/**
+ * IP del cliente detrás de proxy/CDN. Solo para rate limiting, no para auth.
+ *
+ * ORDEN IMPORTANTE. `x-forwarded-for` es una lista que CRECE por la izquierda
+ * con lo que envió el cliente: el primer elemento es exactamente el valor que
+ * un atacante puede escribir a mano. Tomar `split(",")[0]` convertía la clave
+ * del rate limit en un valor controlado por el atacante — bastaba variar la
+ * cabecera en cada intento para que cada petición cayera en un bucket distinto
+ * y el límite (incluido el de login del panel admin) nunca se alcanzara.
+ *
+ * Por eso:
+ *   1. `x-real-ip` primero: lo escribe el edge de Vercel con la IP real de la
+ *      conexión y no es concatenable por el cliente.
+ *   2. Si no está, el ÚLTIMO elemento de `x-forwarded-for`: es el que añade el
+ *      proxy más cercano al servidor, el único que el cliente no controla.
+ *
+ * Nunca sirve para autorizar: solo para agrupar solicitudes.
+ */
 export function getClientIp(request: Request): string {
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp.slice(0, 64);
+
   const fwd = request.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0]!.trim().slice(0, 64);
-  return request.headers.get("x-real-ip")?.slice(0, 64) ?? "unknown";
+  if (fwd) {
+    const hops = fwd
+      .split(",")
+      .map((hop) => hop.trim())
+      .filter(Boolean);
+    const trusted = hops[hops.length - 1];
+    if (trusted) return trusted.slice(0, 64);
+  }
+  return "unknown";
 }
 
 /** Límites estándar por endpoint (solicitudes por ventana). */

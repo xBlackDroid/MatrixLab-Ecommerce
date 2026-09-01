@@ -86,9 +86,44 @@ export function isMercadoPagoConfigured(): boolean {
   return Boolean(getServerEnv().mpAccessToken);
 }
 
+/**
+ * ¿El Access Token configurado es una credencial REAL (no de prueba)?
+ *
+ * Mercado Pago prefija sus credenciales productivas con `APP_USR-` y las de
+ * prueba con `TEST-`. Saberlo permite endurecer por CREDENCIAL y no sólo por
+ * `NODE_ENV`: un staging o un preview apuntando a la cuenta real mueve dinero
+ * real y debe exigir los mismos controles que producción (webhook firmado,
+ * `live_mode`), aunque su NODE_ENV diga otra cosa.
+ *
+ * Nunca imprime ni devuelve el token: sólo su naturaleza.
+ */
+export function usesLiveMercadoPagoCredentials(): boolean {
+  const token = getServerEnv().mpAccessToken;
+  if (!token) return false;
+  if (token.startsWith("TEST-")) return false;
+  return token.startsWith("APP_USR-");
+}
+
 /** Longitudes mínimas de credenciales admin (ver .env.example). */
 export const ADMIN_SECRET_MIN_LENGTH = 32;
 export const ADMIN_PASSWORD_MIN_LENGTH = 8;
+
+/**
+ * Longitud RECOMENDADA de la contraseña admin.
+ *
+ * El mínimo duro sigue en 8 para no bloquear un panel que ya está en
+ * producción con una contraseña más corta (eso sería un fail-safe que se
+ * convierte en denegación de servicio a la operación). Por debajo de este
+ * umbral se emite una advertencia en el log del servidor —sin el valor— para
+ * que la rotación quede en el radar del operador.
+ */
+export const ADMIN_PASSWORD_RECOMMENDED_LENGTH = 20;
+
+/** ¿La contraseña admin está por debajo de la longitud recomendada? */
+export function isAdminPasswordWeak(): boolean {
+  const password = getServerEnv().adminAccessPassword;
+  return Boolean(password && password.length < ADMIN_PASSWORD_RECOMMENDED_LENGTH);
+}
 
 /**
  * Secreto de firma de sesiones admin. Un secreto corto debilita el HMAC,

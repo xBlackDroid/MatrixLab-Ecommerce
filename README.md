@@ -45,7 +45,27 @@ src/app/api         → route handlers (cart, checkout, webhooks, designs, uploa
 src/lib             → seguridad, validación, db, pagos, diseñador, lógica de tienda
 src/components      → store / designer / admin
 supabase/           → migraciones SQL, RLS, storage y seed
+scripts/qa          → QA ejecutable (incluye las pruebas de seguridad)
 ```
+
+## Seguridad
+
+Las migraciones se aplican en orden: `0001` → `0002` (RLS) → `0003` (storage)
+→ `0004` → `0005` → **`0006` (endurecimiento)**. La `0006` es aditiva y crea
+el freno durable de fuerza bruta del panel; sin ella el login sólo cuenta con
+el límite en memoria, que en serverless se reinicia con cada instancia.
+
+QA de seguridad (no necesita base de datos ni credenciales):
+
+```bash
+npx tsx scripts/qa/security-payments.test.ts    # integridad del cobro y anti-replay
+npx tsx scripts/qa/security-contracts.test.ts   # precio server-side, authz, uploads
+npx tsx scripts/qa/security-headers.test.ts     # CSP con nonce y cabeceras
+npx tsx scripts/qa/mercadopago-webhook.test.ts  # firma y mapeo de estados
+```
+
+Informe completo de la auditoría de caja blanca:
+**[docs/SECURITY_AUDIT_WHITEBOX_2026-08.md](docs/SECURITY_AUDIT_WHITEBOX_2026-08.md)**.
 
 > La landing real de MatrixLab aún no vive en este repo: `src/app/page.tsx`
 > es un placeholder con branding que enlaza a `/tienda`. Reemplazar solo ese

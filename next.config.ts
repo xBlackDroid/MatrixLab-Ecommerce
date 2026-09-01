@@ -1,52 +1,48 @@
 import type { NextConfig } from "next";
 
 /**
- * Cabeceras de seguridad HTTP.
+ * Cabeceras de seguridad HTTP (estáticas).
  *
- * CSP pensada para esta app:
- * - img-src incluye Supabase Storage (URLs firmadas del diseñador/catálogo)
- *   más data:/blob: que usa el canvas de Konva.
- * - connect-src incluye Supabase por si el cliente descarga assets firmados
- *   vía fetch para montarlos en el canvas.
- * - script-src necesita 'unsafe-inline' por los scripts de hidratación de
- *   Next.js; en desarrollo se añade 'unsafe-eval' (requerido por HMR).
- * - style-src/font-src permiten Google Fonts: el diseñador de Etiquetas
- *   Escolares carga tipografías (Baloo 2, Caveat, Fredoka, Pacifico…) desde
- *   fonts.googleapis.com (hoja) y fonts.gstatic.com (archivos). Sin esto la
- *   galería de tipografías degrada a fuentes del sistema.
- * - El checkout de Mercado Pago es por redirección (Checkout Pro), no hay
- *   SDK embebido ni iframes: frame-src queda cerrado.
+ * La Content-Security-Policy NO está aquí: necesita un nonce distinto en cada
+ * respuesta, así que la emite `src/middleware.ts`. Definirla también en este
+ * archivo mandaría DOS cabeceras CSP y el navegador aplicaría la intersección
+ * de ambas, que es la forma más silenciosa de romper la página.
+ *
+ * Lo que sí vive aquí es todo lo que no varía por petición:
+ *
+ * - HSTS con `preload`: además de forzar https en visitas siguientes, permite
+ *   inscribir el dominio en la lista precargada de los navegadores para que ni
+ *   la PRIMERA visita viaje en claro. (Inscribirlo es un trámite aparte en
+ *   hstspreload.org; la cabecera es el requisito previo.)
+ * - `X-Frame-Options: DENY` acompaña a `frame-ancestors 'none'` para
+ *   navegadores viejos que no leen la CSP.
+ * - COOP `same-origin`: aísla el contexto de navegación, de modo que una
+ *   ventana abierta desde el sitio (o que abra el sitio) no conserve
+ *   referencias `window.opener` explotables.
+ * - CORP `same-origin`: impide que otro sitio incruste nuestros recursos.
+ *   No afecta a los scrapers de vista previa (WhatsApp, redes), que descargan
+ *   del lado del servidor y no aplican esta política.
+ * - Deliberadamente NO se añade COEP (`require-corp`): rompería la carga de
+ *   imágenes de Supabase Storage y de Google Fonts, que son cross-origin.
+ * - `Permissions-Policy` apaga APIs que la tienda no usa. `payment=()` es
+ *   seguro: Checkout Pro es una redirección a Mercado Pago, no la Payment
+ *   Request API dentro de nuestro origen.
  */
-const isDev = process.env.NODE_ENV === "development";
-
 const securityHeaders = [
   {
-    key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in",
-      "worker-src 'self' blob:",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
-    ].join("; "),
-  },
-  {
     key: "Strict-Transport-Security",
-    value: "max-age=31536000; includeSubDomains",
+    value: "max-age=63072000; includeSubDomains; preload",
   },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+  { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    value:
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), interest-cohort=()",
   },
 ] as const;
 

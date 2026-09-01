@@ -17,6 +17,17 @@ export const dynamic = "force-dynamic";
 const MAX_PRODUCT_IMAGE_BYTES = 5 * 1024 * 1024;
 
 /**
+ * Techo de píxeles al decodificar (bomba de descompresión). Igual que en el
+ * subidor del Laboratorio: unos pocos KB comprimidos pueden expandirse a
+ * cientos de megapíxeles y agotar la memoria del runtime antes de que ninguna
+ * validación se ejecute. 64 MP cubre con holgura cualquier foto de catálogo.
+ */
+const SHARP_DECODE_OPTIONS = {
+  limitInputPixels: 8000 * 8000,
+  failOn: "warning" as const,
+};
+
+/**
  * Subida de imágenes de catálogo (bucket público product-images).
  * Solo admin. La imagen se re-encodea con sharp (webp) para neutralizar
  * payloads y normalizar peso.
@@ -46,11 +57,11 @@ export async function POST(request: NextRequest) {
   try {
     const sharp = (await import("sharp")).default;
     const buffer = Buffer.from(await file.arrayBuffer());
-    const metadata = await sharp(buffer).metadata();
+    const metadata = await sharp(buffer, SHARP_DECODE_OPTIONS).metadata();
     if (!metadata.format || !["png", "jpeg", "webp"].includes(metadata.format)) {
       return jsonError("Formato no permitido. Usa PNG, JPG o WEBP.", 415);
     }
-    const optimized = await sharp(buffer)
+    const optimized = await sharp(buffer, SHARP_DECODE_OPTIONS)
       .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
       .webp({ quality: 84 })
       .toBuffer();
