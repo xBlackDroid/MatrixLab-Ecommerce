@@ -15,7 +15,13 @@ import { join } from "node:path";
 import {
   CheckoutSchema,
   ShippingAddressSchema,
+  normalizeMexicanPhone,
 } from "../../src/lib/validation/checkout";
+import {
+  formatAddressLines,
+  isShippingAddressSnapshot,
+} from "../../src/components/admin/ShippingAddressBlock";
+import { sanitizeText } from "../../src/lib/security/sanitize";
 
 const ROOT = join(__dirname, "..", "..");
 
@@ -372,7 +378,7 @@ check(
       join(ROOT, "src", "components", "admin", "ShippingAddressBlock.tsx"),
       "utf8",
     ),
-  ) && /if \(!address\)/.test(adminBlock),
+  ) && /if \(!isShippingAddressSnapshot\(address\)\)/.test(adminBlock),
 );
 check(
   "la confirmación pública tolera un pedido sin dirección",
@@ -407,6 +413,158 @@ check(
 check(
   "la migración agrega la modalidad de entrega con default",
   /delivery_method text not null default 'shipping'/i.test(migracionSql),
+);
+
+// ---------------------------------------------------------------------------
+// 14) COMPORTAMIENTO, no contrato: la limpieza no puede vaciar un campo
+//     obligatorio en silencio.
+//
+//     `sanitizeText` borra `<...>` COMPLETO. Cuando corría DESPUÉS de Zod,
+//     "Av. 5 de Mayo <esquina Juárez>" se guardaba como "Av. 5 de Mayo" y
+//     "<S/N>" como "": el pedido se cobraba con la dirección mutilada y sin
+//     error para nadie. Ahora la limpieza vive DENTRO del esquema, así que lo
+//     que Zod aprueba es exactamente lo que se guarda.
+// ---------------------------------------------------------------------------
+for (const [campo, escrito, esperado] of [
+  ["street", "Av. 5 de Mayo <esquina Juárez>", "Av. 5 de Mayo esquina Juárez"],
+  ["neighborhood", "Roma <Norte>", "Roma Norte"],
+  ["recipient_name", "Ana <López>", "Ana López"],
+] as const) {
+  const parsed = ShippingAddressSchema.safeParse({
+    ...DIRECCION_OK,
+    [campo]: escrito,
+  });
+  const guardado = parsed.success
+    ? sanitizeText(parsed.data[campo] as string, 240)
+    : "(rechazado)";
+  check(
+    `${campo}: el texto sobrevive a la limpieza ("${escrito}")`,
+    parsed.success && guardado === esperado,
+    guardado,
+  );
+}
+// "S/N" (sin número) es una dirección mexicana legítima: con la limpieza
+// anterior "<S/N>" se guardaba VACÍO; ahora conserva el texto.
+const sn = ShippingAddressSchema.safeParse({
+  ...DIRECCION_OK,
+  exterior_number: "<S/N>",
+});
+check(
+  'exterior_number: "<S/N>" conserva el texto en vez de vaciarse',
+  sn.success && sn.data.exterior_number === "S/N",
+  sn.success ? sn.data.exterior_number : "rechazado",
+);
+// Lo que SÍ queda vacío tras limpiar se RECHAZA con el error del campo, en vez
+// de guardarse en blanco.
+for (const [campo, escrito] of [
+  ["exterior_number", "<>"],
+  ["street", "  <>  "],
+  ["neighborhood", "<<>>"],
+] as const) {
+  check(
+    `${campo}: "${escrito}" se rechaza en vez de guardarse vacío`,
+    !ShippingAddressSchema.safeParse({ ...DIRECCION_OK, [campo]: escrito })
+      .success,
+  );
+}
+// Y ninguna etiqueta puede sobrevivir: sin `<` ni `>` no hay HTML posible.
+const conScript = ShippingAddressSchema.safeParse({
+  ...DIRECCION_OK,
+  street: "<script>alert(1)</script>Calle Real",
+});
+check(
+  "ningún campo guardado conserva < o >",
+  conScript.success &&
+    !/[<>]/.test(conScript.data.street) &&
+    conScript.data.street.includes("Calle Real"),
+  conScript.success ? conScript.data.street : "rechazado",
+);
+// Y ningún campo obligatorio del snapshot puede llegar vacío a la base.
+const limpio = ShippingAddressSchema.safeParse(DIRECCION_OK);
+check(
+  "ningún campo obligatorio queda vacío después de sanear",
+  limpio.success &&
+    OBLIGATORIOS.every(
+      (campo) => sanitizeText(limpio.data[campo] as string, 240) !== "",
+    ),
+);
+
+// ---------------------------------------------------------------------------
+// 15) El admin no puede caerse por un jsonb con otra forma.
+//
+//     `ShippingAddressBlock` es componente de cliente y el panel no tiene
+//     error boundary: una excepción ahí tumba la lista COMPLETA de pedidos.
+//     Una dirección editada a mano en Supabase, o con la forma vieja, no puede
+//     costar la única vista de pedidos que hay.
+// ---------------------------------------------------------------------------
+const MALFORMADAS: [string, unknown][] = [
+  ["null", null],
+  ["objeto vacío", {}],
+  ["forma anterior", {
+    street: "Av. 5 de Mayo",
+    exterior: "123",
+    city: "Cuauhtémoc",
+    zip: "06700",
+    state: "CDMX",
+  }],
+  ["texto plano", "una dirección en texto plano"],
+  ["arreglo", []],
+  ["números", { street: 123, postal_code: 6700 }],
+  ["parcial", { street: "Av. 5 de Mayo" }],
+];
+for (const [label, valor] of MALFORMADAS) {
+  let lanzo = false;
+  try {
+    formatAddressLines(valor);
+  } catch {
+    lanzo = true;
+  }
+  check(`formatAddressLines no lanza con ${label}`, !lanzo);
+  check(
+    `${label} no se toma por una dirección válida`,
+    !isShippingAddressSnapshot(valor),
+  );
+}
+check(
+  "un snapshot completo sí se reconoce como válido",
+  isShippingAddressSnapshot(limpio.success ? limpio.data : null),
+);
+check(
+  "el snapshot completo produce las 4 líneas de dirección",
+  formatAddressLines(limpio.success ? limpio.data : null).length === 4,
+  `${formatAddressLines(limpio.success ? limpio.data : null).join(" / ")}`,
+);
+
+// ---------------------------------------------------------------------------
+// 16) Cliente y servidor comparten el MISMO normalizador de teléfono.
+// ---------------------------------------------------------------------------
+const formSrc = code("src", "components", "store", "CheckoutForm.tsx");
+check(
+  "el formulario reusa el normalizador del servidor",
+  /normalizeMexicanPhone/.test(formSrc),
+);
+check(
+  "el formulario ya no tiene su propia regla de teléfono",
+  !/replace\(\/\^521\?\//.test(formSrc),
+);
+// El teléfono se guarda en UN solo formato en las dos columnas.
+const contacto = CheckoutSchema.safeParse({
+  ...CHECKOUT_OK,
+  customerPhone: "+52 (55) 1234-5678",
+  shippingAddress: { ...DIRECCION_OK, phone: "044 55 1234 5678" },
+});
+check(
+  "customer_phone y shipping_address.phone quedan en el mismo formato",
+  contacto.success &&
+    contacto.data.customerPhone === "5512345678" &&
+    contacto.data.shippingAddress.phone === "5512345678",
+  contacto.success
+    ? `${contacto.data.customerPhone} / ${contacto.data.shippingAddress.phone}`
+    : "rechazado",
+);
+check(
+  "el normalizador exportado y el esquema coinciden",
+  normalizeMexicanPhone("+52 1 55 1234 5678") === "5512345678",
 );
 
 console.log(

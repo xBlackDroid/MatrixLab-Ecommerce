@@ -38,7 +38,12 @@ alter table public.orders
 do $$
 begin
   if not exists (
-    select 1 from pg_constraint where conname = 'orders_delivery_method_check'
+    -- `conname` es único por (esquema, tabla), no global: sin calificar por
+    -- tabla, una restricción homónima en otro lado haría que esto se saltara
+    -- en silencio.
+    select 1 from pg_constraint
+     where conname = 'orders_delivery_method_check'
+       and conrelid = 'public.orders'::regclass
   ) then
     alter table public.orders
       add constraint orders_delivery_method_check

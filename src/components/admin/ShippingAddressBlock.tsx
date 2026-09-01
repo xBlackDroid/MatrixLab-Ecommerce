@@ -8,22 +8,52 @@ import type { ShippingAddressSnapshot } from "@/lib/db/types";
  * Datos de entrega de un pedido, para el admin.
  *
  * SOLO se usa dentro del panel autenticado: la dirección es PII y no aparece
- * en ninguna vista pública. Ver `formatAddressLines`, que es lo único que
- * arma el texto — nada de esto se registra en logs.
+ * en ninguna vista pública. Nada de esto se registra en logs.
  *
- * Los pedidos anteriores a la captura de dirección tienen `null` y se
- * declaran como tal en vez de renderizar campos vacíos o `undefined`.
+ * Un pedido puede traer `shipping_address` en tres estados y los tres se
+ * manejan aquí: `null` (los anteriores a la captura de dirección), el
+ * snapshot completo, o —si alguien editó el jsonb a mano en Supabase o
+ * apareciera una fila con la forma vieja— algo que NO es el snapshot. Este
+ * componente es cliente y el panel no tiene error boundary, así que una
+ * excepción aquí tumbaría la lista COMPLETA de pedidos: por eso se valida la
+ * forma en vez de confiar en el tipo.
  */
-export function formatAddressLines(address: ShippingAddressSnapshot): string[] {
-  const numeros = [address.exterior_number, address.interior_number]
-    .filter(Boolean)
+function texto(valor: unknown): string {
+  return typeof valor === "string" ? valor.trim() : "";
+}
+
+/** ¿El jsonb tiene de verdad la forma del snapshot? */
+export function isShippingAddressSnapshot(
+  value: unknown,
+): value is ShippingAddressSnapshot {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const v = value as Record<string, unknown>;
+  return (
+    texto(v.street) !== "" &&
+    texto(v.neighborhood) !== "" &&
+    texto(v.municipality) !== "" &&
+    texto(v.state) !== "" &&
+    texto(v.postal_code) !== ""
+  );
+}
+
+/**
+ * Líneas de la dirección, tolerante a campos ausentes: nunca lanza. Las
+ * líneas que quedarían vacías se omiten.
+ */
+export function formatAddressLines(address: unknown): string[] {
+  const v = (address ?? {}) as Record<string, unknown>;
+  const numeros = [texto(v.exterior_number), texto(v.interior_number)]
+    .filter((n) => n !== "")
     .join(" int. ");
   return [
-    `${address.street} ${numeros}`.trim(),
-    address.neighborhood,
-    `${address.postal_code} ${address.municipality}`.trim(),
-    address.state,
-  ].filter((line) => line.trim() !== "");
+    `${texto(v.street)} ${numeros}`.trim(),
+    texto(v.neighborhood),
+    `${texto(v.postal_code)} ${texto(v.municipality)}`.trim(),
+    texto(v.state),
+  ].filter((line) => line !== "");
 }
 
 export default function ShippingAddressBlock({
@@ -33,7 +63,11 @@ export default function ShippingAddressBlock({
 }) {
   const [copiado, setCopiado] = useState(false);
 
-  if (!address) {
+  // Sin dirección utilizable —null o un jsonb con otra forma— se dice, no se
+  // adivina. El caso "otra forma" además muestra lo que sí se pueda leer para
+  // que el pedido no quede a ciegas.
+  if (!isShippingAddressSnapshot(address)) {
+    const rescatadas = formatAddressLines(address);
     return (
       <div className="flex flex-col gap-3 text-sm">
         <h3 className="text-xs font-bold uppercase text-ml-white/45">
@@ -43,6 +77,18 @@ export default function ShippingAddressBlock({
           Dirección no registrada. Este pedido es anterior a la captura de
           dirección en el checkout: confírmala por WhatsApp antes de enviar.
         </p>
+        {rescatadas.length > 0 && (
+          <div className="rounded-lg bg-white/5 px-3.5 py-2.5 text-ml-white/70">
+            <p className="text-xs text-ml-white/45">
+              Datos parciales encontrados en el pedido:
+            </p>
+            {rescatadas.map((linea) => (
+              <span key={linea} className="block">
+                {linea}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -90,14 +136,15 @@ export default function ShippingAddressBlock({
 
       <p>
         <span className="text-ml-white/50">Recibe:</span>{" "}
-        {address.recipient_name}
+        {texto(address.recipient_name) || "—"}
       </p>
       <p>
         <span className="text-ml-white/50">WhatsApp / teléfono:</span>{" "}
-        {address.phone}
+        {texto(address.phone) || "—"}
       </p>
       <p>
-        <span className="text-ml-white/50">Correo:</span> {address.email}
+        <span className="text-ml-white/50">Correo:</span>{" "}
+        {texto(address.email) || "—"}
       </p>
 
       <div className="flex gap-2 rounded-lg bg-white/5 px-3.5 py-2.5">

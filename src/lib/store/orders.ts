@@ -112,13 +112,15 @@ export async function createOrderFromCart(params: {
   );
 
   const orderNumber = generateOrderNumber();
-  // El snapshot llega validado y normalizado por Zod; aquí sólo se sanea el
-  // texto (mismo tratamiento que el resto de campos libres del pedido) y se
-  // descartan los opcionales vacíos para no guardar claves huecas.
+  // El snapshot llega ya limpio y validado por Zod (ver `limpiar` en
+  // validation/checkout.ts). `sanitizeText` se aplica igual como segunda
+  // barrera para quien llame a esta función sin pasar por el endpoint, pero
+  // el filtro mira el valor YA SANEADO: si la limpieza dejara algo vacío, la
+  // clave se descarta en vez de guardarse como cadena vacía.
   const shippingAddress = Object.fromEntries(
     Object.entries(params.shippingAddress)
-      .filter(([, value]) => typeof value === "string" && value.trim() !== "")
-      .map(([key, value]) => [key, sanitizeText(value as string, 240)]),
+      .map(([key, value]) => [key, sanitizeText(value as string, 240)])
+      .filter(([, value]) => value !== ""),
   ) as unknown as ShippingAddressSnapshot;
 
   const { data: orderData, error: orderError } = await client

@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { CartView } from "@/lib/db/types";
+import { normalizeMexicanPhone } from "@/lib/validation/checkout";
 import { formatPrice, formatUnitQuantity } from "@/lib/utils";
 
 /**
@@ -27,12 +28,16 @@ const CheckoutFormSchema = z.object({
     .min(2, "Escribe tu nombre completo.")
     .max(80, "Máximo 80 caracteres."),
   customerEmail: z.email("Correo inválido.").max(120, "Máximo 120 caracteres."),
+  // Se reusa el normalizador DEL SERVIDOR en vez de escribir aquí una regla
+  // parecida: con dos algoritmos, el cliente rechazaba formatos que el
+  // servidor sí acepta (044/045) y el usuario nunca llegaba a la rama que los
+  // arregla. Una sola regla, un solo comportamiento.
   customerPhone: z
     .string()
     .max(25, "Teléfono muy largo.")
     .regex(/^[0-9+()\s-]+$/, "Solo números, espacios y + ( ) -.")
     .refine(
-      (v) => v.replace(/\D/g, "").replace(/^521?/, "").length === 10,
+      (v) => /^[0-9]{10}$/.test(normalizeMexicanPhone(v)),
       "Escribe los 10 dígitos de tu teléfono.",
     ),
   postalCode: z

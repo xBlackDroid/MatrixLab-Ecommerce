@@ -183,7 +183,14 @@ export interface OrderRow {
    * tratarlos siempre como "sin dirección registrada", nunca asumir el objeto.
    */
   shipping_address: ShippingAddressSnapshot | null;
-  delivery_method: DeliveryMethod;
+  /**
+   * OPCIONAL a propósito: la columna llega con la migración 0006 y hasta que
+   * se aplique, un `select("*")` no la trae. Marcarla obligatoria haría que
+   * `order.delivery_method === "pickup"` compilara comparando contra
+   * `undefined`. Cuando 0006 esté aplicada en todos los entornos se puede
+   * volver obligatoria.
+   */
+  delivery_method?: DeliveryMethod;
   payment_provider: string;
   payment_status: PaymentStatus;
   payment_reference: string | null;

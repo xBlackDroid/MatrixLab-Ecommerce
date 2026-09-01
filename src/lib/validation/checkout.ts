@@ -17,12 +17,31 @@ import { z } from "zod";
 const emptyToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
-/** Recorta y colapsa espacios internos; los campos de dirección son de una línea. */
+/**
+ * Limpieza de un campo de dirección.
+ *
+ * Se hace DENTRO del esquema, no después: si la limpieza corriera al guardar
+ * —como hacía `sanitizeText`, que borra `<...>` COMPLETO— un campo obligatorio
+ * podía quedar vacío después de haber pasado la validación. "Av. 5 de Mayo
+ * <esquina Juárez>" se guardaba como "Av. 5 de Mayo" y "<S/N>" como "", sin
+ * error para nadie y con el pedido ya cobrado.
+ *
+ * Aquí se quitan los signos `<` y `>` pero se CONSERVA el texto: una dirección
+ * no puede contener etiquetas HTML, pero sí puede decir "esquina Juárez" o
+ * "S/N". Es más estricto que borrar el tramo (ninguna etiqueta sobrevive) y
+ * además no pierde información. Lo que quede vacío lo rechaza el `.min(1)` de
+ * abajo con el mensaje del campo, en vez de guardarse en blanco.
+ */
+const limpiar = (v: string) =>
+  v
+    .replace(/[<>]/g, "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/** Campo de dirección de una línea, ya limpio y con longitud acotada. */
 const oneLine = (max: number) =>
-  z
-    .string()
-    .transform((v) => v.replace(/\s+/g, " ").trim())
-    .pipe(z.string().min(1).max(max));
+  z.string().transform(limpiar).pipe(z.string().min(1).max(max));
 
 /**
  * Teléfono mexicano. Se acepta como lo escribe la gente —con espacios,
@@ -32,20 +51,29 @@ const oneLine = (max: number) =>
  * No se asume que el cliente escriba el código de país: "55 1234 5678",
  * "+52 55 1234 5678" y "5215512345678" terminan igual.
  */
-const mexicanPhone = z
-  .string()
-  .max(25, "Teléfono demasiado largo")
-  .transform((raw) => {
-    let digits = raw.replace(/\D/g, "");
+/**
+ * Normaliza un teléfono mexicano a sus 10 dígitos nacionales. Exportada para
+ * que el formulario aplique EXACTAMENTE la misma regla que el servidor: con
+ * dos implementaciones distintas, el cliente rechazaba formatos que el
+ * servidor sí acepta (044/045) y el usuario nunca llegaba a la rama que los
+ * arregla.
+ */
+export function normalizeMexicanPhone(raw: string): string {
+  let digits = raw.replace(/\D/g, "");
     // 044 / 045: el prefijo de larga distancia a celular que México retiró en
     // 2019. Sigue siendo lo que teclea mucha gente, así que se acepta y se
     // limpia en vez de rechazar un teléfono que sí es correcto.
     if (digits.length === 13 && /^04[45]/.test(digits)) digits = digits.slice(3);
     else if (digits.length === 13 && digits.startsWith("521")) digits = digits.slice(3);
     else if (digits.length === 12 && digits.startsWith("52")) digits = digits.slice(2);
-    else if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
-    return digits;
-  })
+  else if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
+  return digits;
+}
+
+const mexicanPhone = z
+  .string()
+  .max(25, "Teléfono demasiado largo")
+  .transform(normalizeMexicanPhone)
   .pipe(
     z
       .string()
@@ -80,11 +108,7 @@ export const ShippingAddressSchema = z
     interior_number: z.preprocess(emptyToUndefined, oneLine(20).optional()),
     references: z.preprocess(
       emptyToUndefined,
-      z
-        .string()
-        .transform((v) => v.replace(/\s+/g, " ").trim())
-        .pipe(z.string().max(240))
-        .optional(),
+      z.string().transform(limpiar).pipe(z.string().max(240)).optional(),
     ),
   })
   .strict();
@@ -103,11 +127,10 @@ export const CheckoutSchema = z
     cartId: z.uuid(),
     customerName: z.string().min(2).max(80),
     customerEmail: z.preprocess(emptyToUndefined, z.email().max(120).optional()),
-    customerPhone: z
-      .string()
-      .min(8)
-      .max(25)
-      .regex(/^[0-9+()\s-]+$/, "Teléfono inválido"),
+    // Mismo normalizador que la dirección: así `orders.customer_phone` y
+    // `shipping_address.phone` guardan el teléfono en UN solo formato y no
+    // pueden acabar siendo dos números distintos.
+    customerPhone: mexicanPhone,
     deliveryMethod: DeliveryMethodSchema.default("shipping"),
     shippingAddress: ShippingAddressSchema,
     notes: z.preprocess(emptyToUndefined, z.string().max(500).optional()),
