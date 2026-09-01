@@ -1008,7 +1008,7 @@ proyecto ni siquiera llega al navegador.
 
 | # | Acción | Responsable | Estado |
 |---|---|---|---|
-| 1 | **Aplicar `supabase/migrations/0006_security_hardening.sql`** en producción. Sin ella el freno de fuerza bruta no existe | Propietario | ⚠️ Requiere ejecución |
+| 1 | **Aplicar `supabase/migrations/0007_security_hardening.sql`** en producción. Sin ella el freno de fuerza bruta no existe | Propietario | ⚠️ Requiere ejecución |
 | 2 | **Rotar `ADMIN_ACCESS_PASSWORD`** a una frase de 24+ caracteres (`openssl rand -base64 32`) | Propietario | ⚠️ |
 | 3 | Desplegar los parches de esta rama (webhook, rate limit, CSP, cuotas, uploads) | Propietario | ✅ Código listo |
 | 4 | **`npm install sharp@^0.35.4`** + `npm audit fix` (ML-02, ML-03) | Propietario | ⚠️ |

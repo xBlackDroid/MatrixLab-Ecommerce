@@ -2,7 +2,7 @@
 -- MatrixLab Store Core — Endurecimiento de seguridad (ADITIVA)
 --
 -- 100% aditiva y no destructiva. NO borra tablas, columnas, políticas ni
--- datos. Ejecutar después de 0001/0002/0003/0004/0005.
+-- datos. Ejecutar después de 0001/0002/0003/0004/0005/0006.
 --
 -- Qué agrega:
 --   1. admin_login_attempts — bloqueo de fuerza bruta DURABLE para el panel.

@@ -171,6 +171,25 @@ for (const [label, productId] of BAD_IDS) {
   );
 }
 
+/**
+ * Direccion de entrega valida. `shippingAddress` es OBLIGATORIA en
+ * `CheckoutSchema` desde la fase 1 de envio, asi que sin ella TODOS los
+ * casos de este bloque fallarian por falta de direccion y dejarian de
+ * probar la regla que dicen probar (correo, telefono, notas). Incluirla
+ * mantiene cada asercion negativa apuntando a su propio motivo.
+ */
+const DIRECCION_OK = {
+  recipient_name: "Ana Ruiz",
+  phone: "5512345678",
+  email: "ana@example.com",
+  postal_code: "06700",
+  state: "Ciudad de Mexico",
+  municipality: "Cuauhtemoc",
+  neighborhood: "Roma Norte",
+  street: "Av. Alvaro Obregon",
+  exterior_number: "123",
+};
+
 console.log("\n--- A4. Datos de contacto del checkout ---");
 
 check(
@@ -180,6 +199,7 @@ check(
     customerName: "Ana Ruiz",
     customerEmail: "no-es-correo",
     customerPhone: "5512345678",
+    shippingAddress: DIRECCION_OK,
   }).success,
 );
 
@@ -189,6 +209,7 @@ check(
     cartId: VALID_UUID,
     customerName: "Ana Ruiz",
     customerPhone: "55-DROP-TABLE",
+    shippingAddress: DIRECCION_OK,
   }).success,
 );
 
@@ -199,6 +220,7 @@ check(
     customerName: "Ana Ruiz",
     customerPhone: "5512345678",
     notes: "x".repeat(501),
+    shippingAddress: DIRECCION_OK,
   }).success,
 );
 
@@ -210,6 +232,7 @@ check(
     customerEmail: "ana@example.com",
     customerPhone: "+52 55 1234 5678",
     notes: "Entregar por la tarde",
+    shippingAddress: DIRECCION_OK,
   }).success,
 );
 
