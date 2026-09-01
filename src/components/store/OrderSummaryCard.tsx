@@ -43,6 +43,21 @@ export default async function OrderSummaryCard({
           </li>
         ))}
       </ul>
+      {/* Zona de entrega, no la dirección completa: confirma al cliente que
+          quedó registrada sin volver a imprimir su domicilio en pantalla. */}
+      {order.shipping_address && (
+        <p className="mt-4 border-t border-white/10 pt-4 text-sm text-ml-white/60">
+          <span className="text-ml-white/45">Entrega a:</span>{" "}
+          {[
+            order.shipping_address.neighborhood,
+            order.shipping_address.municipality,
+            order.shipping_address.state,
+          ]
+            .filter(Boolean)
+            .join(", ")}
+        </p>
+      )}
+
       <div className="mt-4 flex justify-between border-t border-white/10 pt-4 font-bold">
         <span>Total</span>
         <span>{formatPrice(order.total)} MXN</span>

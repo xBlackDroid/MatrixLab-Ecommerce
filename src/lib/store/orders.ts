@@ -3,10 +3,12 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { logAudit, requireServiceClient } from "@/lib/db/admin";
 import type {
+  DeliveryMethod,
   DesignProjectRow,
   OrderItemRow,
   OrderRow,
   OrderStatus,
+  ShippingAddressSnapshot,
 } from "@/lib/db/types";
 import { loadCartItems, type CartErrorCode } from "@/lib/store/cart";
 import { checkAvailability } from "@/lib/store/inventory";
@@ -48,7 +50,12 @@ export async function createOrderFromCart(params: {
   customerName: string;
   customerEmail?: string;
   customerPhone: string;
-  shippingAddress?: Record<string, string | undefined>;
+  /**
+   * Dirección YA VALIDADA por `ShippingAddressSchema`. Se guarda tal cual, sin
+   * volver a leer nada de ningún perfil: es el snapshot del pedido.
+   */
+  shippingAddress: ShippingAddressSnapshot;
+  deliveryMethod: DeliveryMethod;
   notes?: string;
 }): Promise<
   | { ok: true; data: CreateOrderResult }
@@ -105,13 +112,14 @@ export async function createOrderFromCart(params: {
   );
 
   const orderNumber = generateOrderNumber();
-  const shippingAddress = params.shippingAddress
-    ? Object.fromEntries(
-        Object.entries(params.shippingAddress)
-          .filter(([, value]) => typeof value === "string" && value.trim())
-          .map(([key, value]) => [key, sanitizeText(value, 240)]),
-      )
-    : null;
+  // El snapshot llega validado y normalizado por Zod; aquí sólo se sanea el
+  // texto (mismo tratamiento que el resto de campos libres del pedido) y se
+  // descartan los opcionales vacíos para no guardar claves huecas.
+  const shippingAddress = Object.fromEntries(
+    Object.entries(params.shippingAddress)
+      .filter(([, value]) => typeof value === "string" && value.trim() !== "")
+      .map(([key, value]) => [key, sanitizeText(value as string, 240)]),
+  ) as unknown as ShippingAddressSnapshot;
 
   const { data: orderData, error: orderError } = await client
     .from("orders")
@@ -122,8 +130,14 @@ export async function createOrderFromCart(params: {
       customer_email: params.customerEmail
         ? sanitizeText(params.customerEmail, 120)
         : null,
-      customer_phone: sanitizeText(params.customerPhone, 20),
+      customer_phone: sanitizeText(params.customerPhone, 25),
       shipping_address: shippingAddress,
+      // `delivery_method` NO se escribe a propósito: la columna (migración
+      // 0006) tiene `default 'shipping'`, que hoy es la única modalidad. Así
+      // este código funciona ANTES y DESPUÉS de aplicar la migración, y el
+      // despliegue no queda acoplado al orden en que se corran las dos cosas.
+      // El día que exista una segunda modalidad hay que empezar a escribirla
+      // aquí — y entonces sí, migración primero.
       payment_provider: "mercadopago",
       payment_status: "pending",
       subtotal: totals.subtotal,
