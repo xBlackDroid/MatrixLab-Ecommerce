@@ -29,9 +29,15 @@ export interface HeroAuraItem {
  *   lo que se anuncia son los enlaces reales de la fila de abajo, no esto.
  * - Sólo desde `lg`. En móvil y tablet el ancho útil es el texto; meter piezas
  *   flotantes ahí competiría con el titular y obligaría a bajar su tamaño.
- * - Opacidades bajas (0.30–0.45) y sin blur propio: las manchas de color ya
- *   difuminadas del hero pasan por detrás y dan la profundidad; añadir otro
- *   `blur` encima sería una capa cara sin ganancia visible.
+ * - NO se usa la clase `.glass` aunque el aspecto sea el mismo. `.glass` trae
+ *   `backdrop-filter: blur(14px)`, y estas seis piezas se mueven en bucle
+ *   infinito: un backdrop-filter que se desplaza obliga al compositor a
+ *   volver a muestrear y desenfocar lo que hay debajo EN CADA FOTOGRAMA, seis
+ *   veces, encima de las cuatro manchas `blur-3xl` del hero. Es coste de GPU
+ *   sostenido durante y después del LCP, y en un portátil con gráfica
+ *   integrada se nota. El fondo translúcido con borde da el mismo aspecto de
+ *   cristal a coste de un solo pintado, porque detrás no hay contenido que
+ *   merezca desenfocarse: sólo el degradado del hero.
  * - `motion-reduce:animate-none`: con reducción de movimiento las piezas se
  *   quedan quietas, pero siguen visibles (son parte de la composición).
  */
@@ -47,7 +53,7 @@ export default function HeroAura({ items }: { items: readonly HeroAuraItem[] }) 
           className={`animate-float absolute motion-reduce:animate-none ${item.position}`}
           style={{ animationDelay: item.delay }}
         >
-          <div className="glass flex h-full w-full items-center justify-center rounded-2xl">
+          <div className="flex h-full w-full items-center justify-center rounded-2xl border border-ml-white/10 bg-ml-white/[0.04]">
             <item.Icon
               className={`h-[55%] w-[55%] ${item.tone}`}
               strokeWidth={1.4}

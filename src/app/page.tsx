@@ -58,7 +58,19 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
  *
  * Sustituye a los chips genéricos anteriores ("Únicos", "Merchandising",
  * "Colecciones"), que no nombraban un producto y apuntaban todos a /tienda o a
- * stickers. Ningún destino se pierde: los que tenían ruta propia siguen aquí.
+ * stickers.
+ *
+ * Qué pasó con los destinos de aquellos chips, para que quede por escrito:
+ *   - /tienda, /tienda/disenador, stickers, playera → siguen enlazados desde
+ *     aquí o desde los accesos del T-Shirt Lab.
+ *   - /tienda/categoria/imanes → YA NO se enlaza desde la home. Es una ruta
+ *     real (tiene ficha propia en CURATED_CATEGORY_FALLBACKS) y sigue
+ *     alcanzable desde /tienda, pero desde la portada ahora sólo se nombra en
+ *     el texto de la tarjeta de Stickers. Si Imanes vuelve a ser prioridad
+ *     comercial, el sitio natural es un acceso propio, no un chip suelto.
+ *   - /tienda/disenador/gorra-clasica → la portada enlaza /tienda/disenador/
+ *     gorra, que es OTRO id del catálogo (la variante clásica y la trucker
+ *     cuelgan de ahí). No se pierde el producto, sí el atajo directo.
  */
 const LAB_LINES: Array<{
   /** Palabra que se ve rotando en el titular. */

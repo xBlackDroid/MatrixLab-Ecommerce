@@ -17,19 +17,27 @@ import { useEffect, useState } from "react";
  * enlaces de abajo.
  *
  * ---------------------------------------------------------------------------
- * Por qué hay una puerta de montaje (`mounted`) y no sólo AnimatePresence
+ * Por qué hay una puerta de montaje (`mounted`)
  * ---------------------------------------------------------------------------
  * framer-motion escribe el `initial` como estilo EN LÍNEA durante el render de
  * servidor, así que el HTML llega con `opacity:0`. Si la animación de entrada
- * no corre —y con `AnimatePresence initial={false}` no corre para el primer
- * hijo— ese `opacity:0` se queda pegado y la palabra NO SE VE NUNCA. Pasó
+ * no corre, ese `opacity:0` se queda pegado y la palabra NO SE VE NUNCA. Pasó
  * exactamente eso en la primera versión de este componente.
  *
- * La puerta lo resuelve de raíz: hasta que el componente monta se pinta la
- * primera palabra como texto normal, sin motion y sin estilos en línea. Eso es
- * además lo que ven quien tiene JS bloqueado y quien pidió reducir movimiento:
- * una palabra legible en vez de un hueco. Sólo después de montar entra
- * AnimatePresence, y ahí las animaciones de entrada ya corren con normalidad.
+ * La puerta lo resuelve de raíz: hasta que monta se pinta la primera palabra
+ * como texto normal, sin motion y sin estilos en línea. Eso es además lo que
+ * ven quien tiene JS bloqueado y quien pidió reducir movimiento: una palabra
+ * legible en vez de un hueco.
+ *
+ * ---------------------------------------------------------------------------
+ * Por qué el hueco se reserva SIEMPRE, también antes de montar
+ * ---------------------------------------------------------------------------
+ * El ancho lo fija una copia invisible de la palabra más larga. Si esa reserva
+ * viviera sólo en la rama animada, al hidratar la caja pasaría del ancho de la
+ * primera palabra al de la más larga y, como el `<p>` que la contiene centra
+ * sus hijos, la línea entera se recolocaría de golpe: justo el salto que este
+ * componente dice evitar. Por eso el envoltorio con la reserva es el MISMO en
+ * las dos ramas y lo único que cambia es qué se pinta encima.
  */
 export default function RotatingWord({
   words,
@@ -43,13 +51,20 @@ export default function RotatingWord({
   const reduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
   const [index, setIndex] = useState(0);
+  // Sólo a partir de la PRIMERA rotación se anima la entrada. Al hidratar,
+  // la palabra ya está pintada: dejarla entrar con `opacity:0` la haría
+  // parpadear al montar, que es un defecto nuevo en lugar de un detalle.
+  const [rotated, setRotated] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!mounted || reduceMotion || words.length < 2) return;
     const id = window.setInterval(
-      () => setIndex((i) => (i + 1) % words.length),
+      () => {
+        setIndex((i) => (i + 1) % words.length);
+        setRotated(true);
+      },
       intervalMs,
     );
     return () => window.clearInterval(id);
@@ -57,18 +72,8 @@ export default function RotatingWord({
 
   const first = words[0] ?? "";
   const current = words[index] ?? first;
-  // Reserva de ancho: la palabra más larga mantiene el hueco para que el
-  // bloque no cambie de tamaño en cada rotación (cero layout shift).
   const longest = words.reduce((a, b) => (b.length > a.length ? b : a), "");
-
-  // Antes de montar (y con reducción de movimiento): texto plano, visible.
-  if (!mounted || reduceMotion) {
-    return (
-      <span className={className}>
-        <span className="text-gradient">{first}</span>
-      </span>
-    );
-  }
+  const animate = mounted && !reduceMotion;
 
   return (
     <span className={className}>
@@ -77,21 +82,29 @@ export default function RotatingWord({
       <span className="sr-only">{words.join(", ")}.</span>
 
       <span aria-hidden className="relative inline-grid overflow-hidden">
+        {/* Reserva de ancho. Presente en las dos ramas: ver cabecera. */}
         <span className="invisible col-start-1 row-start-1 whitespace-nowrap">
           {longest}
         </span>
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={current}
-            initial={{ y: "0.75em", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "-0.75em", opacity: 0 }}
-            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-            className="text-gradient col-start-1 row-start-1 whitespace-nowrap text-left"
-          >
-            {current}
-          </motion.span>
-        </AnimatePresence>
+
+        {animate ? (
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={current}
+              initial={rotated ? { y: "0.75em", opacity: 0 } : false}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "-0.75em", opacity: 0 }}
+              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              className="text-gradient col-start-1 row-start-1 whitespace-nowrap text-left"
+            >
+              {current}
+            </motion.span>
+          </AnimatePresence>
+        ) : (
+          <span className="text-gradient col-start-1 row-start-1 whitespace-nowrap text-left">
+            {first}
+          </span>
+        )}
       </span>
     </span>
   );
