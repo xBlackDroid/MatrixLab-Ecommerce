@@ -146,6 +146,31 @@ export interface CartItemRow {
   updated_at: string;
 }
 
+/**
+ * Copia INMUTABLE de la dirección con la que se compró un pedido.
+ *
+ * Vive en `orders.shipping_address` (jsonb) y no se re-lee de ningún perfil:
+ * si el cliente cambia su domicilio después, el pedido histórico sigue
+ * diciendo a dónde se envió. La forma la valida `ShippingAddressSchema`
+ * (src/lib/validation/checkout.ts) y la documenta la migración 0006.
+ */
+export interface ShippingAddressSnapshot {
+  recipient_name: string;
+  phone: string;
+  email: string;
+  postal_code: string;
+  state: string;
+  municipality: string;
+  neighborhood: string;
+  street: string;
+  exterior_number: string;
+  interior_number?: string;
+  references?: string;
+}
+
+/** Modalidad de entrega. Espeja el CHECK de `orders.delivery_method`. */
+export type DeliveryMethod = "shipping";
+
 export interface OrderRow {
   id: string;
   order_number: string;
@@ -153,7 +178,19 @@ export interface OrderRow {
   customer_name: string;
   customer_email: string | null;
   customer_phone: string | null;
-  shipping_address: Record<string, string> | null;
+  /**
+   * `null` en los pedidos anteriores a la captura de dirección: hay que
+   * tratarlos siempre como "sin dirección registrada", nunca asumir el objeto.
+   */
+  shipping_address: ShippingAddressSnapshot | null;
+  /**
+   * OPCIONAL a propósito: la columna llega con la migración 0006 y hasta que
+   * se aplique, un `select("*")` no la trae. Marcarla obligatoria haría que
+   * `order.delivery_method === "pickup"` compilara comparando contra
+   * `undefined`. Cuando 0006 esté aplicada en todos los entornos se puede
+   * volver obligatoria.
+   */
+  delivery_method?: DeliveryMethod;
   payment_provider: string;
   payment_status: PaymentStatus;
   payment_reference: string | null;

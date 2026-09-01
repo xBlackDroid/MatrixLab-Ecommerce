@@ -7,6 +7,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import StatusBadge from "@/components/admin/StatusBadge";
 import type { OrderItemRow, OrderRow, OrderStatus } from "@/lib/db/types";
+import ShippingAddressBlock from "@/components/admin/ShippingAddressBlock";
 import { cn, formatPrice } from "@/lib/utils";
 import { ORDER_STATUSES } from "@/lib/validation/store";
 
@@ -159,7 +160,7 @@ export default function OrdersTable({
                   {isOpen && (
                     <tr className="bg-white/[0.02]">
                       <td colSpan={7} className="px-5 py-5">
-                        <div className="grid gap-6 lg:grid-cols-2">
+                        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                           <div>
                             <h3 className="mb-2 text-xs font-bold uppercase text-ml-white/45">
                               Productos
@@ -252,6 +253,13 @@ export default function OrdersTable({
                               </p>
                             )}
                           </div>
+
+                          {/* A dónde se envía. Sólo aquí, dentro del admin
+                              autenticado: la dirección es PII y no aparece en
+                              ninguna vista pública. */}
+                          <ShippingAddressBlock
+                            address={order.shipping_address}
+                          />
                         </div>
                       </td>
                     </tr>

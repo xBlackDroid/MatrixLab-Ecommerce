@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
       customerEmail: parsed.data.customerEmail,
       customerPhone: parsed.data.customerPhone,
       shippingAddress: parsed.data.shippingAddress,
+      deliveryMethod: parsed.data.deliveryMethod,
       notes: parsed.data.notes,
     });
     if (!orderResult.ok) {

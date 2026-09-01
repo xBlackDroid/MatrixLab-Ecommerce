@@ -8,22 +8,49 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { CartView } from "@/lib/db/types";
+import { normalizeMexicanPhone } from "@/lib/validation/checkout";
 import { formatPrice, formatUnitQuantity } from "@/lib/utils";
 
-/** Validación cliente (espejo de CheckoutSchema del servidor, sin cartId). */
+/**
+ * Validación cliente (espejo de CheckoutSchema del servidor, sin cartId).
+ *
+ * Es sólo para dar errores rápidos junto al campo: quien decide es el
+ * servidor, que revalida todo antes de crear el pedido. Si estos mensajes y
+ * los de `src/lib/validation/checkout.ts` divergen, manda el servidor.
+ */
+const requerido = (campo: string, max: number) =>
+  z.string().trim().min(1, `${campo} es obligatorio.`).max(max, `Máximo ${max} caracteres.`);
+
 const CheckoutFormSchema = z.object({
   customerName: z
     .string()
+    .trim()
     .min(2, "Escribe tu nombre completo.")
     .max(80, "Máximo 80 caracteres."),
-  customerEmail: z
-    .union([z.literal(""), z.email("Correo inválido.")])
-    .optional(),
+  customerEmail: z.email("Correo inválido.").max(120, "Máximo 120 caracteres."),
+  // Se reusa el normalizador DEL SERVIDOR en vez de escribir aquí una regla
+  // parecida: con dos algoritmos, el cliente rechazaba formatos que el
+  // servidor sí acepta (044/045) y el usuario nunca llegaba a la rama que los
+  // arregla. Una sola regla, un solo comportamiento.
   customerPhone: z
     .string()
-    .min(8, "Teléfono muy corto.")
-    .max(20, "Teléfono muy largo.")
-    .regex(/^[0-9+()\s-]+$/, "Solo números, espacios y + ( ) -."),
+    .max(25, "Teléfono muy largo.")
+    .regex(/^[0-9+()\s-]+$/, "Solo números, espacios y + ( ) -.")
+    .refine(
+      (v) => /^[0-9]{10}$/.test(normalizeMexicanPhone(v)),
+      "Escribe los 10 dígitos de tu teléfono.",
+    ),
+  postalCode: z
+    .string()
+    .trim()
+    .regex(/^[0-9]{5}$/, "El código postal son 5 dígitos."),
+  state: requerido("El estado", 80),
+  municipality: requerido("El municipio", 80),
+  neighborhood: requerido("La colonia", 80),
+  street: requerido("La calle", 120),
+  exteriorNumber: requerido("El número exterior", 20),
+  interiorNumber: z.string().trim().max(20, "Máximo 20 caracteres.").optional(),
+  addressReferences: z.string().trim().max(240, "Máximo 240 caracteres.").optional(),
   notes: z.string().max(500, "Máximo 500 caracteres.").optional(),
 });
 
@@ -40,7 +67,22 @@ export default function CheckoutForm() {
     formState: { errors },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(CheckoutFormSchema),
-    defaultValues: { customerName: "", customerEmail: "", customerPhone: "", notes: "" },
+    // Los valores se conservan si la validación falla: react-hook-form no
+    // remonta el formulario, así que nadie tiene que reescribir su dirección.
+    defaultValues: {
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
+      postalCode: "",
+      state: "",
+      municipality: "",
+      neighborhood: "",
+      street: "",
+      exteriorNumber: "",
+      interiorNumber: "",
+      addressReferences: "",
+      notes: "",
+    },
   });
 
   useEffect(() => {
@@ -73,8 +115,24 @@ export default function CheckoutForm() {
         body: JSON.stringify({
           cartId: cartData.cartId,
           customerName: values.customerName,
-          customerEmail: values.customerEmail || undefined,
+          customerEmail: values.customerEmail,
           customerPhone: values.customerPhone,
+          deliveryMethod: "shipping",
+          // Snapshot de entrega: se manda con el pedido para que quede
+          // guardado ANTES de salir a Mercado Pago. El servidor lo revalida.
+          shippingAddress: {
+            recipient_name: values.customerName,
+            phone: values.customerPhone,
+            email: values.customerEmail,
+            postal_code: values.postalCode,
+            state: values.state,
+            municipality: values.municipality,
+            neighborhood: values.neighborhood,
+            street: values.street,
+            exterior_number: values.exteriorNumber,
+            interior_number: values.interiorNumber || undefined,
+            references: values.addressReferences || undefined,
+          },
           notes: values.notes || undefined,
         }),
       });
@@ -129,7 +187,12 @@ export default function CheckoutForm() {
         className="glass flex flex-col gap-5 rounded-2xl p-7"
         noValidate
       >
-        <h2 className="text-xl font-semibold">Datos de contacto</h2>
+        <div>
+          <h2 className="text-xl font-semibold">Datos de entrega</h2>
+          <p className="mt-1.5 text-sm text-ml-white/60">
+            Ingresa la dirección donde quieres recibir tu pedido.
+          </p>
+        </div>
 
         <div>
           <label htmlFor="customerName" className="mb-1.5 block text-sm text-ml-white/70">
@@ -159,7 +222,7 @@ export default function CheckoutForm() {
             id="customerPhone"
             type="tel"
             autoComplete="tel"
-            maxLength={20}
+            maxLength={25}
             placeholder="55 1234 5678"
             className={inputClass}
             {...register("customerPhone")}
@@ -173,7 +236,7 @@ export default function CheckoutForm() {
 
         <div>
           <label htmlFor="customerEmail" className="mb-1.5 block text-sm text-ml-white/70">
-            Correo (opcional, para tu comprobante)
+            Correo *
           </label>
           <input
             id="customerEmail"
@@ -187,6 +250,182 @@ export default function CheckoutForm() {
           {errors.customerEmail && (
             <p className="mt-1 text-xs text-ml-coral">
               {errors.customerEmail.message}
+            </p>
+          )}
+        </div>
+
+        {/* Dirección. El orden sigue cómo la gente escribe un domicilio en
+            México: primero el CP —que ubica estado y municipio—, luego la
+            colonia y al final la calle. En móvil cada campo ocupa el ancho
+            completo; en pantallas medianas se agrupan de dos en dos. */}
+        <div className="mt-2 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="postalCode" className="mb-1.5 block text-sm text-ml-white/70">
+              Código postal *
+            </label>
+            <input
+              id="postalCode"
+              type="text"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              maxLength={5}
+              placeholder="06700"
+              className={inputClass}
+              {...register("postalCode")}
+            />
+            {errors.postalCode && (
+              <p className="mt-1 text-xs text-ml-coral">
+                {errors.postalCode.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="state" className="mb-1.5 block text-sm text-ml-white/70">
+              Estado *
+            </label>
+            <input
+              id="state"
+              type="text"
+              autoComplete="address-level1"
+              maxLength={80}
+              placeholder="Ciudad de México"
+              className={inputClass}
+              {...register("state")}
+            />
+            {errors.state && (
+              <p className="mt-1 text-xs text-ml-coral">{errors.state.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="municipality"
+              className="mb-1.5 block text-sm text-ml-white/70"
+            >
+              Municipio / Alcaldía *
+            </label>
+            <input
+              id="municipality"
+              type="text"
+              autoComplete="address-level2"
+              maxLength={80}
+              placeholder="Cuauhtémoc"
+              className={inputClass}
+              {...register("municipality")}
+            />
+            {errors.municipality && (
+              <p className="mt-1 text-xs text-ml-coral">
+                {errors.municipality.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="neighborhood"
+              className="mb-1.5 block text-sm text-ml-white/70"
+            >
+              Colonia *
+            </label>
+            <input
+              id="neighborhood"
+              type="text"
+              autoComplete="address-level3"
+              maxLength={80}
+              placeholder="Roma Norte"
+              className={inputClass}
+              {...register("neighborhood")}
+            />
+            {errors.neighborhood && (
+              <p className="mt-1 text-xs text-ml-coral">
+                {errors.neighborhood.message}
+              </p>
+            )}
+          </div>
+
+          <div className="sm:col-span-2">
+            <label htmlFor="street" className="mb-1.5 block text-sm text-ml-white/70">
+              Calle *
+            </label>
+            <input
+              id="street"
+              type="text"
+              autoComplete="address-line1"
+              maxLength={120}
+              placeholder="Av. Álvaro Obregón"
+              className={inputClass}
+              {...register("street")}
+            />
+            {errors.street && (
+              <p className="mt-1 text-xs text-ml-coral">{errors.street.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="exteriorNumber"
+              className="mb-1.5 block text-sm text-ml-white/70"
+            >
+              Número exterior *
+            </label>
+            <input
+              id="exteriorNumber"
+              type="text"
+              autoComplete="address-line2"
+              maxLength={20}
+              placeholder="123"
+              className={inputClass}
+              {...register("exteriorNumber")}
+            />
+            {errors.exteriorNumber && (
+              <p className="mt-1 text-xs text-ml-coral">
+                {errors.exteriorNumber.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="interiorNumber"
+              className="mb-1.5 block text-sm text-ml-white/70"
+            >
+              Número interior (opcional)
+            </label>
+            <input
+              id="interiorNumber"
+              type="text"
+              maxLength={20}
+              placeholder="4B"
+              className={inputClass}
+              {...register("interiorNumber")}
+            />
+            {errors.interiorNumber && (
+              <p className="mt-1 text-xs text-ml-coral">
+                {errors.interiorNumber.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="addressReferences"
+            className="mb-1.5 block text-sm text-ml-white/70"
+          >
+            Referencias para encontrar el domicilio (opcional)
+          </label>
+          <textarea
+            id="addressReferences"
+            rows={2}
+            maxLength={240}
+            placeholder="Entre calles, color de fachada, portón, negocio cercano, etc."
+            className={inputClass}
+            {...register("addressReferences")}
+          />
+          {errors.addressReferences && (
+            <p className="mt-1 text-xs text-ml-coral">
+              {errors.addressReferences.message}
             </p>
           )}
         </div>
