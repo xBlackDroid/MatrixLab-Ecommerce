@@ -5,23 +5,30 @@ import Link from "next/link";
 import {
   ArrowRight,
   Box,
-  Boxes,
   Building2,
   CheckCircle2,
   CupSoda,
-  Factory,
   FlaskConical,
   GraduationCap,
   MessageCircle,
   Shirt,
   ShoppingBag,
-  Sparkles,
   Sticker,
   Upload,
   Wand2,
   Zap,
 } from "lucide-react";
-import { CapIcon, HoodieIcon, ToteIcon } from "@/components/icons/GarmentIcons";
+import {
+  CapSilhouette,
+  HoodieSilhouette,
+  TeeSilhouette,
+  ToteSilhouette,
+} from "@/components/icons/ApparelSilhouettes";
+import {
+  BoxStackSilhouette,
+  GiftBoxSilhouette,
+  SoftBlob,
+} from "@/components/icons/BrandDecor";
 import FamilyCard, {
   type FamilyAccent,
 } from "@/components/landing/FamilyCard";
@@ -47,6 +54,9 @@ export const metadata: Metadata = {
 };
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+/** Silueta de prenda del T-Shirt Lab (ver ApparelSilhouettes). */
+type SilhouetteComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 /**
  * Las seis líneas del laboratorio. FUENTE ÚNICA del hero: de aquí salen las
@@ -293,18 +303,23 @@ const FAMILY_CARDS: Array<{
 ];
 
 /**
- * Las cuatro capacidades del laboratorio, dichas como verbos. Van sobre las dos
- * tarjetas de público: primero qué hacemos, después para quién.
+ * Lo que una empresa puede pedir, dicho con su nombre.
+ *
+ * Antes esta fila eran verbos nuestros (diseñamos, producimos, personalizamos,
+ * entregamos). Describían el servicio pero no ayudaban a nadie a reconocerse:
+ * quien entra buscando uniformes no busca "personalizamos", busca "uniformes".
+ * El servicio integral se dice ahora en el subtítulo, que es su sitio, y esta
+ * fila pasa a ser un menú de categorías que se pueden cotizar.
  */
-const CAPABILITIES: Array<{
-  label: string;
-  Icon: IconComponent;
-  tone: string;
-}> = [
-  { label: "Diseñamos", Icon: Wand2, tone: "text-ml-violet" },
-  { label: "Producimos", Icon: Factory, tone: "text-ml-cyan" },
-  { label: "Personalizamos", Icon: Sparkles, tone: "text-ml-coral" },
-  { label: "Entregamos por volumen", Icon: Boxes, tone: "text-ml-green" },
+const B2B_CAPABILITIES: Array<{ label: string; tone: string }> = [
+  { label: "Branding", tone: "border-ml-violet/30" },
+  { label: "Uniformes", tone: "border-ml-cyan/30" },
+  { label: "Kits corporativos", tone: "border-ml-coral/30" },
+  { label: "Activaciones", tone: "border-ml-green/30" },
+  { label: "Merchandising", tone: "border-ml-violet/30" },
+  { label: "Eventos y ferias", tone: "border-ml-cyan/30" },
+  { label: "Regalos de marca", tone: "border-ml-coral/30" },
+  { label: "Producción por volumen", tone: "border-ml-green/30" },
 ];
 
 /**
@@ -319,6 +334,7 @@ const CAPABILITIES: Array<{
 const AUDIENCE_CARDS: Array<{
   id: string;
   Icon: IconComponent;
+  eyebrow: string;
   title: string;
   description: string;
   useCases: readonly string[];
@@ -333,47 +349,49 @@ const AUDIENCE_CARDS: Array<{
 }> = [
   {
     id: "personas",
-    Icon: Sparkles,
-    title: "Piezas únicas y momentos que importan",
+    Icon: GiftBoxSilhouette,
+    eyebrow: "Para regalar y celebrar",
+    title: "Regalos y ediciones que la gente conserva",
     description:
-      "Regalos personalizados, bodas, XV años, graduaciones y colecciones propias. Te acompañamos desde el primer boceto hasta la entrega — y si sólo necesitas una pieza, también es tu lugar.",
+      "Kits de bienvenida que se estrenan el primer día, regalos de fin de año que no acaban en un cajón y piezas de edición limitada para un lanzamiento o un aniversario. Cuidamos el detalle y el empaque, porque es lo primero que toca quien lo recibe.",
     useCases: [
-      "Regalos",
-      "Bodas y XV",
-      "Graduaciones",
-      "Colecciones propias",
-      "Piezas de autor",
+      "Kits de bienvenida",
+      "Regalos de marca",
+      "Ediciones limitadas",
+      "Aniversarios",
+      "Detalles de evento",
     ],
-    cta: "Cotizar mi idea",
+    cta: "Cotizar un regalo de marca",
     whatsapp:
-      "Hola MatrixLab, quiero cotizar una pieza única o un regalo personalizado.",
+      "Hola MatrixLab, quiero cotizar regalos de marca o un kit para mi empresa.",
     tone: "text-ml-coral",
     badgeBg: "bg-ml-coral/15",
-    orb: "bg-ml-coral/15",
+    orb: "bg-ml-coral/20",
     gradient: "from-ml-coral/15 via-ml-violet/5 to-transparent",
     hoverBorder: "hover:border-ml-coral/50 hover:shadow-glow-coral",
     chipBorder: "border-ml-coral/25",
   },
   {
     id: "empresas",
-    Icon: Building2,
-    title: "Merchandising, marca y producción por volumen",
+    Icon: BoxStackSilhouette,
+    eyebrow: "Para vestir, surtir y activar",
+    title: "Uniformes, merch y producción por lote",
     description:
-      "Uniformes, kits de bienvenida, material para eventos, activaciones y campañas para empresas, escuelas y marcas. Cotización por volumen, muestra previa y tiempos de entrega comprometidos por escrito.",
+      "Vestimos a tu equipo, surtimos tu campaña y sacamos el lote completo con muestra previa, control de tallas y fecha de entrega por escrito. Un solo interlocutor desde la cotización hasta la caja, sin cadena de proveedores en medio.",
     useCases: [
       "Uniformes",
-      "Kits de bienvenida",
+      "Merchandising",
       "Activaciones",
-      "Eventos y ferias",
+      "Ferias y congresos",
       "Campañas",
       "Escuelas",
     ],
-    cta: "Cotizar para mi empresa",
+    cta: "Cotizar producción por volumen",
     whatsapp:
-      "Hola MatrixLab, quiero cotizar un pedido por volumen para mi empresa o marca.",
+      "Hola MatrixLab, quiero cotizar producción por volumen para mi empresa o marca.",
     tone: "text-ml-violet",
     badgeBg: "bg-ml-violet/15",
-    orb: "bg-ml-violet/15",
+    orb: "bg-ml-violet/20",
     gradient: "from-ml-violet/15 via-ml-cyan/5 to-transparent",
     hoverBorder: "hover:border-ml-violet/50 hover:shadow-glow-violet",
     chipBorder: "border-ml-violet/25",
@@ -394,22 +412,48 @@ const AUDIENCE_CARDS: Array<{
 const PRENDA_TILES: Array<{
   label: string;
   type: string;
-  Icon: IconComponent;
+  Silhouette: SilhouetteComponent;
   offset: string;
+  /** Acento propio por prenda. Clases completas: Tailwind no compone strings. */
+  tone: string;
+  glow: string;
+  wash: string;
 }> = [
-  { label: "Playera", type: "playera", Icon: Shirt, offset: "" },
+  {
+    label: "Playera",
+    type: "playera",
+    Silhouette: TeeSilhouette,
+    offset: "",
+    tone: "text-ml-violet",
+    glow: "drop-shadow-[0_0_10px_rgba(177,151,252,0.45)]",
+    wash: "from-ml-violet/12",
+  },
   {
     label: "Sudadera",
     type: "sudadera",
-    Icon: HoodieIcon,
+    Silhouette: HoodieSilhouette,
     offset: "sm:translate-y-10",
+    tone: "text-ml-cyan",
+    glow: "drop-shadow-[0_0_10px_rgba(77,206,255,0.45)]",
+    wash: "from-ml-cyan/12",
   },
-  { label: "Gorra", type: "gorra", Icon: CapIcon, offset: "" },
+  {
+    label: "Gorra",
+    type: "gorra",
+    Silhouette: CapSilhouette,
+    offset: "",
+    tone: "text-ml-coral",
+    glow: "drop-shadow-[0_0_10px_rgba(255,135,135,0.45)]",
+    wash: "from-ml-coral/12",
+  },
   {
     label: "Tote bag",
     type: "tote",
-    Icon: ToteIcon,
+    Silhouette: ToteSilhouette,
     offset: "sm:translate-y-10",
+    tone: "text-ml-green",
+    glow: "drop-shadow-[0_0_10px_rgba(61,220,151,0.45)]",
+    wash: "from-ml-green/12",
   },
 ];
 
@@ -576,13 +620,16 @@ export default function LandingPage() {
             <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-ml-cyan/15 blur-3xl" />
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-ml-violet/15 blur-3xl" />
 
-            {/* Logo de MatrixLab Wear como marca de agua del panel, igual que
-                en las tarjetas de familia. Es el único activo real que existe
-                para prendas: las carpetas de fotos de producto están vacías,
-                así que el logo atenuado da presencia de marca sin inventar un
-                mockup ni cargar una imagen pesada en la ruta crítica. */}
+            {/* Logo de MatrixLab Wear como marca de agua del panel.
+                Vive en la esquina IZQUIERDA, no en la derecha: desde que cada
+                tarjeta lleva su propia silueta grande, la banda derecha ya
+                tiene marca de agua propia y superponer ahí el logo dejaba la
+                tarjeta de Tote bag con dos dibujos encima peleándose — se leía
+                como una imagen suelta mal colocada, no como fondo. A la
+                izquierda queda tras el texto, muy tenue y recortado por el
+                borde del panel: presencia de marca sin competir con nada. */}
             <div
-              className="pointer-events-none absolute -bottom-16 right-[-3rem] hidden h-72 w-72 opacity-[0.07] lg:block"
+              className="pointer-events-none absolute -bottom-20 left-[-4rem] hidden h-72 w-72 opacity-[0.05] lg:block"
               aria-hidden
             >
               <Image
@@ -654,21 +701,26 @@ export default function LandingPage() {
                     <TiltCard
                       key={item.type}
                       href={`/tienda/disenador/${item.type}`}
-                      className={`h-36 transition-transform duration-500 sm:h-44 ${item.offset}`}
+                      className={`h-40 transition-transform duration-500 sm:h-48 ${item.offset}`}
                     >
-                      {/* Watermark: el mismo recurso que las tarjetas de familia
-                          —icono sobredimensionado, muy translúcido, que crece un
-                          poco en hover— para que la prenda se lea como dibujo de
-                          fondo sin robarle contraste a la etiqueta. */}
-                      <item.Icon
-                        className="pointer-events-none absolute -bottom-6 -right-5 h-28 w-28 text-ml-violet opacity-[0.10] transition duration-500 group-hover:scale-110 group-hover:text-ml-cyan group-hover:opacity-[0.20] sm:h-32 sm:w-32"
+                      {/* Baño de color: da profundidad y evita el "rectángulo
+                          vacío". Cada prenda lleva el suyo, así que las cuatro
+                          tarjetas se distinguen de un vistazo. */}
+                      <span
+                        className={`pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-100 ${item.wash}`}
                         aria-hidden
                       />
-                      <item.Icon
-                        className="relative h-8 w-8 text-ml-violet transition duration-300 group-hover:text-ml-cyan sm:h-9 sm:w-9"
-                        aria-hidden
+                      {/* Watermark: la misma silueta, enorme y muy translúcida,
+                          desbordando la esquina. Sin área de impresión: a ese
+                          tamaño el punteado sólo ensuciaría. */}
+                      <item.Silhouette
+                        className={`pointer-events-none absolute -bottom-7 -right-6 h-32 w-32 opacity-[0.09] transition duration-500 group-hover:scale-105 group-hover:opacity-[0.16] sm:h-36 sm:w-36 ${item.tone}`}
                       />
-                      <span className="relative text-sm font-semibold sm:text-base">
+                      {/* Pieza en primer plano, con brillo suave. */}
+                      <item.Silhouette
+                        className={`relative h-14 w-14 transition duration-300 group-hover:scale-105 sm:h-16 sm:w-16 ${item.tone} ${item.glow}`}
+                      />
+                      <span className="relative mt-0.5 text-sm font-semibold tracking-tight sm:text-base">
                         {item.label}
                       </span>
                     </TiltCard>
@@ -680,38 +732,53 @@ export default function LandingPage() {
         </section>
 
         {/* ================= PERSONAS Y EMPRESAS ================= */}
-        <section id="empresas" className="scroll-mt-24 px-4 py-20 sm:px-6">
-          <div className="mx-auto max-w-7xl">
+        <section
+          id="empresas"
+          className="relative scroll-mt-24 overflow-hidden px-4 py-20 sm:px-6"
+        >
+          {/* Fondo de la sección: dos manchas orgánicas muy difuminadas y la
+              retícula. Es lo que quita la sensación de "caja sobre fondo
+              plano" sin meter una sola imagen. */}
+          <SoftBlob
+            className="pointer-events-none absolute -left-40 top-10 h-[30rem] w-[30rem] text-ml-violet/[0.07] blur-2xl"
+            aria-hidden
+          />
+          <SoftBlob
+            className="pointer-events-none absolute -right-48 bottom-0 h-[34rem] w-[34rem] text-ml-cyan/[0.06] blur-2xl"
+            aria-hidden
+          />
+          <div className="grid-overlay pointer-events-none absolute inset-0 opacity-40" />
+
+          <div className="relative mx-auto max-w-7xl">
             <Reveal>
               <div className="mx-auto max-w-3xl text-center">
-                <span className="text-sm font-semibold uppercase tracking-widest text-ml-violet">
-                  Tu proveedor creativo
+                <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-ml-violet">
+                  <Building2 className="h-4 w-4" aria-hidden />
+                  Empresas, marcas y escuelas
                 </span>
-                <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
-                  Diseñamos, producimos y{" "}
-                  <span className="text-gradient">resolvemos volumen</span>
+                <h2 className="mt-5 text-3xl font-bold leading-[1.12] sm:text-[2.6rem]">
+                  Ponemos tu marca en todo lo que{" "}
+                  <span className="text-gradient">tu empresa entrega</span>
                 </h2>
                 <p className="mt-5 text-base text-ml-white/70 sm:text-lg">
-                  Misma calidad y mismos acabados en la pieza 1 y en la 1,000.
-                  Del primer boceto a la entrega, con tiempos claros y una sola
-                  persona que te atiende.
+                  Uniformes que tu equipo quiere ponerse, kits que abren
+                  conversaciones, merch que la gente conserva y material de
+                  evento listo el día que toca. Diseño, producción y entrega con
+                  un solo proveedor: desde la muestra hasta el lote completo.
                 </p>
               </div>
             </Reveal>
 
-            {/* Las cuatro capacidades, dichas como verbos. Responde "¿qué hacen
-                por mí?" antes de que el visitante entre a elegir su caso. */}
+            {/* Menú de lo que se puede cotizar. Va en el nombre del cliente
+                ("uniformes"), no en el nuestro ("personalizamos"): es lo que
+                hace que alguien se reconozca y siga leyendo. */}
             <Reveal delay={0.06}>
-              <ul className="mx-auto mt-10 flex max-w-4xl flex-wrap items-center justify-center gap-2.5">
-                {CAPABILITIES.map((capability) => (
+              <ul className="mx-auto mt-9 flex max-w-4xl flex-wrap items-center justify-center gap-2.5">
+                {B2B_CAPABILITIES.map((capability) => (
                   <li
                     key={capability.label}
-                    className="glass inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-ml-white/80"
+                    className={`glass rounded-full border px-4 py-2 text-sm font-medium text-ml-white/80 ${capability.tone}`}
                   >
-                    <capability.Icon
-                      className={`h-4 w-4 ${capability.tone}`}
-                      aria-hidden
-                    />
                     {capability.label}
                   </li>
                 ))}
@@ -736,19 +803,27 @@ export default function LandingPage() {
                       className={`pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full ${card.orb} blur-3xl`}
                       aria-hidden
                     />
-                    {/* Watermark de la tarjeta: mismo recurso que las familias. */}
+                    {/* Watermark: la pieza que representa la tarjeta —caja de
+                        regalo o lote apilado—, enorme y desbordando la esquina.
+                        Antes eran unas estrellas y un edificio: decoraban, pero
+                        no decían nada del negocio. */}
                     <card.Icon
-                      className={`pointer-events-none absolute -bottom-10 -right-8 h-48 w-48 ${card.tone} opacity-[0.07] transition duration-500 group-hover:scale-105 group-hover:opacity-[0.14]`}
+                      className={`pointer-events-none absolute -bottom-12 -right-10 h-56 w-56 ${card.tone} opacity-[0.08] transition duration-500 group-hover:scale-105 group-hover:opacity-[0.15]`}
                       aria-hidden
                     />
 
                     <span
-                      className={`relative flex h-12 w-12 items-center justify-center rounded-2xl ${card.badgeBg} ${card.tone}`}
+                      className={`relative flex h-14 w-14 items-center justify-center rounded-2xl ${card.badgeBg} ${card.tone}`}
                     >
-                      <card.Icon className="h-6 w-6" aria-hidden />
+                      <card.Icon className="h-8 w-8" aria-hidden />
                     </span>
 
-                    <h3 className="relative mt-5 text-2xl font-bold">
+                    <span
+                      className={`relative mt-5 text-xs font-semibold uppercase tracking-[0.16em] ${card.tone}`}
+                    >
+                      {card.eyebrow}
+                    </span>
+                    <h3 className="relative mt-2 text-2xl font-bold leading-tight sm:text-[1.7rem]">
                       {card.title}
                     </h3>
                     <p className="relative mt-3 text-sm leading-relaxed text-ml-white/70 sm:text-base">
