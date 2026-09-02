@@ -314,6 +314,32 @@ const FAMILY_CARDS: Array<{
  * El servicio integral se dice ahora en el subtítulo, que es su sitio, y esta
  * fila pasa a ser un menú de categorías que se pueden cotizar.
  */
+/*
+ * OJO con `.glass` y los bordes de color.
+ *
+ * `.glass` (globals.css) está SIN capa y declara el atajo `border: 1px solid
+ * rgba(248,249,250,.1)`. Las utilidades de Tailwind v4 viven en
+ * `@layer utilities`, y en la cascada lo no-encapado gana a cualquier capa: si
+ * a un elemento con `.glass` le pones `border-ml-violet/30`, el borde sigue
+ * saliendo gris. Por eso estos chips NO usan `.glass` sino sus utilidades
+ * equivalentes, que sí se dejan sobrescribir.
+ *
+ * El mismo choque deja mudos los `hover:border-*` de cualquier `.glass` del
+ * proyecto (hay ~113 usos, varios en /tienda y admin con bordes de color que
+ * hoy no se ven). Arreglarlo de raíz es mover `.glass` a `@layer components`,
+ * pero eso cambia el render fuera de la home y se sale de este encargo.
+ */
+const B2B_CAPABILITIES: Array<{ label: string; tone: string }> = [
+  { label: "Branding", tone: "border-ml-violet/30" },
+  { label: "Uniformes", tone: "border-ml-cyan/30" },
+  { label: "Kits corporativos", tone: "border-ml-coral/30" },
+  { label: "Activaciones", tone: "border-ml-green/30" },
+  { label: "Merchandising", tone: "border-ml-violet/30" },
+  { label: "Eventos y ferias", tone: "border-ml-cyan/30" },
+  { label: "Regalos de marca", tone: "border-ml-coral/30" },
+  { label: "Producción por volumen", tone: "border-ml-green/30" },
+];
+
 /**
  * Ocasiones del cliente particular. Son ETIQUETAS, no enlaces: ver el
  * comentario de la franja para por qué (ninguna tiene ruta propia).
@@ -351,32 +377,6 @@ const B2C_OCCASIONS: Array<{
     tone: "text-ml-green",
     border: "border-ml-green/30",
   },
-];
-
-/*
- * OJO con `.glass` y los bordes de color.
- *
- * `.glass` (globals.css) está SIN capa y declara el atajo `border: 1px solid
- * rgba(248,249,250,.1)`. Las utilidades de Tailwind v4 viven en
- * `@layer utilities`, y en la cascada lo no-encapado gana a cualquier capa: si
- * a un elemento con `.glass` le pones `border-ml-violet/30`, el borde sigue
- * saliendo gris. Por eso estos chips NO usan `.glass` sino sus utilidades
- * equivalentes, que sí se dejan sobrescribir.
- *
- * El mismo choque deja mudos los `hover:border-*` de cualquier `.glass` del
- * proyecto (hay ~113 usos, varios en /tienda y admin con bordes de color que
- * hoy no se ven). Arreglarlo de raíz es mover `.glass` a `@layer components`,
- * pero eso cambia el render fuera de la home y se sale de este encargo.
- */
-const B2B_CAPABILITIES: Array<{ label: string; tone: string }> = [
-  { label: "Branding", tone: "border-ml-violet/30" },
-  { label: "Uniformes", tone: "border-ml-cyan/30" },
-  { label: "Kits corporativos", tone: "border-ml-coral/30" },
-  { label: "Activaciones", tone: "border-ml-green/30" },
-  { label: "Merchandising", tone: "border-ml-violet/30" },
-  { label: "Eventos y ferias", tone: "border-ml-cyan/30" },
-  { label: "Regalos de marca", tone: "border-ml-coral/30" },
-  { label: "Producción por volumen", tone: "border-ml-green/30" },
 ];
 
 /**
@@ -826,7 +826,11 @@ export default function LandingPage() {
                   </span>
                   <h2 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
                     Para ti, para regalar,{" "}
-                    <span className="text-gradient">para celebrar</span>
+                    {/* Coral, NO `.text-gradient`: ese degradado es violeta a
+                        cian, o sea la paleta de la sección de empresas. Puesto
+                        en el elemento más grande de esta franja contradecía en
+                        pantalla lo único que separa a los dos públicos. */}
+                    <span className="text-ml-coral">para celebrar</span>
                   </h2>
                   <p className="mt-3 text-sm leading-relaxed text-ml-white/70 sm:text-base">
                     Diseños personalizados para cumpleaños, graduaciones, bodas,
@@ -852,7 +856,13 @@ export default function LandingPage() {
                     {B2C_OCCASIONS.map((occasion) => (
                       <li
                         key={occasion.label}
-                        className={`inline-flex items-center gap-2 rounded-full border bg-ml-white/[0.04] px-4 py-2 text-sm font-medium text-ml-white/80 backdrop-blur-[14px] ${occasion.border}`}
+                        /* Sin `backdrop-blur` aquí, a diferencia de los chips
+                           de empresas: el panel que los contiene ya lo lleva, y
+                           un `backdrop-filter` establece raíz de fondo — el
+                           desenfoque anidado no tendría nada nuevo que
+                           difuminar y sólo añadiría una capa de composición por
+                           chip. */
+                        className={`inline-flex items-center gap-2 rounded-full border bg-ml-white/[0.04] px-4 py-2 text-sm font-medium text-ml-white/80 ${occasion.border}`}
                       >
                         <occasion.Icon
                           className={`h-4 w-4 ${occasion.tone}`}
