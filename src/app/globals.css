@@ -102,6 +102,24 @@ body {
   background-size: 44px 44px;
 }
 
+/*
+ * Carrusel: se oculta la barra de scroll SIN perder el scroll.
+ *
+ * El carrusel de la galería de cursos es un contenedor con scroll-snap nativo
+ * (no una librería): así el arrastre táctil, el impulso y el teclado los pone
+ * el navegador, que siempre lo hace mejor. Lo único que sobra es la barra, que
+ * en escritorio corta la foto por abajo. La navegación visible son las flechas
+ * y los puntos, que sí son accesibles.
+ */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Scrollbar discreto acorde al laboratorio */
 * {
   scrollbar-width: thin;
