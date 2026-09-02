@@ -9,8 +9,11 @@ import {
   CheckCircle2,
   CupSoda,
   FlaskConical,
+  Gift,
   GraduationCap,
+  Layers,
   MessageCircle,
+  PartyPopper,
   Shirt,
   ShoppingBag,
   Sticker,
@@ -311,6 +314,45 @@ const FAMILY_CARDS: Array<{
  * El servicio integral se dice ahora en el subtítulo, que es su sitio, y esta
  * fila pasa a ser un menú de categorías que se pueden cotizar.
  */
+/**
+ * Ocasiones del cliente particular. Son ETIQUETAS, no enlaces: ver el
+ * comentario de la franja para por qué (ninguna tiene ruta propia).
+ *
+ * Tonos cálidos —coral y verde— frente al violeta y cian de la sección de
+ * empresas: el color hace de separador entre los dos públicos.
+ */
+const B2C_OCCASIONS: Array<{
+  label: string;
+  Icon: IconComponent;
+  tone: string;
+  border: string;
+}> = [
+  {
+    label: "Regalos",
+    Icon: Gift,
+    tone: "text-ml-coral",
+    border: "border-ml-coral/30",
+  },
+  {
+    label: "Graduaciones",
+    Icon: GraduationCap,
+    tone: "text-ml-green",
+    border: "border-ml-green/30",
+  },
+  {
+    label: "Celebraciones",
+    Icon: PartyPopper,
+    tone: "text-ml-coral",
+    border: "border-ml-coral/30",
+  },
+  {
+    label: "Colecciones",
+    Icon: Layers,
+    tone: "text-ml-green",
+    border: "border-ml-green/30",
+  },
+];
+
 /*
  * OJO con `.glass` y los bordes de color.
  *
@@ -754,6 +796,84 @@ export default function LandingPage() {
               </Reveal>
             </div>
           </div>
+        </section>
+
+        {/* ================= PARTICULARES (franja compacta) ================= */}
+        <section id="particulares" className="scroll-mt-24 px-4 pt-8 sm:px-6">
+          <Reveal>
+            <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-ml-white/10 bg-ml-white/[0.04] p-7 backdrop-blur-[14px] sm:p-9">
+              {/* Acento cálido (coral y verde) a propósito: la sección de
+                  empresas que va justo debajo es violeta y cian. Separarlas por
+                  temperatura de color deja claro de un vistazo que son dos
+                  públicos distintos, sin repetir la palabra "particulares". */}
+              <div
+                className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ml-coral/12 via-ml-green/[0.06] to-transparent"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-ml-coral/20 blur-3xl"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -bottom-24 right-10 h-48 w-48 rounded-full bg-ml-green/15 blur-3xl"
+                aria-hidden
+              />
+
+              <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+                <div className="max-w-xl">
+                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-ml-coral">
+                    Para personas
+                  </span>
+                  <h2 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
+                    Para ti, para regalar,{" "}
+                    <span className="text-gradient">para celebrar</span>
+                  </h2>
+                  <p className="mt-3 text-sm leading-relaxed text-ml-white/70 sm:text-base">
+                    Diseños personalizados para cumpleaños, graduaciones, bodas,
+                    XV años, regalos, colecciones y momentos especiales.
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 flex-col gap-6">
+                  {/* Etiquetas, NO enlaces. Se auditaron las rutas públicas
+                      antes de decidirlo: las nueve categorías reales son otras
+                      (stickers, imanes, tumbler, 3D…) y ninguna de estas cuatro
+                      ocasiones tiene página propia; /tienda sólo expone el ancla
+                      #catalogo y las categorías sólo aceptan ?orden=. Apuntar
+                      las cuatro al mismo catálogo genérico sería un callejón
+                      sin salida disfrazado de navegación, así que aquí sólo
+                      cuentan de qué va la franja y la navegación la hace el CTA.
+                      El día que exista una categoría por ocasión, se convierten
+                      en enlaces sin tocar nada más. */}
+                  {/* `lg:max-w-sm` fuerza 2+2 en escritorio. Sin el tope
+                      caían 3+1 y el bloque se veía desparejo; 2×2 es además la
+                      misma retícula que sale sola en móvil. */}
+                  <ul className="flex flex-wrap gap-2.5 lg:max-w-sm lg:justify-end">
+                    {B2C_OCCASIONS.map((occasion) => (
+                      <li
+                        key={occasion.label}
+                        className={`inline-flex items-center gap-2 rounded-full border bg-ml-white/[0.04] px-4 py-2 text-sm font-medium text-ml-white/80 backdrop-blur-[14px] ${occasion.border}`}
+                      >
+                        <occasion.Icon
+                          className={`h-4 w-4 ${occasion.tone}`}
+                          aria-hidden
+                        />
+                        {occasion.label}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href="/tienda#catalogo"
+                    className="inline-flex w-fit items-center gap-2 self-start rounded-full bg-ml-coral px-7 py-3.5 font-semibold text-ml-bg shadow-glow-coral transition hover:scale-[1.02] hover:bg-ml-coral/90 lg:self-end"
+                  >
+                    Explorar ideas
+                    <ArrowRight className="h-5 w-5" aria-hidden />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Reveal>
         </section>
 
         {/* ================= PERSONAS Y EMPRESAS ================= */}
