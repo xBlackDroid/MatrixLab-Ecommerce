@@ -33,6 +33,7 @@ import {
   getEdition,
   getFeaturedEdition,
   MATRIXLAB_TUMBLER_COURSE,
+  MATRIXLAB_TUMBLER_COURSE_NAV,
   MATRIXLAB_TUMBLER_COURSE_SLUG,
   safeCourseVideos,
 } from "../../src/lib/store/courses";
@@ -472,6 +473,56 @@ check(
   "el estado por defecto en base es 'interested'",
   /default 'interested'/i.test(migration),
 );
+
+// ---------------------------------------------------------------------------
+console.log("\n--- 7. Accesos en los headers ---");
+
+/**
+ * Los dos headers muestran "Cursos" siempre y "MatrixLab Tumbler" sólo cuando
+ * la barra ensancha. Si alguien renombra el curso y no reajusta el par, la
+ * barra ancha diría un nombre y el menú móvil otro. Esto lo impide.
+ */
+check(
+  "las dos mitades del rótulo reconstruyen el nombre del curso",
+  `${MATRIXLAB_TUMBLER_COURSE_NAV.label} ${MATRIXLAB_TUMBLER_COURSE_NAV.labelRest}` ===
+    MATRIXLAB_TUMBLER_COURSE.name,
+  MATRIXLAB_TUMBLER_COURSE.name,
+);
+check(
+  "la primera mitad se ve sola sin quedar ambigua",
+  MATRIXLAB_TUMBLER_COURSE_NAV.label.trim().length > 0 &&
+    !MATRIXLAB_TUMBLER_COURSE_NAV.label.endsWith(" "),
+);
+
+/**
+ * El acceso tiene que estar en los DOS headers: el de la landing y el de la
+ * tienda, en escritorio y en móvil. Es exactamente lo que se pidió al publicar
+ * el curso, y es invisible en type-check y en build: si alguien borra el
+ * enlace, todo sigue compilando y la página simplemente deja de tener entrada.
+ */
+const HEADERS: readonly { file: string; label: string }[] = [
+  { file: "src/components/landing/LandingNav.tsx", label: "header de la Home" },
+  { file: "src/components/store/StoreLayout.tsx", label: "header de la tienda" },
+  {
+    file: "src/components/store/StoreMobileMenu.tsx",
+    label: "menú móvil de la tienda",
+  },
+];
+for (const header of HEADERS) {
+  const source = readFileSync(join(process.cwd(), header.file), "utf8");
+  check(
+    `${header.label} enlaza al curso`,
+    // Enlaza por la constante, no por una URL escrita a mano: así mover la
+    // ruta sigue siendo cambiar una sola línea del módulo de datos.
+    source.includes("MATRIXLAB_TUMBLER_COURSE"),
+    header.file,
+  );
+  check(
+    `${header.label} no escribe la ruta del curso a mano`,
+    !source.includes(`"${MATRIXLAB_TUMBLER_COURSE.href}"`),
+    header.file,
+  );
+}
 
 // ---------------------------------------------------------------------------
 console.log(

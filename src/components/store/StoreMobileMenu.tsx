@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Drawer } from "vaul";
+import { MATRIXLAB_TUMBLER_COURSE } from "@/lib/store/courses";
 import {
   GraduationCap,
   Home,
@@ -10,6 +11,7 @@ import {
   MessageCircle,
   Sparkles,
   Store,
+  Ticket,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -36,6 +38,13 @@ export default function StoreMobileMenu({ whatsappUrl }: StoreMobileMenuProps) {
   const items: NavItem[] = [
     { label: "Inicio", href: "/", icon: Home },
     { label: "Tienda", href: "/tienda", icon: Store },
+    // Nombre completo: aquí no hay estrechez de barra, cada entrada ocupa su
+    // propia fila.
+    {
+      label: MATRIXLAB_TUMBLER_COURSE.name,
+      href: MATRIXLAB_TUMBLER_COURSE.href,
+      icon: Ticket,
+    },
     { label: "Diseñador", href: "/tienda/disenador", icon: Sparkles },
     {
       label: "Etiquetas escolares",

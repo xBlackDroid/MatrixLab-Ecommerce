@@ -2,12 +2,51 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FlaskConical, Menu, ShoppingBag, X } from "lucide-react";
+import { FlaskConical, Menu, ShoppingBag, Ticket, X } from "lucide-react";
+import {
+  MATRIXLAB_TUMBLER_COURSE,
+  MATRIXLAB_TUMBLER_COURSE_NAV,
+} from "@/lib/store/courses";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
+interface NavLink {
+  href: string;
+  /** Texto que se ve SIEMPRE. En la barra estrecha es lo único que se ve. */
+  label: string;
+  /**
+   * Resto del nombre, que se añade a `label` a partir de `xl` y en el menú
+   * móvil. Se guarda por separado —y no el nombre completo— para que las dos
+   * mitades no puedan solaparse: el nombre entero es siempre
+   * `label + " " + labelRest`, se muestre o no la segunda mitad.
+   */
+  labelRest?: string;
+  /** Ruta real de la app (no un ancla de la home). Lleva ícono y color. */
+  route?: boolean;
+}
+
+/** Nombre completo de una entrada, con o sin segunda mitad visible. */
+function fullLabel(link: NavLink): string {
+  return link.labelRest ? `${link.label} ${link.labelRest}` : link.label;
+}
+
+const NAV_LINKS: readonly NavLink[] = [
   { href: "/#laboratorio", label: "Laboratorio" },
   { href: "/#tumbler", label: "MatrixLab Tumbler" },
+  /*
+    Los cursos son la ÚNICA entrada de esta barra que apunta a una página real
+    y no a una sección de la home, así que van justo después de la familia a la
+    que pertenecen y se distinguen con ícono y color coral.
+
+    En `lg` la barra ya lleva cinco anclas, el logotipo y el botón de tienda:
+    ahí el nombre completo la desborda y se muestra "Cursos". A partir de `xl`
+    aparece entero, y en el menú móvil se lee siempre completo (`longLabel`).
+  */
+  {
+    href: MATRIXLAB_TUMBLER_COURSE.href,
+    label: MATRIXLAB_TUMBLER_COURSE_NAV.label,
+    labelRest: MATRIXLAB_TUMBLER_COURSE_NAV.labelRest,
+    route: true,
+  },
   { href: "/#tshirtlab", label: "T-Shirt Lab" },
   { href: "/#empresas", label: "Empresas" },
   { href: "/#contacto", label: "Contacto" },
@@ -24,9 +63,15 @@ export default function LandingNav() {
           Logo MatrixLab. Cuando exista el archivo de logo definitivo
           (SVG/PNG), sustituir el ícono manteniendo el wordmark.
         */}
+        {/*
+          `shrink-0` y `whitespace-nowrap`: sin ellos el wordmark es lo primero
+          que cede cuando la barra va justa y "MatrixLab / Intelligence" cae a
+          dos líneas, que estira el header de 64 a 84 px. Que ceda el espaciado
+          de la navegación (abajo), nunca la marca.
+        */}
         <Link
           href="/"
-          className="flex items-center gap-2"
+          className="flex shrink-0 items-center gap-2 whitespace-nowrap"
           onClick={() => setOpen(false)}
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ml-violet/15 text-ml-violet shadow-glow-violet">
@@ -37,25 +82,45 @@ export default function LandingNav() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 text-sm text-ml-white/75 lg:flex">
+        <nav className="hidden items-center gap-4 text-sm text-ml-white/75 lg:flex xl:gap-5">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="transition hover:text-ml-violet"
+              aria-label={link.labelRest ? fullLabel(link) : undefined}
+              className={cn(
+                "whitespace-nowrap transition",
+                link.route
+                  ? "flex items-center gap-1.5 hover:text-ml-coral"
+                  : "hover:text-ml-violet",
+              )}
             >
+              {link.route ? <Ticket className="h-4 w-4" aria-hidden /> : null}
               {link.label}
+              {link.labelRest ? (
+                <span className="hidden xl:inline">{link.labelRest}</span>
+              ) : null}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
+          {/*
+            Entre `lg` y `xl` la barra lleva las seis entradas de navegación y
+            aquí ya no cabe la frase entera: sin acortarla, el botón parte
+            "Ir a la / tienda" en dos renglones. Debajo de `lg` la navegación
+            está plegada en la hamburguesa y sobra sitio, así que la frase
+            larga sólo se retira en esa banda intermedia. El `aria-label` la
+            mantiene completa para lectores de pantalla en todos los anchos.
+          */}
           <Link
             href="/tienda"
-            className="hidden items-center gap-2 rounded-full bg-ml-violet px-5 py-2.5 text-sm font-semibold text-ml-bg shadow-glow-violet transition hover:bg-ml-violet/90 sm:inline-flex"
+            aria-label="Ir a la tienda"
+            className="hidden shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-ml-violet px-5 py-2.5 text-sm font-semibold text-ml-bg shadow-glow-violet transition hover:bg-ml-violet/90 sm:inline-flex"
           >
             <ShoppingBag className="h-4 w-4" aria-hidden />
-            Ir a la tienda
+            <span className="inline lg:hidden xl:inline">Ir a la tienda</span>
+            <span className="hidden lg:inline xl:hidden">Tienda</span>
           </Link>
           <button
             type="button"
@@ -77,7 +142,7 @@ export default function LandingNav() {
       <div
         className={cn(
           "overflow-hidden border-t border-white/10 bg-ml-bg/95 backdrop-blur-xl transition-[max-height] duration-300 lg:hidden",
-          open ? "max-h-105" : "max-h-0 border-t-0",
+          open ? "max-h-120" : "max-h-0 border-t-0",
         )}
       >
         <nav className="flex flex-col gap-1 px-4 py-4">
@@ -86,9 +151,13 @@ export default function LandingNav() {
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="rounded-xl px-4 py-2.5 text-ml-white/80 transition hover:bg-white/5 hover:text-ml-violet"
+              className={cn(
+                "flex items-center gap-2 rounded-xl px-4 py-2.5 text-ml-white/80 transition hover:bg-white/5",
+                link.route ? "hover:text-ml-coral" : "hover:text-ml-violet",
+              )}
             >
-              {link.label}
+              {link.route ? <Ticket className="h-4 w-4" aria-hidden /> : null}
+              {fullLabel(link)}
             </Link>
           ))}
           <Link

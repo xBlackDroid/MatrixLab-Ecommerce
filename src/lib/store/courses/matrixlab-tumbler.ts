@@ -178,3 +178,18 @@ export const MATRIXLAB_TUMBLER_COURSE: Course = {
   editions: [EDICION_2],
   featuredEdition: 2,
 };
+
+/**
+ * El nombre del curso partido en dos para las barras de navegación.
+ *
+ * Los dos headers (landing y tienda) tienen sitio de sobra para "Cursos" pero
+ * no para el nombre entero: se muestra la primera mitad siempre y la segunda
+ * sólo cuando la barra ensancha. Vive AQUÍ, junto al nombre, y no dentro de
+ * cada header, para que las dos barras no puedan discrepar y para que el QA
+ * pueda comprobar que las mitades reconstruyen exactamente `name`. Si mañana
+ * el curso se llama de otra forma, esto es lo único que hay que reajustar.
+ */
+export const MATRIXLAB_TUMBLER_COURSE_NAV = {
+  label: "Cursos",
+  labelRest: "MatrixLab Tumbler",
+} as const;
