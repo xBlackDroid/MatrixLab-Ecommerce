@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { FlaskConical, MessageCircle, Sparkles } from "lucide-react";
+import { FlaskConical, MessageCircle, Sparkles, Ticket } from "lucide-react";
 import CartBadge from "@/components/store/CartBadge";
 import StoreMobileMenu from "@/components/store/StoreMobileMenu";
+import {
+  MATRIXLAB_TUMBLER_COURSE,
+  MATRIXLAB_TUMBLER_COURSE_NAV,
+} from "@/lib/store/courses";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 /**
@@ -17,8 +21,18 @@ export default function StoreLayout({
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-ml-bg/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-          {/* Logo (izquierda en móvil y escritorio) */}
-          <Link href="/tienda" className="flex items-center gap-2">
+          {/*
+            Logo (izquierda en móvil y escritorio).
+
+            `shrink-0` y `whitespace-nowrap`: en `md` —justo donde aparece la
+            navegación de escritorio— la barra va al límite y, sin esto, el
+            wordmark es lo primero que cede y "MatrixLab / Tienda" cae a dos
+            líneas. Que ceda el espaciado, nunca la marca.
+          */}
+          <Link
+            href="/tienda"
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap"
+          >
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ml-violet/15 text-ml-violet">
               <FlaskConical className="h-5 w-5" aria-hidden />
             </span>
@@ -35,6 +49,24 @@ export default function StoreLayout({
             </Link>
             <Link href="/tienda" className="transition hover:text-ml-white">
               Tienda
+            </Link>
+            {/*
+              Acceso directo a los cursos. El nombre completo sólo cabe a
+              partir de `lg`: en `md` esta barra ya lleva cinco elementos más
+              el logo y el carrito, así que ahí se queda en "Cursos". El
+              `aria-label` conserva SIEMPRE el nombre completo, de modo que
+              quien navega por lector de pantalla nunca oye la versión corta.
+            */}
+            <Link
+              href={MATRIXLAB_TUMBLER_COURSE.href}
+              aria-label={MATRIXLAB_TUMBLER_COURSE.name}
+              className="flex items-center gap-1.5 whitespace-nowrap transition hover:text-ml-coral"
+            >
+              <Ticket className="h-4 w-4" aria-hidden />
+              {MATRIXLAB_TUMBLER_COURSE_NAV.label}
+              <span className="hidden lg:inline">
+                {MATRIXLAB_TUMBLER_COURSE_NAV.labelRest}
+              </span>
             </Link>
             <Link
               href="/tienda/disenador"
@@ -78,6 +110,12 @@ export default function StoreLayout({
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-ml-white/60">
             <Link href="/tienda" className="hover:text-ml-violet">
               Catálogo
+            </Link>
+            <Link
+              href={MATRIXLAB_TUMBLER_COURSE.href}
+              className="hover:text-ml-coral"
+            >
+              {MATRIXLAB_TUMBLER_COURSE.name}
             </Link>
             <Link href="/tienda/disenador" className="hover:text-ml-cyan">
               Diseñador

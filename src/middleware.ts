@@ -97,6 +97,19 @@ export const DYNAMIC_ROUTE_PATTERNS: readonly RegExp[] = [
   /^\/tienda\/categoria\/[^/]+$/,
   /^\/tienda\/producto\/[^/]+$/,
   /^\/tienda\/disenador\/[^/]+$/,
+  /**
+   * Landing de los cursos de MatrixLab Tumbler. Lleva un formulario que
+   * recoge nombre, teléfono y correo, así que le corresponde la política
+   * ESTRICTA y por eso la página declara `force-dynamic`.
+   *
+   * La coincidencia es EXACTA, no un prefijo `^\/tienda\/matrixlab-tumbler`.
+   * Con el prefijo, `/tienda/matrixlab-tumbler` —que no tiene página— también
+   * caería aquí, y esa URL se sirve con la 404 PRERENDERIZADA, cuyo HTML sale
+   * del caché con los scripts en línea sin nonce: `strict-dynamic` los
+   * bloquearía todos y la 404 quedaría sin hidratar. Es exactamente la
+   * regresión que documenta el comentario de arriba.
+   */
+  /^\/tienda\/matrixlab-tumbler\/cursos$/,
 ];
 
 /** ¿Esta ruta la renderiza Next en la petición (y por tanto lleva nonce)? */

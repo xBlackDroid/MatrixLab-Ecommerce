@@ -14,6 +14,7 @@ import {
   Sparkles,
   Sticker,
 } from "lucide-react";
+import TumblerCoursesBanner from "@/components/courses/TumblerCoursesBanner";
 import ProductGrid from "@/components/store/ProductGrid";
 import SparklesCatalog from "@/components/store/SparklesCatalog";
 import TumblerCupsCatalog from "@/components/store/TumblerCupsCatalog";
@@ -280,7 +281,18 @@ export default async function CategoryPage({
     // Regla de QA: ningún CTA visible de la home puede terminar en 404. Las
     // categorías curadas sin fila en la base muestran "Próximamente".
     const fallback = curatedFallback(handle);
-    if (fallback) return <CategoryComingSoon {...fallback} />;
+    if (fallback) {
+      return (
+        <CategoryComingSoon
+          {...fallback}
+          /* Los cursos NO dependen de que la categoría esté sembrada: su
+             contenido vive en el código, no en `categories`. Si MatrixLab
+             Tumbler cae en "Próximamente" (base sin seed), el bloque de
+             cursos se sigue publicando en vez de desaparecer con la grilla. */
+          showTumblerCourses={handle === TUMBLER_PARENT_HANDLE}
+        />
+      );
+    }
     notFound();
   }
 
@@ -462,10 +474,13 @@ function CategoryComingSoon({
   title,
   description,
   whatsapp,
+  showTumblerCourses = false,
 }: {
   title: string;
   description: string;
   whatsapp: string;
+  /** Publica el bloque de Cursos debajo (sólo MatrixLab Tumbler). */
+  showTumblerCourses?: boolean;
 }) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -497,6 +512,8 @@ function CategoryComingSoon({
           Cotizar por WhatsApp
         </a>
       </div>
+
+      {showTumblerCourses && <TumblerCoursesBanner />}
     </div>
   );
 }
@@ -644,6 +661,12 @@ function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
           </Link>
         ))}
       </div>
+
+      {/* CURSOS: va DEBAJO de la grilla y por encima del CTA de WhatsApp.
+          No es una séptima tarjeta —es de ancho completo y con tratamiento
+          editorial propio— porque no es otra línea de producto sino una
+          experiencia con fecha, sede y cupo. Ver TumblerCoursesBanner. */}
+      <TumblerCoursesBanner />
 
       <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
         <p className="text-ml-white/75">

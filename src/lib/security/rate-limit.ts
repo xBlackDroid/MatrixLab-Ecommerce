@@ -105,6 +105,10 @@ export const RATE_LIMITS = {
   designs: { limit: 20, windowMs: 60_000 },
   uploads: { limit: 10, windowMs: 5 * 60_000 },
   adminLogin: { limit: 5, windowMs: 5 * 60_000 },
+  // Registro a cursos: es un formulario público sin sesión, así que el límite
+  // por IP es la única barrera de volumen (además del honeypot). 5 en 10
+  // minutos deja registrar a una familia entera y corta un bot al instante.
+  courseRegistration: { limit: 5, windowMs: 10 * 60_000 },
   adminApi: { limit: 120, windowMs: 60_000 },
   webhook: { limit: 120, windowMs: 60_000 },
 } as const;
