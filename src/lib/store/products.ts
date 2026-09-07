@@ -976,6 +976,128 @@ export async function getProductsByCategory(
   return data.map(presentProduct);
 }
 
+/**
+ * ---------------------------------------------------------------------------
+ * PRENDAS LISTAS — catálogo de prendas que se compran tal cual.
+ *
+ * QUÉ PROBLEMA RESUELVE
+ * MatrixLab Wear tenía un solo camino visible: el Laboratorio. Pero en la base
+ * conviven DOS cosas distintas bajo las mismas categorías de prenda:
+ *
+ *   1. Variantes con inventario real (Playera Blanco/Negro x CH/M/G/XG,
+ *      Gorra Negro/Azul marino/Beige, Tote Natural/Negro). Se compran hoy,
+ *      con talla y color, desde la ficha del producto.
+ *   2. Variantes `sobre_pedido` con stock 0 ("Personalizado"), que son la
+ *      puerta al diseñador y NO son una prenda lista.
+ *
+ * Este resolver publica SÓLO lo primero.
+ *
+ * POR QUÉ EL FILTRO ES POR DATO Y NO UNA LISTA DE HANDLES
+ * Si mañana Operaciones carga inventario de sudaderas en Supabase, la sudadera
+ * aparece aquí sola, sin tocar código. Y si se agota, desaparece sola. Una
+ * lista quemada de handles prometería prendas que no existen —justo lo que
+ * hay que evitar— y obligaría a un deploy por cada cambio de inventario.
+ *
+ * ESTADO ACTUAL DE LOS DATOS (seed.sql y mock-data.ts, idénticos)
+ * Califican `playera-personalizada`, `gorra-personalizada` y
+ * `tote-bag-personalizada`. NO califican `sudadera-personalizada`,
+ * `gorra-trucker-personalizada` ni `gorra-clasica-personalizada`: su única
+ * variante es `sobre_pedido` con stock 0. La sudadera SÍ existe como producto
+ * (es el "hoodie"); lo que no existe es inventario listo para envío.
+ * ---------------------------------------------------------------------------
+ */
+
+/** Categorías que alojan prendas. No se crea ninguna categoría nueva. */
+export const READY_TO_WEAR_CATEGORY_HANDLES = [
+  "playeras-prendas",
+  "gorras",
+] as const;
+
+/**
+ * Una variante cuenta como "lista" sólo si está disponible y tiene piezas.
+ * `sobre_pedido` queda fuera a propósito: se puede comprar, pero se produce
+ * contra pedido y es exactamente el camino del Laboratorio.
+ */
+function isReadyToWearVariant(v: ProductVariantRow): boolean {
+  return v.status === "disponible" && Number(v.stock) > 0;
+}
+
+/**
+ * Quita las variantes anidadas que trae el `select` con join. Las variantes se
+ * usan sólo para decidir si la prenda califica; devolverlas dentro del producto
+ * las arrastraría hasta las props del componente de cliente sin que nadie las
+ * lea.
+ */
+function stripVariantRows(row: ProductWithVariantRows): ProductRow {
+  const copy: Partial<ProductWithVariantRows> = { ...row };
+  delete copy.product_variants;
+  return copy as ProductRow;
+}
+
+/**
+ * Prendas con al menos una variante lista para comprar, ordenadas por precio
+ * ascendente (el mismo criterio que el orden "featured" del catálogo).
+ *
+ * Devuelve `ProductRow[]` para que el consumidor use `ProductGrid`/`ProductCard`
+ * sin adaptadores: la selección de talla/color y el alta al carrito ya viven en
+ * la ficha `/tienda/producto/<handle>`, que es a donde apunta cada tarjeta.
+ */
+export async function getReadyToWearProducts(): Promise<ProductRow[]> {
+  const client = getCatalogClient();
+
+  if (!client) {
+    const categoryIds = new Set(
+      MOCK_CATEGORIES.filter((c) =>
+        (READY_TO_WEAR_CATEGORY_HANDLES as readonly string[]).includes(
+          c.handle,
+        ),
+      ).map((c) => c.id),
+    );
+    const ready = MOCK_PRODUCTS.filter(
+      (p) =>
+        p.category_id !== null &&
+        categoryIds.has(p.category_id) &&
+        (VISIBLE_PRODUCT_FILTER as readonly string[]).includes(p.status) &&
+        MOCK_VARIANTS.some(
+          (v) => v.product_id === p.id && isReadyToWearVariant(v),
+        ),
+    );
+    return sortProducts(ready, "price_asc").map(presentProduct);
+  }
+
+  const { data: categories, error: categoryError } = await raceRead<
+    Pick<CategoryRow, "id">[]
+  >(
+    client
+      .from("categories")
+      .select("id")
+      .in("handle", [...READY_TO_WEAR_CATEGORY_HANDLES])
+      .eq("status", "activa") as unknown as PromiseLike<
+      ReadResult<Pick<CategoryRow, "id">[]>
+    >,
+  );
+  if (categoryError || !categories || categories.length === 0) return [];
+
+  const { data, error } = await raceRead<ProductWithVariantRows[]>(
+    client
+      .from("products")
+      .select("*, product_variants(*)")
+      .in(
+        "category_id",
+        categories.map((c) => c.id),
+      )
+      .in("status", [...VISIBLE_PRODUCT_FILTER])
+      .order("base_price", { ascending: true }) as unknown as PromiseLike<
+      ReadResult<ProductWithVariantRows[]>
+    >,
+  );
+  if (error || !data) return [];
+
+  return data
+    .filter((row) => (row.product_variants ?? []).some(isReadyToWearVariant))
+    .map((row) => presentProduct(stripVariantRows(row)));
+}
+
 export async function getAllVisibleProducts(): Promise<ProductRow[]> {
   const client = getCatalogClient();
   if (!client) return [...MOCK_PRODUCTS].map(presentProduct);

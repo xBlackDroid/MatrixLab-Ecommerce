@@ -12,6 +12,7 @@ import {
   Package,
   PartyPopper,
   Shirt,
+  ShoppingBag,
   Sparkles,
   Sticker,
   User,
@@ -188,9 +189,21 @@ export default function TiendaHomePage() {
               MatrixLab <span className="text-gradient">Wear</span>
             </>
           }
-          description="Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas."
+          description="Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas. Diseña la tuya o llévate una prenda ya lista."
           ctaLabel="Diseñar mi prenda"
           ctaHref="/tienda/disenador"
+          /*
+            Segundo camino de la familia. Los dos accesos son distintos de
+            verdad —uno abre el Laboratorio, el otro vende inventario con talla
+            y color ya definidos— y hasta ahora sólo el primero era visible.
+            Se deja como acción SECUNDARIA para no desplazar al diseñador, que
+            sigue siendo el corazón de MatrixLab Wear.
+          */
+          secondaryCta={{
+            label: "Comprar prendas listas",
+            href: "/tienda/prendas-listas",
+            icon: ShoppingBag,
+          }}
           blurSide="left"
           backgroundLogo={{
             kind: "image",
