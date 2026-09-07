@@ -48,6 +48,7 @@ import {
   TUMBLER_CUPS,
   type CupItem,
 } from "@/lib/store/tumbler-cups";
+import { magicFlowImagePath } from "@/lib/store/tumbler-magic-flow";
 import {
   MATRIXLAB_STICKER_PLACEHOLDER_IMAGE,
   MATRIXLAB_STICKERS,
@@ -181,6 +182,17 @@ function resolveCupImages(p: ProductRow): ProductRow {
 }
 
 /**
+ * Imagen de un producto Magic Flow. Las imagenes administradas en base
+ * conservan prioridad; la ruta por codigo se usa como curaduria local.
+ */
+function resolveMagicFlowImages(p: ProductRow): ProductRow {
+  if (Array.isArray(p.images) && p.images.length > 0) return p;
+  const rel = magicFlowImagePath(p.handle);
+  if (!rel) return p;
+  return publicImageExists(rel) ? { ...p, images: [rel] } : p;
+}
+
+/**
  * Pipeline de presentación pública de un producto. Cada resolver devuelve el
  * producto intacto si el handle no le corresponde, así que encadenarlos es
  * seguro: un Sparkle nunca entra al resolver de stickers ni al de vasos.
@@ -188,7 +200,9 @@ function resolveCupImages(p: ProductRow): ProductRow {
 function presentProduct(p: ProductRow): ProductRow {
   return resolveMatrixLabImages(
     resolveCupImages(
-      resolveStickerImages(resolveSparkleImages(fixProductText(p))),
+      resolveMagicFlowImages(
+        resolveStickerImages(resolveSparkleImages(fixProductText(p))),
+      ),
     ),
   );
 }

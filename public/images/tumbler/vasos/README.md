@@ -31,7 +31,7 @@ v005.webp  →  V005   (16 oz Can)
 
 ## Estado actual de las fotos
 
-Ningún `{codigo}.webp` está subido todavía: los 5 vasos muestran el
-placeholder. Basta con dejar el archivo en esta carpeta (por ejemplo
-`v003.webp`) para que aparezca en el siguiente render: no hay que modificar
-código ni la base de datos.
+Los 5 archivos `{codigo}.webp` ya están publicados en esta carpeta:
+`v001.webp`, `v002.webp`, `v003.webp`, `v004.webp` y `v005.webp`. La página los
+detecta automáticamente por código; no hace falta modificar código ni la base
+de datos para actualizar una foto.
