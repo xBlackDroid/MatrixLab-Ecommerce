@@ -109,6 +109,21 @@ export function FamilyWatermark({ logo }: { logo?: FamilyBackgroundLogo }) {
   );
 }
 
+/**
+ * Segunda acción del bloque, opcional. Existe porque una familia puede tener
+ * DOS caminos de compra distintos —no dos nombres para el mismo— y esconder
+ * uno de ellos dentro de las tarjetas de la derecha lo vuelve invisible: esas
+ * tarjetas son destinos por tipo de pieza, no decisiones de flujo.
+ *
+ * Se renderiza con tratamiento secundario (contorno, sin glow) para que la
+ * jerarquía siga siendo evidente: el CTA sólido es la acción principal.
+ */
+interface FamilySecondaryCta {
+  label: string;
+  href: string;
+  icon?: IconComponent;
+}
+
 export interface StoreFamilySectionProps {
   id?: string;
   accent: StoreFamilyAccent;
@@ -118,6 +133,8 @@ export interface StoreFamilySectionProps {
   description: string;
   ctaLabel: string;
   ctaHref: string;
+  /** Acción secundaria opcional. Los bloques que no la pasan no cambian. */
+  secondaryCta?: FamilySecondaryCta;
   right: FamilyRight;
   /** Lado del blur decorativo, para alternar el ritmo visual entre bloques. */
   blurSide?: "left" | "right";
@@ -139,10 +156,12 @@ export default function StoreFamilySection({
   description,
   ctaLabel,
   ctaHref,
+  secondaryCta,
   right,
   blurSide = "left",
   backgroundLogo,
 }: StoreFamilySectionProps) {
+  const SecondaryIcon = secondaryCta?.icon;
   const s = ACCENT_STYLES[accent];
   const hasRight = right.kind !== "none";
 
@@ -170,13 +189,35 @@ export default function StoreFamilySection({
             </span>
             <h2 className="mt-5 text-3xl font-bold sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg text-ml-white/65">{description}</p>
-            <Link
-              href={ctaHref}
-              className={`mt-8 inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-semibold transition hover:scale-[1.02] ${s.ctaSolid}`}
-            >
-              {ctaLabel}
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </Link>
+            {/*
+              Contenedor de acciones. En móvil los botones se apilan a ancho
+              completo (`flex-col`), que es lo único que evita que una etiqueta
+              larga como "Comprar prendas listas" desborde la tarjeta a 320 px;
+              a partir de `sm` van en fila y pueden envolver. Un bloque con un
+              solo CTA renderiza exactamente igual que antes: el `mt-8` que
+              tenía el enlace pasó al contenedor, sin cambiar el espaciado.
+            */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <Link
+                href={ctaHref}
+                className={`inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 font-semibold transition hover:scale-[1.02] ${s.ctaSolid}`}
+              >
+                {ctaLabel}
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </Link>
+
+              {secondaryCta && (
+                <Link
+                  href={secondaryCta.href}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-ml-white/85 transition hover:border-white/30 hover:text-ml-white"
+                >
+                  {SecondaryIcon && (
+                    <SecondaryIcon className="h-5 w-5" aria-hidden />
+                  )}
+                  {secondaryCta.label}
+                </Link>
+              )}
+            </div>
           </div>
 
           {right.kind === "items" && (

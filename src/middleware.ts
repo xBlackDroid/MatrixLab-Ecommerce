@@ -110,6 +110,16 @@ export const DYNAMIC_ROUTE_PATTERNS: readonly RegExp[] = [
    * regresión que documenta el comentario de arriba.
    */
   /^\/tienda\/matrixlab-tumbler\/cursos$/,
+  /**
+   * Vitrina de prendas listas. Lee inventario en cada petición (una prenda
+   * agotada debe desaparecer al instante, no al siguiente build), así que la
+   * página declara `force-dynamic` y le toca la política estricta.
+   *
+   * Coincidencia EXACTA, por el mismo motivo que la línea de arriba: con un
+   * prefijo, cualquier subruta inexistente caería en la política estricta y
+   * se serviría con la 404 prerenderizada, que no lleva nonce.
+   */
+  /^\/tienda\/prendas-listas$/,
 ];
 
 /** ¿Esta ruta la renderiza Next en la petición (y por tanto lleva nonce)? */
