@@ -240,6 +240,20 @@ function presentProduct(p: ProductRow): ProductRow {
 }
 
 /**
+ * Miniatura pública de un producto ya leído de base.
+ *
+ * Ningún seed escribe `images`: la foto de cada línea vive en `public/` y se
+ * resuelve por handle/código con los mismos resolvers que usa la vitrina. Los
+ * consumidores que leen la fila cruda —el carrito, por ejemplo— necesitan esta
+ * misma regla o mostrarían el placeholder para TODO el catálogo. Una imagen
+ * administrada en base sigue teniendo prioridad; `null` = sin foto conocida.
+ */
+export function catalogImageFor(product: ProductRow): string | null {
+  const images = presentProduct(product).images;
+  return Array.isArray(images) ? (images[0] ?? null) : null;
+}
+
+/**
  * Imagen de las tres líneas MatrixLab (Stickers / Wear / 3D), resuelta por
  * CÓDIGO con la misma regla que Tumbler. Sin esto, los productos sembrados
  * saldrían sin foto en /tienda/producto/<handle>, en la búsqueda y en las
