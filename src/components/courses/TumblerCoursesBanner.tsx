@@ -16,8 +16,8 @@ import {
 /**
  * Bloque de CURSOS dentro de /tienda/categoria/matrixlab-tumbler.
  *
- * Va DEBAJO de la grilla de subcategorías y NO debe leerse como una séptima
- * tarjeta: las seis de arriba son *estanterías* (líneas de producto) y esto es
+ * Va DEBAJO de la grilla de subcategorías y NO debe leerse como una tarjeta
+ * de producto: las de arriba son *estanterías* (líneas de producto) y esto es
  * una *experiencia con fecha y cupo*. Lo que lo separa visualmente:
  *
  *   - Ancho completo, no una celda de la retícula de tres.

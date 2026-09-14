@@ -1,4 +1,3 @@
-import type { ComponentType, SVGProps } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,14 +5,15 @@ import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
-  CupSoda,
-  Droplets,
-  Gem,
-  Layers,
   MessageCircle,
-  Sparkles,
-  Sticker,
 } from "lucide-react";
+import { tumblerSections } from "@/lib/store/tumbler-sections";
+import {
+  READY_TUMBLER_HANDLE,
+  READY_TUMBLER_TITLE,
+  READY_TUMBLER_DESCRIPTION,
+} from "@/lib/store/tumbler-ready";
+import ReadyTumblerCatalog from "@/components/store/ReadyTumblerCatalog";
 import TumblerCoursesBanner from "@/components/courses/TumblerCoursesBanner";
 import ProductGrid from "@/components/store/ProductGrid";
 import SparklesCatalog from "@/components/store/SparklesCatalog";
@@ -27,6 +27,7 @@ import {
   getCategoryByHandle,
   getProductsByCategory,
   getCupCatalog,
+  getReadyTumblerCatalog,
   getSparkleCatalog,
   getStickerCatalog,
   getMatrixLabStickersCatalog,
@@ -35,6 +36,7 @@ import {
   getTumblerSubcategories,
   LEGACY_TUMBLER_PARENT_HANDLE,
   TUMBLER_PARENT_HANDLE,
+  TUMBLER_SUBCATEGORY_HANDLES,
 } from "@/lib/store/products";
 import type { CategoryRow } from "@/lib/db/types";
 import { SPARKLES_CATEGORY_HANDLE } from "@/lib/store/tumbler-sparkles";
@@ -142,6 +144,10 @@ export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { handle } = await params;
+  if (handle === READY_TUMBLER_HANDLE) return {
+    title: READY_TUMBLER_TITLE,
+    description: READY_TUMBLER_DESCRIPTION,
+  };
   const category = await getCategoryByHandle(handle);
   // Las tres líneas nuevas publican su nombre de marca aunque la categoría
   // todavía no tenga fila en la base (su seed sigue bloqueado por precios).
@@ -195,7 +201,32 @@ export default async function CategoryPage({
     redirect(`/tienda/categoria/${TUMBLER_PARENT_HANDLE}`);
   }
 
+  if (handle === READY_TUMBLER_HANDLE) {
+    const items = await getReadyTumblerCatalog();
+    return <ReadyTumblerCatalog items={items} />;
+  }
+
   const category = await getCategoryByHandle(handle);
+  const isTumblerParent = handle === TUMBLER_PARENT_HANDLE;
+
+  // MatrixLab Tumbler presenta sus líneas aunque la base todavía no tenga
+  // sembrada la fila madre (por ejemplo, durante una primera instalación).
+  // Así la ruta pública conserva el layout comercial y sus enlaces siguen
+  // siendo visibles desde la tienda.
+  if (!category && isTumblerParent) {
+    const fallback = curatedFallback(handle);
+    const subcategories = await getTumblerSubcategories();
+    return (
+      <MatrixLabCategoryShell
+        title={fallback?.title ?? "MatrixLab Tumbler"}
+        description={fallback?.description ?? null}
+        imageUrl="/images/categories/matrixlab-tumbler.png"
+        summary="8 líneas para crear, personalizar y terminar tu próximo proyecto"
+      >
+        <TumblerBlocks subcategories={subcategories} />
+      </MatrixLabCategoryShell>
+    );
+  }
 
   // MatrixLab Stickers / Wear / 3D publican el catálogo real del Excel. A
   // diferencia de las líneas de Tumbler, su seed sigue BLOQUEADO por precios
@@ -299,7 +330,6 @@ export default async function CategoryPage({
   // "MatrixLab Tumbler" (categoría madre) presenta sus subcategorías
   // comerciales como bloques; no tiene productos propios. El resto de
   // categorías muestra su grilla de productos normal.
-  const isTumblerParent = handle === TUMBLER_PARENT_HANDLE;
   const subcategories = isTumblerParent ? await getTumblerSubcategories() : [];
 
   // Sparkle Mix es un catálogo propio: 46 Sparkles individuales con buscador,
@@ -518,108 +548,16 @@ function CategoryComingSoon({
   );
 }
 
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-
-interface TumblerBlockDisplay {
-  /** Handle real de la categoría (no se toca en DB; solo se usa para el href
-   * y para verificar que la fila exista antes de mostrar la card). */
-  handle: string;
-  title: string;
-  description: string;
-  icon: IconComponent;
-  accentText: string;
-  iconClasses: string;
-  gradient: string;
-  hover: string;
-}
-
-/**
- * Presentación curada de las subcategorías de MatrixLab Tumbler: nombre
- * visible, copy y acento propios por línea, en el orden comercial deseado.
- * SOLO afecta esta página — el título/descripción real en base (y el resto
- * de la app) no cambian. Los handles son los reales de
- * `TUMBLER_SUBCATEGORY_HANDLES`; "llaveros" y "tags-acrilico" quedan fuera a
- * propósito (Tags de acrílico se integra conceptualmente en Acrylab, y
- * Llaveros deja de tener tarjeta propia), pero sus rutas y datos siguen
- * vivos sin cambios.
- */
-const TUMBLER_BLOCKS_DISPLAY: TumblerBlockDisplay[] = [
-  {
-    handle: SPARKLES_CATEGORY_HANDLE, // "repuestos-consumibles"
-    title: "Sparkle Mix",
-    description:
-      "Sparkles, glitter y mezclas decorativas para crear efectos únicos en vasos y proyectos personalizados.",
-    icon: Sparkles,
-    accentText: "text-ml-violet",
-    iconClasses: "bg-ml-violet/15 text-ml-violet",
-    gradient: "from-ml-violet/25 via-ml-coral/10 to-transparent",
-    hover: "hover:border-ml-violet/50 hover:shadow-glow-violet",
-  },
-  {
-    handle: CUPS_CATEGORY_HANDLE, // "snowglobe"
-    title: "SnowGlobe Cups",
-    description:
-      "Vasos y bases para crear proyectos SnowGlobe, tumblers personalizados y diseños creativos.",
-    icon: CupSoda,
-    accentText: "text-ml-cyan",
-    iconClasses: "bg-ml-cyan/15 text-ml-cyan",
-    gradient: "from-ml-cyan/25 via-ml-violet/10 to-transparent",
-    hover: "hover:border-ml-cyan/50 hover:shadow-glow-cyan",
-  },
-  {
-    handle: STICKERS_CATEGORY_HANDLE, // "wraps-glow-finish"
-    title: "Wraps & Glow Studio",
-    description:
-      "Stickers UV y wraps premium para transformar vasos y superficies con diseños de alta definición y acabados especiales.",
-    icon: Sticker,
-    accentText: "text-ml-coral",
-    iconClasses: "bg-ml-coral/15 text-ml-coral",
-    gradient: "from-ml-coral/25 via-ml-violet/10 to-transparent",
-    hover: "hover:border-ml-coral/50 hover:shadow-glow-coral",
-  },
-  {
-    handle: "magic-flow",
-    title: "Magic Flow",
-    description:
-      "Líquidos, bases y mezclas especiales para efectos, movimiento y acabados en proyectos SnowGlobe y Tumbler.",
-    icon: Droplets,
-    accentText: "text-ml-cyan",
-    iconClasses: "bg-ml-cyan/15 text-ml-cyan",
-    gradient: "from-ml-cyan/25 via-ml-green/10 to-transparent",
-    hover: "hover:border-ml-cyan/50 hover:shadow-glow-cyan",
-  },
-  {
-    handle: "acrilicos",
-    title: "Acrylab",
-    description:
-      "Piezas de acrílico precortadas para llaveros, tags, figuras y proyectos creativos listos para personalizar.",
-    icon: Gem,
-    accentText: "text-ml-violet",
-    iconClasses: "bg-ml-violet/15 text-ml-violet",
-    gradient: "from-ml-violet/25 via-ml-cyan/10 to-transparent",
-    hover: "hover:border-ml-violet/50 hover:shadow-glow-violet",
-  },
-  {
-    handle: "accesorios-personalizacion",
-    title: "Creator Tools",
-    description:
-      "Herramientas, repuestos y consumibles para tu estación creativa MatrixLab Tumbler.",
-    icon: Layers,
-    accentText: "text-ml-green",
-    iconClasses: "bg-ml-green/15 text-ml-green",
-    gradient: "from-ml-green/25 via-ml-violet/10 to-transparent",
-    hover: "hover:border-ml-green/50 hover:shadow-glow-green",
-  },
-];
-
 /** Bloques de las subcategorías comerciales de MatrixLab Tumbler. */
 function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
-  // Defensivo: solo se muestra una card si su fila realmente existe en base
-  // (mismo criterio que el resto de la app — ningún link visible da 404).
-  const realHandles = new Set(subcategories.map((c) => c.handle));
-  const blocks = TUMBLER_BLOCKS_DISPLAY.filter((item) =>
-    realHandles.has(item.handle),
-  );
+  // El layout comercial siempre muestra las ocho líneas conocidas. La
+  // consulta se conserva para añadir handles futuros activos sin desplazar el
+  // orden curado.
+  const handles = [
+    ...TUMBLER_SUBCATEGORY_HANDLES,
+    ...subcategories.map((c) => c.handle),
+  ];
+  const blocks = tumblerSections(handles);
 
   return (
     <div className="mt-10">
@@ -663,9 +601,9 @@ function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
       </div>
 
       {/* CURSOS: va DEBAJO de la grilla y por encima del CTA de WhatsApp.
-          No es una séptima tarjeta —es de ancho completo y con tratamiento
-          editorial propio— porque no es otra línea de producto sino una
-          experiencia con fecha, sede y cupo. Ver TumblerCoursesBanner. */}
+          Es de ancho completo y tiene tratamiento editorial propio porque no
+          es otra línea de producto sino una experiencia con fecha, sede y
+          cupo. Ver TumblerCoursesBanner. */}
       <TumblerCoursesBanner />
 
       <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 text-center">

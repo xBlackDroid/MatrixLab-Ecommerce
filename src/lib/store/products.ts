@@ -42,12 +42,21 @@ import {
 } from "@/lib/store/tumbler-stickers";
 import {
   CUP_PLACEHOLDER_IMAGE,
+  CUPS_CATEGORY_HANDLE,
   cupByHandle,
   cupHandle,
   cupImagePath,
   TUMBLER_CUPS,
   type CupItem,
 } from "@/lib/store/tumbler-cups";
+import {
+  READY_TUMBLER_PLACEHOLDER,
+  readyTumblerByHandle,
+  readyTumblerHandle,
+  readyTumblerSku,
+  visibleReadyTumblers,
+  type ReadyTumblerItem,
+} from "@/lib/store/tumbler-ready";
 import { magicFlowImagePath } from "@/lib/store/tumbler-magic-flow";
 import {
   MATRIXLAB_STICKER_PLACEHOLDER_IMAGE,
@@ -193,15 +202,38 @@ function resolveMagicFlowImages(p: ProductRow): ProductRow {
 }
 
 /**
+ * Fotos de un vaso listo. El seed no escribe `images` a propósito, así que sin
+ * este resolver la ficha `/tienda/producto/vaso-listo-vlXXX`, la búsqueda y
+ * los relacionados saldrían sin foto aunque la vitrina de la categoría sí las
+ * muestre. Las imágenes administradas en base conservan prioridad.
+ */
+function resolveReadyTumblerImages(p: ProductRow): ProductRow {
+  const ready = readyTumblerByHandle(p.handle);
+  if (!ready) return p;
+  if (Array.isArray(p.images) && p.images.length > 0) return p;
+  return { ...p, images: readyTumblerPhotos(ready) };
+}
+
+/** Fotos reales del vaso (hasta 3); placeholder si el archivo aún no existe. */
+function readyTumblerPhotos(item: ReadyTumblerItem): string[] {
+  const photos = item.imagePaths
+    .filter((src) => publicImageExists(src))
+    .slice(0, 3);
+  return photos.length ? photos : [READY_TUMBLER_PLACEHOLDER];
+}
+
+/**
  * Pipeline de presentación pública de un producto. Cada resolver devuelve el
  * producto intacto si el handle no le corresponde, así que encadenarlos es
  * seguro: un Sparkle nunca entra al resolver de stickers ni al de vasos.
  */
 function presentProduct(p: ProductRow): ProductRow {
   return resolveMatrixLabImages(
-    resolveCupImages(
-      resolveMagicFlowImages(
-        resolveStickerImages(resolveSparkleImages(fixProductText(p))),
+    resolveReadyTumblerImages(
+      resolveCupImages(
+        resolveMagicFlowImages(
+          resolveStickerImages(resolveSparkleImages(fixProductText(p))),
+        ),
       ),
     ),
   );
@@ -893,6 +925,64 @@ export async function getCupCatalog(categoryId: string): Promise<CupCatalog> {
     );
   }
   return assembleCupCatalog(products, variantsByProduct);
+}
+
+// ---------------------------------------------------------------------------
+// MatrixLab Tumbler — Vasos listos
+// ---------------------------------------------------------------------------
+
+/** Entrada de vitrina + ids reales necesarios para compra directa. */
+export interface ReadyTumblerCatalogEntry {
+  item: ReadyTumblerItem;
+  handle: string;
+  title: string;
+  productId: string | null;
+  variantId: string | null;
+  sku: string;
+  /** Precio real de la variante/producto; se conserva el del inventario sólo
+   * mientras el seed aún no existe para que la vitrina no pierda su precio. */
+  price: number | null;
+  /** Stock real de la variante. Si falta en base, es 0 y no se puede comprar. */
+  stock: number;
+  imagePaths: string[];
+  sellable: boolean;
+}
+
+/**
+ * Catálogo de vasos listos. La presentación siempre conserva las filas del
+ * inventario, pero el carrito sólo recibe productos y variantes existentes en
+ * Supabase. Así el preview puede mostrar los nuevos diseños antes de ejecutar
+ * el seed, sin inventar ids ni permitir compras que el servidor no puede
+ * validar.
+ */
+export async function getReadyTumblerCatalog(): Promise<ReadyTumblerCatalogEntry[]> {
+  const category = await getCategoryByHandle(CUPS_CATEGORY_HANDLE);
+  const { products, variantsByProduct } = await readCategoryProducts(
+    category?.id ?? "",
+  );
+  const byHandle = new Map(products.map((product) => [product.handle, product]));
+
+  return visibleReadyTumblers().map((item) => {
+    const handle = readyTumblerHandle(item.code);
+    const product = byHandle.get(handle) ?? null;
+    const pricing = resolvePendingPricing(
+      product,
+      product ? (variantsByProduct.get(product.id) ?? []) : [],
+      item.price,
+    );
+    return {
+      item,
+      handle,
+      title: product?.title ?? item.name,
+      productId: product?.id ?? null,
+      variantId: pricing.variantId,
+      sku: readyTumblerSku(item.code),
+      price: pricing.price,
+      stock: pricing.stock ?? 0,
+      imagePaths: readyTumblerPhotos(item),
+      sellable: pricing.sellable,
+    };
+  });
 }
 
 /** Subcategorías de MatrixLab Tumbler, en orden comercial (para su landing). */
