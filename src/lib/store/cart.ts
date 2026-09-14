@@ -14,6 +14,7 @@ import type {
 import { checkAvailability } from "@/lib/store/inventory";
 import { getDesignerDisplayName } from "@/lib/designer/product-catalog";
 import { commercialUnitOf } from "@/lib/store/curated-lines";
+import { catalogImageFor } from "@/lib/store/products";
 import { computeTotals, resolveUnitPrice } from "@/lib/store/pricing";
 
 /**
@@ -172,7 +173,9 @@ export async function buildCartView(sessionId: string): Promise<CartView> {
       // base, no de nada que haya mandado el cliente. Un producto sin unidad
       // propia devuelve null y la UI no cambia.
       unitLabel: commercialUnitOf(product.handle),
-      image: Array.isArray(product.images) ? (product.images[0] ?? null) : null,
+      // Misma regla de foto que la vitrina: los seeds no escriben `images`, así
+      // que leer la fila cruda dejaba TODAS las líneas con placeholder.
+      image: catalogImageFor(product),
       isCustom: item.is_custom,
       designProjectId: item.design_project_id,
       designPreviewUrl,
