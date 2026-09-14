@@ -1,3 +1,6 @@
+import { getTumblerSubcategories, TUMBLER_SUBCATEGORY_HANDLES } from "@/lib/store/products";
+import { tumblerSections } from "@/lib/store/tumbler-sections";
+import { MATRIXLAB_TUMBLER_COURSE_HREF } from "@/lib/store/courses/matrixlab-tumbler";
 import type { ComponentType } from "react";
 import Link from "next/link";
 import {
@@ -5,7 +8,6 @@ import {
   Box,
   Building2,
   CupSoda,
-  Droplets,
   Gift,
   GraduationCap,
   Magnet,
@@ -87,7 +89,21 @@ const LASER_CHIPS = [
   { label: "Tag" },
 ];
 
-export default function TiendaHomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function TiendaHomePage() {
+  const subcategories = await getTumblerSubcategories();
+  // Las ocho líneas son parte del layout comercial de Tumbler. La consulta
+  // permite respetar datos activos de la base, pero el layout conserva todas
+  // las tarjetas aunque una lectura de catálogo llegue vacía o incompleta.
+  const tumblerHandles = [
+    ...TUMBLER_SUBCATEGORY_HANDLES,
+    ...subcategories.map((c) => c.handle),
+  ];
+  const tumblerItems = tumblerSections(tumblerHandles).map((item) => ({
+    label: item.title, href: `/tienda/categoria/${item.handle}`, icon: item.icon,
+  }));
+  tumblerItems.push({ label: "Cursos", href: MATRIXLAB_TUMBLER_COURSE_HREF, icon: GraduationCap });
   return (
     <>
       <StoreHero />
@@ -119,7 +135,7 @@ export default function TiendaHomePage() {
               MatrixLab <span className="text-gradient">Tumbler</span>
             </>
           }
-          description="Vasos, materiales e insumos creativos para personalizar tumblers, snow globe y proyectos únicos."
+          description="Elige un vaso ya decorado o crea el tuyo. Encuentra vasos, insumos, accesorios y cursos para darle forma a tu próximo proyecto."
           ctaLabel="Explorar MatrixLab Tumbler"
           ctaHref="/tienda/categoria/matrixlab-tumbler"
           blurSide="left"
@@ -129,24 +145,7 @@ export default function TiendaHomePage() {
           }}
           right={{
             kind: "items",
-            items: [
-              { label: "Vasos", href: "/tienda/categoria/snowglobe", icon: CupSoda },
-              {
-                label: "Sparkles",
-                href: "/tienda/categoria/repuestos-consumibles",
-                icon: Sparkles,
-              },
-              {
-                label: "UV Stickers",
-                href: "/tienda/categoria/wraps-glow-finish",
-                icon: Sticker,
-              },
-              {
-                label: "Magic Flow",
-                href: "/tienda/categoria/magic-flow",
-                icon: Droplets,
-              },
-            ],
+            items: tumblerItems,
           }}
         />
       </Reveal>
