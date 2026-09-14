@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import ProductGallery from "@/components/store/ProductGallery";
+import ThreeDProductGallery from "@/components/store/ThreeDProductGallery";
+import { matrixLab3dByHandle } from "@/lib/store/matrixlab-3d";
 import ProductGrid from "@/components/store/ProductGrid";
 import ProductOptions from "@/components/store/ProductOptions";
 import {
@@ -46,6 +48,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const related = await getRelatedProducts(product, 4);
   const designerType = DESIGNER_PRODUCT_HANDLES[product.handle] ?? null;
+  const Gallery = matrixLab3dByHandle(product.handle)
+    ? ThreeDProductGallery
+    : ProductGallery;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -62,7 +67,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </Link>
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
-        <ProductGallery
+        <Gallery
           images={Array.isArray(product.images) ? product.images : []}
           title={product.title}
         />

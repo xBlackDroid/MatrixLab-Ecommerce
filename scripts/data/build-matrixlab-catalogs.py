@@ -18,16 +18,17 @@ dentro de src/lib/store/matrixlab-*.ts, igual que hace
 scripts/data/build-tumbler-stickers.ts con la línea de Tumbler. Todo lo que
 está fuera de esos marcadores (tipos, helpers, comentarios) se conserva.
 
-PRECIO: los tres Excel traen la columna Precio VACÍA en las 217 filas. El
-generador NO emite ningún campo de precio: el precio no existe en el modelo
-hasta que se confirme comercialmente. No hay ningún valor por defecto que
-pueda colarse a producción.
+3D importa precios confirmados, unidades opcionales y hasta tres fotos locales.
+Los códigos sin nombre permanecen reservados en el Excel y no se publican.
+Para actualizar solo 3D, usar --only 3d con la ruta al XLSX.
 
 Uso:
   python scripts/data/build-matrixlab-catalogs.py <carpeta-con-los-xlsx>
 """
 import re
-import sys
+import argparse
+import json
+import math
 import unicodedata
 import zipfile
 import xml.etree.ElementTree as ET
@@ -98,8 +99,7 @@ def slugify(value):
 
 def ts_string(value):
     """Literal de string TypeScript, con comillas y barras escapadas."""
-    escaped = value.replace(chr(92), chr(92) * 2).replace('"', chr(92) + '"')
-    return '"%s"' % escaped
+    return json.dumps(value, ensure_ascii=False)
 
 
 def write_block(rel_path, marker, lines, comment='//'):
@@ -171,20 +171,49 @@ def build_wear(src_dir):
 
 
 def build_3d(src_dir):
-    """Columnas: B código, C nombre, D categoría, F descripción, G tipo/uso,
-    H color/acabado, I unidades, M personalizable. Precio (K) vacío.
-    El Excel NO trae handle: se deriva del código en el módulo TS."""
-    _, rows = read_sheet(src_dir / 'Inventario_MatrixLab_3D.xlsx', 'Inventario 3D')
+    """Lee 3D sin inventar precios, cantidades o personalización faltantes."""
+    source = src_dir if src_dir.is_file() else src_dir / 'Inventario_MatrixLab_3D.xlsx'
+    _, rows = read_sheet(source, 'Inventario 3D')
     out, cats = [], []
-    for position, r in enumerate(rows, start=1):
+    seen = set()
+    allowed_categories = {'lamparas-rgb', 'calendarios', 'decoracion-escolar',
+                          'organizadores', 'coleccionables', 'personalizados', 'gaming'}
+    for r in rows:
+        r = r + [''] * max(0, 18-len(r))
+        if not r[1].strip() or not r[2].strip():
+            continue  # Códigos reservados sin producto: permanecen en el Excel.
+        code = r[1].strip().upper()
+        if not re.fullmatch(r'3D\d{3}', code) or code in seen:
+            raise SystemExit('Código inválido o duplicado: ' + code)
+        seen.add(code)
         category = collect_categories(r, 3, cats)
-        customizable = 'true' if r[12].strip().lower().startswith('s') else 'false'
-        out.append(
-            '{ position: %d, code: %s, name: %s, category: %s, description: %s, '
-            'usageLabel: %s, finishLabel: %s, inventory: %d, customizable: %s },' % (
-                position, ts_string(r[1]), ts_string(r[2]), ts_string(category),
-                ts_string(r[5]), ts_string(r[6]), ts_string(r[7]), int(r[8]),
-                customizable))
+        if category not in allowed_categories:
+            raise SystemExit('Agrega la categoría al módulo 3D antes de importar: ' + r[3])
+        if not r[5] or r[5].lower().startswith('agrega descrip'):
+            raise SystemExit('Descripción pendiente: ' + code)
+        def number(value, label, integer=False):
+            if not value.strip(): return None
+            result = float(value)
+            if not math.isfinite(result) or result < 0 or (integer and not result.is_integer()):
+                raise SystemExit('%s inválido para %s' % (label, code))
+            return int(result) if result.is_integer() else result
+        photos = [value.strip() for value in r[15:18] if value.strip()]
+        for photo in photos:
+            if not re.fullmatch(r'/images/matrixlab-3d/[a-z0-9-]+\.(?:webp|png|jpe?g)', photo):
+                raise SystemExit('Ruta de foto inválida para %s: %s' % (code, photo))
+        note = r[14].strip()
+        item = dict(position=len(out)+1, code=code, name=r[2], category=category,
+                    description=r[5], usageLabel=r[6], finishLabel=r[7],
+                    inventory=number(r[8], 'Inventario', True),
+                    price=number(r[10], 'Precio'),
+                    priceFrom='desde' in note.lower(),
+                    salesUnit='paquete de 12 piezas' if code == '3D007' else
+                              'paquete de 3 piezas' if code == '3D015' else 'pieza',
+                    status=r[4].strip() or None,
+                    customizable=True if r[12].lower().startswith('s') else
+                                 False if r[12].lower() == 'no' else None,
+                    imagePaths=photos)
+        out.append(json.dumps(item, ensure_ascii=False) + ',')
     return out, cats
 
 
@@ -256,9 +285,16 @@ TARGETS = [
 
 
 def main():
-    if len(sys.argv) < 2:
-        raise SystemExit('Uso: build-matrixlab-catalogs.py <carpeta-con-los-xlsx>')
-    src_dir = Path(sys.argv[1])
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('source', type=Path)
+    parser.add_argument('--only', choices=['3d'])
+    args = parser.parse_args()
+    src_dir = args.source
+    if args.only == '3d':
+        lines, cats = build_3d(src_dir)
+        write_block('src/lib/store/matrixlab-3d.ts', 'matrixlab-3d', lines)
+        print('MatrixLab 3D: %d productos, %d categorias' % (len(lines), len(cats)))
+        return
     print('Fuente de verdad:', src_dir)
     for label, builder, rel_path, marker in TARGETS:
         lines, cats = builder(src_dir)
@@ -268,7 +304,7 @@ def main():
         write_block(rel_path, marker, lines)
 
     # Seed de MatrixLab Stickers: es la unica linea con precio confirmado, asi
-    # que es la unica cuyo seed lleva datos. Wear y 3D siguen bloqueados.
+    # que es la unica cuyo seed lleva datos. Los seeds de Wear y 3D no se regeneran en este flujo.
     price, sheet_copy = read_stickers_commercials()
     seed_rows = build_stickers_seed(src_dir, price)
     print('Seed MatrixLab Stickers: %d planillas a $%s c/u' % (len(seed_rows), price))

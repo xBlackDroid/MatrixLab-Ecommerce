@@ -70,10 +70,10 @@ import {
 } from "@/lib/store/matrixlab-wear";
 import {
   MATRIXLAB_3D,
-  MATRIXLAB_3D_PLACEHOLDER_IMAGE,
   matrixLab3dByHandle,
   matrixLab3dHandle,
-  matrixLab3dImagePath,
+  matrixLab3dImagePaths,
+  selectMatrixLab3dImages,
   matrixLab3dSku,
   type MatrixLab3dItem,
 } from "@/lib/store/matrixlab-3d";
@@ -215,6 +215,8 @@ function presentProduct(p: ProductRow): ProductRow {
  * placeholder de marca: el seed no escribe `images` a propósito.
  */
 function resolveMatrixLabImages(p: ProductRow): ProductRow {
+  const piece = matrixLab3dByHandle(p.handle);
+  if (piece) return { ...p, images: resolveMatrixLab3dImages(piece, p) };
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const sticker = matrixLabStickerByHandle(p.handle);
   if (sticker) {
@@ -232,14 +234,6 @@ function resolveMatrixLabImages(p: ProductRow): ProductRow {
     return {
       ...p,
       images: [publicImageExists(rel) ? rel : MATRIXLAB_WEAR_PLACEHOLDER_IMAGE],
-    };
-  }
-  const piece = matrixLab3dByHandle(p.handle);
-  if (piece) {
-    const rel = matrixLab3dImagePath(piece.code);
-    return {
-      ...p,
-      images: [publicImageExists(rel) ? rel : MATRIXLAB_3D_PLACEHOLDER_IMAGE],
     };
   }
   return p;
@@ -1743,6 +1737,19 @@ export async function getMatrixLabWearCatalog(
 
 // --- MatrixLab 3D ----------------------------------------------------------
 
+function resolveMatrixLab3dImages(
+  item: MatrixLab3dItem,
+  product: ProductRow | null,
+): string[] {
+  const candidates = item.imagePaths ?? matrixLab3dImagePaths(item.code);
+  return selectMatrixLab3dImages(
+    item.imagePaths === undefined && Array.isArray(product?.images) ? product.images : [],
+    candidates.filter(
+      (src) => /^https?:\/\//.test(src) || publicImageExists(src),
+    ),
+  );
+}
+
 export interface MatrixLab3dCatalogEntry {
   /** Fila del Excel (nombre, categoría, uso, acabado, personalizable). */
   item: MatrixLab3dItem;
@@ -1757,19 +1764,20 @@ export interface MatrixLab3dCatalogEntry {
   price: number | null;
   stock: number | null;
   /** Unidades declaradas en el Excel (columna I). */
-  declaredInventory: number;
+  declaredInventory: number | null;
   image: string;
+  images: string[];
   sellable: boolean;
 }
 
 export interface MatrixLab3dCatalog {
-  /** Las 7 piezas del Excel, en el orden EXACTO del Excel. */
+  /** Productos del inventario, en el orden del Excel. */
   entries: MatrixLab3dCatalogEntry[];
   pricePending: number;
   legacyHidden: ProductRow[];
 }
 
-/** Catálogo MatrixLab 3D: 7 piezas del Excel + datos reales de base. */
+/** Catálogo MatrixLab 3D: datos comerciales del Excel y referencias de base. */
 export async function getMatrixLab3dCatalog(
   categoryId: string,
 ): Promise<MatrixLab3dCatalog> {
@@ -1779,6 +1787,7 @@ export async function getMatrixLab3dCatalog(
   for (const item of MATRIXLAB_3D) {
     const handle = matrixLab3dHandle(item.code);
     const product = byHandle.get(handle) ?? null;
+    const images = resolveMatrixLab3dImages(item, product);
     const pricing = resolvePendingPricing(
       product,
       product ? (variantsByProduct.get(product.id) ?? []) : [],
@@ -1786,18 +1795,15 @@ export async function getMatrixLab3dCatalog(
     entries.push({
       item,
       handle,
-      title: product?.title ?? item.name,
+      title: item.name,
       productId: product?.id ?? null,
       variantId: pricing.variantId,
       sku: matrixLab3dSku(item.code),
-      price: pricing.price,
+      price: item.price,
       stock: pricing.stock,
       declaredInventory: item.inventory,
-      image: resolveCodeImage(
-        product,
-        matrixLab3dImagePath(item.code),
-        MATRIXLAB_3D_PLACEHOLDER_IMAGE,
-      ),
+      image: images[0],
+      images,
       sellable: pricing.sellable,
     });
   }

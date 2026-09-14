@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import ThreeDProductGallery from "@/components/store/ThreeDProductGallery";
 import { MessageCircle, Sparkles } from "lucide-react";
 import type { MatrixLab3dCatalogEntry } from "@/lib/store/products";
 import {
@@ -20,11 +20,7 @@ interface ThreeDFilter {
   count: number;
 }
 
-/**
- * Filtros derivados EXCLUSIVAMENTE del Excel: las 6 categorías reales. Con 7
- * piezas no hace falta buscador, pero el filtro sí aporta (Organizadores
- * agrupa 2). Una categoría sin piezas no se muestra.
- */
+/** Filtros derivados de las categorías presentes en el inventario. */
 function buildFilters(entries: MatrixLab3dCatalogEntry[]): ThreeDFilter[] {
   const counts = matrixLab3dCategoryCounts(entries.map((e) => e.item));
   const filters: ThreeDFilter[] = [
@@ -55,8 +51,13 @@ export default function MatrixLab3DCatalog({
 }) {
   const [filter, setFilter] = useState<MatrixLab3dCategoryId | null>(null);
   const filters = useMemo(() => buildFilters(entries), [entries]);
+  const customRequestUrl = new URL(customizationWhatsappUrl);
+  customRequestUrl.searchParams.set(
+    "text",
+    "Hola MatrixLab, tengo una idea para una pieza 3D que no encontré en el catálogo. Quiero contarles qué busco y cotizarla con ustedes.",
+  );
 
-  // Orden del Excel (3D001 → 3D007), ya resuelto en el servidor.
+  // Orden del Excel, ya resuelto en el servidor.
   const visible = useMemo(
     () => entries.filter((entry) => matchesMatrixLab3dFilter(entry.item, filter)),
     [entries, filter],
@@ -64,6 +65,40 @@ export default function MatrixLab3DCatalog({
 
   return (
     <div className="mt-10">
+      <section
+        aria-labelledby="custom-3d-heading"
+        className="mb-8 overflow-hidden rounded-2xl border border-ml-violet/40 bg-linear-to-br from-ml-violet/20 via-ml-bg to-ml-cyan/10 p-5 sm:p-8"
+      >
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-ml-cyan">
+              Tu idea también tiene lugar aquí
+            </p>
+            <h2 id="custom-3d-heading" className="text-2xl font-bold leading-tight text-ml-white sm:text-3xl">
+              ¿No lo ves? Lo creamos contigo.
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ml-white/75 sm:text-base">
+              Ese regalo, accesorio o detalle que tienes en mente puede ser tu
+              próxima pieza favorita. Mándanos una foto, un boceto o cuéntanos
+              qué buscas y le damos forma en 3D.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col gap-2 lg:items-center">
+            <a
+              href={customRequestUrl.toString()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ml-green px-6 py-3 text-sm font-bold text-ml-bg transition hover:bg-ml-green/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ml-cyan"
+            >
+              <MessageCircle className="h-5 w-5" aria-hidden />
+              Quiero crear mi pieza
+            </a>
+            <p className="text-center text-xs text-ml-white/60">
+              Platiquemos por WhatsApp
+            </p>
+          </div>
+        </div>
+      </section>
       <div className="flex flex-wrap gap-2">
         {filters.map((option) => {
           const active = filter === option.id;
@@ -98,7 +133,7 @@ export default function MatrixLab3DCatalog({
         {visible.length} de {entries.length} piezas
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
         {visible.map((entry) => (
           <ThreeDCard
             key={entry.handle}
@@ -112,12 +147,7 @@ export default function MatrixLab3DCatalog({
   );
 }
 
-/**
- * Tarjeta de una pieza 3D. Las piezas personalizables del Excel (3D004, 3D005,
- * 3D007) se destacan visualmente y cambian su CTA a "Consultar
- * personalización": el Laboratorio no tiene editor de piezas 3D, así que NO se
- * promete un configurador que no existe.
- */
+/** Tarjeta con precio del Excel y consulta de la pieza por WhatsApp. */
 function ThreeDCard({
   entry,
   whatsappUrl,
@@ -129,6 +159,8 @@ function ThreeDCard({
 }) {
   const { item } = entry;
   const priceConfirmed = entry.price !== null;
+  const contactUrl = new URL(item.customizable ? customizationWhatsappUrl : whatsappUrl);
+  contactUrl.searchParams.set("text", `Hola MatrixLab, quiero ${item.customizable ? "personalizar" : "consultar"} ${entry.title} (${item.code}), ${item.salesUnit}.`);
 
   return (
     <article
@@ -139,23 +171,19 @@ function ThreeDCard({
           : "hover:border-ml-violet/40",
       )}
     >
-      <div className="relative aspect-square w-full overflow-hidden">
-        <Image
-          src={entry.image}
-          alt={entry.title}
-          fill
-          sizes="(max-width: 420px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition duration-500 hover:scale-105"
-        />
-        <span className="absolute left-3 top-3 rounded-full bg-ml-bg/85 px-3 py-1 text-xs font-semibold text-ml-cyan">
+      <div className="relative">
+        <ThreeDProductGallery images={entry.images} title={entry.title} />
+        <div className="pointer-events-none absolute inset-x-3 top-3 flex flex-wrap items-start justify-between gap-1.5">
+        <span className="rounded-full bg-ml-bg/85 px-3 py-1 text-xs font-semibold text-ml-cyan">
           {MATRIXLAB_3D_CATEGORY_LABELS[item.category]}
         </span>
         {item.customizable && (
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-ml-violet px-3 py-1 text-xs font-semibold text-ml-white">
+          <span className="inline-flex items-center gap-1 rounded-full bg-ml-violet px-3 py-1 text-xs font-semibold text-ml-white">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             Personalizable
           </span>
         )}
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
@@ -171,7 +199,10 @@ function ThreeDCard({
 
         {priceConfirmed ? (
           <p className="text-xl font-bold text-ml-white">
-            {formatPrice(entry.price as number)}
+            {item.priceFrom && "Desde "}{formatPrice(entry.price as number)}
+            <span className="block text-xs font-normal text-ml-white/60">
+              MXN / {item.salesUnit}
+            </span>
           </p>
         ) : (
           <p className="text-sm font-semibold text-ml-white/70">
@@ -185,7 +216,7 @@ function ThreeDCard({
 
         <div className="mt-auto pt-2">
           <a
-            href={item.customizable ? customizationWhatsappUrl : whatsappUrl}
+            href={contactUrl.toString()}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -195,9 +226,6 @@ function ThreeDCard({
                 : "bg-ml-green text-ml-bg hover:bg-ml-green/90",
             )}
           >
-            {/* Los 7 precios siguen pendientes: el CTA pide precio en vez de
-                mostrar una cifra. Las piezas personalizables se atienden por
-                WhatsApp en esta versión (no hay configurador 3D). */}
             {item.customizable ? (
               <>
                 <Sparkles className="h-4 w-4" aria-hidden />
@@ -206,7 +234,7 @@ function ThreeDCard({
             ) : (
               <>
                 <MessageCircle className="h-4 w-4" aria-hidden />
-                Consultar precio
+                {priceConfirmed ? "Pedir por WhatsApp" : "Consultar precio"}
               </>
             )}
           </a>
