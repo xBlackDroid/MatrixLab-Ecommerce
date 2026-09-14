@@ -240,17 +240,26 @@ function presentProduct(p: ProductRow): ProductRow {
 }
 
 /**
- * Miniatura pública de un producto ya leído de base.
+ * Presentación pública de un producto ya leído de base, para consumidores
+ * fuera de este módulo que trabajan con la fila cruda (el carrito).
  *
- * Ningún seed escribe `images`: la foto de cada línea vive en `public/` y se
- * resuelve por handle/código con los mismos resolvers que usa la vitrina. Los
- * consumidores que leen la fila cruda —el carrito, por ejemplo— necesitan esta
- * misma regla o mostrarían el placeholder para TODO el catálogo. Una imagen
- * administrada en base sigue teniendo prioridad; `null` = sin foto conocida.
+ * Aplica exactamente lo mismo que la vitrina:
+ *
+ *   - FOTO. Ningún seed escribe `images`: la imagen de cada línea vive en
+ *     `public/` y se resuelve por handle/código. Sin esto el carrito mostraba
+ *     el placeholder para TODO el catálogo. Una imagen administrada en base
+ *     conserva prioridad y un producto sin foto conocida devuelve `[]`.
+ *   - TEXTO. Repara el mojibake heredado de importaciones antiguas
+ *     ("personalizaciÃ³n"). `repairMojibake` deja intacto cualquier texto que
+ *     no traiga los marcadores, así que es inocuo para el resto del catálogo.
  */
-export function catalogImageFor(product: ProductRow): string | null {
-  const images = presentProduct(product).images;
-  return Array.isArray(images) ? (images[0] ?? null) : null;
+export function presentCatalogProduct(product: ProductRow): ProductRow {
+  return presentProduct(product);
+}
+
+/** Primera foto pública de un producto, o `null` si no tiene ninguna. */
+export function catalogImageOf(product: ProductRow): string | null {
+  return Array.isArray(product.images) ? (product.images[0] ?? null) : null;
 }
 
 /**

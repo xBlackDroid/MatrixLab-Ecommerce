@@ -14,7 +14,7 @@ import type {
 import { checkAvailability } from "@/lib/store/inventory";
 import { getDesignerDisplayName } from "@/lib/designer/product-catalog";
 import { commercialUnitOf } from "@/lib/store/curated-lines";
-import { catalogImageFor } from "@/lib/store/products";
+import { catalogImageOf, presentCatalogProduct } from "@/lib/store/products";
 import { computeTotals, resolveUnitPrice } from "@/lib/store/pricing";
 
 /**
@@ -158,11 +158,15 @@ export async function buildCartView(sessionId: string): Promise<CartView> {
       item.is_custom && design
         ? getDesignerDisplayName(design.product_type)
         : null;
+    // El carrito lee la fila cruda de base; la vitrina, la presentada. Sin esta
+    // línea el carrito quedaba con placeholder en TODAS sus fotos (ningún seed
+    // escribe `images`) y arrastraba el mojibake de importaciones antiguas.
+    const presented = presentCatalogProduct(product);
     lines.push({
       id: item.id,
       productId: product.id,
       productHandle: product.handle,
-      title: product.title,
+      title: presented.title,
       customTitle,
       variantId: variant?.id ?? null,
       variantTitle: variant?.title ?? null,
@@ -173,9 +177,7 @@ export async function buildCartView(sessionId: string): Promise<CartView> {
       // base, no de nada que haya mandado el cliente. Un producto sin unidad
       // propia devuelve null y la UI no cambia.
       unitLabel: commercialUnitOf(product.handle),
-      // Misma regla de foto que la vitrina: los seeds no escriben `images`, así
-      // que leer la fila cruda dejaba TODAS las líneas con placeholder.
-      image: catalogImageFor(product),
+      image: catalogImageOf(presented),
       isCustom: item.is_custom,
       designProjectId: item.design_project_id,
       designPreviewUrl,
