@@ -33,13 +33,21 @@ import {
   SoftBlob,
 } from "@/components/icons/BrandDecor";
 import FamilyCard, {
+  FamilyDualCard,
   type FamilyAccent,
 } from "@/components/landing/FamilyCard";
+import BackToSchoolAccesses from "@/components/school/BackToSchoolAccesses";
 import HeroAura, { type HeroAuraItem } from "@/components/landing/HeroAura";
 import LandingNav from "@/components/landing/LandingNav";
 import Reveal from "@/components/landing/Reveal";
 import RotatingWord from "@/components/landing/RotatingWord";
 import TiltCard from "@/components/landing/TiltCard";
+import {
+  BACK_TO_SCHOOL_BADGE,
+  BACK_TO_SCHOOL_DESCRIPTION,
+  BACK_TO_SCHOOL_TITLE_HIGHLIGHT,
+  BACK_TO_SCHOOL_TITLE_PREFIX,
+} from "@/lib/store/back-to-school";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
@@ -139,50 +147,81 @@ const LAB_LINES: Array<{
 ];
 
 /**
- * Piezas flotantes del hero. Posiciones elegidas para dejar libre la columna
- * central de texto (max-w-4xl): tres por banda, alternando tamaño y altura para
+ * Piezas flotantes del hero, tres por banda, alternando tamaño y altura para
  * que la composición no quede simétrica ni alineada como una rejilla.
+ *
+ * Cada pieza lleva DOS juegos de posición en la misma cadena de clases:
+ *
+ * - Móvil (por defecto): distancias en píxeles desde el borde superior de la
+ *   sección, no porcentajes. El alto del hero cambia con el ancho (el copy
+ *   reflowea y los botones se apilan), así que un `top-[18%]` caería en un
+ *   sitio distinto en cada teléfono; en cambio la banda del titular SIEMPRE
+ *   empieza a la misma distancia del borde (pt-16 + badge + mt-7). Así las
+ *   seis piezas rodean "MatrixLab Intelligence" y se ven enteras a 360 px.
+ *   Van pegadas a los bordes y en tamaño reducido para no invadir la columna
+ *   de texto: el titular, el copy y los botones se leen sin estorbo.
+ * - Tablet (`sm:`): a partir de 640 px la sección gana relleno superior y el
+ *   titular salta a `text-7xl`, así que las piezas bajan y crecen. Se anclan
+ *   con `calc(50% - 17rem)` en vez de un porcentaje del ancho: el titular
+ *   mide lo mismo a 640 que a 1023 px y está centrado, así que medir desde el
+ *   centro mantiene la misma holgura (~28 px) en todo el tramo, mientras que
+ *   un porcentaje las iría alejando según crece la pantalla.
+ * - Escritorio (`lg:`): el juego de siempre, en porcentajes del alto de la
+ *   sección, que deja libre la columna central (max-w-4xl). Las bandas
+ *   izquierda y derecha se espejan para equilibrar la composición.
+ * - Las dos piezas de abajo suben en el tramo 1024-1279 (`lg:bottom-[24%]`,
+ *   `xl:` las devuelve a su sitio). A esos anchos la fila de accesos ya mide
+ *   sus 896 px completos y el margen libre es de sólo 64 px, así que a la
+ *   altura de siempre se montaban sobre la primera y la última pastilla.
+ *
+ * Los colores, el tamaño relativo del icono y la animación no cambian.
  */
 const HERO_AURA: readonly HeroAuraItem[] = [
   {
     Icon: Sticker,
     label: "stickers",
-    position: "left-[4%] top-[18%] h-20 w-20 opacity-40",
+    position:
+      "left-1 top-[84px] h-11 w-11 opacity-30 sm:left-[calc(50%-17rem)] sm:top-[140px] sm:h-14 sm:w-14 sm:opacity-35 lg:left-[4%] lg:top-[18%] lg:h-20 lg:w-20 lg:opacity-40",
     tone: "text-ml-coral",
     delay: "0s",
   },
   {
     Icon: CupSoda,
     label: "tumbler",
-    position: "left-[9%] top-[54%] h-16 w-16 opacity-30",
+    position:
+      "left-0 top-[140px] h-10 w-10 opacity-25 sm:left-[calc(50%-17rem)] sm:top-[212px] sm:h-12 sm:w-12 sm:opacity-30 lg:left-[9%] lg:top-[54%] lg:h-16 lg:w-16 lg:opacity-30",
     tone: "text-ml-cyan",
     delay: "1.4s",
   },
   {
     Icon: Shirt,
     label: "prendas",
-    position: "left-[2%] bottom-[14%] h-24 w-24 opacity-35",
+    position:
+      "left-1 top-[198px] h-11 w-11 opacity-30 sm:left-[calc(50%-17rem)] sm:top-[276px] sm:h-14 sm:w-14 sm:opacity-35 lg:left-[3%] lg:top-auto lg:bottom-[24%] lg:h-24 lg:w-24 lg:opacity-35 xl:bottom-[14%]",
     tone: "text-ml-violet",
     delay: "2.6s",
   },
   {
     Icon: Box,
     label: "3d",
-    position: "right-[5%] top-[15%] h-24 w-24 opacity-40",
+    position:
+      "right-1 top-[78px] h-11 w-11 opacity-30 sm:right-[calc(50%-17rem)] sm:top-[130px] sm:h-14 sm:w-14 sm:opacity-35 lg:right-[4%] lg:top-[15%] lg:h-24 lg:w-24 lg:opacity-40",
     tone: "text-ml-green",
     delay: "0.7s",
   },
   {
     Icon: Zap,
     label: "laser",
-    position: "right-[11%] top-[52%] h-16 w-16 opacity-30",
+    position:
+      "right-0 top-[136px] h-10 w-10 opacity-25 sm:right-[calc(50%-17rem)] sm:top-[204px] sm:h-12 sm:w-12 sm:opacity-30 lg:right-[9%] lg:top-[52%] lg:h-16 lg:w-16 lg:opacity-30",
     tone: "text-ml-violet",
     delay: "2s",
   },
   {
     Icon: GraduationCap,
     label: "etiquetas",
-    position: "right-[3%] bottom-[16%] h-20 w-20 opacity-35",
+    position:
+      "right-1 top-[190px] h-11 w-11 opacity-30 sm:right-[calc(50%-17rem)] sm:top-[268px] sm:h-14 sm:w-14 sm:opacity-35 lg:right-[3%] lg:top-auto lg:bottom-[25%] lg:h-20 lg:w-20 lg:opacity-35 xl:bottom-[16%]",
     tone: "text-ml-green",
     delay: "3.2s",
   },
@@ -198,13 +237,16 @@ const HERO_AURA: readonly HeroAuraItem[] = [
  */
 const FAMILY_CARDS: Array<{
   id: string;
-  href: string;
+  /** Destino único. Las familias con dos caminos reales usan `dual`. */
+  href?: string;
+  /** Tarjeta con dos accesos independientes en vez de un solo enlace. */
+  dual?: boolean;
   badgeIcon: IconComponent;
   badgeLabel: string;
   titlePrefix: string;
   titleHighlight: string;
   description: string;
-  cta: string;
+  cta?: string;
   accent: FamilyAccent;
   gradient: string;
   visual:
@@ -287,15 +329,16 @@ const FAMILY_CARDS: Array<{
     visual: { kind: "image", src: "/images/categories/matrixlab-laser.png" },
   },
   {
-    id: "etiquetas-escolares",
-    href: "/tienda/disenador/etiquetas-escolares",
+    // Regreso a Clases NO es una tarjeta con un solo destino: presenta sus dos
+    // caminos (editor de etiquetas y catálogo escolar) como accesos separados.
+    // Ver `dual` y FamilyDualCard.
+    id: "regreso-a-clases",
+    dual: true,
     badgeIcon: GraduationCap,
-    badgeLabel: "De regreso a clases",
-    titlePrefix: "Etiquetas",
-    titleHighlight: "escolares",
-    description:
-      "Paquetes personalizados con tipografías y diseños editables, listos para ropa, útiles y más.",
-    cta: "Crear etiquetas",
+    badgeLabel: BACK_TO_SCHOOL_BADGE,
+    titlePrefix: BACK_TO_SCHOOL_TITLE_PREFIX,
+    titleHighlight: BACK_TO_SCHOOL_TITLE_HIGHLIGHT,
+    description: BACK_TO_SCHOOL_DESCRIPTION,
     accent: "green",
     gradient: "from-ml-green/20 via-ml-coral/10 to-transparent",
     visual: {
@@ -600,15 +643,22 @@ export default function LandingPage() {
                 color. Sustituye a los chips genéricos — dice qué se produce en
                 vez de categorías abstractas, y cada uno lleva a su familia. */}
             <Reveal delay={0.24} className="w-full">
-              <div className="mt-12 flex flex-wrap items-center justify-center gap-2.5">
+              {/* El icono pasó de 16 a 20 px (+25%): a 16 px el símbolo se leía
+                  como un punto de color y no como la línea que representa. El
+                  hueco y el relleno suben con él (gap-2 -> gap-2.5, px-4 ->
+                  px-4.5) para que la pastilla conserve su proporción y el
+                  nombre siga mandando. En móvil la fila envuelve en varias
+                  líneas centradas, con algo menos de hueco para que las tres
+                  filas no separen demasiado. */}
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
                 {LAB_LINES.map((line) => (
                   <Link
                     key={line.href}
                     href={line.href}
-                    className="glass group inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-ml-white/75 transition hover:-translate-y-0.5 hover:border-ml-violet/50 hover:text-ml-white"
+                    className="glass group inline-flex items-center gap-2.5 rounded-full px-4.5 py-2.5 text-sm font-medium text-ml-white/75 transition hover:-translate-y-0.5 hover:border-ml-violet/50 hover:text-ml-white"
                   >
                     <line.Icon
-                      className={`h-4 w-4 ${line.tone} transition group-hover:scale-110`}
+                      className={`h-5 w-5 ${line.tone} transition group-hover:scale-110`}
                       aria-hidden
                     />
                     {line.label}
@@ -640,24 +690,40 @@ export default function LandingPage() {
 
             <div className="mt-12 grid gap-5 md:grid-cols-2">
               {FAMILY_CARDS.map((card, index) => {
+                const visual =
+                  card.visual.kind === "image"
+                    ? ({ kind: "image", src: card.visual.src } as const)
+                    : ({ kind: "icon", Icon: card.visual.icon } as const);
                 const cardEl = (
                   <Reveal delay={index * 0.06} className="h-full">
-                    <FamilyCard
-                      href={card.href}
-                      badgeIcon={card.badgeIcon}
-                      badgeLabel={card.badgeLabel}
-                      titlePrefix={card.titlePrefix}
-                      titleHighlight={card.titleHighlight}
-                      description={card.description}
-                      cta={card.cta}
-                      accent={card.accent}
-                      gradient={card.gradient}
-                      visual={
-                        card.visual.kind === "image"
-                          ? { kind: "image", src: card.visual.src }
-                          : { kind: "icon", Icon: card.visual.icon }
-                      }
-                    />
+                    {card.dual ? (
+                      <FamilyDualCard
+                        badgeIcon={card.badgeIcon}
+                        badgeLabel={card.badgeLabel}
+                        titlePrefix={card.titlePrefix}
+                        titleHighlight={card.titleHighlight}
+                        description={card.description}
+                        accent={card.accent}
+                        gradient={card.gradient}
+                        visual={visual}
+                        actions={
+                          <BackToSchoolAccesses accent="green" className="mt-6" />
+                        }
+                      />
+                    ) : (
+                      <FamilyCard
+                        href={card.href ?? "/tienda"}
+                        badgeIcon={card.badgeIcon}
+                        badgeLabel={card.badgeLabel}
+                        titlePrefix={card.titlePrefix}
+                        titleHighlight={card.titleHighlight}
+                        description={card.description}
+                        cta={card.cta ?? "Explorar la línea"}
+                        accent={card.accent}
+                        gradient={card.gradient}
+                        visual={visual}
+                      />
+                    )}
                   </Reveal>
                 );
                 // El wrapper con id preserva el ancla #tumbler existente en

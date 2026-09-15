@@ -23,6 +23,8 @@ interface TumblerBlockDisplay {
  * Presentación curada de las subcategorías de MatrixLab Tumbler: nombre
  * visible, copy y acento propios por línea, en el orden comercial deseado.
  * Compartida por /tienda y la categoría madre; no modifica títulos en base.
+ * Las líneas retiradas de la navegación siguen en esta lista pero no se
+ * publican: ver `TUMBLER_HIDDEN_BLOCK_HANDLES`.
  * Los ocho handles de los insumos son los reales de
  * `TUMBLER_SUBCATEGORY_HANDLES`; el catálogo local de vasos listos se suma
  * como una nueva tarjeta comercial.
@@ -128,8 +130,28 @@ export const TUMBLER_BLOCKS_DISPLAY: TumblerBlockDisplay[] = [
   },
 ];
 
+/**
+ * Líneas que siguen existiendo —productos, filas en Supabase y su ruta
+ * /tienda/categoria/<handle>— pero que ya NO se listan como tarjeta en la
+ * navegación de MatrixLab Tumbler.
+ *
+ * El filtro vive aquí, en la presentación compartida, y no en cada página:
+ * /tienda y la categoría madre tienen que enseñar exactamente los mismos
+ * apartados, y tenerlo por duplicado era la forma segura de que una de las dos
+ * se quedara atrás. Quitar un handle de esta lista lo devuelve a las dos
+ * vistas a la vez.
+ */
+const TUMBLER_HIDDEN_BLOCK_HANDLES: ReadonlySet<string> = new Set([
+  "tags-acrilico",
+  "acrilicos",
+]);
+
 /** La tienda principal y la familia usan exactamente los mismos apartados. */
 export function tumblerSections(handles: readonly string[]) {
   const available = new Set(handles);
-  return TUMBLER_BLOCKS_DISPLAY.filter((item) => item.handle === READY_TUMBLER_HANDLE || available.has(item.handle));
+  return TUMBLER_BLOCKS_DISPLAY.filter(
+    (item) =>
+      !TUMBLER_HIDDEN_BLOCK_HANDLES.has(item.handle) &&
+      (item.handle === READY_TUMBLER_HANDLE || available.has(item.handle)),
+  );
 }

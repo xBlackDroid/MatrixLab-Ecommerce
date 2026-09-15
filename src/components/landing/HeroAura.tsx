@@ -6,7 +6,12 @@ export interface HeroAuraItem {
   Icon: IconComponent;
   /** Etiqueta sólo para depurar/leer el código: la capa es decorativa. */
   label: string;
-  /** Clases de posición (top/left/right/bottom) y tamaño. */
+  /**
+   * Clases de posición (top/left/right/bottom), tamaño y opacidad. Llevan el
+   * juego MÓVIL primero y el de escritorio en variantes `lg:`, en la misma
+   * cadena: Tailwind necesita los nombres de clase completos y literales en
+   * el código, así que no se pueden componer aparte.
+   */
   position: string;
   /** Color de acento del icono. Nombre completo: Tailwind no compone strings. */
   tone: string;
@@ -27,8 +32,14 @@ export interface HeroAuraItem {
  * Decisiones:
  * - `pointer-events-none` y `aria-hidden`: es adorno. Lo que se puede tocar y
  *   lo que se anuncia son los enlaces reales de la fila de abajo, no esto.
- * - Sólo desde `lg`. En móvil y tablet el ancho útil es el texto; meter piezas
- *   flotantes ahí competiría con el titular y obligaría a bajar su tamaño.
+ * - También se ve en móvil, con posiciones y tamaños PROPIOS (ver
+ *   `HERO_AURA`). Antes estaba oculto por debajo de `lg` porque a esos anchos
+ *   el margen libre es mínimo: la condición para mostrarlo es que las piezas
+ *   se apoyen en los bordes, a la altura del titular, sin invadir la columna
+ *   de texto ni empujar el ancho de la página. Son más pequeñas y algo más
+ *   tenues que en escritorio por el mismo motivo.
+ * - El `overflow-hidden` de la sección del hero es la última red: ninguna
+ *   pieza puede provocar desplazamiento horizontal aunque se asome al borde.
  * - NO se usa la clase `.glass` aunque el aspecto sea el mismo. `.glass` trae
  *   `backdrop-filter: blur(14px)`, y estas seis piezas se mueven en bucle
  *   infinito: un backdrop-filter que se desplaza obliga al compositor a
@@ -44,7 +55,7 @@ export interface HeroAuraItem {
 export default function HeroAura({ items }: { items: readonly HeroAuraItem[] }) {
   return (
     <div
-      className="pointer-events-none absolute inset-0 hidden lg:block"
+      className="pointer-events-none absolute inset-0"
       aria-hidden
     >
       {items.map((item) => (

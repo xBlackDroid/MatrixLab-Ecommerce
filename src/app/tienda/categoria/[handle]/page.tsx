@@ -221,7 +221,7 @@ export default async function CategoryPage({
         title={fallback?.title ?? "MatrixLab Tumbler"}
         description={fallback?.description ?? null}
         imageUrl="/images/categories/matrixlab-tumbler.png"
-        summary="8 líneas para crear, personalizar y terminar tu próximo proyecto"
+        summary={`${tumblerPageBlocks(subcategories).length} líneas para crear, personalizar y terminar tu próximo proyecto`}
       >
         <TumblerBlocks subcategories={subcategories} />
       </MatrixLabCategoryShell>
@@ -548,16 +548,23 @@ function CategoryComingSoon({
   );
 }
 
-/** Bloques de las subcategorías comerciales de MatrixLab Tumbler. */
-function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
-  // El layout comercial siempre muestra las ocho líneas conocidas. La
-  // consulta se conserva para añadir handles futuros activos sin desplazar el
-  // orden curado.
+/**
+ * Tarjetas visibles de la categoría madre, en el orden curado. Qué líneas se
+ * publican lo decide `tumblerSections`, la presentación compartida con
+ * /tienda, para que las dos vistas no puedan discrepar. La consulta se
+ * conserva para añadir handles futuros activos sin desplazar ese orden.
+ */
+function tumblerPageBlocks(subcategories: CategoryRow[]) {
   const handles = [
     ...TUMBLER_SUBCATEGORY_HANDLES,
     ...subcategories.map((c) => c.handle),
   ];
-  const blocks = tumblerSections(handles);
+  return tumblerSections(handles);
+}
+
+/** Bloques de las subcategorías comerciales de MatrixLab Tumbler. */
+function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
+  const blocks = tumblerPageBlocks(subcategories);
 
   return (
     <div className="mt-10">

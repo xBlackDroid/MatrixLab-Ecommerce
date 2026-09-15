@@ -1,10 +1,14 @@
 import { getTumblerSubcategories, TUMBLER_SUBCATEGORY_HANDLES } from "@/lib/store/products";
 import { tumblerSections } from "@/lib/store/tumbler-sections";
+import {
+  BACK_TO_SCHOOL_BADGE,
+  BACK_TO_SCHOOL_DESCRIPTION,
+  BACK_TO_SCHOOL_TITLE_HIGHLIGHT,
+  BACK_TO_SCHOOL_TITLE_PREFIX,
+} from "@/lib/store/back-to-school";
 import { MATRIXLAB_TUMBLER_COURSE_HREF } from "@/lib/store/courses/matrixlab-tumbler";
 import type { ComponentType } from "react";
-import Link from "next/link";
 import {
-  ArrowRight,
   Box,
   Building2,
   CupSoda,
@@ -25,6 +29,7 @@ import {
   HoodieIcon,
   ToteIcon,
 } from "@/components/icons/GarmentIcons";
+import BackToSchoolAccesses from "@/components/school/BackToSchoolAccesses";
 import StoreFamilySection, {
   FamilyWatermark,
 } from "@/components/store/StoreFamilySection";
@@ -263,12 +268,16 @@ export default async function TiendaHomePage() {
         />
       </Reveal>
 
-      {/* 2. Regreso a clases — Etiquetas Escolares Lab (sección dedicada,
-          sin cambios de copy/CTA/ruta/lógica; solo se reubica dentro del
-          nuevo sistema de bloques). */}
+      {/* 2. Regreso a Clases. La línea escolar son DOS caminos, no uno: el
+          editor de etiquetas y el catálogo de productos escolares. Antes el
+          bloque se llamaba "Etiquetas Escolares Lab" y el catálogo quedaba
+          detrás de un "Ver categoría" genérico, así que toda la línea se leía
+          como si fueran sólo etiquetas. Ahora cada camino tiene su acceso, con
+          su propia área clicable y su propio destino. El nombre, el copy y los
+          destinos salen de `back-to-school.ts`, compartido con la home. */}
       <Reveal delay={0.12}>
         <section className="px-4 pb-20 pt-6 sm:px-6">
-          <div className="glass relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-3xl p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between">
+          <div className="glass relative mx-auto max-w-7xl overflow-hidden rounded-3xl p-8 sm:p-12">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-ml-violet/10 blur-3xl" />
           {/* Watermark de marca, mismo lenguaje visual que los bloques de arriba. */}
           <FamilyWatermark
@@ -280,31 +289,20 @@ export default async function TiendaHomePage() {
           <div className="relative">
             <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ml-cyan">
               <GraduationCap className="h-4 w-4" aria-hidden />
-              Regreso a clases
+              {BACK_TO_SCHOOL_BADGE}
             </span>
             <h2 className="mt-5 text-2xl font-bold sm:text-3xl">
-              Etiquetas <span className="text-gradient">Escolares Lab</span>
+              {BACK_TO_SCHOOL_TITLE_PREFIX}{" "}
+              <span className="text-gradient">
+                {BACK_TO_SCHOOL_TITLE_HIGHLIGHT}
+              </span>
             </h2>
             <p className="mt-3 max-w-xl text-ml-white/65">
-              Arma tu pedido con nombre, tipografía, colores y temática en pocos
-              pasos. Packs personalizados para útiles, loncheras, termos,
-              cuadernos y regreso a clases.
+              {BACK_TO_SCHOOL_DESCRIPTION}
             </p>
-          </div>
-          <div className="relative flex flex-col gap-3 sm:flex-row lg:flex-col">
-            <Link
-              href="/tienda/disenador/etiquetas-escolares"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-ml-cyan px-7 py-3.5 font-semibold text-ml-bg shadow-glow-cyan transition hover:scale-[1.02] hover:bg-ml-cyan/90"
-            >
-              Crear etiquetas escolares
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </Link>
-            <Link
-              href="/tienda/categoria/etiquetas-escolares"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-ml-white/85 transition hover:border-white/30"
-            >
-              Ver categoría
-            </Link>
+            {/* Misma presentación compacta que en la home: dos pastillas a la
+                altura del CTA, no dos tarjetas dentro del bloque. */}
+            <BackToSchoolAccesses accent="cyan" className="mt-8" />
           </div>
           </div>
         </section>

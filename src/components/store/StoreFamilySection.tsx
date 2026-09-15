@@ -2,6 +2,7 @@ import type { ComponentType, ReactNode, SVGProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { categoryLogoScale } from "@/lib/store/category-logos";
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -91,12 +92,16 @@ export function FamilyWatermark({ logo }: { logo?: FamilyBackgroundLogo }) {
   if (logo.kind === "image") {
     return (
       <div className={`${positionClasses} opacity-10`} aria-hidden="true">
+        {/* Cada PNG trae distinto margen transparente, así que la misma caja
+            no da el mismo tamaño visual. `categoryLogoScale` lo iguala
+            escalando desde el centro, sin deformar. Ver category-logos.ts. */}
         <Image
           src={logo.src}
           alt={logo.alt ?? ""}
           fill
           sizes="320px"
           className="object-contain"
+          style={{ transform: `scale(${categoryLogoScale(logo.src)})` }}
         />
       </div>
     );
