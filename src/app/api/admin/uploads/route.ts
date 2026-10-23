@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { jsonError, serviceUnavailable, tooManyRequests } from "@/lib/api";
 import { logAudit } from "@/lib/db/admin";
 import { BUCKETS, getPublicUrl, uploadToBucket } from "@/lib/db/storage";
+import { detectRasterFormat } from "@/lib/uploads/magic-bytes";
 import { requireAdminMutation } from "@/lib/security/admin-auth";
 import { isSupabaseConfigured } from "@/lib/security/env";
 import {
@@ -57,6 +58,9 @@ export async function POST(request: NextRequest) {
   try {
     const sharp = (await import("sharp")).default;
     const buffer = Buffer.from(await file.arrayBuffer());
+    if (!detectRasterFormat(buffer)) {
+      return jsonError("Formato no permitido. Usa PNG, JPG o WEBP.", 415);
+    }
     const metadata = await sharp(buffer, SHARP_DECODE_OPTIONS).metadata();
     if (!metadata.format || !["png", "jpeg", "webp"].includes(metadata.format)) {
       return jsonError("Formato no permitido. Usa PNG, JPG o WEBP.", 415);
