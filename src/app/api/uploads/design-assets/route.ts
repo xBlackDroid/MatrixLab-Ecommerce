@@ -4,6 +4,7 @@ import { jsonError, tooManyRequests } from "@/lib/api";
 import { requireServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl, uploadToBucket } from "@/lib/db/storage";
 import { UPLOAD_ERRORS } from "@/lib/uploads/errors";
+import { detectRasterFormat } from "@/lib/uploads/magic-bytes";
 import type { DesignProjectRow } from "@/lib/db/types";
 import { getServerEnv, isSupabaseConfigured } from "@/lib/security/env";
 import {
@@ -131,7 +132,17 @@ export async function POST(request: NextRequest) {
     return jsonError("No pudimos leer el archivo.", 400);
   }
 
-  // Validación del contenido REAL (magic bytes) con sharp.
+  // Firma del archivo ANTES de sharp: un SVG/HEIF/TIFF nunca llega a un
+  // decoder (ver src/lib/uploads/magic-bytes.ts).
+  if (!detectRasterFormat(buffer)) {
+    return jsonError(
+      "Formato no permitido. Usa PNG, JPG o WEBP (recomendamos PNG).",
+      415,
+      "INVALID_TYPE",
+    );
+  }
+
+  // Validación del contenido REAL con sharp.
   let width = 0;
   let height = 0;
   let detected: { mime: string; ext: string } | undefined;

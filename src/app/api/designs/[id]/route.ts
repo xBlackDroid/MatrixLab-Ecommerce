@@ -4,6 +4,7 @@ import { jsonError, readJsonBody, tooManyRequests } from "@/lib/api";
 import { requireServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl, uploadToBucket } from "@/lib/db/storage";
 import { UPLOAD_ERRORS } from "@/lib/uploads/errors";
+import { detectRasterFormat } from "@/lib/uploads/magic-bytes";
 import type { DesignProjectRow } from "@/lib/db/types";
 import { isSupabaseConfigured } from "@/lib/security/env";
 import {
@@ -136,6 +137,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 /**
+ * Techo de píxeles al decodificar la preview (bomba de descompresión), igual
+ * que en los demás puntos donde sharp recibe bytes del cliente.
+ */
+const PREVIEW_DECODE_OPTIONS = {
+  limitInputPixels: 4000 * 4000,
+  failOn: "warning" as const,
+};
+
+/**
  * Genera y sube una preview compuesta (dataURL del canvas) a storage privado.
  * Re-encodea con sharp a webp para neutralizar payloads. Devuelve la ruta o
  * undefined (la preview es opcional y nunca tira el guardado).
@@ -152,7 +162,9 @@ async function buildPreviewPath(
   try {
     const sharp = (await import("sharp")).default;
     const inputBuffer = Buffer.from(match[2]!, "base64");
-    const safePreview = await sharp(inputBuffer)
+    // El prefijo del dataURL lo escribe el cliente: se verifica la firma real.
+    if (!detectRasterFormat(inputBuffer)) return undefined;
+    const safePreview = await sharp(inputBuffer, PREVIEW_DECODE_OPTIONS)
       .resize({ width: 1000, height: 1200, fit: "inside", withoutEnlargement: true })
       .webp({ quality: 82 })
       .toBuffer();
