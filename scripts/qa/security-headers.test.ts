@@ -115,7 +115,7 @@ for (const unknownPath of [
   );
 }
 
-// Las 3 páginas prerenderizadas conocidas siguen fuera de la política estricta.
+// Las páginas prerenderizadas conocidas siguen fuera de la política estricta.
 for (const staticPath of STATIC_PRERENDERED_PATHS) {
   check(
     `${staticPath} (prerenderizada) recibe la CSP compatible`,
@@ -127,6 +127,7 @@ for (const staticPath of STATIC_PRERENDERED_PATHS) {
 for (const sensitivePath of [
   "/admin",
   "/admin/pedidos",
+  "/tienda",
   "/tienda/checkout",
   "/tienda/carrito",
   "/api/checkout/mercadopago",

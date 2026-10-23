@@ -15,8 +15,8 @@ import { type NextRequest, NextResponse } from "next/server";
  * página se quedaría sin ejecutar un solo script. Es decir: aplicar la
  * política estricta a todo tumbaría el landing.
  *
- * Se comprobó en un build real de este proyecto: `/`, `/tienda` y
- * `/tienda/disenador` salen estáticas y traen 25 scripts en línea sin nonce;
+ * Se comprobó en un build real de este proyecto: `/` y `/tienda/disenador`
+ * salen estáticas y traen 25 scripts en línea sin nonce;
  * el resto de rutas declara `force-dynamic` y recibe el nonce correctamente.
  *
  * Así que la política se elige por ruta:
@@ -62,7 +62,6 @@ const SUPABASE_HOSTS = "https://*.supabase.co https://*.supabase.in";
  */
 export const STATIC_PRERENDERED_PATHS = new Set([
   "/",
-  "/tienda",
   "/tienda/disenador",
 ]);
 
@@ -120,6 +119,12 @@ export const DYNAMIC_ROUTE_PATTERNS: readonly RegExp[] = [
    * se serviría con la 404 prerenderizada, que no lleva nonce.
    */
   /^\/tienda\/prendas-listas$/,
+  /**
+   * Portada de la tienda. Ya no se prerenderiza: lee las subcategorías de
+   * Tumbler en cada petición y declara `force-dynamic`, así que recibe el
+   * nonce. Coincidencia EXACTA para no arrastrar subrutas inexistentes.
+   */
+  /^\/tienda$/,
 ];
 
 /** ¿Esta ruta la renderiza Next en la petición (y por tanto lleva nonce)? */
