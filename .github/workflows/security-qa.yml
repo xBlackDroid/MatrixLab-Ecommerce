@@ -1,0 +1,34 @@
+# QA de seguridad en cada PR y en cada push a main (plan de remediación, P1 #14).
+# No necesita base de datos ni credenciales: son pruebas de contratos y de código.
+name: Security QA
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  security-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check
+      - name: npm audit (dependencias de producción)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Pruebas de seguridad
+        run: |
+          shopt -s nullglob
+          for test in scripts/qa/security-*.test.ts scripts/qa/mercadopago-webhook.test.ts scripts/qa/upload-*.test.ts; do
+            echo "::group::$test"
+            npx --yes tsx "$test"
+            echo "::endgroup::"
+          done

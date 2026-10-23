@@ -27,7 +27,11 @@ import {
 export const SESSION_COOKIE = "ml_session";
 export const ADMIN_COOKIE = "ml_admin";
 
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+/**
+ * 90 días: un carrito o diseño abandonado no necesita vivir un año en el
+ * navegador, y acorta la ventana de una cookie robada (ML-17).
+ */
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 90;
 export const ADMIN_MAX_AGE_SECONDS = 60 * 60 * 8;
 
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{20,64}$/;
