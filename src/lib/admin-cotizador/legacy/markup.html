@@ -1,0 +1,1257 @@
+<header>
+  <div class="logo-dot"></div>
+  <div>
+    <h1>MatrixLab · Cotizador interno v4.4</h1>
+    <span>Papelería Creativa · T-Shirt Lab · Cap Lab · @MatrixLab.Stickers</span>
+  </div>
+</header>
+
+<div class="main-tabs">
+  <button type="button" class="main-tab active" data-page="dulceros" data-ml-click='["switchPage","dulceros"]'>Bolsas Dulceros</button>
+  <button type="button" class="main-tab" data-page="tattoo" data-ml-click='["switchPage","tattoo"]'>Tatuajes Temp.</button>
+  <button type="button" class="main-tab" data-page="tshirt" data-ml-click='["switchPage","tshirt"]'>T-Shirt Lab</button>
+  <button type="button" class="main-tab" data-page="caplab" data-ml-click='["switchPage","caplab"]'>🧢 Cap Lab</button>
+  <button type="button" class="main-tab" data-page="prendas" data-ml-click='["switchPage","prendas"]'>Prendas</button>
+  <button type="button" class="main-tab" data-page="stickers" data-ml-click='["switchPage","stickers"]'>✦ Stickers</button>
+  <button type="button" class="main-tab" data-page="imanes" data-ml-click='["switchPage","imanes"]'>🧲 Imanes</button>
+  <button type="button" class="main-tab" data-page="accesorios" data-ml-click='["switchPage","accesorios"]'>🎁 Accesorios</button>
+  <button type="button" class="main-tab" data-page="fablab" data-ml-click='["switchPage","fablab"]'>⚡ Láser / 3D</button>
+  <button type="button" class="main-tab cot-tab" data-page="cotizacion" data-ml-click='["switchPage","cotizacion"]'>⬛ Cotización</button>
+  <button type="button" class="main-tab rec-tab" data-page="recibos" data-ml-click='["switchPage","recibos"]'>🧾 Recibos</button>
+  <button type="button" class="main-tab" data-page="insumos" data-ml-click='["switchPage","insumos"]'>Insumos</button>
+</div>
+
+<div class="container">
+
+<!-- ====== BOLSAS DULCEROS ====== -->
+<div id="page-dulceros" class="page active">
+  <div class="accent" style="background:var(--purple)"></div>
+  <div class="card">
+    <p class="sec-label">Material base</p>
+    <div class="chip-group">
+      <button type="button" class="chip active" data-ml-click='["setMat","pvc","$this"]'>Bolsa PVC 20×20×8 cm</button>
+      <button type="button" class="chip" data-ml-click='["setMat","pp","$this"]'>Bolsa polipropileno 24×25 cm</button>
+      <button type="button" class="chip" data-ml-click='["setMat","lunchera","$this"]'>Dulcero lunchera 11×10×11 cm</button>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Personalización incluida</p>
+    <label class="chk-row"><input type="checkbox" id="chk-liston" data-ml-change='["calcD"]'> Listón satinado</label>
+    <label class="chk-row"><input type="checkbox" id="chk-agra" data-ml-change='["toggleAgra"]'> Agradecimiento en opalina</label>
+    <div id="agra-opts" class="hidden indent">
+      <div class="chip-group">
+        <button type="button" class="chip active" data-ml-click='["setAgraSize","6x6","$this"]'>6×6 cm</button>
+        <button type="button" class="chip" data-ml-click='["setAgraSize","6x12","$this"]'>6×12 cm</button>
+      </div>
+    </div>
+    <label class="chk-row"><input type="checkbox" id="chk-sticker" data-ml-change='["toggleSticker"]'> Sticker personalizado</label>
+    <div id="sticker-opts" class="hidden indent">
+      <div class="chip-group" style="margin-bottom:10px">
+        <button type="button" class="chip active" data-ml-click='["setStickerMat","foto","$this"]'>Papel fotográfico</button>
+        <button type="button" class="chip" data-ml-click='["setStickerMat","vb","$this"]'>Vinil blanco</button>
+        <button type="button" class="chip" data-ml-click='["setStickerMat","vt","$this"]'>Vinil transparente</button>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label style="font-size:13px">Tamaño del sticker (cm)</label>
+        <input type="number" inputmode="decimal" id="sticker-size" value="5" min="1" max="15" step="0.5" style="width:80px" data-ml-change='["calcD"]'>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Cantidad y margen</p>
+    <div class="row">
+      <label>Cantidad (múltiplos de 10, mínimo 10)</label>
+      <div class="qty-ctrl">
+        <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeQty",-10]'>−</button>
+        <span class="qty-num" id="qty-d">10</span>
+        <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeQty",10]'>+</button>
+      </div>
+    </div>
+    <div class="row">
+      <label>Margen — <strong id="margen-d-lbl" style="color:var(--purple)">40%</strong></label>
+      <input type="range" id="margen-d" min="10" max="80" value="40" step="5" data-ml-input='["setMargen","$this","calcD"]'>
+    </div>
+  </div>
+  <div id="res-dulceros" class="res-grid"></div>
+  <button type="button" class="add-cot-btn" data-ml-click='["addToCot","dulceros"]'>↓ Añadir a cotización</button>
+  <p class="note">Sticker 5×5 cm por default. Diseño acordado con cliente. Factura CFDI +16% IVA.</p>
+</div>
+
+<!-- ====== TATUAJES TEMPORALES ====== -->
+<div id="page-tattoo" class="page">
+  <div class="accent" style="background:var(--cyan)"></div>
+  <div class="sub-tabs">
+    <button type="button" class="sub-tab active-cyan" data-ml-click='["setTattooSub","station","$this"]'>🎪 Tattoo Station</button>
+    <button type="button" class="sub-tab" data-ml-click='["setTattooSub","kit","$this"]' id="sub-tab-kit">💜 Bolsas Tattoo Kit</button>
+  </div>
+  <!-- SUB: TATTOO STATION -->
+  <div id="sub-tattoo-station" class="sub-page active">
+    <div class="card">
+      <p class="sec-label">Tamaño del tatuaje</p>
+      <div class="chip-group" id="ts-size-chips">
+        <button type="button" class="chip" data-ml-click='["setTSSize",3,"$this"]'>3 cm</button>
+        <button type="button" class="chip active" data-ml-click='["setTSSize",4,"$this"]'>4 cm</button>
+        <button type="button" class="chip" data-ml-click='["setTSSize",5,"$this"]'>5 cm</button>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Paquete <span class="tag warn">Tattoo Station · evento en vivo</span></p>
+      <div class="chip-group" id="ts-pkg-chips">
+        <button type="button" class="chip active" data-ml-click='["setTSPkg",30,"$this"]'>Paquete 30 pzas</button>
+        <button type="button" class="chip" data-ml-click='["setTSPkg",60,"$this"]'>Paquete 60 pzas</button>
+        <button type="button" class="chip" data-ml-click='["setTSPkg",120,"$this"]'>Paquete 120 pzas</button>
+        <button type="button" class="chip" data-ml-click='["setTSPkg",0,"$this"]'>Personalizado</button>
+      </div>
+      <div id="ts-custom-qty" class="hidden" style="margin-top:10px">
+        <div class="row" style="margin-bottom:0">
+          <label>Cantidad personalizada</label>
+          <div class="qty-ctrl">
+            <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeTSQty",-5]'>−</button>
+            <span class="qty-num" id="qty-ts">30</span>
+            <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeTSQty",5]'>+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Configuración</p>
+      <label class="chk-row"><input type="checkbox" id="chk-ts-diseno" checked data-ml-change='["calcTStation"]'> Incluye creación de diseños</label>
+      <div class="row">
+        <label>Margen — <strong id="margen-ts-lbl" style="color:var(--cyan)">50%</strong></label>
+        <input type="range" id="margen-ts" min="10" max="80" value="50" step="5" data-ml-input='["setMargen","$this","calcTStation"]'>
+      </div>
+    </div>
+    <div id="res-ts" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","tattooStation"]'>↓ Añadir a cotización</button>
+    <p class="note" id="note-ts">Incluye 1 atomizador 100ml personalizado + esponjas de aplicación. Factura CFDI +16% IVA.</p>
+  </div>
+  <!-- SUB: BOLSAS TATTOO KIT -->
+  <div id="sub-tattoo-kit" class="sub-page">
+    <div class="card" style="border-color:rgba(177,151,252,.2)">
+      <p class="sec-label">Tamaño del tatuaje</p>
+      <div class="chip-group" id="tk-size-chips">
+        <button type="button" class="chip" data-ml-click='["setTKSize",3,"$this"]'>3 cm</button>
+        <button type="button" class="chip active" data-ml-click='["setTKSize",4,"$this"]'>4 cm</button>
+        <button type="button" class="chip" data-ml-click='["setTKSize",5,"$this"]'>5 cm</button>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(177,151,252,.2)">
+      <p class="sec-label">Paquete de bolsas <span class="tag purple">10 tatuajes distintos por bolsa</span></p>
+      <div class="chip-group" id="tk-pkg-chips">
+        <button type="button" class="chip active" data-ml-click='["setTKPkg",10,"$this"]'>✦ Petite — 10 bolsas</button>
+        <button type="button" class="chip" data-ml-click='["setTKPkg",20,"$this"]'>✦ Medio — 20 bolsas</button>
+        <button type="button" class="chip" data-ml-click='["setTKPkg",30,"$this"]'>✦ Max — 30 bolsas</button>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(177,151,252,.2)">
+      <p class="sec-label">Configuración</p>
+      <p class="sec-label" style="color:var(--muted);text-transform:none;font-size:12px;letter-spacing:0;margin-bottom:6px">
+        Cada bolsa incluye: <strong style="color:var(--text)">10 tatuajes</strong> + atomizador 30ml + esponja + bolsa de celofán + tarjeta de opalina 12×12 cm personalizada
+      </p>
+      <div class="row" style="margin-top:8px">
+        <label>Margen — <strong id="margen-tk-lbl" style="color:var(--purple)">55%</strong></label>
+        <input type="range" id="margen-tk" min="10" max="80" value="55" step="5" data-ml-input='["setMargen","$this","calcTKit"]'>
+      </div>
+    </div>
+    <div id="res-tk" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","tattooKit"]'>↓ Añadir a cotización</button>
+    <p class="note">10 diseños únicos independientemente del paquete elegido. Los tatuajes son a base de agua, impermeables, duración 3-7 días. El diseño se acuerda con el cliente previo al evento.</p>
+  </div>
+</div>
+
+<!-- ====== T-SHIRT LAB ====== -->
+<div id="page-tshirt" class="page">
+  <div class="accent" style="background:var(--coral)"></div>
+  <div class="card">
+    <p class="sec-label">Tipo de prenda <span class="tag warn">Servicio en evento</span></p>
+    <div class="chip-group" id="tshirt-tipo-chips">
+      <button type="button" class="chip active" data-ml-click='["setTshirtTipo","adulto","$this"]'>Adulto (S–XL)</button>
+      <button type="button" class="chip" data-ml-click='["setTshirtTipo","infantil","$this"]'>Infantil (2–12)</button>
+      <button type="button" class="chip" data-ml-click='["setTshirtTipo","mixto","$this"]'>Mixto</button>
+      <button type="button" class="chip" data-ml-click='["setTshirtTipo","trae","$this"]'>Cliente trae prenda</button>
+    </div>
+    <div id="mixto-opts" class="hidden" style="margin-top:12px">
+      <div class="two-col">
+        <div class="row" style="margin-bottom:0"><label>Prendas infantil</label><input type="number" inputmode="numeric" id="ts-mixto-inf" value="0" min="0" step="1" style="width:80px" data-ml-change='["calcTS"]'></div>
+        <div class="row" style="margin-bottom:0"><label>Prendas adulto</label><input type="number" inputmode="numeric" id="ts-mixto-adu" value="10" min="0" step="1" style="width:80px" data-ml-change='["calcTS"]'></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Configuración del evento</p>
+    <div class="row">
+      <label>Total de prendas</label>
+      <div class="qty-ctrl">
+        <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeTshirtQty",-1]'>−</button>
+        <input type="number" inputmode="numeric" class="qty-input" id="qty-tshirt" value="20" min="1" data-ml-input='["calcTS"]'>
+        <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeTshirtQty",1]'>+</button>
+      </div>
+    </div>
+    <label class="chk-row"><input type="checkbox" id="chk-talla-esp" data-ml-change='["calcTS"]'> Aplican tallas especiales (2XL / 3XL) <span class="tag">+$30/pza</span></label>
+    <div class="row">
+      <label>Área impresión (cm²) <span class="tag">Planilla completa = 603</span></label>
+      <input type="number" inputmode="decimal" id="ts-area" value="603" min="50" max="900" step="10" style="width:100px" data-ml-change='["calcTS"]'>
+    </div>
+    <div class="row">
+      <label>Margen — <strong id="margen-tshirt-lbl" style="color:var(--coral)">35%</strong></label>
+      <input type="range" id="margen-tshirt" min="10" max="70" value="35" step="5" data-ml-input='["setMargen","$this","calcTS"]'>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Costos fijos del evento <span class="tag warn">Ajustables</span></p>
+    <div class="two-col">
+      <div class="row" style="margin-bottom:0"><label>Mano de obra ($)</label><input type="number" inputmode="decimal" id="ts-mdo" value="500" step="50" style="width:100px" data-ml-change='["calcTS"]'></div>
+      <div class="row" style="margin-bottom:0"><label>Traslado / logística ($)</label><input type="number" inputmode="decimal" id="ts-traslado" value="200" step="50" style="width:100px" data-ml-change='["calcTS"]'></div>
+    </div>
+    <div class="row" style="margin-top:10px;margin-bottom:0"><label>Otros fijos ($)</label><input type="number" inputmode="decimal" id="ts-otros" value="0" step="50" style="width:100px" data-ml-change='["calcTS"]'></div>
+  </div>
+  <div id="res-tshirt" class="res-grid"></div>
+  <button type="button" class="add-cot-btn" data-ml-click='["addToCot","tshirt"]'>↓ Añadir a cotización</button>
+  <p class="note">Mínimo 10 piezas. Espacio 2×2m + 110V. Aprox. 1.5 hrs. Lienzo maquila: $<span id="ts-lienzo-ref">350</span>/9,000 cm². CFDI +16% IVA.</p>
+</div>
+
+<!-- ====== CAP LAB (NUEVO) ====== -->
+<div id="page-caplab" class="page">
+  <div class="accent" style="background:var(--green)"></div>
+  <div class="card">
+    <p class="sec-label">Modelo de gorra <span class="tag green">Servicio en evento</span></p>
+    <div class="chip-group" id="caplab-gorra-chips">
+      <button type="button" class="chip active" data-ml-click='["setCapLabGorra","curva","$this"]'>Acrílica Visera Curva <small style="opacity:.7">($28)</small></button>
+      <button type="button" class="chip" data-ml-click='["setCapLabGorra","camionera","$this"]'>Acrílica 5 gajos Camionera <small style="opacity:.7">($35)</small></button>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Tipo de parche bordado</p>
+    <div class="chip-group" id="caplab-parche-chips">
+      <button type="button" class="chip active" data-ml-click='["setCapLabParche","eco","$this"]'>Económico <small style="opacity:.7">(~$15)</small></button>
+      <button type="button" class="chip" data-ml-click='["setCapLabParche","premium","$this"]'>Premium <small style="opacity:.7">(~$50)</small></button>
+      <button type="button" class="chip" data-ml-click='["setCapLabParche","mixto","$this"]'>Mixto eco + premium</button>
+    </div>
+    <div id="caplab-mixto-opts" class="hidden" style="margin-top:12px">
+      <div class="two-col">
+        <div class="row" style="margin-bottom:0"><label>Gorras con parche económico</label><input type="number" inputmode="numeric" id="cl-mixto-eco" value="7" min="0" step="1" style="width:80px" data-ml-change='["calcCL"]'></div>
+        <div class="row" style="margin-bottom:0"><label>Gorras con parche premium</label><input type="number" inputmode="numeric" id="cl-mixto-prem" value="3" min="0" step="1" style="width:80px" data-ml-change='["calcCL"]'></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">El precio unitario será el promedio ponderado. La cantidad total se toma del control de abajo.</p>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Configuración del evento</p>
+    <div class="row">
+      <label>Total de gorras (mínimo 10)</label>
+      <div class="qty-ctrl">
+        <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeCapLabQty",-1]'>−</button>
+        <input type="number" inputmode="numeric" class="qty-input" id="qty-caplab" value="20" min="1" data-ml-input='["calcCL"]'>
+        <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeCapLabQty",1]'>+</button>
+      </div>
+    </div>
+    <div class="row">
+      <label>Margen — <strong id="margen-caplab-lbl" style="color:var(--green)">40%</strong></label>
+      <input type="range" id="margen-caplab" min="10" max="70" value="40" step="5" data-ml-input='["setMargen","$this","calcCL"]'>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Costos fijos del evento <span class="tag warn">Ajustables</span></p>
+    <div class="two-col">
+      <div class="row" style="margin-bottom:0"><label>Mano de obra ($)</label><input type="number" inputmode="decimal" id="cl-mdo" value="500" step="50" style="width:100px" data-ml-change='["calcCL"]'></div>
+      <div class="row" style="margin-bottom:0"><label>Traslado / logística ($)</label><input type="number" inputmode="decimal" id="cl-traslado" value="200" step="50" style="width:100px" data-ml-change='["calcCL"]'></div>
+    </div>
+    <div class="row" style="margin-top:10px;margin-bottom:0"><label>Otros fijos ($)</label><input type="number" inputmode="decimal" id="cl-otros" value="0" step="50" style="width:100px" data-ml-change='["calcCL"]'></div>
+  </div>
+  <div id="res-caplab" class="res-grid"></div>
+  <button type="button" class="add-cot-btn" data-ml-click='["addToCot","caplab"]'>↓ Añadir a cotización</button>
+  <p class="note">Mínimo 10 gorras. Un parche bordado personalizado por gorra. Diseño acordado con cliente previo al evento. Espacio 2×2m + 110V. Factura CFDI +16% IVA. <strong style="color:var(--green)">Tu evento, nuestro laboratorio.</strong></p>
+</div>
+
+<!-- ====== PRENDAS PERSONALIZADAS ====== -->
+<div id="page-prendas" class="page">
+  <div class="accent" style="background:var(--amber)"></div>
+  <div class="card">
+    <p class="sec-label">Tipo de prenda <span class="tag">Desde 1 pieza</span></p>
+    <div class="chip-group" id="prendas-tipo-chips">
+      <button type="button" class="chip active" data-ml-click='["setPrendasTipo","adulto","$this"]'>Adulto (S–XL)</button>
+      <button type="button" class="chip" data-ml-click='["setPrendasTipo","infantil","$this"]'>Infantil (2–12)</button>
+      <button type="button" class="chip" data-ml-click='["setPrendasTipo","tote","$this"]'>Tote bag</button>
+      <button type="button" class="chip" data-ml-click='["setPrendasTipo","trae","$this"]'>Cliente trae prenda</button>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Configuración del pedido</p>
+    <div class="row">
+      <label>Cantidad</label>
+      <div class="qty-ctrl">
+        <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changePQty",-1]'>−</button>
+        <span class="qty-num" id="qty-p">5</span>
+        <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changePQty",1]'>+</button>
+      </div>
+    </div>
+    <label class="chk-row"><input type="checkbox" id="chk-p-talla-esp" data-ml-change='["calcP"]'> Tallas especiales 2XL/3XL <span class="tag">+$30/pza</span></label>
+    <div class="row"><label>Área de estampado (cm²)</label>
+      <div class="chip-group" id="area-chips">
+        <button type="button" class="chip" data-ml-click='["setPArea",150,"$this"]'>Pequeño ~150</button>
+        <button type="button" class="chip" data-ml-click='["setPArea",300,"$this"]'>Mediano ~300</button>
+        <button type="button" class="chip active" data-ml-click='["setPArea",603,"$this"]'>Completo ~603</button>
+        <button type="button" class="chip" data-ml-click='["setPArea",0,"$this"]'>Custom</button>
+      </div>
+    </div>
+    <div id="area-custom" class="hidden" style="margin-top:8px">
+      <div class="row" style="margin-bottom:0"><label>Área (cm²)</label><input type="number" inputmode="decimal" id="p-area-custom" value="300" min="50" max="900" step="10" style="width:100px" data-ml-change='["calcP"]'></div>
+    </div>
+    <div class="row">
+      <label>Margen — <strong id="margen-p-lbl" style="color:var(--amber)">40%</strong></label>
+      <input type="range" id="margen-p" min="10" max="70" value="40" step="5" data-ml-input='["setMargen","$this","calcP"]'>
+    </div>
+  </div>
+  <div id="res-prendas" class="res-grid"></div>
+  <button type="button" class="add-cot-btn" data-ml-click='["addToCot","prendas"]'>↓ Añadir a cotización</button>
+  <p class="note">Sin mínimo de piezas. Precio varía por área de estampado y cantidad. CFDI +16% IVA.</p>
+</div>
+
+<!-- ====== STICKERS ====== -->
+<div id="page-stickers" class="page">
+  <div class="accent" style="background:linear-gradient(90deg,var(--purple),var(--pink))"></div>
+  <div class="sub-tabs">
+    <button type="button" class="sub-tab active-purple" data-ml-click='["setStickerSub","troquelado","$this"]'>✦ Full Troquelados</button>
+    <button type="button" class="sub-tab" data-ml-click='["setStickerSub","planilla","$this"]'>▦ Planillas</button>
+    <button type="button" class="sub-tab" data-ml-click='["setStickerSub","uv","$this"]'>✦ Etiquetas UV</button>
+  </div>
+  <!-- TARJETAS COMPARTIDAS (solo troquelado/planilla) -->
+  <div id="stk-shared-cards">
+  <!-- MATERIAL (compartido) -->
+  <div class="card">
+    <p class="sec-label">Material base <span class="tag purple">Papeles adhesivos</span></p>
+    <div class="chip-group" id="stk-mat-chips">
+      <button type="button" class="chip" data-ml-click='["setStkMat","foto","$this"]'>Papel fotográfico <small style="opacity:.6">carta</small></button>
+      <button type="button" class="chip active" data-ml-click='["setStkMat","vb","$this"]'>Vinil blanco <small style="opacity:.6">A4</small></button>
+      <button type="button" class="chip" data-ml-click='["setStkMat","vt","$this"]'>Vinil transparente <small style="opacity:.6">carta</small></button>
+      <button type="button" class="chip" data-ml-click='["setStkMat","holoLiso","$this"]'>Holo liso tornasol <small style="opacity:.6">A4</small></button>
+      <button type="button" class="chip" data-ml-click='["setStkMat","holoTex","$this"]'>Holo texturizado <small style="opacity:.6">A4</small></button>
+      <button type="button" class="chip" data-ml-click='["setStkMat","glow","$this"]'>Glow-in-the-dark <small style="opacity:.6">A4</small></button>
+      <button type="button" class="chip" data-ml-click='["setStkMat","mag","$this"]'>Papel magnético <small style="opacity:.6">A4</small></button>
+    </div>
+    <div id="stk-mag-note" class="hidden" style="margin-top:8px;font-size:11px;color:var(--amber)">⚠ Papel magnético requiere laminado liso (incluido en precio, no desglosado al cliente)</div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Laminado en frío <span class="tag">por hoja completa · no se puede fraccionar</span></p>
+    <div class="chip-group" id="stk-lam-chips">
+      <button type="button" class="chip active" data-ml-click='["setStkLam","none","$this"]'>Sin laminado</button>
+      <button type="button" class="chip" data-ml-click='["setStkLam","liso","$this"]'>Liso (brillante / mate)</button>
+      <button type="button" class="chip" data-ml-click='["setStkLam","tex","$this"]'>Texturizado varios</button>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Método de corte <span class="tag purple">afecta área útil de la hoja</span></p>
+    <div class="chip-group" id="stk-cut-chips">
+      <button type="button" class="chip active" data-ml-click='["setStkCut","sin","$this"]'>Sin marcas de registro <small style="opacity:.6">hoja completa</small></button>
+      <button type="button" class="chip" data-ml-click='["setStkCut","ds","$this"]'>Design Space <small style="opacity:.6">área reducida</small></button>
+    </div>
+    <p id="stk-cut-note" style="font-size:11px;color:var(--muted);margin-top:8px"></p>
+  </div>
+  </div>
+  <!-- SUB: TROQUELADOS -->
+  <div id="sub-stk-troquelado" class="sub-page active">
+    <div class="card">
+      <p class="sec-label">Tamaño y cantidad del sticker</p>
+      <div class="two-col">
+        <div class="row" style="margin-bottom:0"><label>Ancho (cm)</label><input type="number" inputmode="decimal" id="stk-w" value="5" min="0.5" max="20" step="0.5" style="width:80px" data-ml-change='["calcStk"]'></div>
+        <div class="row" style="margin-bottom:0"><label>Alto (cm)</label><input type="number" inputmode="decimal" id="stk-h" value="5" min="0.5" max="20" step="0.5" style="width:80px" data-ml-change='["calcStk"]'></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label>Cantidad de stickers</label>
+        <div class="qty-ctrl">
+          <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeStkQty",-1]'>−</button>
+          <input type="number" inputmode="numeric" class="qty-input" id="qty-stk" value="50" min="1" data-ml-input='["calcStk"]'>
+          <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeStkQty",1]'>+</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Fee de diseño / archivo de corte</p>
+      <label class="chk-row"><input type="checkbox" id="chk-stk-diseno" checked data-ml-change='["calcStk"]'> Incluir fee de diseño en el precio</label>
+      <div class="row" style="margin-bottom:0">
+        <label>Fee total del pedido ($) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="stk-dis-fee-custom" value="80" min="0" step="10" style="width:90px" data-ml-change='["calcStk"]'>
+      </div>
+      <p id="stk-dis-desglose" style="font-size:11px;color:var(--muted);margin-top:8px"></p>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:0">
+        <label>Margen — <strong id="margen-stk-lbl" style="color:var(--purple)">50%</strong></label>
+        <input type="range" id="margen-stk" min="10" max="80" value="50" step="5" data-ml-input='["setMargen","$this","calcStk"]'>
+      </div>
+    </div>
+    <div id="res-stk-tro" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","stickers"]'>↓ Añadir a cotización</button>
+    <p class="note" id="stk-tro-note">El laminado aplica por hoja completa independientemente del relleno.</p>
+  </div>
+  <!-- SUB: PLANILLAS -->
+  <div id="sub-stk-planilla" class="sub-page">
+    <div class="card">
+      <p class="sec-label">Planillas por hoja <span class="tag">¿cuántas salen de 1 hoja cortada?</span></p>
+      <div class="chip-group" id="plan-pph-chips">
+        <button type="button" class="chip active" data-ml-click='["setPlanPPH",1,"$this"]'>1 planilla / hoja <small style="opacity:.6">(hoja completa)</small></button>
+        <button type="button" class="chip" data-ml-click='["setPlanPPH",2,"$this"]'>2 planillas / hoja <small style="opacity:.6">(½ hoja)</small></button>
+        <button type="button" class="chip" data-ml-click='["setPlanPPH",4,"$this"]'>4 planillas / hoja <small style="opacity:.6">(¼ hoja)</small></button>
+        <button type="button" class="chip" data-ml-click='["setPlanPPH",0,"$this"]'>Personalizado</button>
+      </div>
+      <div id="plan-pph-custom" class="hidden" style="margin-top:10px">
+        <div class="row" style="margin-bottom:0">
+          <label>Planillas por hoja</label>
+          <input type="number" inputmode="numeric" id="plan-pph-num" value="3" min="1" max="20" step="1" style="width:80px" data-ml-change='["calcStk"]'>
+        </div>
+      </div>
+      <p id="plan-pph-note" style="font-size:11px;color:var(--muted);margin-top:8px"></p>
+    </div>
+    <div class="card">
+      <p class="sec-label">Cantidad de planillas a entregar</p>
+      <div class="row" style="margin-bottom:0">
+        <label></label>
+        <div class="qty-ctrl">
+          <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changePlanQty",-1]'>−</button>
+          <input type="number" inputmode="numeric" class="qty-input" id="qty-plan" value="10" min="1" data-ml-input='["calcStk"]'>
+          <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changePlanQty",1]'>+</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Fee de diseño / adaptación</p>
+      <label class="chk-row"><input type="checkbox" id="chk-plan-diseno" checked data-ml-change='["calcStk"]'> Incluir fee de diseño en el precio</label>
+      <div class="row" style="margin-bottom:0">
+        <label>Fee total del pedido ($) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="plan-dis-fee-custom" value="80" min="0" step="10" style="width:90px" data-ml-change='["calcStk"]'>
+      </div>
+      <p id="plan-dis-desglose" style="font-size:11px;color:var(--muted);margin-top:8px"></p>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:0">
+        <label>Margen — <strong id="margen-plan-lbl" style="color:var(--pink)">50%</strong></label>
+        <input type="range" id="margen-plan" min="10" max="80" value="50" step="5" data-ml-input='["setMargen","$this","calcStk"]'>
+      </div>
+    </div>
+    <div id="res-stk-plan" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","stickers"]'>↓ Añadir a cotización</button>
+    <p class="note" id="plan-note">El material (hoja completa) se divide entre las planillas que salen de ella. El laminado aplica siempre por hoja completa.</p>
+  </div>
+  <!-- SUB: ETIQUETAS UV -->
+  <div id="sub-stk-uv" class="sub-page">
+    <div class="card">
+      <p class="sec-label">Etiquetas UV <span class="tag" style="background:rgba(99,230,190,.12);color:var(--cyan);border-color:rgba(99,230,190,.35)">impresión DTF UV directa</span></p>
+      <p style="font-size:11px;color:var(--muted);margin:0">Etiquetas impresas en DTF UV con corte individual. Acabado UV mate/brillante incluido en la impresión — no requiere laminado adicional.</p>
+    </div>
+    <div class="card">
+      <p class="sec-label">Tamaño y cantidad de la etiqueta</p>
+      <div class="two-col">
+        <div class="row" style="margin-bottom:0"><label>Ancho (cm)</label><input type="number" inputmode="decimal" id="uv-w" value="5" min="0.5" max="38" step="0.5" style="width:80px" data-ml-change='["calcStk"]'></div>
+        <div class="row" style="margin-bottom:0"><label>Alto (cm)</label><input type="number" inputmode="decimal" id="uv-h" value="5" min="0.5" max="100" step="0.5" style="width:80px" data-ml-change='["calcStk"]'></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label>Cantidad de etiquetas</label>
+        <div class="qty-ctrl">
+          <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeUVQty",-1]'>−</button>
+          <input type="number" inputmode="numeric" class="qty-input" id="qty-uv" value="50" min="1" data-ml-input='["calcStk"]'>
+          <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeUVQty",1]'>+</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Fee de diseño / archivo de corte</p>
+      <label class="chk-row"><input type="checkbox" id="chk-uv-diseno" checked data-ml-change='["calcStk"]'> Incluir fee de diseño en el precio</label>
+      <div class="row" style="margin-bottom:0">
+        <label>Fee total del pedido ($) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="uv-dis-fee" value="80" min="0" step="10" style="width:90px" data-ml-change='["calcStk"]'>
+      </div>
+      <p id="uv-dis-desglose" style="font-size:11px;color:var(--muted);margin-top:8px"></p>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:0">
+        <label>Margen — <strong id="margen-uv-lbl" style="color:var(--cyan)">50%</strong></label>
+        <input type="range" id="margen-uv" min="10" max="80" value="50" step="5" data-ml-input='["setMargen","$this","calcStk"]'>
+      </div>
+    </div>
+    <div id="res-stk-uv" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","stickers"]'>↓ Añadir a cotización</button>
+    <p class="note" id="uv-note">Cálculo basado en aprovechamiento del lienzo DTF UV. Configura el costo del lienzo en la pestaña Insumos.</p>
+  </div>
+</div>
+
+<!-- ====== IMANES PERSONALIZADOS ====== -->
+<div id="page-imanes" class="page">
+  <div class="accent" style="background:linear-gradient(90deg,var(--amber),var(--coral))"></div>
+  <div class="card">
+    <p class="sec-label">Dimensiones del imán</p>
+    <div class="two-col">
+      <div class="row" style="margin-bottom:0"><label>Ancho (cm)</label><input type="number" inputmode="decimal" id="imn-w" value="5" min="0.5" max="60" step="0.5" style="width:80px" data-ml-change='["calcIMN"]'></div>
+      <div class="row" style="margin-bottom:0"><label>Alto (cm)</label><input type="number" inputmode="decimal" id="imn-h" value="5" min="0.5" max="50" step="0.5" style="width:80px" data-ml-change='["calcIMN"]'></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">Rollo magnético natural cal 20: 61cm ancho × 15m largo · máx. 60cm en sentido del ancho.</p>
+  </div>
+  <div class="card">
+    <p class="sec-label">Cantidad de imanes</p>
+    <div class="row" style="margin-bottom:0">
+      <label>Cantidad</label>
+      <div class="qty-ctrl">
+        <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeImnQty",-1]'>−</button>
+        <input type="number" inputmode="numeric" class="qty-input" id="qty-imn" value="10" min="1" data-ml-input='["calcIMN"]'>
+        <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeImnQty",1]'>+</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Tipo de impresión <span class="tag warn">Aplicada sobre la base magnética</span></p>
+    <div class="chip-group" id="imn-print-chips">
+      <button type="button" class="chip active" data-ml-click='["setImnPrint","vinil_adhesivo","$this"]'>Vinil adhesivo (impreso + cortado)</button>
+      <button type="button" class="chip" data-ml-click='["setImnPrint","vinil_corte","$this"]'>Vinil de corte permanente</button>
+    </div>
+    <!-- SUB: Vinil adhesivo -->
+    <div id="imn-adhesivo-opts" style="margin-top:12px">
+      <p class="sec-label" style="margin-bottom:8px">Material del vinil adhesivo</p>
+      <div class="chip-group" id="imn-mat-chips">
+        <button type="button" class="chip active" data-ml-click='["setImnMat","vb","$this"]'>Vinil blanco</button>
+        <button type="button" class="chip" data-ml-click='["setImnMat","vt","$this"]'>Vinil transparente</button>
+        <button type="button" class="chip" data-ml-click='["setImnMat","foto","$this"]'>Papel fotográfico</button>
+        <button type="button" class="chip" data-ml-click='["setImnMat","holoLiso","$this"]'>Holo liso tornasol</button>
+        <button type="button" class="chip" data-ml-click='["setImnMat","holoTex","$this"]'>Holo texturizado</button>
+      </div>
+      <div style="margin-top:10px">
+        <p class="sec-label" style="margin-bottom:6px">Laminado (opcional)</p>
+        <div class="chip-group" id="imn-lam-chips">
+          <button type="button" class="chip active" data-ml-click='["setImnLam","none","$this"]'>Sin laminado</button>
+          <button type="button" class="chip" data-ml-click='["setImnLam","liso","$this"]'>Liso (brillante/mate)</button>
+          <button type="button" class="chip" data-ml-click='["setImnLam","tex","$this"]'>Texturizado varios</button>
+        </div>
+      </div>
+    </div>
+    <!-- SUB: Vinil de corte -->
+    <div id="imn-corte-opts" class="hidden" style="margin-top:12px">
+      <p class="sec-label" style="margin-bottom:8px">Tipo de vinil de corte permanente</p>
+      <div class="chip-group" id="imn-corte-chips">
+        <button type="button" class="chip active" data-ml-click='["setImnCorte","holoA","$this"]'>Holográfico premium <small style="opacity:.6">30cm×120cm / $240</small></button>
+        <button type="button" class="chip" data-ml-click='["setImnCorte","holoB","$this"]'>Holográfico económico <small style="opacity:.6">30cm×10m / $225</small></button>
+        <button type="button" class="chip" data-ml-click='["setImnCorte","custom","$this"]'>Personalizado</button>
+      </div>
+      <div id="imn-corte-custom-opts" class="hidden" style="margin-top:8px">
+        <p style="font-size:11px;color:var(--cyan);">✦ Precio, ancho y largo del rollo personalizado se configuran en <strong>Insumos → 🧲 Imanes</strong></p>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Acabado adicional</p>
+    <div class="chip-group" id="imn-acabado-chips">
+      <button type="button" class="chip active" data-ml-click='["setImnAcabado","none","$this"]'>Sin acabado adicional</button>
+      <button type="button" class="chip" data-ml-click='["setImnAcabado","resina","$this"]'>Resina 3D (epoxy)</button>
+    </div>
+    <div id="imn-resina-opts" class="hidden" style="margin-top:8px">
+      <p style="font-size:11px;color:var(--cyan);">✦ Costo de resina por pieza se configura en <strong>Insumos → 🧲 Imanes</strong></p>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-label">Diseño y margen</p>
+    <label class="chk-row"><input type="checkbox" id="chk-imn-diseno" checked data-ml-change='["calcIMN"]'> Incluir fee de diseño en el precio</label>
+    <div class="row">
+      <label>Fee diseño ($ por pedido) <span class="tag purple">editable</span></label>
+      <input type="number" inputmode="decimal" id="imn-dis-fee" value="80" min="0" step="10" style="width:90px" data-ml-change='["calcIMN"]'>
+    </div>
+    <div class="row" style="margin-bottom:0">
+      <label>Margen — <strong id="margen-imn-lbl" style="color:var(--amber)">45%</strong></label>
+      <input type="range" id="margen-imn" min="10" max="80" value="45" step="5" data-ml-input='["setMargen","$this","calcIMN"]'>
+    </div>
+  </div>
+  <div id="res-imanes" class="res-grid"></div>
+  <button type="button" class="add-cot-btn" data-ml-click='["addToCot","imanes"]'>↓ Añadir a cotización</button>
+  <p class="note">Rollo magnético natural cal 20 · 61cm × 15m = $1,348. Costo de base magnética calculado por área usada. Vinil de corte: precio varía según efecto/color. CFDI +16% IVA.</p>
+</div>
+
+<!-- ====== ACCESORIOS PERSONALIZADOS ====== -->
+<div id="page-accesorios" class="page">
+  <div class="accent" style="background:linear-gradient(90deg,var(--pink),var(--purple))"></div>
+  <div class="sub-tabs">
+    <button type="button" class="sub-tab active-purple" id="acc-tab-tl" data-ml-click='["setAccSub","tagllavero","$this"]'>🔑 Tags y Llaveros</button>
+    <button type="button" class="sub-tab" id="acc-tab-vasos" data-ml-click='["setAccSub","vasos","$this"]'>🫙 Vasos Personalizados</button>
+  </div>
+
+  <!-- SUB: TAGS Y LLAVEROS -->
+  <div id="sub-acc-tagllavero" class="sub-page active">
+    <div class="card">
+      <p class="sec-label">Tipo de accesorio</p>
+      <div class="chip-group" id="acc-tl-tipo-chips">
+        <button type="button" class="chip active" data-ml-click='["setAccTLTipo","llavero","$this"]'>Llavero acrílico figura <small style="opacity:.6">($55)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccTLTipo","tag_rect","$this"]'>Tag rectangular <small style="opacity:.6">($11.35)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccTLTipo","tag_redondo","$this"]'>Tag redondo <small style="opacity:.6">($9.45)</small></button>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Decoración DTF UV <span class="tag">$450 / lienzo 38cm × 1m = 3,800cm²</span></p>
+      <div class="two-col">
+        <div class="row" style="margin-bottom:0"><label>Ancho DTF por pieza (cm)</label><input type="number" inputmode="decimal" id="acc-dtf-w" value="5" min="0" max="38" step="0.5" style="width:80px" data-ml-change='["calcACCTag"]'></div>
+        <div class="row" style="margin-bottom:0"><label>Alto DTF por pieza (cm)</label><input type="number" inputmode="decimal" id="acc-dtf-h" value="8" min="0" max="100" step="0.5" style="width:80px" data-ml-change='["calcACCTag"]'></div>
+      </div>
+      <label class="chk-row" style="margin-top:10px"><input type="checkbox" id="chk-acc-double-dtf" data-ml-change='["calcACCTag"]'> Doble DTF (ambas caras) <span class="tag">×2 área</span></label>
+      <p style="font-size:11px;color:var(--muted);margin-top:4px">Si no lleva DTF, deja en 0.</p>
+    </div>
+    <div class="card">
+      <p class="sec-label">Otros acabados</p>
+      <label class="chk-row"><input type="checkbox" id="chk-acc-foto" data-ml-change='["toggleAccFoto"]'> Papel fotográfico (detalles adicionales)</label>
+      <div id="acc-foto-opts" class="hidden indent">
+        <div class="row" style="margin-bottom:0">
+          <label>Área foto por pieza (cm²)</label>
+          <input type="number" inputmode="decimal" id="acc-foto-area" value="10" min="0" step="1" style="width:90px" data-ml-change='["calcACCTag"]'>
+        </div>
+      </div>
+      <label class="chk-row" style="margin-top:6px"><input type="checkbox" id="chk-acc-corte" data-ml-change='["calcACCTag"]'> Vinil de corte</label>
+      <div class="indent">
+        <p style="font-size:11px;color:var(--cyan);">✦ Costo por pieza configurado en <strong>Insumos → 🎁 Accesorios</strong></p>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Cantidad y margen</p>
+      <div class="row">
+        <label>Cantidad</label>
+        <div class="qty-ctrl">
+          <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeAccTLQty",-1]'>−</button>
+          <input type="number" inputmode="numeric" class="qty-input" id="qty-acc-tl" value="10" min="1" data-ml-input='["calcACCTag"]'>
+          <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeAccTLQty",1]'>+</button>
+        </div>
+      </div>
+      <label class="chk-row"><input type="checkbox" id="chk-acc-tl-diseno" checked data-ml-change='["calcACCTag"]'> Incluir fee de diseño</label>
+      <div class="row">
+        <label>Fee diseño ($ por pedido) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="acc-tl-dis-fee" value="80" min="0" step="10" style="width:90px" data-ml-change='["calcACCTag"]'>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label>Margen — <strong id="margen-acc-tl-lbl" style="color:var(--pink)">50%</strong></label>
+        <input type="range" id="margen-acc-tl" min="10" max="80" value="50" step="5" data-ml-input='["setMargen","$this","calcACCTag"]'>
+      </div>
+    </div>
+    <div id="res-acc-tl" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","accTagLlavero"]'>↓ Añadir a cotización</button>
+    <p class="note">DTF UV: lienzo 38cm × 1m = $450 · costo por cm² aplicado. Tags pueden llevar doble DTF (ambas caras), papel fotográfico para detalles o vinil de corte. CFDI +16% IVA.</p>
+  </div>
+
+  <!-- SUB: VASOS PERSONALIZADOS -->
+  <div id="sub-acc-vasos" class="sub-page">
+    <div class="card">
+      <p class="sec-label">Tipo de vaso / recipiente</p>
+      <div class="chip-group" id="acc-vaso-chips">
+        <button type="button" class="chip active" data-ml-click='["setAccVasoTipo","mason16color","$this"]'>Mason jar 16oz tapa color <small style="opacity:.6">($88.75)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccVasoTipo","mason16trans","$this"]'>Mason jar 16oz transparente <small style="opacity:.6">($82.60)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccVasoTipo","infantil10","$this"]'>Infantil 10oz <small style="opacity:.6">($86.07)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccVasoTipo","tumbler24trans","$this"]'>Tumbler 24oz transparente <small style="opacity:.6">($99.01)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccVasoTipo","vidrio16asa","$this"]'>Vidrio 16oz con asa <small style="opacity:.6">($125.34)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccVasoTipo","tumbler24color","$this"]'>Tumbler 24oz tapa color <small style="opacity:.6">($95.47)</small></button>
+        <button type="button" class="chip" data-ml-click='["setAccVasoTipo","vasoLata","$this"]'>Vaso lata de vidrio <small style="opacity:.6">($53.33)</small></button>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(99,230,190,.25)">
+      <p class="sec-label">Relleno del vaso <span class="int-badge">Costo interno — no visible al cliente</span></p>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:12px">Ingresa las cantidades utilizadas POR PIEZA. El costo se incluye en el precio pero no aparece en la cotización al cliente.</p>
+      <div class="costs-grid">
+        <div class="cost-item"><label>Agua destilada (ml)</label><input type="number" inputmode="decimal" id="acc-v-agua" value="0" min="0" step="5" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Glicerina USP (ml)</label><input type="number" inputmode="decimal" id="acc-v-glicerina" value="0" min="0" step="5" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Aceite mineral (ml)</label><input type="number" inputmode="decimal" id="acc-v-aceite" value="0" min="0" step="5" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Colores comestibles (ml)</label><input type="number" inputmode="decimal" id="acc-v-color" value="0" min="0" step="0.1" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Glitter chunky (g) · 1–10g max</label><input type="number" inputmode="decimal" id="acc-v-glitter" value="0" min="0" max="10" step="0.5" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Color mica (g) · hasta 1g max</label><input type="number" inputmode="decimal" id="acc-v-mica" value="0" min="0" max="1" step="0.01" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Color base alcohol (ml) <span class="tag warn">$0 hasta cotizar</span></label><input type="number" inputmode="decimal" id="acc-v-base-alcohol" value="0" min="0" step="0.1" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Color base aceite (ml) <span class="tag warn">$0 hasta cotizar</span></label><input type="number" inputmode="decimal" id="acc-v-base-aceite" value="0" min="0" step="0.1" data-ml-change='["calcACCVasos"]'></div>
+        <div class="cost-item"><label>Colores acrílicos (ml) <span class="tag warn">$0 hasta cotizar</span></label><input type="number" inputmode="decimal" id="acc-v-acrilico" value="0" min="0" step="0.1" data-ml-change='["calcACCVasos"]'></div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-label">Decoración DTF UV <span class="tag">$450 / lienzo 38cm × 1m</span></p>
+      <div class="two-col">
+        <div class="row" style="margin-bottom:0"><label>Ancho DTF por pieza (cm)</label><input type="number" inputmode="decimal" id="acc-v-dtf-w" value="0" min="0" max="38" step="0.5" style="width:80px" data-ml-change='["calcACCVasos"]'></div>
+        <div class="row" style="margin-bottom:0"><label>Alto DTF por pieza (cm)</label><input type="number" inputmode="decimal" id="acc-v-dtf-h" value="0" min="0" max="100" step="0.5" style="width:80px" data-ml-change='["calcACCVasos"]'></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">Deja en 0 si no lleva decoración DTF UV.</p>
+    </div>
+    <div class="card">
+      <p class="sec-label">Cantidad y margen</p>
+      <div class="row">
+        <label>Cantidad</label>
+        <div class="qty-ctrl">
+          <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeAccVasosQty",-1]'>−</button>
+          <input type="number" inputmode="numeric" class="qty-input" id="qty-acc-vasos" value="10" min="1" data-ml-input='["calcACCVasos"]'>
+          <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeAccVasosQty",1]'>+</button>
+        </div>
+      </div>
+      <label class="chk-row"><input type="checkbox" id="chk-acc-v-diseno" checked data-ml-change='["calcACCVasos"]'> Incluir fee de diseño</label>
+      <div class="row">
+        <label>Fee diseño ($ por pedido) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="acc-v-dis-fee" value="80" min="0" step="10" style="width:90px" data-ml-change='["calcACCVasos"]'>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label>Margen — <strong id="margen-acc-vasos-lbl" style="color:var(--cyan)">45%</strong></label>
+        <input type="range" id="margen-acc-vasos" min="10" max="80" value="45" step="5" data-ml-input='["setMargen","$this","calcACCVasos"]'>
+      </div>
+    </div>
+    <div id="res-acc-vasos" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","accVasos"]'>↓ Añadir a cotización</button>
+    <p class="note">Todos los precios de insumos se gestionan en la pestaña Insumos. Los colores base marcados como <em>$0</em> serán considerados sin costo hasta que ingreses su precio en Insumos. El relleno de líquidos no aparece en la cotización al cliente. CFDI +16% IVA.</p>
+  </div>
+</div>
+
+
+<!-- ====== LÁSER / 3D (Falcon A1 + Bambu Lab P1S) ====== -->
+<div id="page-fablab" class="page">
+  <div class="accent" style="background:linear-gradient(90deg,var(--amber),var(--cyan))"></div>
+  <div class="sub-tabs">
+    <button type="button" class="sub-tab active-cyan" id="fab-tab-laser" data-ml-click='["setFabSub","laser","$this"]'>🔥 Grabado / corte láser</button>
+    <button type="button" class="sub-tab" id="fab-tab-3d" data-ml-click='["setFabSub","print3d","$this"]'>🧊 Impresión 3D</button>
+  </div>
+
+  <!-- SUB: GRABADO / CORTE LÁSER -->
+  <div id="sub-fab-laser" class="sub-page active">
+    <div class="card">
+      <p class="sec-label">Trabajo láser <span class="tag warn">Falcon A1 · 10W</span></p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">El costo se calcula por <strong>tiempo de máquina</strong>. Engloba grabado y corte: solo cambia el tiempo estimado por pieza.</p>
+      <div class="row">
+        <label>Minutos de láser por pieza <span class="tag">tiempo máquina</span></label>
+        <input type="number" inputmode="decimal" id="laser-min" value="10" min="0.5" step="0.5" style="width:90px" data-ml-change='["calcLaser"]'>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label>Tarifa de máquina ($/min) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="laser-rate" value="5" min="0" step="0.5" style="width:90px" data-ml-change='["calcLaser"]'>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:rgba(250,199,117,.3)">
+      <p class="sec-label" style="color:var(--amber)">¿Incluyes el artículo a grabar?</p>
+      <label class="chk-row"><input type="checkbox" id="chk-laser-insumo" data-ml-change='["toggleLaserInsumo"]'> Sí — yo pongo el insumo (termo, joyería, placa, etc.)</label>
+      <div id="laser-insumo-opts" class="hidden indent">
+        <div class="two-col">
+          <div class="cost-item"><label>Nombre del artículo</label><input type="text" id="laser-insumo-nombre" value="Termo" placeholder="Ej. Termo acero 20oz" data-ml-change='["calcLaser"]'></div>
+          <div class="cost-item"><label>Costo del artículo ($/pza)</label><input type="number" inputmode="decimal" id="laser-insumo-costo" value="0" min="0" step="0.5" data-ml-change='["calcLaser"]'></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">Este costo entra directo aquí — no necesitas ir a la pestaña Insumos.</p>
+      </div>
+      <p id="laser-insumo-cliente-note" style="font-size:11px;color:var(--cyan);margin-top:4px">Sin marcar = grabado sobre artículo que trae el cliente (solo cobras el servicio).</p>
+    </div>
+
+    <div class="card">
+      <p class="sec-label">Consumible extra por pieza <span class="tag">opcional</span></p>
+      <div class="row" style="margin-bottom:0">
+        <label>Spray de marcado / masking / etc. ($/pza)</label>
+        <input type="number" inputmode="decimal" id="laser-consumible" value="0" min="0" step="0.5" style="width:90px" data-ml-change='["calcLaser"]'>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:6px">Para metal sin recubrir (acero, joyería) que requiere spray de marcado. Deja en 0 si no aplica.</p>
+    </div>
+
+    <div class="card">
+      <p class="sec-label">Cantidad y margen</p>
+      <div class="row">
+        <label>Cantidad</label>
+        <div class="qty-ctrl">
+          <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["changeLaserQty",-1]'>−</button>
+          <input type="number" inputmode="numeric" class="qty-input" id="qty-laser" value="10" min="1" data-ml-input='["calcLaser"]'>
+          <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["changeLaserQty",1]'>+</button>
+        </div>
+      </div>
+      <label class="chk-row"><input type="checkbox" id="chk-laser-setup" checked data-ml-change='["calcLaser"]'> Incluir fee de preparación / diseño</label>
+      <div class="row">
+        <label>Fee preparación ($ por pedido) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="laser-setup" value="80" min="0" step="10" style="width:90px" data-ml-change='["calcLaser"]'>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label>Margen — <strong id="margen-laser-lbl" style="color:var(--amber)">50%</strong></label>
+        <input type="range" id="margen-laser" min="10" max="80" value="50" step="5" data-ml-input='["setMargen","$this","calcLaser"]'>
+      </div>
+    </div>
+    <div id="res-laser" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","laser"]'>↓ Añadir a cotización</button>
+    <p class="note" id="laser-note"></p>
+  </div>
+
+  <!-- SUB: IMPRESIÓN 3D -->
+  <div id="sub-fab-3d" class="sub-page">
+    <div class="card">
+      <p class="sec-label">Filamento <span class="tag green">Bambu Lab P1S</span></p>
+      <div class="chip-group" id="fab-3d-fil-chips">
+        <button type="button" class="chip active" data-ml-click='["set3DFil","pla","$this"]'>PLA básico</button>
+        <button type="button" class="chip" data-ml-click='["set3DFil","plaSeda","$this"]'>PLA seda / mate</button>
+        <button type="button" class="chip" data-ml-click='["set3DFil","petg","$this"]'>PETG</button>
+        <button type="button" class="chip" data-ml-click='["set3DFil","abs","$this"]'>ABS / ASA</button>
+        <button type="button" class="chip" data-ml-click='["set3DFil","tpu","$this"]'>TPU flexible</button>
+      </div>
+      <p style="font-size:11px;color:var(--cyan);margin-top:8px">✦ Precio por kg de cada filamento se configura en <strong>Insumos → ⚡ Láser / 3D</strong>.</p>
+    </div>
+
+    <div class="card">
+      <p class="sec-label">Material y tiempo <span class="int-badge">Por pieza</span></p>
+      <div class="two-col">
+        <div class="cost-item"><label>Gramos de filamento por pieza</label><input type="number" inputmode="decimal" id="p3d-gramos" value="50" min="0" step="1" data-ml-change='["calc3D"]'></div>
+        <div class="cost-item"><label>Horas de impresión por pieza</label><input type="number" inputmode="decimal" id="p3d-horas" value="3" min="0" step="0.25" data-ml-change='["calc3D"]'></div>
+      </div>
+      <div class="row" style="margin-top:12px;margin-bottom:0">
+        <label>Post-proceso / acabado ($/pza) <span class="tag">opcional</span></label>
+        <input type="number" inputmode="decimal" id="p3d-post" value="0" min="0" step="1" style="width:90px" data-ml-change='["calc3D"]'>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:6px">Merma de soportes/purga (<strong id="p3d-merma-lbl">12%</strong>) y tarifa de máquina ($/hr) se aplican automáticamente — se ajustan en Insumos.</p>
+    </div>
+
+    <div class="card">
+      <p class="sec-label">Cantidad y margen</p>
+      <div class="row">
+        <label>Cantidad</label>
+        <div class="qty-ctrl">
+          <button type="button" class="qty-btn" aria-label="Disminuir cantidad" data-ml-click='["change3DQty",-1]'>−</button>
+          <input type="number" inputmode="numeric" class="qty-input" id="qty-p3d" value="5" min="1" data-ml-input='["calc3D"]'>
+          <button type="button" class="qty-btn" aria-label="Aumentar cantidad" data-ml-click='["change3DQty",1]'>+</button>
+        </div>
+      </div>
+      <label class="chk-row"><input type="checkbox" id="chk-p3d-setup" checked data-ml-change='["calc3D"]'> Incluir fee de modelado / preparación</label>
+      <div class="row">
+        <label>Fee modelado ($ por pedido) <span class="tag purple">editable</span></label>
+        <input type="number" inputmode="decimal" id="p3d-setup" value="80" min="0" step="10" style="width:90px" data-ml-change='["calc3D"]'>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <label>Margen — <strong id="margen-p3d-lbl" style="color:var(--green)">50%</strong></label>
+        <input type="range" id="margen-p3d" min="10" max="80" value="50" step="5" data-ml-input='["setMargen","$this","calc3D"]'>
+      </div>
+    </div>
+    <div id="res-p3d" class="res-grid"></div>
+    <button type="button" class="add-cot-btn" data-ml-click='["addToCot","print3d"]'>↓ Añadir a cotización</button>
+    <p class="note" id="p3d-note"></p>
+  </div>
+</div>
+
+
+<!-- ====== COTIZACIÓN ====== -->
+<div id="page-cotizacion" class="page">
+  <div class="accent" style="background:linear-gradient(90deg,var(--cyan),var(--purple))"></div>
+  <!-- Header cotización -->
+  <div class="cot-header">
+    <div>
+      <p class="sec-label" style="margin:0 0 4px">Número de cotización</p>
+      <div class="cot-num-badge" id="cot-num-display">COT-003</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button type="button" class="btn btn-outline btn-sm" aria-label="Folio anterior de cotización" data-ml-click='["prevCotNum"]'>‹</button>
+      <input type="text" id="cot-num-input" value="COT-003" style="width:100px;text-align:center;font-weight:700" data-ml-input='["syncCotNum","$value"]'>
+      <button type="button" class="btn btn-outline btn-sm" aria-label="Folio siguiente de cotización" data-ml-click='["nextCotNum"]'>›</button>
+    </div>
+  </div>
+  <!-- Datos del cliente -->
+  <div class="card">
+    <p class="sec-label">Datos del cliente</p>
+    <div class="form-grid">
+      <div class="form-item">
+        <label>Cliente / Evento</label>
+        <input type="text" id="cot-cliente" placeholder="Nombre del evento o cliente">
+      </div>
+      <div class="form-item">
+        <label>Teléfono / Email</label>
+        <input type="text" id="cot-tel" placeholder="55 1234 5678">
+      </div>
+      <div class="form-item">
+        <label>Fecha del evento</label>
+        <input type="date" id="cot-fecha-evento">
+      </div>
+      <div class="form-item">
+        <label>Dirección / Lugar</label>
+        <input type="text" id="cot-lugar" placeholder="Salón, escuela, domicilio…">
+      </div>
+    </div>
+    <div class="form-item" style="margin-top:10px">
+      <label>Tipo de servicio (para encabezado del PDF)</label>
+      <input type="text" id="cot-tipo" placeholder="T-Shirt Lab · Cap Lab · Stickers · Tatuajes…">
+    </div>
+    <div style="display:flex;gap:12px;margin-top:12px;align-items:center;flex-wrap:wrap">
+      <div class="form-item" style="flex:0 0 auto">
+        <label>Vigencia</label>
+        <input type="text" id="cot-vigencia" value="15 días" style="width:100px">
+      </div>
+      <div style="flex:0 0 auto">
+        <p class="sec-label" style="margin-bottom:6px">IVA</p>
+        <div class="pill-toggle" id="iva-toggle">
+          <button type="button" class="pill-opt active" data-ml-click='["setIva",false,"$this"]'>Sin IVA</button>
+          <button type="button" class="pill-opt" data-ml-click='["setIva",true,"$this"]'>Con IVA 16%</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Líneas de servicio -->
+  <div class="card" style="padding:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)">
+      <p class="sec-label" style="margin:0">Servicios cotizados</p>
+      <button type="button" class="btn btn-outline btn-sm" data-ml-click='["addManualLine"]'>+ Línea manual</button>
+    </div>
+    <div id="cot-lines-wrap">
+      <div class="cot-line-header">
+        <span>Concepto</span><span style="text-align:center">Cant.</span><span style="text-align:center">P. Unit.</span><span style="text-align:right">Importe</span><span></span>
+      </div>
+      <div id="cot-lines-body">
+        <div class="cot-empty" id="cot-empty-msg">No hay servicios añadidos. Usa el botón "↓ Añadir a cotización" en cada módulo o agrega una línea manual.</div>
+      </div>
+    </div>
+  </div>
+  <!-- Totales -->
+  <div class="totals-panel" id="cot-totals" style="margin-bottom:1rem">
+    <div class="totals-row"><span>Subtotal</span><span id="tot-sub">$0.00</span></div>
+    <div class="totals-row" id="iva-row" style="display:none"><span>IVA (16%)</span><span id="tot-iva">$0.00</span></div>
+    <div class="totals-row"><span>TOTAL A PAGAR</span><span id="tot-total">$0.00</span></div>
+  </div>
+  <!-- Notas / Condiciones -->
+  <div class="card">
+    <p class="sec-label">Notas / Condiciones del servicio</p>
+    <textarea id="cot-notas" placeholder="Escribe condiciones específicas. Usa el formato 'Etiqueta: Descripción' para que aparezcan formateadas en el PDF."></textarea>
+  </div>
+  <!-- Botones de acción -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button type="button" class="btn btn-cyan" data-ml-click='["generatePDF",false]'>🖨 Cotización individual (1 servicio / hoja)</button>
+    <button type="button" class="btn btn-purple" data-ml-click='["generatePDF",true]'>📋 Cotización integrada (todos en una hoja)</button>
+    <button type="button" class="btn btn-outline" data-ml-click='["clearCot"]'>🗑 Limpiar cotización</button>
+  </div>
+  <p class="note" style="margin-top:10px">
+    <strong>Individual:</strong> cada servicio genera su propia hoja con número de COT consecutivo (COT-003, COT-004…).<br>
+    <strong>Integrada:</strong> todos los servicios en una sola hoja con un único número de COT.<br>
+    El PDF no muestra costos ni margen — solo el precio final al cliente. Elige "Guardar como PDF" en el diálogo de impresión.
+  </p>
+</div>
+
+<!-- ====== RECIBOS ====== -->
+<div id="page-recibos" class="page">
+  <div class="accent" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div>
+
+  <!-- Header recibo -->
+  <div class="cot-header" style="background:linear-gradient(135deg,rgba(105,219,124,.10),rgba(99,230,190,.05));border-color:rgba(105,219,124,.18)">
+    <div>
+      <p class="sec-label" style="margin:0 0 4px">Número de recibo</p>
+      <div class="cot-num-badge" id="rec-num-display" style="color:var(--green)">REC-001</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button type="button" class="btn btn-outline btn-sm" aria-label="Folio anterior de recibo" data-ml-click='["prevRecNum"]'>‹</button>
+      <input type="text" id="rec-num-input" value="REC-001" style="width:100px;text-align:center;font-weight:700" data-ml-input='["syncRecNum","$value"]'>
+      <button type="button" class="btn btn-outline btn-sm" aria-label="Folio siguiente de recibo" data-ml-click='["nextRecNum"]'>›</button>
+    </div>
+  </div>
+
+  <!-- Cargar desde cotización -->
+  <div class="card">
+    <p class="sec-label">Relacionar con cotización</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.55">
+      Carga los datos de una cotización previa para no recapturar. Los recibos se relacionan por número de cotización (COT-XXX).
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+      <button type="button" class="btn btn-outline btn-sm" data-ml-click='["loadFromCurrentCot"]'>↑ Cargar de cotización actual</button>
+      <select id="rec-cot-saved" data-ml-change='["loadFromSavedCot","$value"]' style="flex:1;min-width:180px">
+        <option value="">— Cargar de cotización guardada —</option>
+      </select>
+      <button type="button" class="btn btn-outline btn-sm" data-ml-click='["clearSavedCots"]' title="Borrar lista de cotizaciones guardadas" aria-label="Borrar lista de cotizaciones guardadas">🗑</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-item">
+        <label>Cotización de referencia (opcional)</label>
+        <input type="text" id="rec-cot-ref" placeholder="COT-003">
+      </div>
+      <div class="form-item">
+        <label>Adjunto / Comprobante (opcional)</label>
+        <input type="file" id="rec-cot-file" accept="application/pdf,image/*" data-ml-change='["handleRecAttachment","$this"]'>
+      </div>
+    </div>
+    <p id="rec-attachment-info" class="note hidden" style="margin-top:8px;font-size:11px"></p>
+  </div>
+
+  <!-- Datos del cliente -->
+  <div class="card">
+    <p class="sec-label">Datos del cliente</p>
+    <div class="form-grid">
+      <div class="form-item">
+        <label>Cliente / Evento</label>
+        <input type="text" id="rec-cliente" placeholder="Nombre del evento o cliente">
+      </div>
+      <div class="form-item">
+        <label>Teléfono / Email</label>
+        <input type="text" id="rec-tel" placeholder="55 1234 5678">
+      </div>
+      <div class="form-item">
+        <label>Fecha de pago</label>
+        <input type="date" id="rec-fecha-pago">
+      </div>
+      <div class="form-item">
+        <label>Dirección / Lugar</label>
+        <input type="text" id="rec-lugar" placeholder="Salón, escuela, domicilio…">
+      </div>
+    </div>
+    <div class="form-item" style="margin-top:10px">
+      <label>Tipo de servicio</label>
+      <input type="text" id="rec-tipo" placeholder="T-Shirt Lab · Cap Lab · Stickers · Tatuajes…">
+    </div>
+  </div>
+
+  <!-- Forma de pago -->
+  <div class="card">
+    <p class="sec-label">Forma de pago</p>
+    <div class="chip-group" id="rec-pay-chips" style="margin-bottom:10px">
+      <button type="button" class="chip active" data-ml-click='["setRecPay","efectivo","$this"]'>💵 Efectivo</button>
+      <button type="button" class="chip" data-ml-click='["setRecPay","transferencia","$this"]'>🏦 Transferencia</button>
+      <button type="button" class="chip" data-ml-click='["setRecPay","mp_pos","$this"]'>💳 TC/TD · MercadoPago POS</button>
+      <button type="button" class="chip" data-ml-click='["setRecPay","mp_link","$this"]'>🔗 TC/TD · Link MercadoPago</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-item">
+        <label>Estatus del pago</label>
+        <select id="rec-status">
+          <option value="pagado">Pagado (total)</option>
+          <option value="anticipo">Anticipo</option>
+          <option value="liquidacion">Liquidación</option>
+          <option value="parcial">Pago parcial</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>Referencia / Folio operación</label>
+        <input type="text" id="rec-pay-ref" placeholder="Folio MP, num. transferencia…">
+      </div>
+    </div>
+    <p class="note" style="margin-top:10px;font-size:11px;line-height:1.7">
+      <strong>Datos para transferencia:</strong><br>
+      Beneficiario: <strong>Karla E Elorza</strong> · CLABE: <strong>002441701958367188</strong> · Banco: <strong>Banamex</strong><br>
+      MercadoPago: cobro en punto de venta o vía link de pago.
+    </p>
+  </div>
+
+  <!-- IVA toggle -->
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div style="flex:0 0 auto">
+        <p class="sec-label" style="margin-bottom:6px">IVA</p>
+        <div class="pill-toggle" id="rec-iva-toggle">
+          <button type="button" class="pill-opt active" data-ml-click='["setRecIva",false,"$this"]'>Sin IVA</button>
+          <button type="button" class="pill-opt" data-ml-click='["setRecIva",true,"$this"]'>Con IVA 16%</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Líneas / conceptos -->
+  <div class="card" style="padding:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)">
+      <p class="sec-label" style="margin:0">Conceptos del recibo</p>
+      <button type="button" class="btn btn-outline btn-sm" data-ml-click='["addRecLine"]'>+ Línea</button>
+    </div>
+    <div id="rec-lines-wrap">
+      <div class="cot-line-header">
+        <span>Concepto</span><span style="text-align:center">Cant.</span><span style="text-align:center">P. Unit.</span><span style="text-align:right">Importe</span><span></span>
+      </div>
+      <div id="rec-lines-body">
+        <div class="cot-empty" id="rec-empty-msg">No hay conceptos. Carga desde una cotización o agrega líneas manualmente.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Totales -->
+  <div class="totals-panel" id="rec-totals" style="margin-bottom:1rem">
+    <div class="totals-row"><span>Subtotal</span><span id="rec-tot-sub">$0.00</span></div>
+    <div class="totals-row" id="rec-iva-row" style="display:none"><span>IVA (16%)</span><span id="rec-tot-iva">$0.00</span></div>
+    <div class="totals-row"><span>TOTAL RECIBIDO</span><span id="rec-tot-total">$0.00</span></div>
+  </div>
+
+  <!-- Notas -->
+  <div class="card">
+    <p class="sec-label">Notas adicionales</p>
+    <textarea id="rec-notas" placeholder="Notas opcionales. Usa el formato 'Etiqueta: Descripción' para que aparezcan formateadas en el PDF."></textarea>
+  </div>
+
+  <!-- Botones de acción -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button type="button" class="btn btn-cyan" data-ml-click='["generateReceiptPDF"]'>🖨 Generar recibo PDF</button>
+    <button type="button" class="btn btn-outline" data-ml-click='["clearRec"]'>🗑 Limpiar recibo</button>
+  </div>
+  <p class="note" style="margin-top:10px">
+    El recibo se genera con el mismo estilo de las cotizaciones. Cada cotización generada se guarda automáticamente y aparece en "Cargar de cotización guardada" para vincularla aquí. Elige "Guardar como PDF" en el diálogo de impresión.
+  </p>
+</div>
+
+<!-- ====== COSTOS DE INSUMOS ====== -->
+<div id="page-insumos" class="page">
+  <div class="accent" style="background:var(--muted)"></div>
+  <p style="font-size:13px;color:var(--muted);margin:0 0 1rem">Actualiza cuando cambien proveedores. Los cambios aplican automáticamente a todos los módulos.</p>
+
+  <div class="card">
+    <p class="sec-label">Bolsas dulceros</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Bolsa PVC ($/pza)</label><input type="number" inputmode="decimal" id="c-pvc" value="11.50" step="0.10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Bolsa polipropileno ($/pza)</label><input type="number" inputmode="decimal" id="c-pp" value="7.00" step="0.10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Dulcero lunchera ($/pza)</label><input type="number" inputmode="decimal" id="c-lunchera" value="25.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Empaque dulceros ($/pza)</label><input type="number" inputmode="decimal" id="c-empaque-d" value="0" step="0.10" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="sec-label">Personalización dulceros</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Listón — precio rollo ($)</label><input type="number" inputmode="decimal" id="c-lp" value="120" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Listón — metros por rollo</label><input type="number" inputmode="decimal" id="c-lm" value="45" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Listón — cm usados por pieza</label><input type="number" inputmode="decimal" id="c-lcm" value="50" step="5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Opalina — hoja carta ($)</label><input type="number" inputmode="decimal" id="c-opal" value="2.50" step="0.10" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="sec-label">Tatuajes temporales — papel e insumos</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Papel tattoo — hoja carta ($)</label><input type="number" inputmode="decimal" id="c-tattoo" value="24.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Fee de diseño ($ por pedido)</label><input type="number" inputmode="decimal" id="c-diseno-fee" value="80" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Atomizador 100ml personalizado ($) <span class="tag warn" style="margin:0">Station</span></label><input type="number" inputmode="decimal" id="c-atom100" value="11.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Esponja de aplicación ($/pza)</label><input type="number" inputmode="decimal" id="c-esponja" value="3.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Atomizador 30ml ($/pza) <span class="tag purple" style="margin:0">Kit</span></label><input type="number" inputmode="decimal" id="c-atom30" value="18.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Bolsa celofán ($/pza) <span class="tag purple" style="margin:0">Kit</span></label><input type="number" inputmode="decimal" id="c-celofan" value="3.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="sec-label">Stickers — materiales adhesivos</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Papel fotográfico — carta ($)</label><input type="number" inputmode="decimal" id="c-foto" value="3.20" step="0.10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil blanco — A4 ($)</label><input type="number" inputmode="decimal" id="c-vb" value="6.00" step="0.10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil transparente — carta ($)</label><input type="number" inputmode="decimal" id="c-vt" value="11.50" step="0.10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil holográfico liso — A4 ($)</label><input type="number" inputmode="decimal" id="c-holo-liso" value="12.25" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil holográfico texturizado — A4 ($)</label><input type="number" inputmode="decimal" id="c-holo-tex" value="11.00" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil glow-in-the-dark — A4 ($)</label><input type="number" inputmode="decimal" id="c-glow" value="15.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Papel magnético — A4 ($)</label><input type="number" inputmode="decimal" id="c-mag" value="15.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="sec-label">Laminado en frío — por hoja A4</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Laminado liso (brillante / mate) — A4 ($)</label><input type="number" inputmode="decimal" id="c-lam-liso" value="9.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Laminado texturizado varios — A4 ($)</label><input type="number" inputmode="decimal" id="c-lam-tex" value="10.00" step="0.50" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p style="font-size:11px;color:var(--amber);margin-top:8px">⚠ El laminado se aplica por hoja completa. El papel magnético siempre incluye laminado liso (oculto al cliente).</p>
+  </div>
+
+  <div class="card">
+    <p class="sec-label">Fee de diseño — stickers</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Fee diseño stickers ($ por pedido)</label><input type="number" inputmode="decimal" id="c-stk-dis" value="80" step="10" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="sec-label">Prendas / T-Shirt Lab</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Prenda infantil ($/pza)</label><input type="number" inputmode="decimal" id="c-inf" value="50" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Prenda adulto ($/pza)</label><input type="number" inputmode="decimal" id="c-adu" value="60" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Tote bag ($/pza)</label><input type="number" inputmode="decimal" id="c-tote" value="55" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Talla especial 2XL/3XL (+$)</label><input type="number" inputmode="decimal" id="c-talla-esp" value="30" step="5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Costo lienzo maquila ($)</label><input type="number" inputmode="decimal" id="c-lienzo" value="350" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Área total lienzo (cm²)</label><input type="number" inputmode="decimal" id="c-lienzo-area" value="9000" step="100" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Empaque prendas ($/pza)</label><input type="number" inputmode="decimal" id="c-empaque-p" value="3" step="0.50" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(105,219,124,.2)">
+    <p class="sec-label" style="color:var(--green)">🧢 Cap Lab — Gorras y parches</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Gorra acrílica visera curva ($/pza)</label><input type="number" inputmode="decimal" id="c-gorra-c" value="28" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Gorra acrílica camionera 5 gajos ($/pza)</label><input type="number" inputmode="decimal" id="c-gorra-k" value="35" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Parche bordado económico ($/pza)</label><input type="number" inputmode="decimal" id="c-parche-eco" value="15" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Parche bordado premium ($/pza)</label><input type="number" inputmode="decimal" id="c-parche-premium" value="50" step="1" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">El empaque por gorra usa el mismo costo que prendas (campo "Empaque prendas").</p>
+  </div>
+
+  <div class="card" style="border-color:rgba(250,199,117,.2)">
+    <p class="sec-label" style="color:var(--amber)">🧲 Imanes — Base magnética y viniles de corte</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Rollo magnético cal 20 — precio total ($)</label><input type="number" inputmode="decimal" id="c-rollo-mag-price" value="1348" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Rollo magnético — ancho (cm)</label><input type="number" inputmode="decimal" id="c-rollo-mag-w" value="61" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Rollo magnético — largo (cm)</label><input type="number" inputmode="decimal" id="c-rollo-mag-l" value="1500" step="10" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">Precio por cm²: <strong id="c-rollo-mag-cm2" style="color:var(--amber)">$0.0147</strong></p>
+    <div class="costs-grid" style="margin-top:12px">
+      <div class="cost-item"><label>Vinil corte Holográfico A — precio rollo ($)</label><input type="number" inputmode="decimal" id="c-vcorte-holoa-price" value="240" step="5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Holográfico A — ancho (cm)</label><input type="number" inputmode="decimal" id="c-vcorte-holoa-w" value="30" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Holográfico A — largo (cm)</label><input type="number" inputmode="decimal" id="c-vcorte-holoa-l" value="120" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil corte Holográfico B — precio rollo ($)</label><input type="number" inputmode="decimal" id="c-vcorte-holob-price" value="225" step="5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Holográfico B — ancho (cm)</label><input type="number" inputmode="decimal" id="c-vcorte-holob-w" value="30" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Holográfico B — largo (cm)</label><input type="number" inputmode="decimal" id="c-vcorte-holob-l" value="1000" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil corte <strong>Personalizado</strong> — precio rollo ($)</label><input type="number" inputmode="decimal" id="c-vcorte-custom-price" value="200" step="5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Personalizado — ancho rollo (cm)</label><input type="number" inputmode="decimal" id="c-vcorte-custom-w" value="30" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Personalizado — largo rollo (cm)</label><input type="number" inputmode="decimal" id="c-vcorte-custom-l" value="100" step="10" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p class="sec-label" style="margin-top:14px;margin-bottom:8px">Acabados</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Resina 3D epoxy — costo por pieza ($)</label><input type="number" inputmode="decimal" id="c-resina-pza" value="15" step="1" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(247,131,172,.2)">
+    <p class="sec-label" style="color:var(--pink)">🎁 Accesorios — Llaveros, Tags y Vasos</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Llavero acrílico figura ($/pza)</label><input type="number" inputmode="decimal" id="c-llavero" value="55" step="0.5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Tag rectangular ($/pza)</label><input type="number" inputmode="decimal" id="c-tag-rect" value="11.35" step="0.05" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Tag redondo ($/pza)</label><input type="number" inputmode="decimal" id="c-tag-redondo" value="9.45" step="0.05" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vinil de corte — costo por pieza en tags ($)</label><input type="number" inputmode="decimal" id="c-acc-corte-pza" value="5" step="0.5" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p class="sec-label" style="margin-top:14px;margin-bottom:8px">Vasos</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Mason jar 16oz tapa color ($/pza)</label><input type="number" inputmode="decimal" id="c-vaso-mason16color" value="88.75" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Mason jar 16oz transparente ($/pza)</label><input type="number" inputmode="decimal" id="c-vaso-mason16trans" value="82.60" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Infantil 10oz ($/pza)</label><input type="number" inputmode="decimal" id="c-vaso-infantil10" value="86.07" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Tumbler 24oz transparente ($/pza)</label><input type="number" inputmode="decimal" id="c-vaso-tumbler24trans" value="99.01" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vidrio 16oz con asa ($/pza)</label><input type="number" inputmode="decimal" id="c-vaso-vidrio16asa" value="125.34" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Tumbler 24oz tapa color ($/pza)</label><input type="number" inputmode="decimal" id="c-vaso-tumbler24color" value="95.47" step="0.25" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Vaso lata de vidrio ($/pza)</label><input type="number" inputmode="decimal" id="c-vaso-lata" value="53.33" step="0.25" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(99,230,190,.2)">
+    <p class="sec-label" style="color:var(--cyan)">🫙 Líquidos y consumibles para vasos <span class="int-badge">Solo costo interno</span></p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Agua destilada ($/litro)</label><input type="number" inputmode="decimal" id="c-agua-dest" value="27" step="0.5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Glicerina USP ($/litro)</label><input type="number" inputmode="decimal" id="c-glicerina" value="197" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Aceite mineral ($/litro)</label><input type="number" inputmode="decimal" id="c-aceite-min" value="96.90" step="0.5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Colores comestibles ($/ml)</label><input type="number" inputmode="decimal" id="c-color-com" value="1.30" step="0.05" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Glitter chunky ($/60g)</label><input type="number" inputmode="decimal" id="c-glitter" value="180" step="5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Color mica ($/810g)</label><input type="number" inputmode="decimal" id="c-mica" value="912.68" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Color base alcohol ($/ml) <span class="tag warn">Pendiente</span></label><input type="number" inputmode="decimal" id="c-color-base-alcohol" value="0" step="0.05" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Color base aceite ($/ml) <span class="tag warn">Pendiente</span></label><input type="number" inputmode="decimal" id="c-color-base-aceite" value="0" step="0.05" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Colores acrílicos ($/ml) <span class="tag warn">Pendiente</span></label><input type="number" inputmode="decimal" id="c-color-acrilico" value="0" step="0.05" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p style="font-size:11px;color:var(--amber);margin-top:8px">⚠ Los colores base y acrílicos marcados como Pendiente tienen costo $0 hasta que ingreses el precio real.</p>
+  </div>
+
+  <div class="card" style="border-color:rgba(99,230,190,.15)">
+    <p class="sec-label" style="color:var(--cyan)">✦ DTF UV — Lienzo de impresión</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Precio lienzo DTF UV ($)</label><input type="number" inputmode="decimal" id="c-dtf-uv-price" value="450" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Ancho lienzo DTF UV (cm)</label><input type="number" inputmode="decimal" id="c-dtf-uv-w" value="38" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Largo lienzo DTF UV (cm)</label><input type="number" inputmode="decimal" id="c-dtf-uv-l" value="100" step="5" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">Precio por cm²: <strong id="c-dtf-uv-cm2" style="color:var(--cyan)">$0.1184</strong></p>
+  </div>
+  <div class="card" style="border-color:rgba(250,199,117,.2)">
+    <p class="sec-label" style="color:var(--amber)">⚡ Láser / 3D — Tarifas de máquina</p>
+    <p class="sec-label" style="margin-top:6px;margin-bottom:8px">Grabado / corte láser (Falcon A1 10W)</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>Tarifa de máquina ($/min)</label><input type="number" inputmode="decimal" id="c-laser-rate" value="5" step="0.5" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Fee preparación / diseño ($ por pedido)</label><input type="number" inputmode="decimal" id="c-laser-setup" value="80" step="10" data-ml-change='["updateCosts"]'></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:6px">El artículo a grabar (termo, joyería, etc.) y el spray de marcado se capturan directo en la pestaña Láser, no aquí.</p>
+    <p class="sec-label" style="margin-top:14px;margin-bottom:8px">Impresión 3D (Bambu Lab P1S)</p>
+    <div class="costs-grid">
+      <div class="cost-item"><label>PLA básico ($/kg)</label><input type="number" inputmode="decimal" id="c-fil-pla" value="420" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>PLA seda / mate ($/kg)</label><input type="number" inputmode="decimal" id="c-fil-pla-seda" value="520" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>PETG ($/kg)</label><input type="number" inputmode="decimal" id="c-fil-petg" value="480" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>ABS / ASA ($/kg)</label><input type="number" inputmode="decimal" id="c-fil-abs" value="540" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>TPU flexible ($/kg)</label><input type="number" inputmode="decimal" id="c-fil-tpu" value="650" step="10" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Tarifa de máquina ($/hora)</label><input type="number" inputmode="decimal" id="c-3d-rate" value="12" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Merma soportes / purga (%)</label><input type="number" inputmode="decimal" id="c-3d-merma" value="12" step="1" data-ml-change='["updateCosts"]'></div>
+      <div class="cost-item"><label>Fee modelado / preparación ($ por pedido)</label><input type="number" inputmode="decimal" id="c-3d-setup" value="80" step="10" data-ml-change='["updateCosts"]'></div>
+    </div>
+  </div>
+
+</div><!-- /page-insumos -->
+
+</div><!-- /container -->
+
+<footer>
+  <strong>MatrixLab Stickers</strong> · Papelería Creativa · T-Shirt Lab · Cap Lab<br>
+  <span style="font-size:11px;margin-top:4px;display:block">📱 @MatrixLab.Stickers &nbsp;·&nbsp; WA: 5655575131 &nbsp;·&nbsp; Cotizador interno v4.2</span>
+</footer>
+
+<!-- ========== PRINT TEMPLATE (contenido generado dinámicamente) ========== -->
+<div id="print-template"></div>
+
+<div class="toast" id="toast-msg">✓ Añadido a cotización</div>

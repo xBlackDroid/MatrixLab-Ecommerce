@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Boxes,
+  Calculator,
+  ChevronRight,
   Package,
   Palette,
   ShoppingCart,
@@ -66,6 +68,21 @@ export default async function AdminDashboardPage() {
       title="Resumen"
       description="Estado general de MatrixLab Store Core."
     >
+      {/* Documento HTML propio (route handler): <a> normal, sin prefetch RSC. */}
+      <a
+        href="/admin/cotizador"
+        className="glass mb-6 flex min-h-11 items-center gap-4 rounded-2xl p-5 transition hover:border-ml-violet/40"
+      >
+        <Calculator className="h-6 w-6 shrink-0 text-ml-violet" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">Cotizador</span>
+          <span className="block text-sm text-ml-white/60">
+            Cotizaciones, recibos y PDFs con costos internos, guardados en la
+            nube.
+          </span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-ml-white/45" aria-hidden />
+      </a>
       {!stats ? (
         <div className="glass flex items-start gap-3 rounded-2xl p-6 text-sm text-ml-coral">
           <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />

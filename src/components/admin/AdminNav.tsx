@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Boxes,
+  Calculator,
   FlaskConical,
   LayoutDashboard,
   LogOut,
@@ -15,8 +16,13 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+/**
+ * `document: true` → la ruta es un documento HTML completo (route handler),
+ * no una página de React: se navega con <a> normal, sin prefetch de RSC.
+ */
 const LINKS = [
   { href: "/admin", label: "Resumen", icon: LayoutDashboard },
+  { href: "/admin/cotizador", label: "Cotizador", icon: Calculator, document: true },
   { href: "/admin/productos", label: "Productos", icon: Package },
   { href: "/admin/categorias", label: "Categorías", icon: Tags },
   { href: "/admin/inventario", label: "Inventario", icon: Boxes },
@@ -57,19 +63,37 @@ export default function AdminNav() {
               link.href === "/admin"
                 ? pathname === "/admin"
                 : pathname.startsWith(link.href);
-            return (
+            const className = cn(
+              "flex min-h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm transition",
+              active
+                ? "bg-ml-violet/15 text-ml-violet"
+                : "text-ml-white/65 hover:bg-white/5 hover:text-ml-white",
+            );
+            const content = (
+              <>
+                <link.icon className="h-4 w-4" aria-hidden />
+                <span className="hidden md:inline">{link.label}</span>
+              </>
+            );
+            // En móvil sólo se ve el icono: aria-label da el nombre accesible.
+            return "document" in link ? (
+              <a
+                key={link.href}
+                href={link.href}
+                aria-label={link.label}
+                className={className}
+              >
+                {content}
+              </a>
+            ) : (
               <Link
                 key={link.href}
                 href={link.href}
-                className={cn(
-                  "flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm transition",
-                  active
-                    ? "bg-ml-violet/15 text-ml-violet"
-                    : "text-ml-white/65 hover:bg-white/5 hover:text-ml-white",
-                )}
+                aria-label={link.label}
+                aria-current={active ? "page" : undefined}
+                className={className}
               >
-                <link.icon className="h-4 w-4" aria-hidden />
-                <span className="hidden md:inline">{link.label}</span>
+                {content}
               </Link>
             );
           })}
@@ -78,7 +102,8 @@ export default function AdminNav() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-sm text-ml-white/65 transition hover:border-ml-coral/40 hover:text-ml-coral"
+          aria-label="Cerrar sesión"
+          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-full border border-white/10 px-3 text-sm text-ml-white/65 transition hover:border-ml-coral/40 hover:text-ml-coral"
         >
           <LogOut className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">Salir</span>
