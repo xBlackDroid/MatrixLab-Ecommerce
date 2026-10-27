@@ -110,5 +110,8 @@ export const RATE_LIMITS = {
   // minutos deja registrar a una familia entera y corta un bot al instante.
   courseRegistration: { limit: 5, windowMs: 10 * 60_000 },
   adminApi: { limit: 120, windowMs: 60_000 },
+  // Guardar la foto del cotizador reescribe hasta ~200 KB de jsonb: el uso
+  // humano es de unos pocos guardados por minuto.
+  adminQuoteWorkspaceSave: { limit: 20, windowMs: 60_000 },
   webhook: { limit: 120, windowMs: 60_000 },
 } as const;

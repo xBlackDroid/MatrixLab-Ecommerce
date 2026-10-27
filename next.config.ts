@@ -77,6 +77,12 @@ const nextConfig: NextConfig = {
     ],
   },
   poweredByHeader: false,
+  // El cotizador admin lee sus fuentes privadas con fs en tiempo de ejecución
+  // (src/lib/admin-cotizador/document.ts). No pueden ir en public/: contienen
+  // costos internos. Se incluyen explícitamente en la función de esa ruta.
+  outputFileTracingIncludes: {
+    "/admin/cotizador": ["./src/lib/admin-cotizador/legacy/**/*"],
+  },
 };
 
 export default nextConfig;
