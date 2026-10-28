@@ -74,7 +74,7 @@ export default function ReadyWearProductCard({
         className={cn(
           "px-2 pt-2",
           grid
-            ? "grid grid-cols-5 justify-items-center gap-y-1"
+            ? "grid grid-cols-3 justify-items-center gap-y-1 sm:grid-cols-4 xl:grid-cols-5"
             : "flex flex-wrap justify-center gap-1",
         )}
         role="group"

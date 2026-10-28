@@ -50,7 +50,7 @@ const TOTE_HANDLE = /^wear-tote-to(\d{3})$/;
 const FIRST_TOTE = 1;
 const LAST_TOTE = 4;
 
-/** Totes listas conocidas (`wear-tote-to001` … `to003`). */
+/** Totes listas conocidas (`wear-tote-to001` … `to004`). */
 export function isReadyWearToteHandle(handle: string): boolean {
   const match = TOTE_HANDLE.exec(handle);
   if (!match) return false;
