@@ -21,3 +21,13 @@ Conjunto de instrucciones de edición: conservar modelo, encuadre, fondo, diseñ
 TypeScript y pruebas `ready-wear.test.ts`, `admin-inventory.test.ts` y `admin-cotizador-workspace.test.ts` aprobadas. Colores cerrados por prenda: un color inválido no genera una ruta inexistente. Galería, miniatura, variante, carrito y enlace conservan el color elegido.
 
 Altas SQL aditivas e idempotentes: semillas de sudaderas y accesorios. Variantes ya existentes no se reinician; las altas registran movimientos de reposición.
+
+## Verificación productiva
+
+Publicado inicialmente como `dpl_8LPUBN6hfUA6woZN3EXLP4JZmc3K` y promovido a `www.matrixlabintelligence.com` el 28 de octubre de 2026. Fuente preservada en PR #10 (`codex/adult-hoodies-ready-wear`) para continuar acumulando cambios sobre `main`.
+
+La comprobación real de inventario devuelve 1,336 variantes sin truncamiento, 270 miniaturas de sudadera en el bloque Wear y 44 productos con fotografía: 34 playeras, 5 sudaderas, 4 totes y 1 gorra. Comparación profunda de los 41 productos/variantes previos: sin cambios.
+
+Playwright en producción: filtros, colecciones y búsqueda combinados; los nueve colores de Architect cambian fotografía grande y URL; compra mediante UI Mujer/Grande/Rosa pastel correcta; 12 variantes añadidas al carrito con precio e imagen del color esperado; cantidades superiores al límite rechazadas. Las 45 imágenes responden 200. Playeras conservan sus tres colores y el default Negra; un color inválido no rompe la galería. Vista de 390 px sin desbordamiento y sin errores JavaScript. Carritos de prueba vaciados al terminar, sin generar pedidos.
+
+Claude Code fue ejecutado con `--effort max` y avanzó la implementación; alcanzó su límite de sesión. La revisión, integración, imágenes, inventario, pruebas y publicación se completaron con Codex.

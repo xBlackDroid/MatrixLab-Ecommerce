@@ -41,8 +41,8 @@ export default function ReadyWearProductCard({
     (Array.isArray(product.images) ? product.images[0] : null);
   const href = readyWearProductHref(product.handle, color);
   // Playeras: 3 muestras de 44 px en una fila, como siempre. Sudaderas: 9 en
-  // una rejilla de 5 columnas (5 + 4) que escala de 24 a 44 px con la
-  // tarjeta, sin desbordar ni a 320 px.
+  // una rejilla adaptable: 2–3 columnas en móvil y hasta 5 en escritorio,
+  // conservando muestras de 44 px sin desbordar tarjetas pequeñas.
   const grid = colors.length > SINGLE_ROW_COLORS;
 
   return (
@@ -74,7 +74,7 @@ export default function ReadyWearProductCard({
         className={cn(
           "px-2 pt-2",
           grid
-            ? "grid grid-cols-3 justify-items-center gap-y-1 sm:grid-cols-4 xl:grid-cols-5"
+            ? "grid grid-cols-2 justify-items-center gap-y-1 min-[360px]:grid-cols-3 sm:grid-cols-4 xl:grid-cols-5"
             : "flex flex-wrap justify-center gap-1",
         )}
         role="group"

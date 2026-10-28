@@ -305,7 +305,7 @@ const FAMILY_CARDS: Array<{
     titlePrefix: "MatrixLab",
     titleHighlight: "Wear",
     description:
-      "Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas.",
+      "Playeras, sudaderas, gorras y totes listas para llevar. Encuentra tu diseño favorito o personaliza tu prenda en el Laboratorio.",
     accent: "violet",
     gradient: "from-ml-violet/20 via-ml-cyan/10 to-transparent",
     visual: { kind: "image", src: "/images/categories/matrixlab-wear.png" },
