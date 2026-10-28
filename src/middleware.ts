@@ -121,6 +121,12 @@ export const DYNAMIC_ROUTE_PATTERNS: readonly RegExp[] = [
    * se serviría con la 404 prerenderizada, que no lleva nonce.
    */
   /^\/tienda\/prendas-listas$/,
+  /**
+   * Vista previa de Inventario con datos de muestra (sólo Preview/dev; en
+   * producción la página responde 404). Declara `force-dynamic`, así que le
+   * toca la política estricta. Coincidencia EXACTA, igual que las de arriba.
+   */
+  /^\/preview\/inventario$/,
 ];
 
 /** ¿Esta ruta la renderiza Next en la petición (y por tanto lleva nonce)? */
