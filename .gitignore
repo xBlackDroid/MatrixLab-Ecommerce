@@ -40,3 +40,8 @@ next-env.d.ts
 
 # Cache de Python (generadores de datos en scripts/data).
 __pycache__/
+
+# Artefactos aislados de pruebas de consignaciones.
+/.consignment-tests/
+/test-results/
+/playwright-report/

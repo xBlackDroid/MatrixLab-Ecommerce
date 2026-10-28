@@ -1,0 +1,4048 @@
+{
+ "description": "Snapshot aprobado de producción recuperado (despliegue CLI) sobre el que se integra el cotizador de forma acumulativa.",
+ "deploymentId": "dpl_2aZrvYwCLTPqVr1yY6V5zTZQxrwH",
+ "deploymentUrl": "https://matrix-lab-ecommerce-1b2vm6kud-rafcastaneda-3285s-projects.vercel.app",
+ "source": {
+  "gitCommitSha": "914dddd66e3573a38c6a8b8d7544486b60fbafff",
+  "gitDirty": true,
+  "branch": "codex/origami-consignaciones"
+ },
+ "excludedFromReference": [
+  "tsconfig.tsbuildinfo (artefacto de compilación)"
+ ],
+ "files": [
+  {
+   "path": "README.md",
+   "sha1": "2165f9ca3c50995f643b599e892c681c42ed877e",
+   "sha1Lf": "0561fb2d30eaf00ec7d2f5bab5bda8a52bc9e6f8"
+  },
+  {
+   "path": "docs/LABORATORIO_ETAPA2.md",
+   "sha1": "704db0ba318c860e06f37267a6d0b7149c13f25d",
+   "sha1Lf": "5c75c8c4aeca8a327b4575bae744386d1b0e74cd"
+  },
+  {
+   "path": "docs/ORIGAMI_ADMIN_INVENTARIO.md",
+   "sha1": "b9fbe15b93e40f8ee2c63bbdfb1fa4f04e66f7e6"
+  },
+  {
+   "path": "docs/ORIGAMI_CODEX_VALIDATION.md",
+   "sha1": "76153b026fbc3df8f79a1c55038e580f24f85458",
+   "sha1Lf": "c881f10e18a3fc396af9bfbbb6d7bc9fd2b88aba"
+  },
+  {
+   "path": "docs/ORIGAMI_CONSIGNACIONES_CLAUDE.md",
+   "sha1": "a123c7f54313d2c85051d9ec7cb0be6345a47c8a"
+  },
+  {
+   "path": "docs/ORIGAMI_CUENTA.md",
+   "sha1": "f5b011097eba51ca51369aaf29ad4e197915d280"
+  },
+  {
+   "path": "docs/ORIGAMI_DISENO_MOVIL.md",
+   "sha1": "039fc1a75a0c6106b34731f1ab07eb5173f35a2c"
+  },
+  {
+   "path": "docs/ORIGAMI_IMPLEMENTACION.md",
+   "sha1": "1a6fb08b3bd93a9aa96fc505382549150b708cbc"
+  },
+  {
+   "path": "docs/ORIGAMI_PREVIEW.md",
+   "sha1": "5367cb667b83cc16814b1b1bf5bc0c5a28c0f9f2"
+  },
+  {
+   "path": "docs/ORIGAMI_PRODUCCION.md",
+   "sha1": "ca90cd3eadfba39fa18a85f3722213b792005089"
+  },
+  {
+   "path": "docs/ORIGAMI_RELEASE_RUNBOOK.md",
+   "sha1": "dd3a412fafa3d0f0b59bc777648244fa3e03413c",
+   "sha1Lf": "5e3d3ad480600f37c453f54861577797911adad8"
+  },
+  {
+   "path": "docs/ORIGAMI_TEST_REPORT.md",
+   "sha1": "c7f390ae7d8e7fe203bfd4c055324fdbfa15cd48"
+  },
+  {
+   "path": "docs/PRODUCTION_QA_HOTFIX.md",
+   "sha1": "53b6fe1f6057bd1de4e3b7533fdc6d4fcf43f6d8",
+   "sha1Lf": "fbd3bd28055459d9ad6214456932e67862b016bf"
+  },
+  {
+   "path": "docs/SECURITY_AUDIT_WHITEBOX_2026-08.md",
+   "sha1": "9b540e3fc42fb8193610fcbb198f1d1cff0167d4"
+  },
+  {
+   "path": "docs/SECURITY_PRODUCTION_AUDIT.md",
+   "sha1": "ea60db60f2fcc61946ec5cbe70c3b2d0e22c62b9",
+   "sha1Lf": "d90671bfa33ecf76f44a765d970ed816ff2f4268"
+  },
+  {
+   "path": "docs/TIENDA.md",
+   "sha1": "e915bece9ae89010b47a2f6ab72ee585f1faacb8",
+   "sha1Lf": "950fe73915741e6952af148df6558cceb00c0d13"
+  },
+  {
+   "path": "docs/TSHIRT_LAB_BORRADO.md",
+   "sha1": "a3178cf53af45df7ee05cb160fcfacd73d5e6a5a"
+  },
+  {
+   "path": "docs/qa-screenshots/01-home-desktop.webp",
+   "sha1": "5b9046d312c89073033cb5e123af39d878b00fdd"
+  },
+  {
+   "path": "docs/qa-screenshots/02-playera-inicial.webp",
+   "sha1": "4b1df564409bb3092672474cc436c24ee03a9dc7"
+  },
+  {
+   "path": "docs/qa-screenshots/03-playera-imagen-frente.webp",
+   "sha1": "53987fcdba87c20d04dc69ec6421291517fe81c6"
+  },
+  {
+   "path": "docs/qa-screenshots/05-playera-giro-espalda-vacia.webp",
+   "sha1": "51818bff557f90d09d97c8af08d5f346e513dab0"
+  },
+  {
+   "path": "docs/qa-screenshots/06-playera-giro-espalda-con-diseno.webp",
+   "sha1": "4e342333827b6ed0a4cc0c9b2ce733c374225c8b"
+  },
+  {
+   "path": "docs/qa-screenshots/08-stickers-planilla-imagen.webp",
+   "sha1": "fcd3ca399f39ebf6c945c027253ecb2e1149efae"
+  },
+  {
+   "path": "docs/qa-screenshots/10-stickers-repeat-circulo.webp",
+   "sha1": "163e5c6a55b1386db995239ee1c13f810807a9f7"
+  },
+  {
+   "path": "docs/qa-screenshots/11-stickers-repeat-rectangulo.webp",
+   "sha1": "2717e4a044d36c15c7831466be846f201a6bdfd5"
+  },
+  {
+   "path": "docs/qa-screenshots/15-etiquetas-imagen-subida.webp",
+   "sha1": "5214333d2f2e5ad4cdd35a8fdc5b4ed530816a9a"
+  },
+  {
+   "path": "docs/qa-screenshots/18-tumbler.webp",
+   "sha1": "018ed9d3197c7c4ac951a91cff44fb94c47abc40"
+  },
+  {
+   "path": "docs/qa-screenshots/20-gorras.webp",
+   "sha1": "70175be9f6271da56148fa7e1c64d7b9be45f1b4"
+  },
+  {
+   "path": "docs/qa-screenshots/23-carrito.webp",
+   "sha1": "efd805f2d05629a03427c07b59b07cbcb5a255ff"
+  },
+  {
+   "path": "docs/qa-screenshots/31-sudadera-movil-390x844.webp",
+   "sha1": "648edf675d15e74f98335ac6933fe2a784203ae0"
+  },
+  {
+   "path": "docs/qa-screenshots/32-sudadera-drawer-390x844.webp",
+   "sha1": "ed6bfb20c412849f4cdc65b6e543d84ccc5eeb1c"
+  },
+  {
+   "path": "docs/qa-screenshots/33-sudadera-imagen-390x844.webp",
+   "sha1": "3ae048eedb7de247efe3714e8e5e36ebab61c612"
+  },
+  {
+   "path": "docs/qa-screenshots/34-sudadera-giro-390x844.webp",
+   "sha1": "5a9ffa71249895fcd4a0ca15da473a0fa2b996e3"
+  },
+  {
+   "path": "docs/qa-screenshots/36-gorra-movil-430x932.webp",
+   "sha1": "c531ee816e6f1aa68c7783785388c817053f1dfb"
+  },
+  {
+   "path": "eslint.config.mjs",
+   "sha1": "c0019dba722fd8af6b91889eb38a38eeaf130902",
+   "sha1Lf": "3182682e0361ba13ed74d9fedef3d4635e1b888a"
+  },
+  {
+   "path": "next.config.ts",
+   "sha1": "3ad931c8f440c84e039264d8808b9dbb06694f48",
+   "sha1Lf": "e48f34c075a265bbd5bb8a61d058337816a65720"
+  },
+  {
+   "path": "package-lock.json",
+   "sha1": "209bb8945278648d73d4195c1efe9989b5cd24eb",
+   "sha1Lf": "2b80b11cfa1e61bd3949117380d62815446ab224"
+  },
+  {
+   "path": "package.json",
+   "sha1": "67e3a957c17996343fb585b8bdf69d774aace3f1",
+   "sha1Lf": "9af9b6fa359e889f66624ac92298f2569203dc25"
+  },
+  {
+   "path": "postcss.config.mjs",
+   "sha1": "101068f6104275f8b9875e9bc85663b4cbffea34",
+   "sha1Lf": "73695b153f42c92ffd2e6af7b20a4c0c74adc3ec"
+  },
+  {
+   "path": "public/images/categories/README.md",
+   "sha1": "6cee9aa6a615b707b53170d53b6d33a72bb6d29c",
+   "sha1Lf": "0f7f1a839e6b82c43fac75dcdcf165c3ec4f74e0"
+  },
+  {
+   "path": "public/images/categories/etiquetas-escolares.png",
+   "sha1": "f26e4e9bd49ae8a5bea1bd3bb3f36b0b37b59673"
+  },
+  {
+   "path": "public/images/categories/impresion-3d.png",
+   "sha1": "49daadd014b0fce7046037dcca49729902aa6ef3"
+  },
+  {
+   "path": "public/images/categories/matrixlab-3d.png",
+   "sha1": "49daadd014b0fce7046037dcca49729902aa6ef3"
+  },
+  {
+   "path": "public/images/categories/matrixlab-laser.png",
+   "sha1": "cbbb36fad82b69500e40398eebe2a7a484d92a41"
+  },
+  {
+   "path": "public/images/categories/matrixlab-stickers.png",
+   "sha1": "48ede9e19fddafa894deddf180ac732b1e3ba59b"
+  },
+  {
+   "path": "public/images/categories/matrixlab-tumbler.png",
+   "sha1": "31e7b6c6c1a3f41aaf158f6ca45ca3ac7302cf75"
+  },
+  {
+   "path": "public/images/categories/matrixlab-wear.png",
+   "sha1": "549dab9075fe8c148f57f1fcb699ea796b6f9487"
+  },
+  {
+   "path": "public/images/matrixlab-3d/matrixlab-3d.png",
+   "sha1": "49daadd014b0fce7046037dcca49729902aa6ef3"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d001-2.webp",
+   "sha1": "f7af0b6665c45cedf5ae2627c254147e2e2ff31d"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d001-3.webp",
+   "sha1": "b231bdf0034aa5d212e9bb21fb9034237628ff07"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d001.webp",
+   "sha1": "3d3e14434fac1fca9ae92065aa0dec066dfb0345"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d002.webp",
+   "sha1": "1be4001ad3872cadb5ab186299a789f7024016b8"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d003.webp",
+   "sha1": "2436f1c58fa4801e6a965a130a233dad9f0a158b"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d004-2.webp",
+   "sha1": "5e1f1b17125c45762bb78c3c0fc945884a667020"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d004-3.webp",
+   "sha1": "740a017aca93f663ae3adb75faa28078ecf5bbd1"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d004.webp",
+   "sha1": "1c254650b96b55ec562dc5d8e880651869866a19"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d005.webp",
+   "sha1": "4296ba99299e44addd6180d4499386c692dbaaef"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d006.webp",
+   "sha1": "433f30afc16abb44d3bcf2009ae6e90124ab1374"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d007-2.webp",
+   "sha1": "803d411d3508b4039061e56365c3f259ad05b201"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d007.webp",
+   "sha1": "6f556faff1b5c4eef7d7d6c7bf180f792b0b9851"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d008.webp",
+   "sha1": "757a88c42875af16fd014cbf3d493c06c8c457d8"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d009-2.webp",
+   "sha1": "86da17def6c3d5d850447d965c00a3a71076bd07"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d009.webp",
+   "sha1": "c9f1a6442aea88520e5ba0ce07b915b3669e1ba1"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d010.webp",
+   "sha1": "2d0bb532f22eecd8c2be95fe2b3b4310babfb7c6"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d011.webp",
+   "sha1": "4016ce187282e4f4f3a6224f735dfb83a3819d6b"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d012.webp",
+   "sha1": "18e0f0ec9db142b77e447dc93639f1d8f8eb6cd3"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d013.webp",
+   "sha1": "596faff7359994b975fb6f27e727dbe452cde3f3"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d014.webp",
+   "sha1": "b7cfbdef71e6332b0607e88d54a226efe6ec4f84"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d015.webp",
+   "sha1": "ed4b1ffdd3204d7af53f44e06d3e6faefccd0d36"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d016.webp",
+   "sha1": "7bf8477e24636f54cbd4f0c42d906b2ae8c801d4"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d017.webp",
+   "sha1": "54e0697314099811ef8b61635380b35365f87b8a"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d018.webp",
+   "sha1": "4e66f25b074070c620634e949314953654e44b49"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d019.webp",
+   "sha1": "f95499c4f10eed0b428ef56b99caae9d6848cf0e"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d020.webp",
+   "sha1": "886b24567b38a54b7b9a967486473b678e8ddce1"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d023-2.webp",
+   "sha1": "455f169401e2f0725b0898b20ad02f1c3337508e"
+  },
+  {
+   "path": "public/images/matrixlab-3d/3d023.webp",
+   "sha1": "59da35188e882110989d338418d2200a20fa3e33"
+  },
+  {
+   "path": "public/images/matrixlab-3d/placeholder.webp",
+   "sha1": "7752534784c477cc5e846baf7ececdff86deee0b"
+  },
+  {
+   "path": "public/images/matrixlab-stickers/matrixlab-stickers.png",
+   "sha1": "48ede9e19fddafa894deddf180ac732b1e3ba59b"
+  },
+  {
+   "path": "public/images/matrixlab-stickers/imn-auto001.webp",
+   "sha1": "dabc858caab5dea3cf5fdafcd45cc8a631c262ba"
+  },
+  {
+   "path": "public/images/matrixlab-stickers/imn-auto002.webp",
+   "sha1": "ca35a1868b124559c316e28d7ccae0b5b3ca2e48"
+  },
+  {
+   "path": "public/images/matrixlab-stickers/imn-auto003.webp",
+   "sha1": "20d8e9219495470d878deab4a32856853450c516"
+  },
+  {
+   "path": "public/images/matrixlab-stickers/imn-auto004.webp",
+   "sha1": "b57f41cfa9cc0060d6a4559b45175f71545b56d4"
+  },
+  {
+   "path": "public/images/matrixlab-stickers/placeholder.webp",
+   "sha1": "0cbed1f61bddb308146f85c09e7f5d58962c0bca"
+  },
+  {
+   "path": "public/images/school-labels/guide/badge.webp",
+   "sha1": "48ede9e19fddafa894deddf180ac732b1e3ba59b"
+  },
+  {
+   "path": "public/images/school-labels/guide/supplies.webp",
+   "sha1": "3f487df05fb8d49fe046c3334cba2cd3db56ee09"
+  },
+  {
+   "path": "public/images/school-labels/backgrounds/doodles.webp",
+   "sha1": "7c907f62f242f59b5a703d1b31cd85e2fa8737be"
+  },
+  {
+   "path": "public/images/school-labels/typography/001.webp",
+   "sha1": "dea3d5aace4b993d47aa353922ed0622dcb718df"
+  },
+  {
+   "path": "public/images/school-labels/typography/002.webp",
+   "sha1": "c6f63f962e21209749facc8019728a3a7eeb0e75"
+  },
+  {
+   "path": "public/images/school-labels/typography/003.webp",
+   "sha1": "96b1f00cf47c7b31fd20841b697c32ad68e6cd70"
+  },
+  {
+   "path": "public/images/school-labels/typography/004.webp",
+   "sha1": "c0682d06b8adc82410b8ae6569ea46791241fa1a"
+  },
+  {
+   "path": "public/images/school-labels/typography/005.webp",
+   "sha1": "ccf8b6c8076fc5cec00acb9c261b75563ca4c85c"
+  },
+  {
+   "path": "public/images/school-labels/typography/006.webp",
+   "sha1": "d8a607c9d3e31dee3de36396fa04d658b11fb09f"
+  },
+  {
+   "path": "public/images/school-labels/typography/007.webp",
+   "sha1": "5ecf0adf231858daeac85208910e7d9ca55f42ca"
+  },
+  {
+   "path": "public/images/school-labels/typography/008.webp",
+   "sha1": "0747cf935b8bf0da7ef9b025ea8b4fca14fce106"
+  },
+  {
+   "path": "public/images/school-labels/typography/009.webp",
+   "sha1": "b918f990336fc719ff792dacbd587a7ccf056fb8"
+  },
+  {
+   "path": "public/images/school-labels/typography/010.webp",
+   "sha1": "3861926b0a75bdb607d3d258a9c7f4653b627746"
+  },
+  {
+   "path": "public/images/school-labels/typography/011.webp",
+   "sha1": "4f03dd9e7f7ec8330ada60028d2901f473b982cb"
+  },
+  {
+   "path": "public/images/school-labels/typography/012.webp",
+   "sha1": "10d895a3c60fa63f93c04495018e7dfb3eb9f8d8"
+  },
+  {
+   "path": "public/images/school-labels/typography/013.webp",
+   "sha1": "5442d9504658bef5da4e6b5b4453c88b3667fff4"
+  },
+  {
+   "path": "public/images/school-labels/typography/014.webp",
+   "sha1": "9342b926c89aabb775285344a3831586a20280ce"
+  },
+  {
+   "path": "public/images/school-labels/typography/015.webp",
+   "sha1": "dcf57af2281920b5322396c30780865a23354f2f"
+  },
+  {
+   "path": "public/images/school-labels/typography/016.webp",
+   "sha1": "41ae6b18082151639a7eb49f9eb84810175aab15"
+  },
+  {
+   "path": "public/images/school-labels/typography/017.webp",
+   "sha1": "f800a1f1be9cd62eccd2950bc6c883ed2e05b30d"
+  },
+  {
+   "path": "public/images/school-labels/typography/018.webp",
+   "sha1": "4abd00702a1eecc8ee0616c5f9b09ba24bee0940"
+  },
+  {
+   "path": "public/images/school-labels/typography/019.webp",
+   "sha1": "99a34eb3665ab5e19157f9fd0d3f61d254c18672"
+  },
+  {
+   "path": "public/images/school-labels/typography/020.webp",
+   "sha1": "006d0dcb08f8bb59d7c8693a13c8721303684c53"
+  },
+  {
+   "path": "public/images/school-labels/typography/021.webp",
+   "sha1": "4508725ca93e9dad0e692e2079c0998a2ed9f9c9"
+  },
+  {
+   "path": "public/images/school-labels/typography/022.webp",
+   "sha1": "a9ba939045449a53c956df36b498c357e22cfd7b"
+  },
+  {
+   "path": "public/images/school-labels/typography/023.webp",
+   "sha1": "29155495b7fcd27050d975fa852a8bde8ab10ba2"
+  },
+  {
+   "path": "public/images/school-labels/typography/024.webp",
+   "sha1": "d0f3746aef5ef4a01bb0e07f6d2753a208c4487f"
+  },
+  {
+   "path": "public/images/school-labels/typography/025.webp",
+   "sha1": "6c0f5335215e2181283c2b7d48a795f72df5f551"
+  },
+  {
+   "path": "public/images/school-labels/typography/026.webp",
+   "sha1": "6b8036fe436432c43aa7b4e205378fbdd1a8dc68"
+  },
+  {
+   "path": "public/images/school-labels/typography/027.webp",
+   "sha1": "76b27917477d6ee057362f84508889209c811ab5"
+  },
+  {
+   "path": "public/images/school-labels/typography/028.webp",
+   "sha1": "b6d5bb283c528135ef75f676f5181d7c1e392e86"
+  },
+  {
+   "path": "public/images/school-labels/typography/029.webp",
+   "sha1": "87b4e77b6d99b3c620107532f0c6cff3716c27c9"
+  },
+  {
+   "path": "public/images/school-labels/typography/030.webp",
+   "sha1": "606f8ff318ba7626b0dca6136dbc17cb9d0d9506"
+  },
+  {
+   "path": "public/images/school-labels/typography/031.webp",
+   "sha1": "c1e7c7ef71cf9e8e2a3b2719fc0f99cfba6f394f"
+  },
+  {
+   "path": "public/images/school-labels/typography/032.webp",
+   "sha1": "2d0e372aaac5b7e50c7e88ef46068e87f041aeec"
+  },
+  {
+   "path": "public/images/school-labels/typography/033.webp",
+   "sha1": "49f786d4edffe56032e703bca62ceb65d7d34ed6"
+  },
+  {
+   "path": "public/images/school-labels/typography/034.webp",
+   "sha1": "fdb78ea2c11496990a195ad10b6659c4bcd6967a"
+  },
+  {
+   "path": "public/images/school-labels/typography/035.webp",
+   "sha1": "1f148dc4f14d0d8cff1c9725e31f824fea918bf6"
+  },
+  {
+   "path": "public/images/school-labels/typography/036.webp",
+   "sha1": "1e94ec436d04258ad90b7a668c562b7c95b222ed"
+  },
+  {
+   "path": "public/images/school-labels/typography/037.webp",
+   "sha1": "c89741799fb4775289e99b6e55265e2ef31bd308"
+  },
+  {
+   "path": "public/images/school-labels/typography/038.webp",
+   "sha1": "7d96d62642c18dcd1230ce3e7747f6d791f84328"
+  },
+  {
+   "path": "public/images/school-labels/typography/039.webp",
+   "sha1": "d906ac409d34b1d6a80243a257a17b5e14335a49"
+  },
+  {
+   "path": "public/images/school-labels/typography/040.webp",
+   "sha1": "5e558d0f870f55ceb2e26ccb73e3c2b5ddb33b1f"
+  },
+  {
+   "path": "public/images/school-labels/typography/041.webp",
+   "sha1": "d4b0582557c4b967c17110c3ccce28676a44a9ab"
+  },
+  {
+   "path": "public/images/school-labels/typography/042.webp",
+   "sha1": "bea884262ee9a628a12e12b693f5384da29c0695"
+  },
+  {
+   "path": "public/images/school-labels/typography/043.webp",
+   "sha1": "5a7f4351691861ac6f2b927fdbe93c0a55152070"
+  },
+  {
+   "path": "public/images/school-labels/typography/044.webp",
+   "sha1": "4f1f59e6c7c19ccf9eca8b8bc91817d913a38bb5"
+  },
+  {
+   "path": "public/images/school-labels/typography/045.webp",
+   "sha1": "bbccb8fb878560876f4b76bbf76c23f2ad53afa1"
+  },
+  {
+   "path": "public/images/school-labels/typography/046.webp",
+   "sha1": "0de45651e3d8f5091ec8d593132893b28d3b8f74"
+  },
+  {
+   "path": "public/images/school-labels/typography/047.webp",
+   "sha1": "d4cc3d658fcd970835f6150fbbb5ca3363b32a7e"
+  },
+  {
+   "path": "public/images/school-labels/typography/048.webp",
+   "sha1": "aec9fc85c3fc5122769f4572398f94fd7170fd94"
+  },
+  {
+   "path": "public/images/school-labels/typography/049.webp",
+   "sha1": "61f2e77b3f3203777a61015d218b63692644f33b"
+  },
+  {
+   "path": "public/images/school-labels/typography/050.webp",
+   "sha1": "e4f03a2a48dd0b39002cacf353a2ec6cd64926d5"
+  },
+  {
+   "path": "public/images/school-labels/typography/051.webp",
+   "sha1": "9586850573f55f56ae15f1af409b0ee9d8e8cc21"
+  },
+  {
+   "path": "public/images/school-labels/typography/052.webp",
+   "sha1": "9c14250a4b3b519f7dd8c6a384eba9af2c45a301"
+  },
+  {
+   "path": "public/images/school-labels/typography/053.webp",
+   "sha1": "ad7fc2b7924d33b534664dc8463eead16f89c106"
+  },
+  {
+   "path": "public/images/school-labels/typography/054.webp",
+   "sha1": "5208e0e922d17fe91f4d855c0a86b021ebbf567e"
+  },
+  {
+   "path": "public/images/school-labels/typography/README.md",
+   "sha1": "c142cdc93e0b2a9b351078ae2f547cf3c1f38f91",
+   "sha1Lf": "df5fe50741e835e7891e5b493d84e2fa488ea4c1"
+  },
+  {
+   "path": "public/images/matrixlab-wear/matrixlab-wear.png",
+   "sha1": "549dab9075fe8c148f57f1fcb699ea796b6f9487"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr001-blanca.webp",
+   "sha1": "6e83cd3dd7899301438319e32566d44f21acf91f"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr001-gris.webp",
+   "sha1": "ad044142a1ece1b80d060ba44dbb54f5cfd6c62e"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr001-negra.webp",
+   "sha1": "1acd520cabc00ec3010f70c4923d6922e509c6ea"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr002-blanca.webp",
+   "sha1": "e013e0efc895080a13dd54e6e37c0e9a2d25a4a9"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr002-gris.webp",
+   "sha1": "331e47ddfa0626e81db55a29e86dfd8f6a9b7ccc"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr002-negra.webp",
+   "sha1": "1511cb60d20a07355c6812bb80ca4ad42751bff8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr003-blanca.webp",
+   "sha1": "5e6a04e7bd573550a72116c07f9c78e661acd71c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr003-gris.webp",
+   "sha1": "19085566eebc966e9bf75975441794b1bab81b47"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr003-negra.webp",
+   "sha1": "2d06f53059a64a4892b8f5f1ab643dd7286d07a0"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr004-blanca.webp",
+   "sha1": "053b28b7170b5adfff8059a1398b551229f4abe2"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr004-gris.webp",
+   "sha1": "fe053f35f64e073413510c93030915b9de27093c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr004-negra.webp",
+   "sha1": "522d652b018d2995518c63ebc0ca1e2e79c61ff7"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr005-blanca-2.webp",
+   "sha1": "2419141e8535506166d82d1e4e6807333eea3ec4"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr005-blanca.webp",
+   "sha1": "47064b02ef0cf0d62fc6cbd2e184d2e37abc9550"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr005-gris-2.webp",
+   "sha1": "4040d4046a57b62d09dc40e19e956df463ef42f0"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr005-gris.webp",
+   "sha1": "10516ecb0c3e1b76fbc51a48c3572d5caadf4976"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr005-negra-2.webp",
+   "sha1": "59d10ed3ee82fa78fa8c383fa387df9920050abb"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr005-negra.webp",
+   "sha1": "4813ca0c016135e1200eb62d4e61f3150a8a5523"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr006-blanca.webp",
+   "sha1": "0c4041132a14aff52fd937bf1371cc911586975c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr006-gris.webp",
+   "sha1": "6976fa67c26988b62cc9c7a5f271fe39a963dde9"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr006-negra.webp",
+   "sha1": "fb382d50fc19d1a98ff5a8501555926b013c8796"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr007-blanca.webp",
+   "sha1": "8f1b20079486f9f4baeada5b0bbbb4d9d6b6a5a1"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr007-gris.webp",
+   "sha1": "3fdf9069d26491b49a5447cde8f58ff474ab5a56"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr007-negra.webp",
+   "sha1": "30e774626d35095b75cd2dca2a87131e79e353b0"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr008-blanca.webp",
+   "sha1": "8b8a6e98467da16e66a1f47094ab8fd2c325307e"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr008-gris.webp",
+   "sha1": "cfcb59379740a3ed2a310b9146cb22d24214a091"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr008-negra.webp",
+   "sha1": "a9fe2cfa849df044d90a234a59694d9635b9680a"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr009-blanca.webp",
+   "sha1": "348447ec1b8213a88983d0403646a8658cf1af6b"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr009-gris.webp",
+   "sha1": "486bdd58f21722f6645de31e552f587af654d731"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr009-negra.webp",
+   "sha1": "97aa1dd3653d8bf18cd7cdfbec664f5e65cac86d"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr010-blanca.webp",
+   "sha1": "023b06a9aa6726843fcdd8ebbd02389a36e04744"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr010-gris.webp",
+   "sha1": "36892d90b082bff739089db3b19247a68d8e5cb7"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr010-negra.webp",
+   "sha1": "2e8ed21e3789bdcb1d7a8ae3f675d3e5c825971f"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr011-blanca.webp",
+   "sha1": "61a68f07434292242300178b74fb1b39b1c71524"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr011-gris.webp",
+   "sha1": "6d740eba96f238d3d4a4eefe801f80558392a615"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr011-negra.webp",
+   "sha1": "8342aab851d3796de8abf8ed4c17416cdf14ab2b"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr012-blanca.webp",
+   "sha1": "354ce7fdc2efd3ab56e9c637a9489e937126a705"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr012-gris.webp",
+   "sha1": "300b458cec873297bda882282746a4a2d1c00a43"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr012-negra.webp",
+   "sha1": "f70a89aad55df71d598b93aea22949f0a2d75386"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr013-blanca.webp",
+   "sha1": "76999fffe0c71290c9fa093127c1075957641d3b"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr013-gris.webp",
+   "sha1": "47bbc7eff9df39479612f95f02a70ef4306d2681"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr013-negra.webp",
+   "sha1": "ab9da2eb6421c667c397110800b0ce3723892b3b"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr014-blanca.webp",
+   "sha1": "09a45d3b596b8c79df6d90e5cd650975cc05205e"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr014-gris.webp",
+   "sha1": "7cc153d8ed4676e448ed0eb7bbf37b0902ac4612"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr014-negra.webp",
+   "sha1": "012937fffc6464424e38f3a832ecdc4d9b75c412"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr015-blanca.webp",
+   "sha1": "c595d4db3324033eb2ac99bc45b8669fad2c160a"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr015-gris.webp",
+   "sha1": "f6b78576bb8110dc692931a7be95756600d9f79e"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr015-negra.webp",
+   "sha1": "0455f705cfe2be26b31636ec54f4bd9dde8b441b"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr016-blanca.webp",
+   "sha1": "7ca4fc93d42fe85ff27734090cc0b3191fe0a82f"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr016-gris.webp",
+   "sha1": "11722067414b1ac22b10ed778249f65ca891fdf2"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr016-negra.webp",
+   "sha1": "f66ec54f61d8d267103dcc2bdf85754a764dd337"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr017-blanca.webp",
+   "sha1": "df148185d8f91ac2693348bb5721c737570fa92d"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr017-gris.webp",
+   "sha1": "db229857b5506bb95d32e9314c11df409b00bc19"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr017-negra.webp",
+   "sha1": "6443d3f6009a320c7972e5c85a522af57c80b985"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr018-blanca.webp",
+   "sha1": "a4a9631c9138000717db93647da6898e693baee8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr018-gris.webp",
+   "sha1": "aef0e227190bc3594e287ae886aba4397ac5e985"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr018-negra.webp",
+   "sha1": "6b6d54ad27e3d4a43738393888f1ff61c31829f4"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr019-blanca.webp",
+   "sha1": "fa79fb60b505ca74b2ff2dce563ef8e31011261c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr019-gris.webp",
+   "sha1": "cf9091b4f75d6e9c7ee46415838c5e63356edf34"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr019-negra.webp",
+   "sha1": "f29789b96b2079bf4424ca623f0cffa158ef53a8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr020-blanca.webp",
+   "sha1": "0326567ee32238ecc908b615db5946e896ef4be2"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr020-gris.webp",
+   "sha1": "b5e201a1669f77298d3a531c994354250edd64ef"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr020-negra.webp",
+   "sha1": "b8433a4ecc742b535c0fe8675c108d7faa562302"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr021-blanca.webp",
+   "sha1": "f575e2b3d3a369922ac780a23eae6db515e67e88"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr021-gris.webp",
+   "sha1": "dd770a2070601acf08e55b88b97219842b6d0576"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr021-negra.webp",
+   "sha1": "b06939afbfe8c6d7030d08972edaacd742dc7b28"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr022-blanca.webp",
+   "sha1": "9e156bf393e4702f6be5a42698786cbed133fa74"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr022-gris.webp",
+   "sha1": "a7e02db41e367e407cf5e552585081a75b5551c2"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr022-negra.webp",
+   "sha1": "0eede889d0522790b13226503d04e1c9f6f2cafd"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr023-blanca.webp",
+   "sha1": "6c1594dc47807b107caf5a7880696cc11815818d"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr023-gris.webp",
+   "sha1": "02ec6ed0023299e8a34fdcae3c873774b55817a0"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr023-negra.webp",
+   "sha1": "b0c324019f003f6a1759f0fb5ca9ac9adb0c9fec"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr024-blanca.webp",
+   "sha1": "a75e65822dd9227d7f3a8ef57ac30b8752b12187"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr024-gris.webp",
+   "sha1": "8e14b2a65a4b753e17d736f72f83e8aea374ded4"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr024-negra.webp",
+   "sha1": "1430648df724d55f643d5f1ca5158c7b7d515060"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr025-blanca.webp",
+   "sha1": "17d1aedef5c76bfde8ba4fe39c9937a133eabf97"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr025-gris.webp",
+   "sha1": "e5cc6337b25a69ed7e15b0b313d4e2d9c80ef7f7"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr025-negra.webp",
+   "sha1": "696d9371b35327685c42a4ce4aa21a0af7d5c32c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr026-blanca.webp",
+   "sha1": "7277ced3ade6b981d6eae0d4f7137f30fe154e67"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr026-gris.webp",
+   "sha1": "417351b5b9d408f945fc8200fa093a916651a8cc"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr026-negra.webp",
+   "sha1": "ccb1243b30167ea0bc082adfbed0bb768bb32bec"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr027-blanca.webp",
+   "sha1": "fe30b78985079fe614e4ccb3c88db474df402129"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr027-gris.webp",
+   "sha1": "724baa8b7cd13b2d336859aa9a3cc9375448f4a4"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr027-negra.webp",
+   "sha1": "5b86a289cac2656f8dcd7e0d75674796b5c219a2"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr028-blanca.webp",
+   "sha1": "303a409c17201fb7aa0c25ef9f06367eb13bb8d6"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr028-gris.webp",
+   "sha1": "b2ec1a3a9d2adc84e9bae735db8fe83e7b01b7cb"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr028-negra.webp",
+   "sha1": "0988cffbb5e4b5549a19cf21c81828b3c53b3e78"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr029-blanca.webp",
+   "sha1": "24eba185c6a3457d65ecbf5422cd75d0746d75ab"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr029-gris.webp",
+   "sha1": "4c38563003b4bb138ada08464bbb292dbf2ca050"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr029-negra.webp",
+   "sha1": "f7fa4404c7d37ee1cc216c0727930ae9817290b8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr030-blanca-2.webp",
+   "sha1": "fff392aea35e2538befdf21d8c7b58da55be689f"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr030-blanca.webp",
+   "sha1": "5d41b1cd6eda5d28a91d7988218c1718e988f2fc"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr030-gris-2.webp",
+   "sha1": "49dc2bced12829496e1409df3ef0b3736004ef0e"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr030-gris.webp",
+   "sha1": "842bc694ca78f8b75f912c8e3eb5c6024c8db955"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr030-negra-2.webp",
+   "sha1": "ebc1bffec7dcf97650036b1d735d405a336902ca"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr030-negra.webp",
+   "sha1": "8664c73b1eae1a912bbc11ffd00a7cf563877eaa"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr031-blanca.webp",
+   "sha1": "26501ab2054e5fc6d830e758ed2633e8350826b0"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr031-gris.webp",
+   "sha1": "511d5c5640985999d03be6a9b1236860ca69c818"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr031-negra.webp",
+   "sha1": "e0141f9d1ee14fba79069a899a8693775e7aa485"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr032-blanca.webp",
+   "sha1": "191a63461752b0013a519349463848c94db5b3a4"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr032-gris.webp",
+   "sha1": "60c9570ea543f8c6a12c8dd9fe8f3ec10a7ccbdb"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr032-negra.webp",
+   "sha1": "d04c1de7a25a1b88acaddd0ee1aaea3544f50ad4"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr033-blanca.webp",
+   "sha1": "cef87af61686952c01776437b2b61b55ecaa4876"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr033-gris.webp",
+   "sha1": "28450690a5dcf2a41e255c312dac5f625eb68acb"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr033-negra.webp",
+   "sha1": "1bcec7af13a22ea76f5b98304900e9bb43d077ed"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr034-blanca.webp",
+   "sha1": "c0ddbe950c08ff7deb5ba05de95ff64b13a686e1"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr034-gris.webp",
+   "sha1": "480e2fbe2fae0597a77e15d65d962025bed571ec"
+  },
+  {
+   "path": "public/images/matrixlab-wear/colors/wr034-negra.webp",
+   "sha1": "cd53ab78e45abf99fe17fc4328a6f48608519abe"
+  },
+  {
+   "path": "public/images/matrixlab-wear/placeholder.webp",
+   "sha1": "4ad7864b86f5b60a566d8b8e5e1be05b64714d65"
+  },
+  {
+   "path": "public/images/matrixlab-wear/totes/to001.webp",
+   "sha1": "8dbce3b3cb53a5f8ab06ebcfba7e7e9b299aaa43"
+  },
+  {
+   "path": "public/images/matrixlab-wear/totes/to002.webp",
+   "sha1": "79ab0d48b99a2b2acefc63204b9aa61d176b741c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/totes/to003.webp",
+   "sha1": "6539cb6bbb3b98d188d92fd46dfce0cab4a248ac"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr001.webp",
+   "sha1": "5430249ef68d593800043125ab114a14ba6c9d47"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr002.webp",
+   "sha1": "cc8748fc34859e83a28ec0aa1044be9e162e8288"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr003.webp",
+   "sha1": "01ce14e493364b5d17a5aff1e3abbbe32480f7ce"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr004.webp",
+   "sha1": "2278acaa22a1892d1093a35a040554767a7fdeb2"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr005-2.webp",
+   "sha1": "2ef592a4c3c8e13c4f93ed4ba8f8e3891b777ad8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr005.webp",
+   "sha1": "4858a25a549b912f8325fa2f1490ea2adb0c4f30"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr006.webp",
+   "sha1": "b91eada8fd68a984fdf0ad136fd51dfcc37d8d6e"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr007.webp",
+   "sha1": "e93674abfc82bab01112f2082a618e6b938e9398"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr008.webp",
+   "sha1": "a2865bcf40a5cce37922cd0836c7e0b857c6e17f"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr009.webp",
+   "sha1": "31805910b4b2d1d6cf331d83d0fd4f9e78defee3"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr010.webp",
+   "sha1": "db759a101662c8a485e140acc66ac4bf442d2972"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr011.webp",
+   "sha1": "d867d6a5ad7688fa16ee4965a621ed4cd045be1c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr012.webp",
+   "sha1": "5aa979eb95fd50c4ffc3c0fd58b98b441068f1a9"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr013.webp",
+   "sha1": "c54e8c722bb5cf3a6de85ffcaf1f4d208a8c5977"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr014.webp",
+   "sha1": "79e13de2dced088366e21a19c5637d4b73f44abc"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr015.webp",
+   "sha1": "b56407fc17c43ed60b37bc8cea18480b546a6731"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr016.webp",
+   "sha1": "5a41d30f9998741691afdffea4a76e4db297ebf8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr017.webp",
+   "sha1": "c1b392a78f0d310238bbdb0f2e8ef385c2f9a1c8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr018.webp",
+   "sha1": "9b47f7b22a6d3a5e12a5c7c99a8af42f06fd490d"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr019.webp",
+   "sha1": "a1597c7a4e6c7f85761c12395857b6adfadf1245"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr020.webp",
+   "sha1": "3f4cb4e24e9d0c8748105ed1460a4ba13811798e"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr021.webp",
+   "sha1": "79396a2ebe3eae8705c979418f9e688fc8d07948"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr022.webp",
+   "sha1": "cd80d9782a12702ea9801f09b3e64930c30a02dc"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr023.webp",
+   "sha1": "560137953ab20c2d6200ead289c7de665fbcfb07"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr024.webp",
+   "sha1": "12f6af08cfa58fd019fefc78c3698d082de9d7cc"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr025.webp",
+   "sha1": "54d9b32bf607e313082902c60230deddba670aec"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr026.webp",
+   "sha1": "7ea9c4a169012ef167a4d6872630b7b621839122"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr027.webp",
+   "sha1": "ca6681668e3988f4f729e53611cfcd8893c7276c"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr028.webp",
+   "sha1": "42e32321ac9c49e033860341398534f6ef28e0fa"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr029.webp",
+   "sha1": "bd73ad134c2514ede32240edf50642a1aa7eeac8"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr030-2.webp",
+   "sha1": "4678410bb4645e1e51ea8c5e34312fbe370f5c4f"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr030.webp",
+   "sha1": "2e979f5564c5490408de948d1364d3cd9727b9b7"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr031.webp",
+   "sha1": "8f655f42d8e5054ccff0712218b20d94ff27b447"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr032.webp",
+   "sha1": "99d516f0245bb579367238bec954f70eee2162a9"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr033.webp",
+   "sha1": "fd5ad77f28e89d4e0b5cf4dded14dd3431034a71"
+  },
+  {
+   "path": "public/images/matrixlab-wear/wr034.webp",
+   "sha1": "cb315e4c336813527dd11130427746e606bca604"
+  },
+  {
+   "path": "public/images/home/sticker-banners/README.md",
+   "sha1": "f92e5cc502a7b21b535e859ccc7b0c36c6c9f773",
+   "sha1Lf": "95d21da2dcc98b20f0f735c171a9f9ef7efda7b6"
+  },
+  {
+   "path": "public/images/products/README.md",
+   "sha1": "88ed2a70297081c5d32a1ff26b9de82542bffc52",
+   "sha1Lf": "b18e2b2e0babe898aad1c7a1013141238615da2b"
+  },
+  {
+   "path": "public/images/products/gorras/clasica/frames/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/gorras/clasica/mockups/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/gorras/trucker/frames/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/gorras/trucker/mockups/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/insumos/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/laser/templates/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/playeras/frames/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/playeras/mockups/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/playeras/mockups/back/.gitkeep",
+   "sha1": "caa0b58ea9b16a317df07e66b4b181b3e12b3b86",
+   "sha1Lf": "03551cba5ed3e3fbb3605f7bfcf05aa2c370f9de"
+  },
+  {
+   "path": "public/images/products/playeras/mockups/front/.gitkeep",
+   "sha1": "e5159dc2764f4d0533ad51436c272b1aa31213c3",
+   "sha1Lf": "512bbac06080abc1899e51b2f688c4acda10a6db"
+  },
+  {
+   "path": "public/images/products/sudaderas/frames/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/sudaderas/mockups/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/sudaderas/mockups/back/.gitkeep",
+   "sha1": "04c8fb46088fab814bf101b283580391dc34ab3e",
+   "sha1Lf": "0f248509cf344ed624e00c823f6794efd07dc941"
+  },
+  {
+   "path": "public/images/products/sudaderas/mockups/front/.gitkeep",
+   "sha1": "087a066c2ecefa49e2400644d003ad528d6620f8",
+   "sha1Lf": "6f836ba152b43c1e55821ccab78c5a98d3da9273"
+  },
+  {
+   "path": "public/images/products/totes/frames/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/products/totes/mockups/.gitkeep",
+   "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/01.webp",
+   "sha1": "ad526d152955c8085a018a41eba5bfcf8d48ae0f"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/04.webp",
+   "sha1": "53f5d5d7dcc8e28949f6cb66bfde6aeee9ab7808"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/05.webp",
+   "sha1": "3599adc5ce556b5f54a0c0b9048de1be899eb573"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/06.webp",
+   "sha1": "23ec4acccf7c82673464850f04eb380e6ee78d0f"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/08.webp",
+   "sha1": "af1901fbfc0704bc8bfe0aff0934fdba89f9a5b7"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/09.webp",
+   "sha1": "1e4fbd87c9affcf483fdbbf4df3b35d2f2a5780e"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/10.webp",
+   "sha1": "38a8c1ae3fd6b1636de953d829a1b275b21f290c"
+  },
+  {
+   "path": "public/images/tumbler/cursos/edicion-3/README.md",
+   "sha1": "4b698566634477b937fc880a80d2ae95738a066c",
+   "sha1Lf": "345e56e30508a844328e88c1f8ea1f8fc743d811"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl001-2.webp",
+   "sha1": "82408d3732e3b0f579ab8b3602a28c0102d8fa1a"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl001-3.webp",
+   "sha1": "d08d712aab8d8779b98b97ecfbbca577bf019e07"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl001.webp",
+   "sha1": "38255fa921a358094e6f9b3951f9213100564123"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl002-2.webp",
+   "sha1": "d6df84d3c944abb1fe7d3f6c2e4ffdff52add42d"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl002-3.webp",
+   "sha1": "9d5c79d4a077584758c8e88c9e4bbdbfd3c11ea9"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl002.webp",
+   "sha1": "4578fb27ffd3d22c1b7ef83a6712ab43f336e410"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl003-2.webp",
+   "sha1": "f6b19133448fd7c961fe189168a883663dc5771e"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl003-3.webp",
+   "sha1": "10f5ecee88adb76bd9f410343087cca1a55d0af9"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl003.webp",
+   "sha1": "a39931f43a0ad0583a710c09bea5930262e30637"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl004-2.webp",
+   "sha1": "e7778819013e2e9e0a571a891759e8d67695fb5e"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl004.webp",
+   "sha1": "a530ee62a202db423a3f0c0c20ee2131b2315c1d"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl005.webp",
+   "sha1": "8c4298dcb12d77a5d20185da0cb410a231416ae9"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl006.webp",
+   "sha1": "449078bce3f4dafcc6e9a9a9c68c688fbfc045b5"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl007.webp",
+   "sha1": "7ca4a7c24ffe72f1df4375bb13257acf9343a601"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl008.webp",
+   "sha1": "2e593902325e0d71a99c3b0c610d29d4cd37ccff"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl009.webp",
+   "sha1": "19d83bdb952bc098eba4097b7509269bbf27072c"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl010.webp",
+   "sha1": "d4cc683324d40c621099841a885ed8edc7bc30ee"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl011.webp",
+   "sha1": "9a3014683a64ff108a8f2432cb4cf199e37c02e1"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl012.webp",
+   "sha1": "54ec4dd413ce9e3b6443a96e635fb05846976598"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl013.webp",
+   "sha1": "dd9907e9d1f7406452cd30d36e5f01ace2a72d63"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl014.webp",
+   "sha1": "516999a1a7d09fac86acfc87bfa50089added5df"
+  },
+  {
+   "path": "public/images/tumbler/listos/vl015.webp",
+   "sha1": "f16eefb54d10e9f50a4476d60404163d67f1520b"
+  },
+  {
+   "path": "public/images/tumbler/magic-flow/README.md",
+   "sha1": "426297745100f1eb97dca1f38050d35b4a6d482d"
+  },
+  {
+   "path": "public/images/tumbler/magic-flow/mf001.webp",
+   "sha1": "9f51c92d591db64b3e627bd4f028a60dd4ecb67e"
+  },
+  {
+   "path": "public/images/tumbler/magic-flow/mf002.webp",
+   "sha1": "d56b55963140ce5e4b4196f77cf6f6e240909c34"
+  },
+  {
+   "path": "public/images/tumbler/magic-flow/mf003.webp",
+   "sha1": "4c10e99d1e58fbdd8c28596bb133b5ade3bfd6a9"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2002.webp",
+   "sha1": "f421c05049ef0bda68e2aa1f11b14179b944e96e"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2003.webp",
+   "sha1": "b2c918709e93c3c7f19d28352157e1fd703646d4"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2004.webp",
+   "sha1": "4ada61cb56614c8ca08272057af29f03747e75c0"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2006.webp",
+   "sha1": "0054884f707766784e219ba470229942cd582299"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2007.webp",
+   "sha1": "1c5a978227176cbd7eb73aecb3c93f1cb56d0644"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2008.webp",
+   "sha1": "c4a67bc4f715dc0713f830cc4ede2613aaed6a8d"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2009.webp",
+   "sha1": "b58de1c4f91c0a1970b3c7e2bd7c0b1d7fc5a346"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2010.webp",
+   "sha1": "eff46ec00f1a5fed018bae3fdc2c0462032cb055"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2011.webp",
+   "sha1": "874fed7637f41f6ee4be987056f6a868ba83bba2"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/2012.webp",
+   "sha1": "ae91a291af3aff762edb640ba27be3a67e0805cd"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/README.md",
+   "sha1": "b9037fee4d8a9adde4034b26b3c029a0dd91f16c",
+   "sha1Lf": "684388e9c5f4031dc637618b297864f2331a4fac"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c03r.webp",
+   "sha1": "85d722ca6e0418e7f33a98b0e01b05efbe606377"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c06r.webp",
+   "sha1": "d7c803f88f037b5ee0bc18d81c6f5785339e7ebd"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c07r-a.webp",
+   "sha1": "2e0a12497faa9409fe876981142a8d4be0eaf6b6"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c07r-b.webp",
+   "sha1": "3868fcc37bdb08c8aceb6c843e8a246526c3a728"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c08r.webp",
+   "sha1": "ffaa08af5b7988dc34c8b6b7fb3a7c556cd6cf55"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c09r.webp",
+   "sha1": "a6fd49aeadbd21e612beafeef8aba473271ecd40"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c11r.webp",
+   "sha1": "5caf2595c9c54cccae9ca074be8e718569f07dd4"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c13r.webp",
+   "sha1": "758958e9c2fcbac250eaa546900da7ca5c113011"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c14r.webp",
+   "sha1": "899fb6d053f1cee40babd58bd97c10f0edfd80fd"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c18r.webp",
+   "sha1": "529043a0046a64efd1b501a0f280dbe196b8b92b"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c21r.webp",
+   "sha1": "256af17bf0c16ff363b77799df794fc4a5d18b5e"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c31r.webp",
+   "sha1": "52c56ae4a8972c04bdd9a99b806f8aeeec01f91c"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c32r.webp",
+   "sha1": "9fa96dc4c3ff1d39f9f0b6b866affce74e94768f"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c34r.webp",
+   "sha1": "97fe532fa0b54394b7c88d8eaafec8d020c5e2be"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/c50r.webp",
+   "sha1": "09e79e27bac33b95c6e93814d3f2aea40e4e2fd2"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/g001.webp",
+   "sha1": "66f6aacb783648c1613a5ff4275223dc36753c43"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/g002.webp",
+   "sha1": "0df1d768c2028d944ef354c719ec03ca997f16bc"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/g003.webp",
+   "sha1": "b68eb4a3ecca42ef22a3f2df381ed8f6bc2a627c"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/g004.webp",
+   "sha1": "9e9e90397c6c5fbbe99aeae6c34de1d4b6f0a00c"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le01.webp",
+   "sha1": "c5adf0798c8bf6833209f1686f71e0371268f932"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le02.webp",
+   "sha1": "f5ffb6935a59ac6a1d5279b2525de25b3e7bce8b"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le03.webp",
+   "sha1": "292f40de89afcc333b0c2a197a2a2db56e668bed"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le04.webp",
+   "sha1": "420bcb584049e9e67b750e740084ab4941d5252b"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le05.webp",
+   "sha1": "2726ef9a11c778d683075b763ef99340fe7a443b"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le06.webp",
+   "sha1": "82fe16bb226839a2c26fb6171081ccf773bd5145"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le07.webp",
+   "sha1": "eba12abec717cb80e4f2632ad8b5ac1a8cb2e072"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le08.webp",
+   "sha1": "7fa81ae68a2d8fef6887bae5823b5ed14880a252"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le09.webp",
+   "sha1": "1a178baabe7473e9c22c718fcc803a61c8c890bc"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/le10.webp",
+   "sha1": "59ccc7b541db7930e7c279a1d6aa311ee551cbf2"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/m001.webp",
+   "sha1": "98ade0598067c29e67720a0325fd44c2ee79f4f1"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/m002.webp",
+   "sha1": "b1dca819f6dbba8795e553701ff56d653e5d74d3"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/m003.webp",
+   "sha1": "fc6b61f46d5186f66cfd4868d2906c44c31d836f"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/m004.webp",
+   "sha1": "d435b7ce3f1a3563a14d0b4fa4372b8b97050a77"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/m005.webp",
+   "sha1": "ff17ceab0b047e47e76484da3e0a714fccc71ffd"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/m006.webp",
+   "sha1": "3bd2fe3e878117f84ebca9f41b0309a6a86e8fd8"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/m007.webp",
+   "sha1": "74175e131b7a6883c61352f3206714c8ff62c53b"
+  },
+  {
+   "path": "public/images/tumbler/sparkles/placeholder.webp",
+   "sha1": "be5d34832fe64c05b59658e93f7e86fbc172e8c7"
+  },
+  {
+   "path": "public/images/tumbler/stickers/README.md",
+   "sha1": "09c226c73ad1f3c88cebde69593688013fd2c305",
+   "sha1Lf": "28ccdafd6776e3048cd6ae1f506426630542502c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a001.webp",
+   "sha1": "061a3f6dbc7cb91894a187a77ce45dac285c432d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a002.webp",
+   "sha1": "ee6a9c92098d91eb5d594afb4e8f4cdf7b3fa8cd"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a003.webp",
+   "sha1": "718179691d0ce62cc12f7c2146be826642320255"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a004.webp",
+   "sha1": "f412ae810ab261f91be5638b3c8c0b8752cc1183"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a005.webp",
+   "sha1": "a047864e281faf615f3ab04d617177d52ea01fbf"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a006.webp",
+   "sha1": "f71b9be633c4055bcca349aafbdc09ab24fcb97a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a007.webp",
+   "sha1": "3d8ed5d5c3cb7e89f97d5c8f6e079b6b80a77e0d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a008.webp",
+   "sha1": "0c90bc9e36ce2b747496206da6488254169471df"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a009.webp",
+   "sha1": "f561ae1d614ed196c144042a3373c5c687605889"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a010.webp",
+   "sha1": "c5e19e6a57f5bd304f60774fd8c0915381536a8d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a011.webp",
+   "sha1": "8b92bcb0adc2976250566075e3736837499664f9"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a012.webp",
+   "sha1": "6820c08f49d1547d3eea0a821db8c703d17019f5"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a013.webp",
+   "sha1": "520c50ccf0dd177a2ec27a992ed1d3c80a655548"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a014.webp",
+   "sha1": "effe378356b72cf1cc68a60e64ff06488acb4694"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a015.webp",
+   "sha1": "0b17398c78176cba8538bddfef512c682b89b605"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a016.webp",
+   "sha1": "709894bbb1c007006538c134a3958e0d631d2a5b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a017.webp",
+   "sha1": "548757cc748906778c8f1a07caf34ea8f980c504"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a018.webp",
+   "sha1": "83c65fcf4f211827d382eafd98710d2991ba5b77"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a019.webp",
+   "sha1": "1c599494051a14868b2bf752429259b24d618c65"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a020.webp",
+   "sha1": "0ea4602dedafc1e9463f1cb1b21e146ecbd0b91c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a021.webp",
+   "sha1": "2a0c74a8de43a60bd8b11175dfce48f55b083a60"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a022.webp",
+   "sha1": "1ddcc3121c2a46e7b3a51e3e150ee77926c2486a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a023.webp",
+   "sha1": "693ffc251cc43a583dfdca915437699ac6bf4785"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a024.webp",
+   "sha1": "c9b1d7a7f264de69863d4cb3e4212f0b18240205"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a025.webp",
+   "sha1": "4300358c63eaecb30cdc463d9f6988a255a4f1e4"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a027.webp",
+   "sha1": "7fd7b513a21fc8db9273e13aaac240ec8e8b9f5f"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a028.webp",
+   "sha1": "75dc6a904d9452b9909ba25098778913cc05f025"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a029.webp",
+   "sha1": "5148b878f57ee2e9084d707493e329f89b23db28"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a030.webp",
+   "sha1": "21a1aee3cc84f8f107a634b159b7b9f427f18db6"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a031.webp",
+   "sha1": "f3ce8e7b7582142a19a1ab2b4a2943b944f02804"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a032.webp",
+   "sha1": "1a2352e8c711ac2cebc28eeb7e54efbe35c5d047"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a032_dup02.webp",
+   "sha1": "5c5b434c1e8c2d26c6fedcdc168176a4561527fe"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a033.webp",
+   "sha1": "601938f99011321c97d9ae00b996a9c082abfeab"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a034.webp",
+   "sha1": "6ba098cf22c971edbdaac40de1ab24d415783bd4"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a035.webp",
+   "sha1": "b69d0441c326a0d37f4d113c9752d766f2c4a671"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a036.webp",
+   "sha1": "85617f01fb178fc4586adcc98c4a8975fe25bf93"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a037.webp",
+   "sha1": "cfdd1663e59a619b142d40f8c7e25ffd9f659eea"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a038.webp",
+   "sha1": "6eb66ba6b354b475ef7663efd04f567c606b263e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a039.webp",
+   "sha1": "b03a7e9d781336694c90f57645bfd2ce8fb2621d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a040.webp",
+   "sha1": "8d6c9443b5af62908d81c918457251afc07f6f3d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a041.webp",
+   "sha1": "75370fe8ac116935902daf723da7d11e2707a03a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a042.webp",
+   "sha1": "bb80eccb0d8d5042b605cee0efe1a2810262bdd2"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a043.webp",
+   "sha1": "b955c3e82da67f65ef6b0c6c30f3bc07e205038a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a044.webp",
+   "sha1": "ea10921b63d530d8ffa4e2ca75aee5602be02f02"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a045.webp",
+   "sha1": "3d0f472170135b0e4d897057aff5c86cd94918a8"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a046.webp",
+   "sha1": "a8b31f7fbb07af1fc3cb4a49585f8e566b4a957c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a047.webp",
+   "sha1": "56614e920e23a5053a6e0011575d8f5a28b0ac22"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a048.webp",
+   "sha1": "1fe0b35a893c72e825e10098829499fbbcc64cef"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a049.webp",
+   "sha1": "6da9674453b52b2f804b2ca9cb43b4bb9d8a7552"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a050.webp",
+   "sha1": "9992e430f7cd280d562cb7bb0cdf31cee183cde0"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a051.webp",
+   "sha1": "e820c5ba5a3208d8c5041a5e1a47ba4b079d30c7"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a052.webp",
+   "sha1": "6b264f5682c60322a192773a9e7438a232ffaad6"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a053.webp",
+   "sha1": "95a5b4ef57b0cced31bd3e42cc11242468752183"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a054_dup02.webp",
+   "sha1": "193161be78d10ff2904d72babb7a5575fd3224dd"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a055.webp",
+   "sha1": "8860bab8755489f68f705bc71848f820b9cad569"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a056.webp",
+   "sha1": "feb9432332486f4fe5fa847bb7d27b01927ca8c6"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a057.webp",
+   "sha1": "12dd8297f6835abb9bdf7ae0f2fcc8d8faabb91b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a058.webp",
+   "sha1": "7b241082b484fb13aa90c13cca9f42fb6319c0fe"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a059.webp",
+   "sha1": "1ee0c480bdf370a7e63c1fcb3e2e48be0207a2d1"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a060.webp",
+   "sha1": "afdd59119910eb3e931176b90fac001d7c91c36a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a061.webp",
+   "sha1": "c67e9abf9216417acea52f408c9647436819b107"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a062.webp",
+   "sha1": "6406e5b90d30b5a3df1757bc549cee5191a1d22f"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a063.webp",
+   "sha1": "b0ac04f4276223c0fce40cb1c6db5e07d139bb5e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a064.webp",
+   "sha1": "127acb8a074f49b9c1e7fa61062fe62503a3c3d7"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a066.webp",
+   "sha1": "cc1ddbf199c78c460beb65a683f1f5f8c9e0ac52"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a067.webp",
+   "sha1": "1d0df5eb6259917d2ecd896aac2825f21ca46d34"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a068.webp",
+   "sha1": "5354cbf5207f1de27015f8f5ea80903ba88d3b78"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a069.webp",
+   "sha1": "07fd9b51ae1703f990eb87cfe88846bf6b4d9203"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a070.webp",
+   "sha1": "775a67eba7a03e3e6688dc72f38743515da6a130"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a071.webp",
+   "sha1": "9a7e6c52ab9799aa88b98fc91bdb9c695dfca85b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a072.webp",
+   "sha1": "3f72ae9a03364e6cd6d3e1bfb8153d9102dce915"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a073.webp",
+   "sha1": "45127109d98f1869e5d195c4637eb81b0aa6b4aa"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a074.webp",
+   "sha1": "4c1a8a9449da35894cfce446e414e7e7a9f99e0e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a075.webp",
+   "sha1": "a0823d7155512b731f55acfcea4edbd234be903f"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a076.webp",
+   "sha1": "36f5c763bcf9e33aaea7a2c30011bdafdbdf420e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a077.webp",
+   "sha1": "54e3c812bc205b99c6942d7bd0188c41bffd3b34"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a078.webp",
+   "sha1": "aaaf897d5fbfe97118f81a3cfb9857db0240dcfb"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a079.webp",
+   "sha1": "2c5e99ee02dad7e4a8b00a3bc8324837be223e50"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a084.webp",
+   "sha1": "3e1e79449294faca56ab3d62490eb54d64f2f2d0"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a084_dup02.webp",
+   "sha1": "8f301401c25ad4827a8824f60d700191b0d5ac29"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a085.webp",
+   "sha1": "32c42492748b03e433e22c39ae4f382b16315f02"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a087.webp",
+   "sha1": "ae78d1895290e0cd7145b33961c9df6819f8075e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a088.webp",
+   "sha1": "d2a2ad2e6f795aa608d0d42d73ce63727aa7a830"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a089.webp",
+   "sha1": "2e195d3a6db4cd2bcb9c58c1e265355c44ecbc4e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a090.webp",
+   "sha1": "85479a8678480305cf01a3dfe1a1315077e54377"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a091.webp",
+   "sha1": "ec6e4d0b5343a59256d9f18575c03d15fdc1bc87"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a092.webp",
+   "sha1": "632407268e467e1c4c230dd5a0f7fe2748a18b59"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a093.webp",
+   "sha1": "4fe171e8794e189477af9be088029608eea79bbc"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a094.webp",
+   "sha1": "fc4330ce468555c8dfad45fbec75dddec51b4a8d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a095.webp",
+   "sha1": "977d46bd5bb226a1c279c0cef955b0101a67bbbd"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a096.webp",
+   "sha1": "c4ade9f7aa670750b78fdbc1e7753ba7ca938ca2"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a097.webp",
+   "sha1": "50363b3de2d4347d2c06ea89938695063572459b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a098.webp",
+   "sha1": "a5565925126cb16bb7ea7bffecd3b1d54e4bd831"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a099.webp",
+   "sha1": "a05f3adde531729c236bca73abafbdfc16cbd8ea"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a100.webp",
+   "sha1": "d6e2326ae324c036e3067bd123839f23684c2fcd"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a101.webp",
+   "sha1": "f6ea95c7e36b9ecb7775da5114f38861fc09ff1b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a101_dup02.webp",
+   "sha1": "c16af3e081a840a50969297aac6d0b4b374b9074"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a102.webp",
+   "sha1": "0021f31356ae3310fe4b906bfba5fd38bafa796b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a103.webp",
+   "sha1": "6c2a0a26630d72c82827f2cb2603090517a868d1"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a104.webp",
+   "sha1": "ebbea099319d4bf1279adfc289d15394d45c0139"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a105.webp",
+   "sha1": "5d3137182dc3c07ee8ab6cba9ef4197961e5a799"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a106.webp",
+   "sha1": "89185d0b63e020e1d81ce6d9191630c290b6f3fd"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a107.webp",
+   "sha1": "83d8cce693f48c60f31d52150db4b99b6de2267e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a108.webp",
+   "sha1": "bbbebba11dada9542073032a543f62bbd5bd9c34"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a109.webp",
+   "sha1": "bbc968dc6fc9405459a2e2321f924f881dd9bc7a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a110.webp",
+   "sha1": "abea557d7ef3c40b95699f19a241980cffb60727"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a111.webp",
+   "sha1": "0e1e9c5f794e6c8066c525acd3cc571cfbf769d8"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a112.webp",
+   "sha1": "eef27327623f68c22a81bb7dfa620ef7d44017a9"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a113.webp",
+   "sha1": "e7dfa96d0e1546c0b790491576eb064a2e880842"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a115.webp",
+   "sha1": "0fdc09f155d47dbea9a9b49cbb702e09711b2b42"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a116.webp",
+   "sha1": "46572de6143bb768641733af06b9c78e87b34717"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a117.webp",
+   "sha1": "7f2331c0b5d3de38f07038ae2285d6f0fa45e827"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a118.webp",
+   "sha1": "d8759ee615ab26f99ea347c1edf79ad4c6f09a0a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a119.webp",
+   "sha1": "c85346378ffde121e360e760769a2632f767e416"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a120.webp",
+   "sha1": "684e43f68291e8d4b084061bb1d8c4a75a29f0dd"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a121.webp",
+   "sha1": "a7bada94453ffd524beec43ca56987cdfc91ee8e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a122.webp",
+   "sha1": "7c30e8fb8fcf3f15e3b53720c21500683f656be6"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a123.webp",
+   "sha1": "1fcf323eca5f535eef879bdc4c9a3c43a7506336"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a124.webp",
+   "sha1": "7930faecfd0007c8d10fa5bb2d800e0d238c51ae"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a125.webp",
+   "sha1": "db469a4115a3f7d8b970553270332f5a4a521c38"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a126.webp",
+   "sha1": "ff742188aef9d221438686961ff8eb926e694cf0"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a127.webp",
+   "sha1": "c280f9e6d33165d6911089d96acd0ad56711a978"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a128.webp",
+   "sha1": "c692db80ca76577a23eba81a7fe0aea676ef07ce"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a129.webp",
+   "sha1": "8a9da99c09e0f97ded705a88e43fab68dbcf425e"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a130.webp",
+   "sha1": "8f0ef500907cdee57b6d359e24b1c89e43377b36"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a131.webp",
+   "sha1": "21cfcd1640eaa5f5b01298344d1ff9157889bc38"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a132.webp",
+   "sha1": "2c78f174f4f6f8e192aa27164877385578df803b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a133.webp",
+   "sha1": "4f756aaa366150016269a90190953d617452064f"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a134.webp",
+   "sha1": "cd23f78c34e82d2c8dbae424d279cfc54a9ded73"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a135.webp",
+   "sha1": "59098b4abb97643787fb44c66473347958b9303d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a136.webp",
+   "sha1": "3dffa5768986c240c937af64a630ec3a8a3c9c8c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a137.webp",
+   "sha1": "f87adb482f85616ea61dbe615bb0bad0341dd190"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a138.webp",
+   "sha1": "c4e40cd8aae507b43f511fcb3d441044f96e7f67"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a139.webp",
+   "sha1": "96c9dd7a0e148b29db0f36f2836e638ab311c677"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a140.webp",
+   "sha1": "1610eef5fc9521334831a71d862c2b89c5415a95"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a141.webp",
+   "sha1": "c74238db9574d94624928241360a5bcde3665cb6"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a142.webp",
+   "sha1": "31131d8c7c2ce489efefae625bec9f17dd22f690"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a143.webp",
+   "sha1": "469895499def448250c8709acb0c97b2ddbc324c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a143_dup02.webp",
+   "sha1": "0cc2074ec7608d40c9933f817ad276c414d8c4be"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a144.webp",
+   "sha1": "91e9fb3f1822b670a1daf046998f3a04ae29b8d9"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a145.webp",
+   "sha1": "d5258f1e7cdec1a2f0c729ab58b27ceba90a8082"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a146.webp",
+   "sha1": "323be8d82ba05e1a2d957928a2b5d943b625b909"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a147.webp",
+   "sha1": "287d9ae125c1fe7f5dd33e8da22c36d2c8c52da5"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a148.webp",
+   "sha1": "93230a167d2ee2ca37cad8ed3d7954e0969ef874"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a150.webp",
+   "sha1": "7478112e82b01a7bf3c5c1bf7565d4c930f9cf8b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a151.webp",
+   "sha1": "bb44db7e90eb380f76e32885c75f453213bc6e04"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a152.webp",
+   "sha1": "e1cac6d89a3e7ed69507529558521e9e6ba898a0"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a152_dup02.webp",
+   "sha1": "2303bc6d40799b559cff51267c947afeaffe27ef"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a153.webp",
+   "sha1": "5fdd3f279aaae9ca8866921eccf7397a2d8aa0b2"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a154.webp",
+   "sha1": "1831cad32e6b802e0333f3cd3c53008e4f622d99"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a154_dup02.webp",
+   "sha1": "2b14c1d7096fe298eff3842f477ad36a369c912b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a155.webp",
+   "sha1": "f1fc5dfbf7cdd052d03cb204f1bd7f6599f57598"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a156.webp",
+   "sha1": "209f01a5717dc210f711a93d993563ced06967cb"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a157.webp",
+   "sha1": "2c582ffb32db3cd67b15b21ed09bcb1ad71e4da1"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a158.webp",
+   "sha1": "f5d08d6452c9f639c4fc6f5134384e97975f17cd"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a159.webp",
+   "sha1": "151b62616c63d2c4cb89d6270c78e1bfac1c9a0a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a160.webp",
+   "sha1": "b5e3cbeef0c00020245294af3c447a362d95dec2"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a161.webp",
+   "sha1": "4dc5138990a3a6b62ddef998d683f120d6a07e9c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a162.webp",
+   "sha1": "3bb222d2ff9514c44e4b49efbe5d8852e4daf92c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a163.webp",
+   "sha1": "701a7e8869b94a21e286dd45124a236721dd9ee6"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a164.webp",
+   "sha1": "42e1e477447a6634be407e8a7aebbfce51e79292"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a165.webp",
+   "sha1": "739c11a4ba2576451643d070bbef0af2b65ec2f6"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a166.webp",
+   "sha1": "97df6aa260b4e5c0bc02fa5a603a780962246845"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a167.webp",
+   "sha1": "88149c1ee0d436924f8aefaba0c4fca5e9f222de"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a167_dup02.webp",
+   "sha1": "3b53445dbd3a9abce265b508682962c648809552"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a168.webp",
+   "sha1": "ebf8ecee1333aa9fb5b56de8b7ff26269708cb06"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a169.webp",
+   "sha1": "acc368577d1f717f83a5451b441463a6302e88ed"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a170.webp",
+   "sha1": "b223170af87fd229961eb074d920eb56b2250b1a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a171.webp",
+   "sha1": "05f2f2ecfc1a0780f0b14ee650140c55c2b4cb66"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a172.webp",
+   "sha1": "dd841f59b5a0b3af204d8c76517357436cecdcce"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a173.webp",
+   "sha1": "c39295d2e255ecf02a8927b7d5f57207e6f71a06"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a174.webp",
+   "sha1": "7790045b4c410399526d1e4525f879f08eed0f31"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a175.webp",
+   "sha1": "744c0463b85c1bb111fe69c8e4723033fd861cca"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a176.webp",
+   "sha1": "3b8aa6933e24b92f2e7d1b4736db76eb34cbd955"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a177.webp",
+   "sha1": "b622015ad9fb84c0b31e69e4cb3bf80ebef66b20"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a178.webp",
+   "sha1": "e7532e3d509057d060da31b087f02e1ba826b447"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a179.webp",
+   "sha1": "0b5716a885a08850dd3bca89378a93a2331b5d45"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a179_dup03.webp",
+   "sha1": "21bf52d2f4a712e87963d6711bddb69dee132dad"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a180.webp",
+   "sha1": "edea3f8312fc27d7f8a197e355b5331aeccca5ee"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a181.webp",
+   "sha1": "01c0e1161815421e38cbd4e943e64670d3deb70b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a182.webp",
+   "sha1": "9bdc6b647cb907707683e0f0ccfb1629fa9dfc36"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a183.webp",
+   "sha1": "feaaa4c8e7cf278bab8af3cce38ffdd28b530a1d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a183_dup03.webp",
+   "sha1": "feaaa4c8e7cf278bab8af3cce38ffdd28b530a1d"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a183_dup02.webp",
+   "sha1": "daae578f092cd862f46d1ae39c309927028754ca"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a184.webp",
+   "sha1": "64f23bc097b1cbd0e348e8252f1f90157ccd7e34"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a184_dup02.webp",
+   "sha1": "d2c032793dc328f107b5b21ef39a4af372263c81"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a185.webp",
+   "sha1": "3c89e4049c6e0f9bb98ff4c32399dfab152da900"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a186.webp",
+   "sha1": "f7f2b45bc1b468e3458ace6bca28294767371147"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a187.webp",
+   "sha1": "108799a612d29ccd9a38cf80805952e3fa8df923"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a188.webp",
+   "sha1": "1f7994d7d8962afdffe6ef567ae194f2cb6a1f54"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a189.webp",
+   "sha1": "16135f8fde536015694d43948d656557e24e7703"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a190.webp",
+   "sha1": "9d1c85796d9e270970be6b13a2b075f748a319e5"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a191.webp",
+   "sha1": "c9aaaee9f42264f46efc3952e6ee564c04763329"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a192.webp",
+   "sha1": "7980d5d791455d8540d8c3fd2e5c846ce9d24e01"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a193.webp",
+   "sha1": "5b7f77867a372eeb2ee37cd09b36ccf79c743f7b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a194.webp",
+   "sha1": "1f21b351a92b51fff8f9fbf1493699bbc5950929"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a195.webp",
+   "sha1": "acc128d56b34ad03a4a956da17a14c29c6a489f2"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a196.webp",
+   "sha1": "be0c39dcde9aa83235c824d693ab650fd87cefd3"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a197.webp",
+   "sha1": "028819cdf2e8e405bca9240914704fc73d6f92cf"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a198.webp",
+   "sha1": "f155ddb5cc2c885f3b5e79b8410558f18be3ab72"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a199.webp",
+   "sha1": "06a8f5c00ccba36dcbf5d07c46ec1c497029730c"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a200_dup03.webp",
+   "sha1": "deaba5ba1b9b49f11e8bc4e2d0648643f11f725b"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a201_dup02.webp",
+   "sha1": "e69b59fdebb362842bf2ce724d003968829f0490"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a202.webp",
+   "sha1": "7cb36c68c427c7d7bb5491f5597b623477217b53"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a203.webp",
+   "sha1": "4725675c9a343109cf8229639d981c83e2cfcb4a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a204.webp",
+   "sha1": "380f827116923c4317f750fc2288b9ef69c48136"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a205.webp",
+   "sha1": "7242e66e7eb20c86f44ddaee3f835fc900712d97"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a206.webp",
+   "sha1": "b3015206d15bc1bceb9056e778c59ea211a37c48"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a207.webp",
+   "sha1": "6b06119bf1c2c26633e6d10cf75a326bae1ed34a"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a208.webp",
+   "sha1": "df7c063d78a9fe444314369179059427606fc5b3"
+  },
+  {
+   "path": "public/images/tumbler/stickers/a209_dup02.webp",
+   "sha1": "91ffa031ffd58ba7003a81cca41c4dfd50f7a421"
+  },
+  {
+   "path": "public/images/tumbler/stickers/placeholder.webp",
+   "sha1": "abf1db0995b07e1e4a357de2bae1822e4b9bee8b"
+  },
+  {
+   "path": "public/images/tumbler/vasos/README.md",
+   "sha1": "69145cec2265328f6f57f35bd6f34d73891841a1",
+   "sha1Lf": "64f14a885132970444398d95c3887a56cad72f99"
+  },
+  {
+   "path": "public/images/tumbler/vasos/placeholder.webp",
+   "sha1": "c53c1b9b759caa7128574117ed3250618785cace"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v001.webp",
+   "sha1": "bc8c0395c65cbfef1b3a53c80e0d03a83b3e9f27"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v002.webp",
+   "sha1": "7ec7b3fbbba3c5e078ae2edea47d908c388145ba"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v003.webp",
+   "sha1": "fb9574104e4045d8c426391b17c7199a2cd9b79d"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v004.webp",
+   "sha1": "45f037b171dc6a9b1b8be42f55aa56074c55643e"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v005.webp",
+   "sha1": "c7c20e5c19ac13ad0c270f68b4e053cf20660dc7"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v006-2.webp",
+   "sha1": "eb719702cbd4f7e80e9dcc54e7ca6a608f61e81f"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v006-3.webp",
+   "sha1": "c1c46a1d267ec7f2d10baf96b4bf694ffaa7fb15"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v006-4.webp",
+   "sha1": "adea6160d3506c970f849904446838f548fdbee4"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v006.webp",
+   "sha1": "8c81e682f088deb7bc78eb069707fd98cf4d44e0"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v007.webp",
+   "sha1": "198b3bbd9732517f284dfb71bce344f89ad664ec"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v008.webp",
+   "sha1": "4e4cc13e5fa34dc9673ed3296c76cfb4f861895b"
+  },
+  {
+   "path": "public/images/tumbler/vasos/v009.webp",
+   "sha1": "f6cccf5231e1de660234af2f9b91eea5aa26dafd"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-02.mp4",
+   "sha1": "6b978ab605fe27fdc172c0517f12b0d8aae4cbea"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-02.webp",
+   "sha1": "fba88871856bae735d8f174ae4e626698d9a42f2"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-03.mp4",
+   "sha1": "8227fcc702aac4839b70658c928c7307b4dfd7ef"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-03.webp",
+   "sha1": "f64e5189f08e5b87d58ed5aebdecd49117720042"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-04.mp4",
+   "sha1": "5b1a4104b385cdcb34f30addc0fd1cf07f4fd7da"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-04.webp",
+   "sha1": "79a087b1a1e9e98e204cab4b8fb05d026a6744e0"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-05.mp4",
+   "sha1": "b261429505dd71610917de75bbf9c92173902484"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-05.webp",
+   "sha1": "63991d9d968f2671e677b78f516df1ff5c7d65eb"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-06.mp4",
+   "sha1": "bb874ebf8513f353dd2e556fdf91e7f41cbe0f32"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-06.webp",
+   "sha1": "5cce63db7d71c36f8bf6e033cf56c90c5df593ba"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-07.mp4",
+   "sha1": "746b16ad001fa6d5e7f85e182f3cacc8a7022c87"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-07.webp",
+   "sha1": "def905ca908341dc649195cf60cd6f94b71fee86"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-08.mp4",
+   "sha1": "cdc12f3794572e99df868e4d9d354f885fc74de0"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-08.webp",
+   "sha1": "c9796d112b3d58d474c695b6e2ef92f066e8a62d"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-09.mp4",
+   "sha1": "5b9844ef26d5b2d0b11de8add6988f004f66d5e4"
+  },
+  {
+   "path": "public/videos/tumbler/cursos/edicion-3/taller-09.webp",
+   "sha1": "f08f2b2cc68c30271ffd1dfd8665f766827726b4"
+  },
+  {
+   "path": "scripts/consignments/provision-origami.ts",
+   "sha1": "9e854c903d50e36e4401f1085a8e669ae8e167b7",
+   "sha1Lf": "3001912a1aa859c46f01d7e2adf795d79841f960"
+  },
+  {
+   "path": "scripts/data/apply-tumbler-ready-seed.ts",
+   "sha1": "7ab019a4f2dd387cce70f467728e8ea8f73a5ca2",
+   "sha1Lf": "2343d8063b122d1151df9688cdc2b54248fc4191"
+  },
+  {
+   "path": "scripts/data/build-matrixlab-catalogs.py",
+   "sha1": "2e42a9c4f85ab0bd0a581e19da115d8e48f23f07",
+   "sha1Lf": "ea1cba1d54b568d152223869d1c3b2ad038019e6"
+  },
+  {
+   "path": "scripts/data/build-matrixlab-placeholders.mjs",
+   "sha1": "3d3b802c95bc5ad14dab236ddad5d57018ba2988",
+   "sha1Lf": "948c39b822d152eeec2917b3dc9c92991d18c6be"
+  },
+  {
+   "path": "scripts/data/build-tumbler-ready.py",
+   "sha1": "50215e1343dcf7d97de46250461935e295f14c7d",
+   "sha1Lf": "de496b35ae0696d8c8598025e0a336c7ff4bf95a"
+  },
+  {
+   "path": "scripts/data/build-tumbler-stickers.ts",
+   "sha1": "32717d84365275115a2f5f4722456ef41e65c3cf",
+   "sha1Lf": "d46618341077e80648e7f5b7ae5e8772c5dba19b"
+  },
+  {
+   "path": "scripts/data/prepare-3d-images.mjs",
+   "sha1": "4794a68b25086df6d9e55bc4df8c8edeae980b6a"
+  },
+  {
+   "path": "scripts/data/prepare-tumbler-ready-images.mjs",
+   "sha1": "ed9648642c2f3f75e586fa4426dfc1b723fcb531",
+   "sha1Lf": "513339b357413c7e6e4fc2388ce1c454c0167c82"
+  },
+  {
+   "path": "scripts/install-deps.sh",
+   "sha1": "cd7ba95842279b6b7772943ea8aca784a279b1da",
+   "sha1Lf": "958918e967560c497276758f1ae0a5c7ce286ffb"
+  },
+  {
+   "path": "scripts/qa/cart-units.test.ts",
+   "sha1": "1d238951de4301ca19d08d8db20578b516c6e17a",
+   "sha1Lf": "36c3b65089f26c9c89dc8adfd85bac5e96eb7bfe"
+  },
+  {
+   "path": "scripts/qa/check-home-links.mjs",
+   "sha1": "bce55beaf00c57d6952cc0d4043d273177be7b76",
+   "sha1Lf": "d2feeb6c5941dc58849a276a09ae3f20a9364645"
+  },
+  {
+   "path": "scripts/qa/checkout-address.test.ts",
+   "sha1": "8a3762bf522d4c82ea36a2a4884f45ba9f090006",
+   "sha1Lf": "2d0aab19022a007d75cad421c5633d8fecf3b34a"
+  },
+  {
+   "path": "scripts/qa/consignments/camera.test.ts",
+   "sha1": "efdbce2988bc5bc8a121516ebf89ca4d05f4b607"
+  },
+  {
+   "path": "scripts/qa/consignments/database.ts",
+   "sha1": "8325a302033f1aca92f4502b643c26f9f4d39e27"
+  },
+  {
+   "path": "scripts/qa/consignments/db.test.ts",
+   "sha1": "4cd9333e49edb92860709b1487c1664b932ca24e"
+  },
+  {
+   "path": "scripts/qa/consignments/domain.test.ts",
+   "sha1": "737eaf4464363e81b183b38c39ae51fbb3a11d7d"
+  },
+  {
+   "path": "scripts/qa/consignments/e2e.test.ts",
+   "sha1": "47763b937c084639c9cac88fc1c1aa705d7cf812"
+  },
+  {
+   "path": "scripts/qa/consignments/harness.ts",
+   "sha1": "5c0dc4ed50a697375dffc356ac730e5a3cd4e256"
+  },
+  {
+   "path": "scripts/qa/consignments/provision.test.ts",
+   "sha1": "6d108440284f5fc6a288ed942617b00a651ac03a",
+   "sha1Lf": "6c5e2d5f0fc50a41b0aa2681e46096b7afb5d255"
+  },
+  {
+   "path": "scripts/qa/consignments/security.test.ts",
+   "sha1": "525c13fc2f67a4770e5d2d2e2d05266d56a313c6"
+  },
+  {
+   "path": "scripts/qa/courses.test.ts",
+   "sha1": "98d1c205f0aa2b002fa17c0b7aa9d3db50f893b5",
+   "sha1Lf": "1f21c489b462fee848e80a452f5cfb7b8933f635"
+  },
+  {
+   "path": "scripts/qa/design-deletion/db.test.ts",
+   "sha1": "8fa661d41ca3a1a46ed7df5b19e3688be1f2fe34"
+  },
+  {
+   "path": "scripts/qa/design-deletion/e2e.test.ts",
+   "sha1": "849b70fb82a079b1532da18068faa636949f13cf"
+  },
+  {
+   "path": "scripts/qa/designer-contracts.test.ts",
+   "sha1": "008c65d05b952544b831aeb00add28fbe6c9d3c2",
+   "sha1Lf": "1b02dc69f7d90c4b8bca1db6601a67444e39dc88"
+  },
+  {
+   "path": "scripts/qa/designer-handles.test.ts",
+   "sha1": "e2cadbac0209cf17ff976d615590ecbd7eecb8ad",
+   "sha1Lf": "3af1e46f6f059f01f67f3b6bc6a6733739dc11dc"
+  },
+  {
+   "path": "scripts/qa/logo-bbox.mjs",
+   "sha1": "7dcc09aafa4a86d426d1ced5969d9cda314a0589",
+   "sha1Lf": "87e75fe4a3b9f97ed41f00d991a4dabd48b60797"
+  },
+  {
+   "path": "scripts/qa/matrixlab-3d.test.ts",
+   "sha1": "07a99dfb926ebb50245ac4993d0c0eaa8e6bbe9f"
+  },
+  {
+   "path": "scripts/qa/matrixlab-stickers.test.ts",
+   "sha1": "dc3bf1ffe6b96b01c08e834d81428a9c2b1e2c20",
+   "sha1Lf": "66a6d53649c4c81e0dc891af2360798dfca2ef26"
+  },
+  {
+   "path": "scripts/qa/matrixlab-wear.test.ts",
+   "sha1": "762f199736b7fdf740b4e1e12f54bcc94a50d9a2",
+   "sha1Lf": "62a94373d02e6dd40813747c4620f3f05d9fb9be"
+  },
+  {
+   "path": "scripts/qa/mercadopago-webhook.test.ts",
+   "sha1": "1051a4b1698a14090cad774776947a448bff06ed",
+   "sha1Lf": "27446c08887ccb3aa593c04d0d349987a14f597e"
+  },
+  {
+   "path": "scripts/qa/run-regression.mjs",
+   "sha1": "3e3744e776d39fc9bb4ec932da1a5cb9c5eeae57"
+  },
+  {
+   "path": "scripts/qa/security-contracts.test.ts",
+   "sha1": "74f105ab8a683cfc8e73390fb8c3d0a46ee5f60b",
+   "sha1Lf": "9af1ac28a5d65f9f6719011e875e234aadcda8bd"
+  },
+  {
+   "path": "scripts/qa/security-headers.test.ts",
+   "sha1": "7d5a19a682fb072d67802405b6fc0d8d47fc64a6",
+   "sha1Lf": "28fca3d288baca11dbeea48809ae54ed297fbab8"
+  },
+  {
+   "path": "scripts/qa/security-payments.test.ts",
+   "sha1": "4c0c8410718e522e9f852bbb756c889ec9483cfd",
+   "sha1Lf": "1cec805eb6e60fc4646be580fbbddfdd076c4ecc"
+  },
+  {
+   "path": "scripts/qa/tumbler-cups.test.ts",
+   "sha1": "675060e435ca3b9496f50ba3aa8dc940d56d8bb6",
+   "sha1Lf": "8a117460ef14244a1d3ce79646f7eb4900271dce"
+  },
+  {
+   "path": "scripts/qa/tumbler-ready.test.py",
+   "sha1": "3e16f76f5ac5062171997eb6b83d7acdc3acdd82",
+   "sha1Lf": "182277f472a8e4de7b407c851bf42ea95115ee93"
+  },
+  {
+   "path": "scripts/qa/tumbler-ready.test.ts",
+   "sha1": "2037998474ca7b2da809b88634211a61993cb085",
+   "sha1Lf": "eb8719ea1e559e9580cdc83d1cbb00b23a1e8e19"
+  },
+  {
+   "path": "scripts/qa/tumbler-sparkles.test.ts",
+   "sha1": "bd6acc3cdf8bcc46204ca1d0093ccf7a73d20615",
+   "sha1Lf": "f2137ef8d2a53d760bf4648e781ff918307a44d7"
+  },
+  {
+   "path": "scripts/qa/tumbler-stickers.test.ts",
+   "sha1": "7609a5919758ec2754ae1845827e466a2e13c2d8",
+   "sha1Lf": "36b0fe055c7ac0626667969f274465e82bc9bda7"
+  },
+  {
+   "path": "src/app/admin/categorias/page.tsx",
+   "sha1": "47c39716d0dd9566cf05f07bda920f9cb843fe70",
+   "sha1Lf": "ef0339fb377a73734ae339bba019dfd3626b94c3"
+  },
+  {
+   "path": "src/app/admin/disenos/page.tsx",
+   "sha1": "0c38cc2c6e2a9c879249436c079b3e97fc310f74",
+   "sha1Lf": "013e8107d1f988d9c9a5178e72b85989f8c18777"
+  },
+  {
+   "path": "src/app/admin/distribuidores/[id]/page.tsx",
+   "sha1": "d094b6e3a05db24f0b363d2450f7a522519df369"
+  },
+  {
+   "path": "src/app/admin/distribuidores/page.tsx",
+   "sha1": "97596c16cbd1b7bcd174bc84e44a134b53b27f68"
+  },
+  {
+   "path": "src/app/admin/inventario/page.tsx",
+   "sha1": "fb2db58ec08928280d532cfa48895885b57a801c",
+   "sha1Lf": "2143a7baf7e71c30aaef47b1209c5524bb50d82c"
+  },
+  {
+   "path": "src/app/admin/login/page.tsx",
+   "sha1": "e7aade73f3d03397c4802d53928adeaf1370bc2b",
+   "sha1Lf": "715b9df8cdc95b6f72d47ca6592bd14f191b98c5"
+  },
+  {
+   "path": "src/app/admin/page.tsx",
+   "sha1": "8f5bf6c5f094c5c67558d3ed742cc9f48e3d3a95",
+   "sha1Lf": "fa1f30807a7d8cb0366ad14552245e24e3f1d5d2"
+  },
+  {
+   "path": "src/app/admin/pedidos/page.tsx",
+   "sha1": "41a3b57791d19d1070bc39d6172a27829bb9ce55",
+   "sha1Lf": "5a317f21d49a7f54755e85bff8bd28c51e669283"
+  },
+  {
+   "path": "src/app/admin/productos/page.tsx",
+   "sha1": "d37dc81beb86c78f661a1c065f081a884b492b74",
+   "sha1Lf": "2bb55b1f2eef96a13695a52b9c48d7aae49accf8"
+  },
+  {
+   "path": "src/app/api/admin/categories/route.ts",
+   "sha1": "3624ba2964064e6074ec62e0acb5ad93e92cb21b",
+   "sha1Lf": "32ee3affbbb08b87ca769ec0b844fe7bbb92c636"
+  },
+  {
+   "path": "src/app/api/admin/designs/files/route.ts",
+   "sha1": "c72c16056817b48385cbda4c3ebed2ca2c96ef8f"
+  },
+  {
+   "path": "src/app/api/admin/designs/route.ts",
+   "sha1": "b7c84e1f1f5ba026c28980b53622930d9ce475e9",
+   "sha1Lf": "d744d5f4c0fd0efec81b062b79ecd22a377bd026"
+  },
+  {
+   "path": "src/app/api/admin/distributors/access/route.ts",
+   "sha1": "5e8290e0d4a373c699d365dbdbef386300fd8e33"
+  },
+  {
+   "path": "src/app/api/admin/distributors/route.ts",
+   "sha1": "fe2fabb678bd6fde4f4971790c816646901f99c1"
+  },
+  {
+   "path": "src/app/api/admin/inventory/route.ts",
+   "sha1": "31228da850cde0da5566e0e2a36b2428a6bcd0c4",
+   "sha1Lf": "6f7722839aaef69ad63cd5f3ba0e8f5591741dac"
+  },
+  {
+   "path": "src/app/api/admin/login/route.ts",
+   "sha1": "aa2040cb37d04f767dbcd0614f426ec05299de37",
+   "sha1Lf": "d535a55a51db7ecfce9fa541ab6cce27e8e53043"
+  },
+  {
+   "path": "src/app/api/admin/logout/route.ts",
+   "sha1": "bcc1169c5b546b14084319b6c9d595f6e2c049e8",
+   "sha1Lf": "f84baa6cc80589e1178ade72913afffc9b92d44c"
+  },
+  {
+   "path": "src/app/api/admin/orders/route.ts",
+   "sha1": "c1800e6d5a7dc93cdcffe4e562c1b560efdcf32c",
+   "sha1Lf": "153a65f8c2a33fa12fa3149fc2f0622bcaa1bf5a"
+  },
+  {
+   "path": "src/app/api/admin/products/route.ts",
+   "sha1": "f7181b82e1bc5c6c802808de800b8842baedc8ca",
+   "sha1Lf": "cf953589ae0fce83d615de506df59c168061ba4a"
+  },
+  {
+   "path": "src/app/api/admin/products/variants/route.ts",
+   "sha1": "86be85d76d507c67aeb9d4141645203273d69ca2",
+   "sha1Lf": "40d16cba980098d1afc7ef3ed1c3dfb69ffc4dc7"
+  },
+  {
+   "path": "src/app/api/admin/uploads/route.ts",
+   "sha1": "2566346dd878487a20ccfed158e9e80357ec8441",
+   "sha1Lf": "11a574092811ba686ff71bb7ea9316c2c5add7ab"
+  },
+  {
+   "path": "src/app/api/cart/items/[id]/route.ts",
+   "sha1": "112328958290dbd204cb14dc2f04b8a1a495e4bd",
+   "sha1Lf": "44f7137d35dd1437d451b1a1b33597a95ede96aa"
+  },
+  {
+   "path": "src/app/api/cart/items/route.ts",
+   "sha1": "dc6685a7b589d79d1cac6863be43887d9b1691df",
+   "sha1Lf": "067860626a4da17c9cf43227c7584a1f3b1461ee"
+  },
+  {
+   "path": "src/app/api/cart/route.ts",
+   "sha1": "d649439f1a5efec6da68169db265b97507093702",
+   "sha1Lf": "85e13f7cfe6d1ae74b906f0ccbbfc3ea3e8a380c"
+  },
+  {
+   "path": "src/app/api/checkout/mercadopago/route.ts",
+   "sha1": "b7b04cddbc76edf5eb58efc90d53475dd70cbaf3",
+   "sha1Lf": "151188d3c7075043501b959da43d6c39ccf6cbfc"
+  },
+  {
+   "path": "src/app/api/cursos/registro/route.ts",
+   "sha1": "4832f5e704e92eabd2694cfbcb55b6943eca01dd"
+  },
+  {
+   "path": "src/app/api/designs/[id]/route.ts",
+   "sha1": "b5dd53e83a4e6008f3d39af57da1333c04380613",
+   "sha1Lf": "ff18661e3b8abd89165f236b78b551a14c7ffa6a"
+  },
+  {
+   "path": "src/app/api/designs/route.ts",
+   "sha1": "5295f09f4949b8e848803cd0c5a53060b4f30603",
+   "sha1Lf": "6fbedde5e2441c28d7ae3188780768bffe101c85"
+  },
+  {
+   "path": "src/app/api/distributor/auth/route.ts",
+   "sha1": "88f94062aef95d898713730664fcd4647f3e8af6",
+   "sha1Lf": "792f2f85506aebf5dba4c1876c7d54a1378e200b"
+  },
+  {
+   "path": "src/app/api/distributor/route.ts",
+   "sha1": "8aae80c3f61a4fbff1c0ba21891602e9c32b5da7"
+  },
+  {
+   "path": "src/app/api/uploads/design-assets/route.ts",
+   "sha1": "0787f843b545b341c3a1aa214b49f535f51c0058",
+   "sha1Lf": "3114ac6da4aa06d37785e3262eecafe1248ecc2d"
+  },
+  {
+   "path": "src/app/api/webhooks/mercadopago/route.ts",
+   "sha1": "359c0f0ac8d76363631d230de9074c0346e548ba",
+   "sha1Lf": "d143d0074abee0771f182c67f06a4603c8f8681e"
+  },
+  {
+   "path": "src/app/distribuidores/escanear/page.tsx",
+   "sha1": "32c84e74fc66a72854bd7727e28e6054dc79ed4e"
+  },
+  {
+   "path": "src/app/distribuidores/login/page.tsx",
+   "sha1": "519ae803aacc9b32c91cdd5493c858f6b58ff837"
+  },
+  {
+   "path": "src/app/distribuidores/page.tsx",
+   "sha1": "d0a13459d1d15b00e6509f6943dcb0cd77fae4bf"
+  },
+  {
+   "path": "src/app/distribuidores/recuperar/page.tsx",
+   "sha1": "f3f643696ef38147e48f6ea4945155126772d033"
+  },
+  {
+   "path": "src/app/globals.css",
+   "sha1": "56118301185b8a3e2b9967a1ac19f3aad1a3a5a4",
+   "sha1Lf": "aaa1a9c9312398189274071be9c62cf2b80aa6ea"
+  },
+  {
+   "path": "src/app/layout.tsx",
+   "sha1": "8c66d3822fc1760377a9c26cba7ac7b7699ebdb6",
+   "sha1Lf": "cd6880b8d6724e6188b2ff2780ecb6ad65c64655"
+  },
+  {
+   "path": "src/app/page.tsx",
+   "sha1": "d5266ae13340cf43660faf7c765a81a35ad3569a",
+   "sha1Lf": "474c50e07a1a705d014f761a2f28b22d03e774cf"
+  },
+  {
+   "path": "src/app/tienda/carrito/page.tsx",
+   "sha1": "50eab334571a3693b0cb86c777a463e4be30911d",
+   "sha1Lf": "eff4895f9cf4a8c9403224541499bf3f123b1df1"
+  },
+  {
+   "path": "src/app/tienda/categoria/[handle]/page.tsx",
+   "sha1": "55bafd8811500de6e594d6f4ad47c7fbbda9922f",
+   "sha1Lf": "b6b1805a8253cb0acca227c62e6abcab17831415"
+  },
+  {
+   "path": "src/app/tienda/checkout/failure/page.tsx",
+   "sha1": "5ec40684aef40a5a42a9270f087f425ca082ff85",
+   "sha1Lf": "bbb1caa1c73cb5e2a2ef7ab5918cd41c7199a46a"
+  },
+  {
+   "path": "src/app/tienda/checkout/page.tsx",
+   "sha1": "b79527e429c2e22067beca05495f534ca5f8a9be",
+   "sha1Lf": "787959dd655d89d641afba4b4751c562b4d1f350"
+  },
+  {
+   "path": "src/app/tienda/checkout/pending/page.tsx",
+   "sha1": "4b0e551299198fc332f4a3e14eb33beb849cac22",
+   "sha1Lf": "8e314713f760b339a36c1d04bdfacb338a5b3c76"
+  },
+  {
+   "path": "src/app/tienda/checkout/success/page.tsx",
+   "sha1": "08ac5b1c2308c0259ee9b101fcb03cf399056439",
+   "sha1Lf": "04a20287d59c1c4fea9148179808f3a46723b375"
+  },
+  {
+   "path": "src/app/tienda/disenador/[productType]/loading.tsx",
+   "sha1": "56569543139d02946e02d483eb3a68db2210b0ea",
+   "sha1Lf": "e8fea1bb3cb4586b36abb9d028a9831a21a1c1f5"
+  },
+  {
+   "path": "src/app/tienda/disenador/[productType]/page.tsx",
+   "sha1": "8fe8c2123caeea7bc6a59125a5991a38e0ec211f",
+   "sha1Lf": "6a710e81c2a26eabc4c5d3e00a212cf8c6c3c894"
+  },
+  {
+   "path": "src/app/tienda/disenador/etiquetas-escolares/loading.tsx",
+   "sha1": "093e41012852a60f9424603409bc0f0e844a09bd",
+   "sha1Lf": "1d30217c5b70d26bb7aa44626472f350795643bd"
+  },
+  {
+   "path": "src/app/tienda/disenador/etiquetas-escolares/page.tsx",
+   "sha1": "e76457575200af1f610245c6001cc0bcc2aee761",
+   "sha1Lf": "575a7e8e7e02897310d3dec9afea51e946794c50"
+  },
+  {
+   "path": "src/app/tienda/disenador/page.tsx",
+   "sha1": "696346ea02a5e24418efba96c9210615ec127cc3",
+   "sha1Lf": "2b1689df34fa83cfa50b496524d11a92ad170fe8"
+  },
+  {
+   "path": "src/app/tienda/layout.tsx",
+   "sha1": "ac5c6d2f64576ac41f3720b42a5a83bc212d2d0c",
+   "sha1Lf": "49e42e4046ebc4c1b230742d85ae072491e6d5dc"
+  },
+  {
+   "path": "src/app/tienda/matrixlab-tumbler/cursos/page.tsx",
+   "sha1": "9128ab95fc1ac7eb476d8f935ebb36ffc77939ce"
+  },
+  {
+   "path": "src/app/tienda/page.tsx",
+   "sha1": "f956963fd16882d1421496343cabe1db53637d17",
+   "sha1Lf": "f9a830147b7fe998caa3a3108d1762cdfb626004"
+  },
+  {
+   "path": "src/app/tienda/prendas-listas/page.tsx",
+   "sha1": "20ec63e725b0088115cabeff0cb182b2d08764e1"
+  },
+  {
+   "path": "src/app/tienda/producto/[handle]/page.tsx",
+   "sha1": "d8709625a6ad5a798ba4d486a707045e1a4c87e3",
+   "sha1Lf": "179398b6aecd72d76a0e745a66cb97d25ee61a21"
+  },
+  {
+   "path": "src/components/admin/AdminLayout.tsx",
+   "sha1": "c373d58af098952112d6d5819f03aa249b329dc6",
+   "sha1Lf": "26a6e972938188a43a07676c4f404f2d61fa76ab"
+  },
+  {
+   "path": "src/components/admin/AdminLoginForm.tsx",
+   "sha1": "13aca9b32d32f4396a82db3c68d771e69d86c1be",
+   "sha1Lf": "67eea76cab5e537469ec140c2f75efad4983ee8f"
+  },
+  {
+   "path": "src/components/admin/AdminNav.tsx",
+   "sha1": "dea73157ca1fb7b5cc6f2ba970a73c0c4f40be8a",
+   "sha1Lf": "48f65ea5b02491294a03c671208e8c5554efdd65"
+  },
+  {
+   "path": "src/components/admin/CategoriesAdminClient.tsx",
+   "sha1": "dbff99473ce175cae1f8b56a995f19b12c2ab025",
+   "sha1Lf": "ce77e4d726c5000b8a5e8868ec5a6b5b5f1dac59"
+  },
+  {
+   "path": "src/components/admin/DesignProjectCard.tsx",
+   "sha1": "e2eae2721ce98a10c3b867f7914a0d54e8f17167",
+   "sha1Lf": "b88ad88fdd29f8fa2a7c06f05f1977ffcc417ad4"
+  },
+  {
+   "path": "src/components/admin/DesignProjectManager.tsx",
+   "sha1": "ce4bcfb040259f8984b3829dab1dd7c4993c3127"
+  },
+  {
+   "path": "src/components/admin/InventoryTable.tsx",
+   "sha1": "1c731fd54018221a40d83e02743e909a5d598eae",
+   "sha1Lf": "87a92ec23f3ae2d7b570f6008646647960223dc8"
+  },
+  {
+   "path": "src/components/admin/OrdersTable.tsx",
+   "sha1": "72beef57837ed670faa2af850da4329de3684aea",
+   "sha1Lf": "cdafb7bc7846ef04108a775444d8eae2ca41c69a"
+  },
+  {
+   "path": "src/components/admin/ProductEditor.tsx",
+   "sha1": "a114819f0aecb0609db14f0467baaa4fffe857be",
+   "sha1Lf": "7f1e23d4aefdc918afcab9027e522adf64057e94"
+  },
+  {
+   "path": "src/components/admin/ProductsAdminClient.tsx",
+   "sha1": "7a13b529a475d89724401d08de63a48f5021f48f",
+   "sha1Lf": "b3b73ea5416a22edf7fc7b3ece55b2caa17e43e4"
+  },
+  {
+   "path": "src/components/admin/ShippingAddressBlock.tsx",
+   "sha1": "e18bcb9fb3c99352d17ab4fb50a2f9485822fc2a",
+   "sha1Lf": "43800e636737f03a605034995cc253a6ff41cc10"
+  },
+  {
+   "path": "src/components/admin/StatusBadge.tsx",
+   "sha1": "7b89ff7990258254ada066157b8199dc0905ea75",
+   "sha1Lf": "20cebb673e2b2905ccd9edb3ac100218c604105b"
+  },
+  {
+   "path": "src/components/consignments/AccessPanel.tsx",
+   "sha1": "492a18e8a3778137d0a6f67bb916cdef8ad63279"
+  },
+  {
+   "path": "src/components/consignments/Directory.tsx",
+   "sha1": "54c80f3e787f5ae3ed4526ba7944d498f2831c45"
+  },
+  {
+   "path": "src/components/consignments/DistributorNav.tsx",
+   "sha1": "b1ac63ee81a95b547653511a50997849145687ca"
+  },
+  {
+   "path": "src/components/consignments/Login.tsx",
+   "sha1": "3c9d56b03df4e5b5f02c236088ddf8ce9ff47726"
+  },
+  {
+   "path": "src/components/consignments/Scanner.tsx",
+   "sha1": "ef1291c806604686717e9142f777dd5ebee2ce7d"
+  },
+  {
+   "path": "src/components/consignments/Workspace.tsx",
+   "sha1": "a23a15ad2c10a957a4ebb51bc704c73200c8ff55"
+  },
+  {
+   "path": "src/components/consignments/portal.module.css",
+   "sha1": "e354ec0aed2cad628254898cf1a9cccf0323d7d3"
+  },
+  {
+   "path": "src/components/courses/CourseExperience.tsx",
+   "sha1": "0fa62ad9f86472f47182e8e38375d82a3e13ca54"
+  },
+  {
+   "path": "src/components/courses/CourseFaq.tsx",
+   "sha1": "44fe3e08c39094b58880b171264fe1ebc35ada82"
+  },
+  {
+   "path": "src/components/courses/CourseGallery.tsx",
+   "sha1": "cf62475be332ed4d0c1251b20021658f8256fb13",
+   "sha1Lf": "5fff7b9ddd29430f2a3964e867fbe29263186f0f"
+  },
+  {
+   "path": "src/components/courses/CourseHero.tsx",
+   "sha1": "93b7d55d802b08784fd6646c91c3fc4750e1d044"
+  },
+  {
+   "path": "src/components/courses/CourseRegistrationForm.tsx",
+   "sha1": "a70a5a1526535e4d16369e26b10ed4ddca8a1937",
+   "sha1Lf": "dbefe31c2ad430e967022f7b7183fc88adc527ff"
+  },
+  {
+   "path": "src/components/courses/CourseVideos.tsx",
+   "sha1": "5cc383a73101fb5ac82581a32cd157c373845442",
+   "sha1Lf": "fb046d8cd90ab138cd6f8d2f11f0df3e0a8d0e91"
+  },
+  {
+   "path": "src/components/courses/TumblerCoursesBanner.tsx",
+   "sha1": "86fa9d8201a643a75b8d38adf49bfab11fd0eeda",
+   "sha1Lf": "72cc0ad653d7897437563ab91eeb055e8e216c31"
+  },
+  {
+   "path": "src/components/courses/accents.ts",
+   "sha1": "ba3383421222b76ecda01983cd132d7a97077b51"
+  },
+  {
+   "path": "src/components/designer/AssetLayerPanel.tsx",
+   "sha1": "40f655d6844366fbdba061e0af1d53ff20357394",
+   "sha1Lf": "256c16a9921c1123015ff583f6be2e8435260a73"
+  },
+  {
+   "path": "src/components/designer/ColorSwatchGrid.tsx",
+   "sha1": "2b3c53fcc197b3ca5c46b95661d350fbe3210f54",
+   "sha1Lf": "e827f4e1d8629a2976443591866c7eb8ee6a124f"
+  },
+  {
+   "path": "src/components/designer/DesignToolbar.tsx",
+   "sha1": "64f756521aa0d69fa46f3289f63ae3bbc1614567",
+   "sha1Lf": "0a6a7fc2fc4fef1846bf7228dec998b76c4ac509"
+  },
+  {
+   "path": "src/components/designer/DesignerCTA.tsx",
+   "sha1": "e86e8d7741b88851c9da7294a9084b161dc5eaba",
+   "sha1Lf": "39d62435f23d5e524700d099d7dc2651f8cff393"
+  },
+  {
+   "path": "src/components/designer/DesignerRouter.tsx",
+   "sha1": "71cac1a0be2d4e5398b37a5a3c475d8fea531fe1",
+   "sha1Lf": "4c0d129bd7ba8a85c119db02a252a8a7bedee05d"
+  },
+  {
+   "path": "src/components/designer/DesignerShell.tsx",
+   "sha1": "0e913a0c74e5d4acb0f70b37ebdeef310c1f1682",
+   "sha1Lf": "8318604bd91d61f9eb9bb38d452b43e765df8342"
+  },
+  {
+   "path": "src/components/designer/DesignerSummary.tsx",
+   "sha1": "dad3f8e5b6765f3ee6dcc5807187ca8946173a72",
+   "sha1Lf": "e9d35da59e451427392e90680b9e8fae80817874"
+  },
+  {
+   "path": "src/components/designer/GarmentDesigner.tsx",
+   "sha1": "840fcb1bc166be00a9a773934d6660e05c820cee",
+   "sha1Lf": "05e80a742499a5d69e4b60061d483c37b4ba0ba0"
+  },
+  {
+   "path": "src/components/designer/GarmentDisclaimer.tsx",
+   "sha1": "af1b414a5df5992f26d756bae8f224218a74be39",
+   "sha1Lf": "9833038b1a12c31eb3984aef38ce591a9d5b3815"
+  },
+  {
+   "path": "src/components/designer/GorrasDesigner.tsx",
+   "sha1": "bec3c296310e762f5f1b4b91a8fb90b5b51e7f3b",
+   "sha1Lf": "c48e7c12970bc008f2d616bbe91a76c14fc47338"
+  },
+  {
+   "path": "src/components/designer/MultiAssetCanvas.tsx",
+   "sha1": "61c1d11dca2f3536f7dfc8255cb1f6f496ff4220",
+   "sha1Lf": "dc015201f7195d7650748b628df3d047d7ca4b47"
+  },
+  {
+   "path": "src/components/designer/PrintAreaOverlay.tsx",
+   "sha1": "f905c61a669f1c8526805f943d8a44c6cb0ad94b",
+   "sha1Lf": "e72b1a62bbb695d304f6dba15db808d0e0827edb"
+  },
+  {
+   "path": "src/components/designer/PrintSizeHelper.tsx",
+   "sha1": "e94d8fb19b976ae8fc335ce965ca70156e289135",
+   "sha1Lf": "0971dade0a4e1b26dea045b275c962bb3efc68d4"
+  },
+  {
+   "path": "src/components/designer/PrintZoneSelector.tsx",
+   "sha1": "c82508c5fb105d8869e037f25d13e57ee85c774f",
+   "sha1Lf": "81d36f53f352858847eb8100bfe11d53955b2b31"
+  },
+  {
+   "path": "src/components/designer/ProductMockupStage.tsx",
+   "sha1": "1388228283fa98a6911a6f04b1a627795276e648",
+   "sha1Lf": "52795cb366f75aced922955d34f086da84806c97"
+  },
+  {
+   "path": "src/components/designer/ProductSelector.tsx",
+   "sha1": "c5e051d307b428f46829bd5b0cd315c03452216f",
+   "sha1Lf": "0acd700a48d1f7c787da3cad5c50da0571d2f641"
+  },
+  {
+   "path": "src/components/designer/ProductSpinViewer.tsx",
+   "sha1": "a078e85c33839d236113a2cc298efe32b849df00",
+   "sha1Lf": "d2b627c754dce0e2ad2fe0e7489334a8c87b3882"
+  },
+  {
+   "path": "src/components/designer/UploadPanel.tsx",
+   "sha1": "95eeffbd3fbab5aef5e267076e55e0f1b42efafb",
+   "sha1Lf": "5cc7b50196df36ab8ee84cfc9b5a7a8a8ee795e8"
+  },
+  {
+   "path": "src/components/designer/laser/LaserCanvas.tsx",
+   "sha1": "6e2de6bf8dac31f529bb64339dfd64230471d948"
+  },
+  {
+   "path": "src/components/designer/laser/LaserDesigner.tsx",
+   "sha1": "7e1963c8374ca8fa427a78d8bdf9f1f890012f7a",
+   "sha1Lf": "015e51d82e23e398969e3866cab4001b8cf8228c"
+  },
+  {
+   "path": "src/components/designer/laser/LaserDisclaimer.tsx",
+   "sha1": "601046dbabfaba8fe68074f76c356299b56c3800",
+   "sha1Lf": "a127a5c27734282cc61eecc974c5f0409beb14a7"
+  },
+  {
+   "path": "src/components/designer/laser/LaserTemplateSelector.tsx",
+   "sha1": "b3f4c98129d8130438b2f5114185e71499e0442e",
+   "sha1Lf": "dd165756e817020fd6769b3d1f364dd5bcbe8263"
+  },
+  {
+   "path": "src/components/designer/laser/LaserTextTool.tsx",
+   "sha1": "d3ae7ef06ca61df3d032dccdbb30ca807171ddd5",
+   "sha1Lf": "f494d748732097d930dfe438eb75d551e35cd562"
+  },
+  {
+   "path": "src/components/designer/mockups/GarmentMockups.tsx",
+   "sha1": "9427a18c8cf9e80e87930b04c9baccbdcd14a7a9",
+   "sha1Lf": "d04bf85f7c66ce45154f2f8eed8fe780dc35a10c"
+  },
+  {
+   "path": "src/components/designer/school-labels/CustomImageUploader.tsx",
+   "sha1": "ff00f124e42865ae2f809809b227f3b01edbd47f",
+   "sha1Lf": "872e03a6b4c39d1030b39348eebf19a873e75b74"
+  },
+  {
+   "path": "src/components/designer/school-labels/SchoolLabelPreview.tsx",
+   "sha1": "90d7af65c08bc0c620546088ef68525fe9e2c22a",
+   "sha1Lf": "292da2360c4f5f3c607a4674649bf50ff63428f1"
+  },
+  {
+   "path": "src/components/designer/school-labels/SchoolLabelTemplate.tsx",
+   "sha1": "fe095cf6783f43ae0876cf515d4bc4bae2f7681f",
+   "sha1Lf": "71ab672047abc200c391c462586f076574680eda"
+  },
+  {
+   "path": "src/components/designer/school-labels/SchoolLabelsGuideHero.tsx",
+   "sha1": "344795ff7e08c85b0690e1be73ef481fa415ab3a",
+   "sha1Lf": "85ca678b986490010a470ab70159ad319d3063e4"
+  },
+  {
+   "path": "src/components/designer/school-labels/SchoolLabelsInfoSections.tsx",
+   "sha1": "5990c6cfee933ed68558d2cf0c615d9bdc410a7b",
+   "sha1Lf": "b3edeec41dc61d080724b18372413d4e825a7c28"
+  },
+  {
+   "path": "src/components/designer/school-labels/SchoolLabelsLab.tsx",
+   "sha1": "b363577cddce96c04644c93410e0244fcfdb21bb",
+   "sha1Lf": "5f8c405066a14cf68f249e105a5d2eea0e6b249b"
+  },
+  {
+   "path": "src/components/designer/school-labels/TypographyGallery.tsx",
+   "sha1": "62276fcb094446b60996e0847e00c213d788742d",
+   "sha1Lf": "e28b9f8282512682ba6d8e79906615077017233c"
+  },
+  {
+   "path": "src/components/designer/sheets/CollisionEngine.ts",
+   "sha1": "8352c6a53b9bfeedd9f20687fd8695ceebf51ef0",
+   "sha1Lf": "253e3e2d4c5a0c9603d08d97d0893c49fae7b3d1"
+  },
+  {
+   "path": "src/components/designer/sheets/FreeLayoutSheet.tsx",
+   "sha1": "5b1e004ceb923b68c1cca6d00bc8405db12d3009",
+   "sha1Lf": "297e2635d6d31a5643680ba7a295a9f6d6bea89f"
+  },
+  {
+   "path": "src/components/designer/sheets/RepeatLayoutSheet.tsx",
+   "sha1": "08d50bc96ab924da3d0a684cd1fa3764637e79e6",
+   "sha1Lf": "a7bb5a5ec45721d80226567d42971b56fd110ca3"
+  },
+  {
+   "path": "src/components/designer/sheets/SheetCanvas.tsx",
+   "sha1": "5f8d407727998ce3486ac6296523924e25388816",
+   "sha1Lf": "afe365ccbc27dace8d87747593d0ea1d9e26df28"
+  },
+  {
+   "path": "src/components/designer/sheets/SheetDesigner.tsx",
+   "sha1": "a7511f4072254aafc288206b414ee9830ddc598d",
+   "sha1Lf": "ec28e1533c43bcf82fb578310b818b9388848498"
+  },
+  {
+   "path": "src/components/designer/sheets/SheetDisclaimer.tsx",
+   "sha1": "2c181d467e6d2924284838be6eae48840126e252",
+   "sha1Lf": "e61f294a62adf8ac7edd7410929577c2a9f24e7b"
+  },
+  {
+   "path": "src/components/icons/ApparelSilhouettes.tsx",
+   "sha1": "177c9df7b853c4da85d509088ef50a7d2b7fb603",
+   "sha1Lf": "63f85801cd396f0676b71ec597b7588bb734009e"
+  },
+  {
+   "path": "src/components/icons/BrandDecor.tsx",
+   "sha1": "1d663b319b80291574e8e40f881f5df4b5a2fc44",
+   "sha1Lf": "ad5a11d589b42384f95f7487753deb4725e7e9a8"
+  },
+  {
+   "path": "src/components/icons/CourseDecor.tsx",
+   "sha1": "2b1b2da3606bdfd48dfd078eba22a43c0f59ede2"
+  },
+  {
+   "path": "src/components/icons/GarmentIcons.tsx",
+   "sha1": "1b24cff9b90cd1bfa4e2ed409ff82db2ef09947e",
+   "sha1Lf": "cdcb51de268538787af238a96af8a3bedeccaa6e"
+  },
+  {
+   "path": "src/components/landing/FamilyCard.tsx",
+   "sha1": "8c68179909800f1c25397dc04393fd8fb0f35785",
+   "sha1Lf": "b9208b7282b5c185c6cd13c22d74435a47afe6fd"
+  },
+  {
+   "path": "src/components/landing/HeroAura.tsx",
+   "sha1": "ca4a2dca85e471445c47a9e0887f623e38449ecb",
+   "sha1Lf": "25d06949c4300fc535f1f915178b8379bcbb0cff"
+  },
+  {
+   "path": "src/components/landing/LandingNav.tsx",
+   "sha1": "4cb7602127031f46372a72c1ed9b13138a4aecfa",
+   "sha1Lf": "0b16e3e17e37ac6ea972496a004b1551506b4750"
+  },
+  {
+   "path": "src/components/landing/Reveal.tsx",
+   "sha1": "0f73b06985f2f54cc9ba49e35792c9adf5dca955",
+   "sha1Lf": "7e313277c5c45eca82b5e2110bef0dc1149d9f4f"
+  },
+  {
+   "path": "src/components/landing/RotatingWord.tsx",
+   "sha1": "e91294f189e55a8d4a245d5df8ab85e7b66fdb04",
+   "sha1Lf": "9752140d61b056b7efc61844ef678148b1f6bc88"
+  },
+  {
+   "path": "src/components/landing/TiltCard.tsx",
+   "sha1": "3ce0e8df99c99400ba9451948256372779b44b10",
+   "sha1Lf": "03316074234133133784add8a487251d447bf989"
+  },
+  {
+   "path": "src/components/school/BackToSchoolAccesses.tsx",
+   "sha1": "30eb7bbbb49378f74743805f717f9556c16bf420",
+   "sha1Lf": "ed8e6739624508e2899d1c4c12e3fcbd48e7bfc2"
+  },
+  {
+   "path": "src/components/store/AddToCartButton.tsx",
+   "sha1": "1246969c1c86396e15b5cb4d82fdc211a40d0c75",
+   "sha1Lf": "467372220473edf413c31db3c190f42c95f107d1"
+  },
+  {
+   "path": "src/components/store/CartBadge.tsx",
+   "sha1": "d05fba6d7c2531b67053717d7570f6502f53f965",
+   "sha1Lf": "a4dd770918327936374891eed61085a7c01f5a58"
+  },
+  {
+   "path": "src/components/store/CartLineItem.tsx",
+   "sha1": "c992129ae1f3c1f2d567851439b14b86d69ad4f6"
+  },
+  {
+   "path": "src/components/store/CartPageClient.tsx",
+   "sha1": "b105ad8d4cb0fa2d0c9ccbdbb1dd42912490b22a",
+   "sha1Lf": "2578ead1b6a2f9a45978813e0837ce258b3eae59"
+  },
+  {
+   "path": "src/components/store/CartSummary.tsx",
+   "sha1": "d856d4c5601de8030e2455b5c103704788a7e54a",
+   "sha1Lf": "6114a632933a48410ac994047abe0a45d02c6faa"
+  },
+  {
+   "path": "src/components/store/CheckoutButton.tsx",
+   "sha1": "c8866a00d0cf4064dd696dfa41a44fb07d009c4c",
+   "sha1Lf": "55a561f760873b0dc6090c86288a0bf1f7a5aeb7"
+  },
+  {
+   "path": "src/components/store/CheckoutForm.tsx",
+   "sha1": "d2ba6082acc0a1afd8ac8681a72f6084ab4d2ddb",
+   "sha1Lf": "da3f33ac3710d44a50e6f68ab7ecb74ab384bb14"
+  },
+  {
+   "path": "src/components/store/InventoryBadge.tsx",
+   "sha1": "c20ef3eaf79bef1eea2210ab8448dd89dd90af5e",
+   "sha1Lf": "7f834ba768d7d84a6dbb176434183ba429513354"
+  },
+  {
+   "path": "src/components/store/MatrixLab3DCatalog.tsx",
+   "sha1": "85e236d59789ea066426c65073042e1dca572421"
+  },
+  {
+   "path": "src/components/store/MatrixLabStickersCatalog.tsx",
+   "sha1": "c50a7ee48e5759d6bf6619fe4eeba290fc8d42a5",
+   "sha1Lf": "3746ef3b3f1d1bb18b5bb17d3ce9fd5e870edd41"
+  },
+  {
+   "path": "src/components/store/MatrixLabWearCatalog.tsx",
+   "sha1": "70b4a6e6b3296c2548288febf6824bbe549a9976",
+   "sha1Lf": "bb85be86290dbf3d729b6d27e4df8c2b2de83e8e"
+  },
+  {
+   "path": "src/components/store/OrderSummaryCard.tsx",
+   "sha1": "0c5dcad052d3a3e36f1ed6825cf1e8a937e7a011",
+   "sha1Lf": "5c29c5b360eca3c307bf777c7aadbe1b3d71de8a"
+  },
+  {
+   "path": "src/components/store/ProductCard.tsx",
+   "sha1": "0b23174e8541685157a60a0215abe91993950e40"
+  },
+  {
+   "path": "src/components/store/ProductGallery.tsx",
+   "sha1": "88275eb114b4ef2256149ec2291daad646657f60",
+   "sha1Lf": "f139146c17cc80ad4aae3adf91ea6c84d8d1a7c5"
+  },
+  {
+   "path": "src/components/store/ProductGrid.tsx",
+   "sha1": "a8f5eedc6b7cc2f3c86c7e3b399269df8998a46b",
+   "sha1Lf": "1684c3045405bd000510b5f5ef9d3c90044497c2"
+  },
+  {
+   "path": "src/components/store/ProductImagePlaceholder.tsx",
+   "sha1": "e53e65a59656926a8283c425647d123444a8c58c",
+   "sha1Lf": "747cf1217b52c2b605bd10460a6bfb584ab7bb07"
+  },
+  {
+   "path": "src/components/store/ProductOptions.tsx",
+   "sha1": "5539c49909ac567cda67c3db7441282be9c0b0f9"
+  },
+  {
+   "path": "src/components/store/ProductPhotoGallery.tsx",
+   "sha1": "b9be48c5311e3374586584b32deb75f2cd9577fe",
+   "sha1Lf": "0da6ccad5ab5ab6bb9086e57c235154170ead7a4"
+  },
+  {
+   "path": "src/components/store/ReadyTumblerCatalog.tsx",
+   "sha1": "5503c83e59354233710d18f401a75d0497d4bf0c",
+   "sha1Lf": "4eb3e2c36e93a803695bde8cc0a19ef3478a8fb0"
+  },
+  {
+   "path": "src/components/store/ReadyWearCatalog.tsx",
+   "sha1": "753b1a175f8a323ed3bcb60cf566e479412f8503"
+  },
+  {
+   "path": "src/components/store/ReadyWearProduct.tsx",
+   "sha1": "d1ea4ce273243c80bbe258c524fa7e7ed039fbb0"
+  },
+  {
+   "path": "src/components/store/ReadyWearProductCard.tsx",
+   "sha1": "fadf2102966f3d4e45fc02cc5c5578a6630721ca"
+  },
+  {
+   "path": "src/components/store/SortSelect.tsx",
+   "sha1": "44d31e5b72ea5c0bc3d89be322a07bf0b7d3e117",
+   "sha1Lf": "909f36b3e64de6a05c64302fb7e37ca916339afa"
+  },
+  {
+   "path": "src/components/store/SparklesCatalog.tsx",
+   "sha1": "5b38bd842c792c3fd54ae512d11b7362b0d91c9c",
+   "sha1Lf": "040df5424655122a86c377df23fecb9cb307d58a"
+  },
+  {
+   "path": "src/components/store/StoreCTA.tsx",
+   "sha1": "d09cf2b01169cab94b71f6043d2dd59a32027be9",
+   "sha1Lf": "45daff1147ebd94da3c662508913fa19f9d08777"
+  },
+  {
+   "path": "src/components/store/StoreFamilySection.tsx",
+   "sha1": "461e3993b4a05a8ac54aec59fe64f5be470278ad",
+   "sha1Lf": "38eff277ff5a7f6c033d06c936e9c2ccf00035d5"
+  },
+  {
+   "path": "src/components/store/StoreHero.tsx",
+   "sha1": "d63fb4fb5c0654494288dd7d7b11c74797af5ed5",
+   "sha1Lf": "a34825c3dd139261c3310111ae49fb686a841a0b"
+  },
+  {
+   "path": "src/components/store/StoreLayout.tsx",
+   "sha1": "fdafaf4183cf5bfd8dbdd6f4cd3a8fe5202d4999",
+   "sha1Lf": "15fc1282c576b179ac78eb2336e267a2233374da"
+  },
+  {
+   "path": "src/components/store/StoreMobileMenu.tsx",
+   "sha1": "ebbbcf75c64840e82d82bab08ddcfd2b297ad706",
+   "sha1Lf": "d7b440ec43963ed30a92f9026b1cd8583e3ee173"
+  },
+  {
+   "path": "src/components/store/ThreeDProductGallery.tsx",
+   "sha1": "4b9b1ddf18c3c228e9402601f50f3ea79c98bf19",
+   "sha1Lf": "46770405788a70f5d36811d597ad2654048f041d"
+  },
+  {
+   "path": "src/components/store/TumblerCupsCatalog.tsx",
+   "sha1": "88514a25a08528b39c246f3b7bdd87fc3d4cc627"
+  },
+  {
+   "path": "src/components/store/TumblerStickersCatalog.tsx",
+   "sha1": "2d8681763fb341144410dc74b79c16b697bcc943",
+   "sha1Lf": "7d4d9076f7a875c953ba9f44a962017c9b81a6a1"
+  },
+  {
+   "path": "src/lib/api.ts",
+   "sha1": "3d9cb1a29e11d7e3fb514d178f4c8d887d6c7349",
+   "sha1Lf": "b6c4d2ac1ff029026aad66eaf751a89c9424365a"
+  },
+  {
+   "path": "src/lib/consignments/access.ts",
+   "sha1": "81e6df0ffab78665488d58a961521c618c41b08d"
+  },
+  {
+   "path": "src/lib/consignments/domain.ts",
+   "sha1": "226c7cc7056dbca3200043c795d6ea55393903ba"
+  },
+  {
+   "path": "src/lib/consignments/http.ts",
+   "sha1": "f9d9e0bbf2ed944450240b563296872b93a9526e"
+  },
+  {
+   "path": "src/lib/consignments/navigation.ts",
+   "sha1": "f5ac183b8e4777e509565455542eea939281b7e3"
+  },
+  {
+   "path": "src/lib/consignments/passwords.ts",
+   "sha1": "ce78348ec01097192208d321b79fa364b5b371ca"
+  },
+  {
+   "path": "src/lib/consignments/server.ts",
+   "sha1": "fca9c1a367cd7ee7298ada424b0a1e3ab2b94c0a"
+  },
+  {
+   "path": "src/lib/consignments/tokens.ts",
+   "sha1": "d66d23d19e1a2ccdbc8c89c4fcacc995dd5914fb"
+  },
+  {
+   "path": "src/lib/db/admin.ts",
+   "sha1": "83eced78553b8902042893dcb396871e6fe0a55e",
+   "sha1Lf": "c8913e869d945d7a05a45cf63a4a9e4e9214ab22"
+  },
+  {
+   "path": "src/lib/db/client.ts",
+   "sha1": "57774ac3f819895719409ab58b10a8efa448b2cb",
+   "sha1Lf": "5743e98e8162421ac372433970c200e332cad91f"
+  },
+  {
+   "path": "src/lib/db/storage.ts",
+   "sha1": "099e024fd12593bdc03724976e38603b24316671",
+   "sha1Lf": "b2d9fff014c74ee826b2e8da0a05e6bd37570eb3"
+  },
+  {
+   "path": "src/lib/db/types.ts",
+   "sha1": "5e074b78cde9b1b91a2f3977eb402d42e0768b43",
+   "sha1Lf": "1fba630511525dbfbd42e4da64cd6318da403e52"
+  },
+  {
+   "path": "src/lib/designer/color-palettes.ts",
+   "sha1": "b979910a3758e2ceb615f0871c3356373c7fb0cc",
+   "sha1Lf": "ee3970dc740527c078289e8339625933bf9da1c4"
+  },
+  {
+   "path": "src/lib/designer/delete-files.ts",
+   "sha1": "6951981a0cf1b010ecb679de3edcc8d11d916900"
+  },
+  {
+   "path": "src/lib/designer/exportPreview.ts",
+   "sha1": "33f8165a562031706d2af6f739557e41c91a1fda",
+   "sha1Lf": "103874fa12adcca58de679197813d001f1983746"
+  },
+  {
+   "path": "src/lib/designer/laser-config.ts",
+   "sha1": "772465fdf44f36e748b3fe9d0ad3a52b16b44716"
+  },
+  {
+   "path": "src/lib/designer/print-sizes.ts",
+   "sha1": "68caf0fb4c846416b7e8742308e4b236733b50a3",
+   "sha1Lf": "97f53de2bbc9d4f74f88988721b5d2cc69aac132"
+  },
+  {
+   "path": "src/lib/designer/printAreas.ts",
+   "sha1": "a9a16300a80894e81161f67577dfba8de957b556",
+   "sha1Lf": "7d28aa6fe3cbbbda6b9e8ce08d5874f604f3bdf7"
+  },
+  {
+   "path": "src/lib/designer/product-catalog.ts",
+   "sha1": "80196dbd9635e65e97f4232d697715324772f421",
+   "sha1Lf": "57be62a33baf8b30f0f43ff9f4e5b78810b357b4"
+  },
+  {
+   "path": "src/lib/designer/product-handles.ts",
+   "sha1": "c2c6877bcd2aaab8e0cad212fc2c755e94e4255b",
+   "sha1Lf": "27a3cb73fe4872b3b159437d7af3dc0d5893a662"
+  },
+  {
+   "path": "src/lib/designer/product-views.ts",
+   "sha1": "d6cdfd725d6e96f74c41b639d0e7bb3cc5d90f51",
+   "sha1Lf": "b49d676b098ae34d66802250612c58df9895c1ce"
+  },
+  {
+   "path": "src/lib/designer/school-labels/background-presets.ts",
+   "sha1": "b3bf69f4db395234d7434596113212f0450ded48",
+   "sha1Lf": "76c44351de12eb1ee9b0405b7fefff6bd0300327"
+  },
+  {
+   "path": "src/lib/designer/school-labels/color-palettes.ts",
+   "sha1": "ff8040aafd7c51bb1f03b1f9c95672a34db62ae6",
+   "sha1Lf": "95db7c758544731eb815a6aaa7f22bd71fb66214"
+  },
+  {
+   "path": "src/lib/designer/school-labels/config.ts",
+   "sha1": "65385fd197c5e7b468174320ebfdb6efd1e43baf",
+   "sha1Lf": "f1283ab8c6001a758e8377178d7cd923700074d5"
+  },
+  {
+   "path": "src/lib/designer/school-labels/info-content.ts",
+   "sha1": "963898eafa1d982a8c51467162bdaef9c7f6f660",
+   "sha1Lf": "0a99066eb60bee8a735ff3bd70b9af2e11f1f988"
+  },
+  {
+   "path": "src/lib/designer/school-labels/preview.ts",
+   "sha1": "d21443f994772a25c585e72d9039d311b7da51d2",
+   "sha1Lf": "7ed448a3146fdadc160fa0db72bb5dd68ef13f19"
+  },
+  {
+   "path": "src/lib/designer/school-labels/templates.ts",
+   "sha1": "c8cfccc53e4f2eaa4171ed6dc4181ed2839d1cdb",
+   "sha1Lf": "e8299e393c7bdcb23fc2496515a23ecf327dae80"
+  },
+  {
+   "path": "src/lib/designer/school-labels/typography-options.ts",
+   "sha1": "881381db7322bf3b840936ac1669d19927ff1cd2",
+   "sha1Lf": "08233c40e8bb0150a611184cb96cd87d0f21defe"
+  },
+  {
+   "path": "src/lib/designer/school-labels/typography-styles.ts",
+   "sha1": "a16cd0495ed99c7d575dad769da1afebef92f0fb",
+   "sha1Lf": "8f5ab595d20038bc354aef4be252b63d71bef771"
+  },
+  {
+   "path": "src/lib/designer/sheet-config.ts",
+   "sha1": "3df54db45e68ffb8af442e158f096246a2f271b7",
+   "sha1Lf": "87c85ff12fb11f033a5e655d806000ac77bf7fe5"
+  },
+  {
+   "path": "src/lib/designer/types.ts",
+   "sha1": "9edf3cafd5ed7a5b70e16fced465984a79851437",
+   "sha1Lf": "1d43411f26d3dada9a8230404fd03661dff8e114"
+  },
+  {
+   "path": "src/lib/designer/validation.ts",
+   "sha1": "74556ae2d7ffb641d0053cb1f713626343261b95",
+   "sha1Lf": "cb9cb649305bfed655d7d3fca102465d9832fba8"
+  },
+  {
+   "path": "src/lib/designer/write-lease.ts",
+   "sha1": "7bbdc8fc19365690fd091bdcc11443399631e552"
+  },
+  {
+   "path": "src/lib/payments/mercadopago-core.ts",
+   "sha1": "8f55e9893c8c9f8203f009fb5ab66cfdf19048f7",
+   "sha1Lf": "5af3b0f9a9d8e0eb1769de4f85ccde581cecb5ed"
+  },
+  {
+   "path": "src/lib/payments/mercadopago.ts",
+   "sha1": "27820fb0d75c33114cfc9f3d76b55d22421e074c",
+   "sha1Lf": "a29cc68854893b334db253a2858b81da6eae80a0"
+  },
+  {
+   "path": "src/lib/payments/types.ts",
+   "sha1": "42b8fa5b36d3ed143b3ea3816716e8bd6b1cb7dc",
+   "sha1Lf": "841aeac3aacd3c211907b9339e487fb3dfbdfab2"
+  },
+  {
+   "path": "src/lib/security/admin-auth.ts",
+   "sha1": "a8b0386b95552b7c40f90b374dd703df46671ed1",
+   "sha1Lf": "3b2500c93516c02ba84fe2996818a2857eb436f9"
+  },
+  {
+   "path": "src/lib/security/csrf.ts",
+   "sha1": "b960acab66fb0ff688ea31750ea84d073508c490",
+   "sha1Lf": "26b99a5f4951695422239ca656664ea825647088"
+  },
+  {
+   "path": "src/lib/security/env.ts",
+   "sha1": "9a2834c7d2ec293157c9ad1dc19c91f0b395ac3b",
+   "sha1Lf": "8fc73f0cc6964d3a99b3c337295692b5cfba44b8"
+  },
+  {
+   "path": "src/lib/security/login-throttle.ts",
+   "sha1": "07bbeabc72157090606e4fd43757869475bf22a0",
+   "sha1Lf": "799bcf760cbd20fcdc0655c889df84d90168b53b"
+  },
+  {
+   "path": "src/lib/security/quota.ts",
+   "sha1": "c44af2bd47f3b24cb240b908e9256ac387944127",
+   "sha1Lf": "0187a37cdd7cf709ddda8d188c584990c6e5baf0"
+  },
+  {
+   "path": "src/lib/security/rate-limit.ts",
+   "sha1": "0bd71e6e0e1711537f38bce7e00eea6d193e3499",
+   "sha1Lf": "3fa15d8f5a78a55f5efd7af070b72a72450a2abe"
+  },
+  {
+   "path": "src/lib/security/sanitize.ts",
+   "sha1": "0c1bfba11655f521edd8d1097f7f60c73d5569c4",
+   "sha1Lf": "1c910bf7995bdeb1bae7ab933de44d138efb6acf"
+  },
+  {
+   "path": "src/lib/security/session.ts",
+   "sha1": "a1e80a495136db1adbef576aa0c6c0a176b7dd4a",
+   "sha1Lf": "8cb255c25ab14d6dbfd364ba809efba310b3ee3c"
+  },
+  {
+   "path": "src/lib/store/back-to-school.ts",
+   "sha1": "8de4843464f1e94fc11e21a942f99afe916b1573",
+   "sha1Lf": "a803f1ddbf3c2736a222e832ad7118ea06676b59"
+  },
+  {
+   "path": "src/lib/store/cart.ts",
+   "sha1": "3b8f6f5c39ee88517d164ff66b5691a55b8c54a6"
+  },
+  {
+   "path": "src/lib/store/category-logos.ts",
+   "sha1": "2aee0dc2f44e477003fa937fa149d5c551040ada",
+   "sha1Lf": "4d9d0b16674beb9886efb31d89551d2fc6373861"
+  },
+  {
+   "path": "src/lib/store/courses/gallery.ts",
+   "sha1": "48b60ec7d99fb88d25ff702a605e4a7047d86335",
+   "sha1Lf": "e8d172bb5e6cffd8278580440c3bfc1c76938aef"
+  },
+  {
+   "path": "src/lib/store/courses/index.ts",
+   "sha1": "4b8879d088bd47e0008ebe866098b3336755f0db"
+  },
+  {
+   "path": "src/lib/store/courses/local-videos.ts",
+   "sha1": "6b4b5e2f61a2b041e4c520b3bbe6431509d2c1f0",
+   "sha1Lf": "e49a5863532647b278e68d03c2049ba9ba167af8"
+  },
+  {
+   "path": "src/lib/store/courses/matrixlab-tumbler.ts",
+   "sha1": "9a9c914566fc5c971eeab31e30b7d3718506a991",
+   "sha1Lf": "58f139aabdccf7143f759a50d8f00b8c8238b187"
+  },
+  {
+   "path": "src/lib/store/courses/types.ts",
+   "sha1": "9ede848e83aa7f849e72351f27f95e8812290197",
+   "sha1Lf": "33c1d63a1eace8f2f409f89749df98a10ffd4b6a"
+  },
+  {
+   "path": "src/lib/store/courses/videos.ts",
+   "sha1": "0e20b349de06531a9a1767e76c4401798b925907"
+  },
+  {
+   "path": "src/lib/store/curated-lines.ts",
+   "sha1": "a4139bf1be4132a1241f1e3e13ea6860f6fd0398",
+   "sha1Lf": "432d27df4558769a85d81e34cd7fb362585ee784"
+  },
+  {
+   "path": "src/lib/store/inventory.ts",
+   "sha1": "c1ae7e382e069278656ad6935281c4f186f81c9c"
+  },
+  {
+   "path": "src/lib/store/matrixlab-3d.ts",
+   "sha1": "a453f156ef4bbbfe677d6cdbd62847407e02b85d",
+   "sha1Lf": "10fcbad82293b25e8f279b7128a5a411bdc6a341"
+  },
+  {
+   "path": "src/lib/store/matrixlab-stickers.ts",
+   "sha1": "f47906d542a1282f90ba78e8b92a4cdca8dcb0a7",
+   "sha1Lf": "1cfc3359cfb5f08bd12ff369bf27567f38ce4a34"
+  },
+  {
+   "path": "src/lib/store/matrixlab-wear.ts",
+   "sha1": "46e51d73a06546b1eb3f05b8e1654081226f76a1",
+   "sha1Lf": "907b92412e522b7f0c49b53ec5fd2c3884d4b82f"
+  },
+  {
+   "path": "src/lib/store/mock-data.ts",
+   "sha1": "f3e9b559474b2959decd8be6a49b1b771158e46d"
+  },
+  {
+   "path": "src/lib/store/orders.ts",
+   "sha1": "951da1f932865fbdc5568eb3c313c8b89522c7d8",
+   "sha1Lf": "6fbfe024c4acf1b5cfe4f9476b712c33a0d6b0e8"
+  },
+  {
+   "path": "src/lib/store/pricing.ts",
+   "sha1": "c0dbddd385fdce37cfd858ef500728f5d1d09815",
+   "sha1Lf": "c03603ec55c1a2bc689b33b6fa710745fb87eec8"
+  },
+  {
+   "path": "src/lib/store/products.ts",
+   "sha1": "d4ca06e77274020991de3234288815701f05ffb9"
+  },
+  {
+   "path": "src/lib/store/ready-wear-colors.ts",
+   "sha1": "df203974a4535217b5903a43abffc49842eec8ec"
+  },
+  {
+   "path": "src/lib/store/ready-wear.ts",
+   "sha1": "277b93b94066ea8a5c2c7e00b714779e426515d9"
+  },
+  {
+   "path": "src/lib/store/text.ts",
+   "sha1": "d0119ff6894988c44757487936d3212d00a788e8",
+   "sha1Lf": "ceaa3d8241e37a73c3f06a4eb05d4546d16c7eea"
+  },
+  {
+   "path": "src/lib/store/tumbler-cups.ts",
+   "sha1": "b418a62a68db7b36c0f1bab74a80233b2b11a82e",
+   "sha1Lf": "ebac85ab11c726498cefe038a90d602332ce8bb1"
+  },
+  {
+   "path": "src/lib/store/tumbler-magic-flow.ts",
+   "sha1": "35f7eb66a0697621a86383b96d8a8a1c52303e57"
+  },
+  {
+   "path": "src/lib/store/tumbler-ready.ts",
+   "sha1": "4aee0e23d4fae7f50c0d4cc6203cf719f757a1af",
+   "sha1Lf": "d71e52e2d1ee18c19265bb40db772cb00b975a33"
+  },
+  {
+   "path": "src/lib/store/tumbler-sections.ts",
+   "sha1": "852ca608bc329712400be782fa9d21c70836d7eb"
+  },
+  {
+   "path": "src/lib/store/tumbler-sparkles.ts",
+   "sha1": "2e2e89790245347a2cbcf62e6fab3bce4d8a0f09",
+   "sha1Lf": "d2bc78403ae66e3a5eed5cca91be646d76eca931"
+  },
+  {
+   "path": "src/lib/store/tumbler-stickers.ts",
+   "sha1": "0bd34a5064f564d41eef80e44d838ce24b3e5220",
+   "sha1Lf": "8a3ee943c51818273abd0141aecc6e69e69fa2c8"
+  },
+  {
+   "path": "src/lib/uploads/errors.ts",
+   "sha1": "27f3f43a1f553ff624fb5df5f564f662cb98b7f9",
+   "sha1Lf": "6a8f6fc352e86378e0128ce08f5cae6cf7afd928"
+  },
+  {
+   "path": "src/lib/uploads/uploadDesignAsset.ts",
+   "sha1": "f919ce07780e6f5b13d4287575203b5abe287ea3",
+   "sha1Lf": "b21f9c70bba95ade631265ae3313ff9c7133e5f5"
+  },
+  {
+   "path": "src/lib/utils.ts",
+   "sha1": "726b08cfc212b5b533173a9bef70fde2f1570009",
+   "sha1Lf": "2efc5891cab2c89be91b82f9712b19d5a214f6ee"
+  },
+  {
+   "path": "src/lib/validation/admin.ts",
+   "sha1": "7a8900742b1e9ed64edb7d19551c94f7119ccc58",
+   "sha1Lf": "efe465d156d9dad3c726dcc3d930286155b1695a"
+  },
+  {
+   "path": "src/lib/validation/cart.ts",
+   "sha1": "9ad40f32aac083b849ca475958e4661eb8f91cad",
+   "sha1Lf": "4309c8b056344249a8df40f50322d9f3e9710936"
+  },
+  {
+   "path": "src/lib/validation/checkout.ts",
+   "sha1": "d72875ebc036a18539907e591c55937f00e23a66",
+   "sha1Lf": "075a9ef5d2b6595199f5df607f35fc45149f61f2"
+  },
+  {
+   "path": "src/lib/validation/courses.ts",
+   "sha1": "727b0c7d194731b09def3697d761f7bceed3b392",
+   "sha1Lf": "726708f284e63a9cc7df28e5ea60725b0cded61b"
+  },
+  {
+   "path": "src/lib/validation/designer.ts",
+   "sha1": "d0e5f0ffb059f63afcac605e53389eeefca4b3ca",
+   "sha1Lf": "b286ed601c08b2b55118999e7dc201e5390e60c3"
+  },
+  {
+   "path": "src/lib/validation/school-labels.ts",
+   "sha1": "2a1e386792ae640cbdbf28de5889a2237add5762",
+   "sha1Lf": "f8c4668d962a90f0746e39775309574a51f0cc8a"
+  },
+  {
+   "path": "src/lib/validation/store.ts",
+   "sha1": "0d5d114f82b244b124f89c4cd95a509f6da1c7d5",
+   "sha1Lf": "e85a0e0ae401a21eb12b53b6ea39465701ab63e2"
+  },
+  {
+   "path": "src/lib/whatsapp.ts",
+   "sha1": "7837a7b9dc2e0066d8b9a451d76f7959b6fbb073",
+   "sha1Lf": "5ab28e54db994185ae1216801529396d336c08c2"
+  },
+  {
+   "path": "src/middleware.ts",
+   "sha1": "49389a7b8c1e49ba110e0b98c0632cb61d0c6832",
+   "sha1Lf": "958c411e06a9fe3bdce2557d6246f925f400009b"
+  },
+  {
+   "path": "supabase/consignment_reconciliation.sql",
+   "sha1": "29004eb5c0fcbe1f2c93f7851f1e7593529df5e1"
+  },
+  {
+   "path": "supabase/migrations/0001_schema.sql",
+   "sha1": "c0e8def31eefc9e755100525d4fde471ed94a807",
+   "sha1Lf": "3aa5951736ad65dd90388c92fa838eb3b2bbbba8"
+  },
+  {
+   "path": "supabase/migrations/0002_rls.sql",
+   "sha1": "d0a0ba56388aa5fca7a0c79fcdbedce4c1987ab0",
+   "sha1Lf": "c5064300985c4dcafde48b1fc05f38fc8f1f4de2"
+  },
+  {
+   "path": "supabase/migrations/0003_storage.sql",
+   "sha1": "a3d15869e2622702ed66f714d57d7c299e4da7af",
+   "sha1Lf": "38ad2da83211c7d17241147f4eb57682a9545f98"
+  },
+  {
+   "path": "supabase/migrations/0004_designer_expansion.sql",
+   "sha1": "eb564fb7b20ecb5541a61768805db9cc2d04a6f7",
+   "sha1Lf": "f40a9fdadd1762b03940e805e696502790a21384"
+  },
+  {
+   "path": "supabase/migrations/0005_school_labels.sql",
+   "sha1": "ade795d5cda33365ee56d27df9d484d70ffcd7ad",
+   "sha1Lf": "a09a547b817ad4b62e27c5c7af92a1a8f9825a42"
+  },
+  {
+   "path": "supabase/migrations/0006_orders_delivery.sql",
+   "sha1": "fff392ef9475711dbc3273a9ede5527c5042dbe3",
+   "sha1Lf": "b8102de04e512eaa74b5a2466d727752c1f50ab4"
+  },
+  {
+   "path": "supabase/migrations/0007_security_hardening.sql",
+   "sha1": "b36fd8342640b5d12e882910fb803f6d742cbf45"
+  },
+  {
+   "path": "supabase/migrations/0008_course_registrations.sql",
+   "sha1": "8389e988be0c1773d1e652adbffe5873ba5cabc1",
+   "sha1Lf": "2f09460faf6e40370efb708ed74d52945f906142"
+  },
+  {
+   "path": "supabase/migrations/0009_consignments.sql",
+   "sha1": "532966af592c8b66a194c93f08cbea4fdcd78492"
+  },
+  {
+   "path": "supabase/migrations/0010_consignment_operations.sql",
+   "sha1": "aee228bf4760a4449460e65c4dcdef192d31f8b4"
+  },
+  {
+   "path": "supabase/migrations/0011_distributor_credentials.sql",
+   "sha1": "c6350e141e6619f8f59c1121a6b1f66b365f725b"
+  },
+  {
+   "path": "supabase/migrations/0012_design_file_deletion.sql",
+   "sha1": "6edae974725a572dbff4bb43b814939606adc301"
+  },
+  {
+   "path": "supabase/seed.sql",
+   "sha1": "81416710f0d0574ab65f2afb95062cf665689840",
+   "sha1Lf": "82cd07065ff8a78daa829efa51630a3047548b95"
+  },
+  {
+   "path": "supabase/seed_designer_base.sql",
+   "sha1": "32bf8d7bc672c2a41972748c898e3744bce51704",
+   "sha1Lf": "efba6b6d58fa99945f7b5dab2b55b2c8452dfb26"
+  },
+  {
+   "path": "supabase/seed_designer_base_v2.sql",
+   "sha1": "ceaac4ddf891429e51eb739f364fea56567ea6a3",
+   "sha1Lf": "2f497e104ba57d496137e09ea52a40747a1975ee"
+  },
+  {
+   "path": "supabase/seed_etapa2.sql",
+   "sha1": "555dc4537b811baafba42358180b67600492e3b2",
+   "sha1Lf": "74d9ba9ffbe996f0073ecfb9b5682ec0817343b9"
+  },
+  {
+   "path": "supabase/seed_matrixlab_3d.sql",
+   "sha1": "232a1eb545676bb50b9341c6487d8d3390ee93ad",
+   "sha1Lf": "4838eae0ce32d4af45e5d786eeae25605229e41a"
+  },
+  {
+   "path": "supabase/seed_matrixlab_stickers.sql",
+   "sha1": "e6c6ee8a05f123866e9d625ccb2fe6a3a8efe5d0",
+   "sha1Lf": "4fecd4473852ee77730a36d715f2cc96617da653"
+  },
+  {
+   "path": "supabase/seed_matrixlab_wear.sql",
+   "sha1": "0af8c2006ee0af649f5b3408937fff5c75626e0b",
+   "sha1Lf": "3f77b4711019acb8f35c00d622282d3d7a5e2239"
+  },
+  {
+   "path": "supabase/seed_school_labels.sql",
+   "sha1": "47ce1a863a842c60a8acef43a1eac8229d725ae4",
+   "sha1Lf": "b1bd04591741c21e9d84a84fd15dbcf0d733acff"
+  },
+  {
+   "path": "supabase/seed_tumbler_cups.sql",
+   "sha1": "7bac7d59e7d774a837d6174763d4a59effa2930c",
+   "sha1Lf": "c05f7050ebcdd088ab9812c61b7561555bb672f7"
+  },
+  {
+   "path": "supabase/seed_tumbler_ready.sql",
+   "sha1": "71ec6033aa2b0adf7ecdcb74fe3df75b4ac23003",
+   "sha1Lf": "ce217a1914fcca0cd954ad154b58b2f2db6dc01d"
+  },
+  {
+   "path": "supabase/seed_tumbler_sparkles.sql",
+   "sha1": "b1fed420d26e32cad0ab4356f13c5f0133070410",
+   "sha1Lf": "bbf8d8629e39f90b067259b76d3e2850ad4d9b7e"
+  },
+  {
+   "path": "supabase/seed_tumbler_stickers.sql",
+   "sha1": "3f3b17c6dd44f76552a3caafaad4988f417af0d0",
+   "sha1Lf": "38793677ec21c0ad8617d4c14890a9a6926ca72a"
+  },
+  {
+   "path": "tsconfig.json",
+   "sha1": "8d71b9486fd63166e7ec4981a2f900d5ea7d8cc9",
+   "sha1Lf": "a31493a7b9a50a1220481e42b85bf19bbeff6f77"
+  }
+ ]
+}

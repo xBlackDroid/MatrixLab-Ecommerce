@@ -1,4 +1,4 @@
-# Fotos del taller — Cursos MatrixLab Tumbler, Edición 2
+# Fotos del taller — Cursos MatrixLab Tumbler, Edición 3
 
 Aquí van las fotos que se ven en el carrusel de
 `/tienda/matrixlab-tumbler/cursos`.
@@ -10,9 +10,9 @@ aparece en la galería y en el orden que le toca.
 ## Convención
 
 ```
-public/images/tumbler/cursos/edicion-2/01.webp
-public/images/tumbler/cursos/edicion-2/02.webp
-public/images/tumbler/cursos/edicion-2/03.webp
+public/images/tumbler/cursos/edicion-3/01.webp
+public/images/tumbler/cursos/edicion-3/02.webp
+public/images/tumbler/cursos/edicion-3/03.webp
 ...
 ```
 

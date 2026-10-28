@@ -62,7 +62,6 @@ const SUPABASE_HOSTS = "https://*.supabase.co https://*.supabase.in";
  */
 export const STATIC_PRERENDERED_PATHS = new Set([
   "/",
-  "/tienda",
   "/tienda/disenador",
 ]);
 
@@ -90,6 +89,8 @@ export const STATIC_PRERENDERED_PATHS = new Set([
  * prerenderizada la recibe por error.
  */
 export const DYNAMIC_ROUTE_PATTERNS: readonly RegExp[] = [
+  /^\/distribuidores(?:\/(?:login|recuperar|escanear))?$/,
+  /^\/tienda$/,
   /^\/admin(?:\/|$)/,
   /^\/api(?:\/|$)/,
   /^\/tienda\/carrito$/,
@@ -127,7 +128,7 @@ export function isDynamicRoute(path: string): boolean {
   return DYNAMIC_ROUTE_PATTERNS.some((pattern) => pattern.test(path));
 }
 
-function directivesFor(scriptSrc: string): string[] {
+function directivesFor(scriptSrc: string, allowCoursePlayer = false): string[] {
   return [
     "default-src 'self'",
     scriptSrc,
@@ -139,7 +140,7 @@ function directivesFor(scriptSrc: string): string[] {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-src 'none'",
+    allowCoursePlayer ? "frame-src https://www.tiktok.com" : "frame-src 'none'",
     "frame-ancestors 'none'",
     "manifest-src 'self'",
     "upgrade-insecure-requests",
@@ -147,12 +148,12 @@ function directivesFor(scriptSrc: string): string[] {
 }
 
 /** Política estricta: sólo scripts con nonce y lo que ellos carguen. */
-export function buildStrictCsp(nonce: string, isDev: boolean): string {
+export function buildStrictCsp(nonce: string, isDev: boolean, allowCoursePlayer = false): string {
   // 'unsafe-eval' sólo en desarrollo: lo exige el hot reload de Next.
   const scriptSrc = `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${
     isDev ? " 'unsafe-eval'" : ""
   }`;
-  return directivesFor(scriptSrc).join("; ");
+  return directivesFor(scriptSrc, allowCoursePlayer).join("; ");
 }
 
 /**
@@ -188,7 +189,9 @@ export function middleware(request: NextRequest) {
   }
 
   const nonce = crypto.randomUUID().replace(/-/g, "");
-  const csp = buildStrictCsp(nonce, isDev);
+  // Sólo esta landing admite el iframe oficial. La política de scripts
+  // conserva el nonce; ningún script de TikTok entra en el documento padre.
+  const csp = buildStrictCsp(nonce, isDev, path === "/tienda/matrixlab-tumbler/cursos");
 
   // Next lee la CSP desde los headers del REQUEST para estampar el nonce en
   // sus propios <script>. Sin esta línea el nonce no llega al HTML.
@@ -209,6 +212,6 @@ export const config = {
      * documentos, no ejecutan scripts, y pasarlos por el middleware sólo
      * añadiría latencia a cada asset.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|webp|gif|svg|ico|woff2?|ttf|otf|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|webp|gif|svg|ico|woff2?|ttf|otf|txt|xml|mp4|mov)$).*)",
   ],
 };

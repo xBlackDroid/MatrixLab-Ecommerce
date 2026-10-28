@@ -43,9 +43,11 @@ export default function TumblerCupsCatalog({
  * compite visualmente con el nombre.
  */
 function CupCard({ entry }: { entry: CupCatalogEntry }) {
-  const maxQuantity = Math.max(0, entry.stock);
+  const [selectedVariantId, setSelectedVariantId] = useState(entry.variants.find(v => v.stock > 0 && v.status === "disponible")?.id ?? entry.variantId);
+  const selectedVariant = entry.variants.find(v => v.id === selectedVariantId);
+  const maxQuantity = Math.max(0, selectedVariant?.stock ?? entry.stock);
   const [quantity, setQuantity] = useState(1);
-  const soldOut = !entry.sellable || maxQuantity <= 0;
+  const soldOut = !entry.sellable || maxQuantity <= 0 || selectedVariant?.status === "agotado" || selectedVariant?.status === "oculto";
 
   function step(delta: number) {
     setQuantity((current) =>
@@ -81,11 +83,12 @@ function CupCard({ entry }: { entry: CupCatalogEntry }) {
         </Link>
 
         <p className="text-xl font-bold text-ml-white">
-          {formatPrice(entry.price)}{" "}
+          {formatPrice(selectedVariant?.price ?? entry.price)}{" "}
           <span className="text-sm font-medium text-ml-white/50">/ pieza</span>
         </p>
 
         <p className="text-sm text-ml-white/60">{entry.item.capacity}</p>
+        {entry.variants.length > 1 && <label className="text-sm text-ml-white/70">Color<select aria-label={`Color de ${entry.title}`} value={selectedVariantId ?? ""} onChange={e => { setSelectedVariantId(e.target.value); setQuantity(1); }} className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-ml-bg px-3 text-ml-white">{entry.variants.map(v => <option key={v.id} value={v.id}>{v.color ?? v.title}{v.stock <= 0 ? " · Agotado" : ""}</option>)}</select></label>}
 
         <p
           className={cn(
@@ -128,7 +131,7 @@ function CupCard({ entry }: { entry: CupCatalogEntry }) {
           )}
           <AddToCartButton
             productId={entry.productId}
-            variantId={entry.variantId}
+            variantId={selectedVariantId}
             quantity={quantity}
             disabled={soldOut}
             label={soldOut ? "Agotado" : "Agregar"}

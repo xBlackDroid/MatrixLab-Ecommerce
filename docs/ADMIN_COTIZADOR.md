@@ -97,3 +97,23 @@ El QA de navegador levanta `next start` con un secreto de sesión aleatorio y
 sin Supabase (sesión sintética local), compara fórmulas, tarjetas y PDFs con
 el HTML original (`COTIZADOR_ORIGINAL_HTML`, se omite si no existe) y prueba
 la nube con un stub de la API.
+
+## Recuperación acumulativa (27/10/2026)
+
+Producción corría un despliegue CLI (`dpl_2aZrvYwCLTPqVr1yY6V5zTZQxrwH`,
+origen `914dddd` con cambios sin commitear de `codex/origami-consignaciones`)
+cuyo código no estaba en `main`. El PR #7 se fusionó sobre el `main` viejo y su
+despliegue perdió funciones aprobadas. La rama
+`codex/cotizador-cumulative-recovery` restaura ese snapshot exacto y le suma el
+cotizador.
+
+- Recibo: `scripts/qa/fixtures/production-reference-dpl_2aZrvYwCLTPqVr1yY6V5zTZQxrwH.json`
+  (943 archivos con su SHA-1 de producción y, para los 261 de texto subidos con
+  CRLF, el SHA-1 tras normalizar a LF, que es como Git los guarda).
+- `scripts/qa/production-reference.test.ts` verifica que todo archivo del
+  snapshot sigue idéntico salvo los 4 de integración enumerados
+  (`next.config.ts`, `src/app/admin/page.tsx`, `src/components/admin/AdminNav.tsx`,
+  `src/lib/security/rate-limit.ts`) y que no hay archivos versionados fuera del
+  snapshot, del cotizador o de metadatos (`.gitignore`, `.env.example`).
+- Regla: nunca asumir que `main` es producción. Antes de fusionar, comparar
+  contra el despliegue de producción vigente.

@@ -7,6 +7,11 @@ import ThreeDProductGallery from "@/components/store/ThreeDProductGallery";
 import { matrixLab3dByHandle } from "@/lib/store/matrixlab-3d";
 import ProductGrid from "@/components/store/ProductGrid";
 import ProductOptions from "@/components/store/ProductOptions";
+import ReadyWearProduct from "@/components/store/ReadyWearProduct";
+import {
+  isReadyWearShirtHandle,
+  parseReadyWearColor,
+} from "@/lib/store/ready-wear-colors";
 import {
   DESIGNER_PRODUCT_HANDLES,
   getProductByHandle,
@@ -17,6 +22,7 @@ export const dynamic = "force-dynamic";
 
 interface ProductPageProps {
   params: Promise<{ handle: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({
@@ -41,8 +47,12 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({
+  params,
+  searchParams,
+}: ProductPageProps) {
   const { handle } = await params;
+  const { color } = (await searchParams) ?? {};
   const product = await getProductByHandle(handle);
   if (!product) notFound();
 
@@ -66,19 +76,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {product.category ? product.category.title : "Volver a la tienda"}
       </Link>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-2">
-        <Gallery
-          images={Array.isArray(product.images) ? product.images : []}
-          title={product.title}
+      {isReadyWearShirtHandle(product.handle) ? (
+        <ReadyWearProduct
+          product={product}
+          initialColor={parseReadyWearColor(
+            typeof color === "string" ? color : null,
+          )}
         />
+      ) : (
+        <div className="mt-8 grid gap-10 lg:grid-cols-2">
+          <Gallery
+            images={Array.isArray(product.images) ? product.images : []}
+            title={product.title}
+          />
 
-        <div>
-          <h1 className="text-3xl font-bold sm:text-4xl">{product.title}</h1>
-          <div className="mt-6">
-            <ProductOptions product={product} designerType={designerType} />
+          <div>
+            <h1 className="text-3xl font-bold sm:text-4xl">{product.title}</h1>
+            <div className="mt-6">
+              <ProductOptions product={product} designerType={designerType} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {product.description && (
         <section className="glass mt-12 max-w-3xl rounded-2xl p-7">

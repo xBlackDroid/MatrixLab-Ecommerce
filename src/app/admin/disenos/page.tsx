@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { TriangleAlert } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import DesignProjectCard, {
-  type AdminDesignAsset,
-  type AdminDesignView,
+import type {
+  AdminDesignAsset,
+  AdminDesignView,
 } from "@/components/admin/DesignProjectCard";
+import DesignProjectManager from "@/components/admin/DesignProjectManager";
 import { getServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl } from "@/lib/db/storage";
 import type { DesignProjectRow, UploadedAssetRow } from "@/lib/db/types";
@@ -23,14 +24,10 @@ export default async function AdminDisenosPage() {
 
   let views: AdminDesignView[] = [];
   if (client) {
-    // Un diseño GUARDADO por el cliente sigue en status 'draft' hasta que se
-    // agrega al carrito: debe aparecer aquí igual (QA: "guardar diseño →
-    // aparece en /admin/disenos"). Solo se ocultan los borradores vacíos
-    // (creados al subir la primera imagen, sin design_json guardado).
+    // Incluye borradores sin guardar: también deben poder limpiarse sus archivos.
     const { data } = await client
       .from("design_projects")
       .select("*, orders(order_number)")
-      .or("status.neq.draft,design_json.not.is.null")
       .order("updated_at", { ascending: false })
       .limit(80);
 
@@ -40,6 +37,8 @@ export default async function AdminDisenosPage() {
 
     // Archivos originales por diseño (v2 puede tener varios).
     const ids = designs.map((d) => d.id);
+    const { data: jobs } = await client.from("design_deletion_jobs").select("design_id").in("design_id", ids);
+    const pending = new Set((jobs ?? []).map(j => j.design_id));
     const assetsByDesign = new Map<string, UploadedAssetRow[]>();
     if (ids.length > 0) {
       const { data: assetData } = await client
@@ -91,6 +90,7 @@ export default async function AdminDisenosPage() {
           assets: assets as AdminDesignAsset[],
           fallbackOriginalUrl: fallbackOriginal,
           orderNumber: orders?.order_number ?? null,
+          deletionPending: pending.has(design.id),
         };
       }),
     );
@@ -112,11 +112,7 @@ export default async function AdminDisenosPage() {
           laboratorio aparecerá aquí.
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {views.map((view) => (
-            <DesignProjectCard key={view.design.id} view={view} csrf={admin.csrf} />
-          ))}
-        </div>
+        <DesignProjectManager views={views} csrf={admin.csrf} />
       )}
     </AdminLayout>
   );

@@ -164,7 +164,7 @@ export default function CourseGallery({
                     alt={image.alt}
                     fill
                     sizes="(max-width: 640px) 84vw, (max-width: 1024px) 58vw, 38vw"
-                    className="object-cover"
+                    className="object-contain"
                     // Sin `priority`: la galería vive MUY por debajo del
                     // pliegue. Marcar la primera foto como prioritaria
                     // inyectaría un <link rel=preload fetchpriority=high> que

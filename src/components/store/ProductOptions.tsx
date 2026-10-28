@@ -105,6 +105,8 @@ export default function ProductOptions({
       ? "sobre_pedido"
       : product.status;
 
+  if (product.tags.includes("precio-cotizacion")) return <div className="flex flex-col gap-4"><InventoryBadge status={product.status} /><p className="text-xl font-semibold">Precio por cotización</p><p className="text-sm text-ml-white/70">Disponible: {variants.reduce((n, v) => n + v.stock, 0)}</p><a href={buildWhatsAppUrl(`Hola MatrixLab, quiero cotizar ${product.title}.`)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-full bg-ml-green px-6 py-3 font-semibold text-ml-bg">Solicitar cotización</a></div>;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-2">

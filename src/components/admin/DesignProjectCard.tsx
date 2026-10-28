@@ -3,7 +3,7 @@
 import { Fragment, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Code2, Download, ImageOff } from "lucide-react";
+import { ChevronDown, Code2, Download, ImageOff, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import StatusBadge from "@/components/admin/StatusBadge";
 import type { DesignProjectRow } from "@/lib/db/types";
@@ -25,6 +25,7 @@ export interface AdminDesignView {
   assets: AdminDesignAsset[];
   fallbackOriginalUrl: string | null;
   orderNumber: string | null;
+  deletionPending?: boolean;
 }
 
 const FAMILY_LABELS: Record<string, string> = {
@@ -132,14 +133,22 @@ function extractProductionDetails(
 export default function DesignProjectCard({
   view,
   csrf,
+  selected,
+  onSelect,
+  onDelete,
 }: {
   view: AdminDesignView;
   csrf: string;
+  selected?: boolean;
+  onSelect?: (selected: boolean) => void;
+  onDelete?: (target: { designId: string; assetIds?: string[]; deleteProject?: boolean; resume?: boolean }) => void;
 }) {
   const router = useRouter();
   const { design } = view;
   const [busy, setBusy] = useState(false);
   const [showJson, setShowJson] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const locked = !!design.order_id || !!view.orderNumber;
 
   async function updateStatus(status: string) {
     setBusy(true);
@@ -196,6 +205,10 @@ export default function DesignProjectCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4 text-sm">
+        {onSelect && <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg bg-white/5 px-3 py-2">
+          <input type="checkbox" checked={!!selected} disabled={busy || locked || view.deletionPending} onChange={e => onSelect(e.target.checked)} className="h-5 w-5 accent-ml-violet" />
+          Seleccionar preview completo
+        </label>}
         <div className="flex items-center justify-between gap-2">
           <p className="font-bold">{displayName}</p>
           <p className="font-mono text-xs text-ml-white/45">
@@ -229,7 +242,7 @@ export default function DesignProjectCard({
             </Fragment>
           ))}
           <dt className="text-ml-white/40">Archivos</dt>
-          <dd>{downloads.length || (view.fallbackOriginalUrl ? 1 : 0)}</dd>
+          <dd>{view.assets.length || (view.fallbackOriginalUrl ? 1 : 0)}</dd>
           {view.orderNumber && (
             <>
               <dt className="text-ml-white/40">Pedido</dt>
@@ -246,18 +259,29 @@ export default function DesignProjectCard({
         )}
 
         <div className="mt-auto flex flex-col gap-2 pt-1">
-          {downloads.map((asset) => (
+          {view.assets.map((asset) => (
+            <div key={asset.id} className="flex min-w-0 items-center gap-2">
+            {onDelete && <label className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center">
+              <span className="sr-only">Seleccionar archivo {asset.fileName}</span><input type="checkbox" className="h-5 w-5 accent-ml-violet" checked={selectedFiles.includes(asset.id)} disabled={busy || locked || view.deletionPending}
+                onChange={e => setSelectedFiles(v => e.target.checked ? [...v, asset.id] : v.filter(id => id !== asset.id))} />
+            </label>}
+            {asset.signedUrl ? (
             <a
-              key={asset.id}
-              href={asset.signedUrl ?? "#"}
+              href={asset.signedUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 truncate rounded-full border border-ml-cyan/40 bg-ml-cyan/10 px-4 py-2 text-xs font-semibold text-ml-cyan transition hover:bg-ml-cyan/20"
+              className="inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 truncate rounded-full border border-ml-cyan/40 bg-ml-cyan/10 px-4 py-2 text-xs font-semibold text-ml-cyan transition hover:bg-ml-cyan/20"
             >
               <Download className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="truncate">{asset.fileName}</span>
             </a>
+            ) : <span className="min-w-0 flex-1 break-all text-xs text-ml-white/60">{asset.fileName} · descarga no disponible</span>}
+            </div>
           ))}
+          {onDelete && !locked && !view.deletionPending && <button type="button" disabled={!selectedFiles.length || busy} onClick={() => onDelete({designId:design.id,assetIds:selectedFiles})}
+            className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-ml-coral/35 px-3 py-2 text-sm text-ml-coral disabled:opacity-40"><Trash2 size={16} aria-hidden />Borrar archivos seleccionados ({selectedFiles.length})</button>}
+          {onDelete && view.deletionPending && <button type="button" className="min-h-11 rounded-xl border border-ml-coral/35 px-3 py-2 text-ml-coral" onClick={() => onDelete({designId:design.id,resume:true})}>Reintentar borrado pendiente</button>}
+          {locked && <p className="text-xs text-ml-white/60">Vinculado a un pedido: se conservan sus archivos de producción.</p>}
           {downloads.length === 0 && view.fallbackOriginalUrl && (
             <a
               href={view.fallbackOriginalUrl}

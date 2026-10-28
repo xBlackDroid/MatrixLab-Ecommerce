@@ -6,8 +6,14 @@ import InventoryBadge, {
   CustomizableBadge,
 } from "@/components/store/InventoryBadge";
 import ProductImagePlaceholder from "@/components/store/ProductImagePlaceholder";
+import ReadyWearProductCard from "@/components/store/ReadyWearProductCard";
+import { isReadyWearShirtHandle } from "@/lib/store/ready-wear-colors";
 
 export default function ProductCard({ product }: { product: ProductRow }) {
+  if (isReadyWearShirtHandle(product.handle)) {
+    return <ReadyWearProductCard product={product} />;
+  }
+
   const image = Array.isArray(product.images) ? product.images[0] : null;
 
   return (
@@ -39,7 +45,7 @@ export default function ProductCard({ product }: { product: ProductRow }) {
         <div className="mt-auto flex items-center justify-between gap-2">
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-ml-white">
-              {formatPrice(product.base_price)}
+              {product.tags.includes("precio-cotizacion") ? "Por cotización" : formatPrice(product.base_price)}
             </span>
             {product.compare_at_price &&
               Number(product.compare_at_price) > Number(product.base_price) && (

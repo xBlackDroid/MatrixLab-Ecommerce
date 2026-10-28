@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { isReadyWearShirtHandle, parseReadyWearColor, readyWearColorSlug } from "@/lib/store/ready-wear-colors";
 import { Loader2, Minus, Plus, Trash2, Wand2 } from "lucide-react";
 import type { CartLineView } from "@/lib/db/types";
 import { cn, formatPrice, formatUnitQuantity } from "@/lib/utils";
@@ -21,6 +22,8 @@ export default function CartLineItem({
   onRemove,
 }: CartLineItemProps) {
   const image = line.designPreviewUrl ?? line.image;
+  const color = isReadyWearShirtHandle(line.productHandle) ? parseReadyWearColor(line.variantTitle?.split(" / ").at(-1)) : null;
+  const productHref = `/tienda/producto/${line.productHandle}${color ? `?color=${readyWearColorSlug(color)}` : ""}`;
   const displayTitle = line.customTitle ?? line.title;
   // Unidad comercial resuelta en servidor. `null` en todo lo que se vende por
   // pieza (Tumbler, Laboratorio, resto del catálogo): ahí el copy no cambia.
@@ -47,7 +50,7 @@ export default function CartLineItem({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <Link
-              href={`/tienda/producto/${line.productHandle}`}
+              href={productHref}
               className="block truncate font-semibold hover:text-ml-violet"
             >
               {displayTitle}

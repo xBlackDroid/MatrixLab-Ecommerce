@@ -2,7 +2,13 @@
 
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MessageCircle, PartyPopper, Ticket } from "lucide-react";
+import {
+  CalendarClock,
+  Loader2,
+  MessageCircle,
+  PartyPopper,
+  Ticket,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,9 +25,13 @@ import { buildWhatsAppUrl } from "@/lib/whatsapp";
  * DECISIONES DE UX (el público es muy visual y no necesariamente técnico)
  * ----------------------------------------------------------------------
  * - Seis campos y ninguno de relleno. Sólo nombre y WhatsApp son obligatorios.
- * - La fecha y el número de lugares se eligen tocando TARJETAS GRANDES, no en
- *   un `<select>`. Un desplegable nativo en móvil abre una rueda diminuta y
- *   esconde las opciones justo cuando se está decidiendo.
+ * - El número de lugares se elige tocando TARJETAS GRANDES, no en un
+ *   `<select>`. Un desplegable nativo en móvil abre una rueda diminuta y
+ *   esconde las opciones justo cuando se está decidiendo. Lo mismo valía para
+ *   la fecha cuando se preguntaba (ver abajo).
+ * - Con la fecha ya CONFIRMADA no se pregunta nada: se MUESTRA el día y la
+ *   hora. Un campo que sólo tiene una respuesta posible es fricción, y dejarlo
+ *   abierto haría dudar de si la fecha está cerrada de verdad.
  * - Los botones son enormes y el principal ocupa todo el ancho en móvil.
  * - Cero jerga: "Quiero mi lugar", no "Enviar solicitud".
  * - No parece un formulario de empresa: ni campo de "razón social", ni
@@ -47,6 +57,8 @@ function partySizeOptions(max: number): string[] {
 }
 
 function buildFormSchema(rules: CourseRegistrationRules) {
+  // Fechas que acepta el sondeo. Con fecha ya confirmada no se usa: no hay
+  // nada que elegir (ver el campo `preferredDate` más abajo).
   const dateValues = new Set([
     ...rules.dateOptions.map((option) => option.value),
     COURSE_ANY_DATE_VALUE,
@@ -76,9 +88,23 @@ function buildFormSchema(rules: CourseRegistrationRules) {
     email: z
       .union([z.literal(""), z.email("Correo inválido.").max(120)])
       .optional(),
+    /**
+     * Fecha preferida.
+     *
+     * Con fecha confirmada no se valida NADA: el campo no se pinta, no se
+     * envía y el servidor escribe la fecha del catálogo. Exigir aquí un valor
+     * que nadie puede elegir sólo conseguiría bloquear el envío de un
+     * formulario que la persona llenó bien.
+     *
+     * En sondeo sí se valida, y es el mismo criterio que el servidor —que es
+     * quien decide— aplica con `courseDateValues`.
+     */
     preferredDate: z
       .string()
-      .refine((value) => dateValues.has(value), "Elige una fecha."),
+      .refine(
+        (value) => Boolean(rules.confirmedDate) || dateValues.has(value),
+        "Elige una fecha.",
+      ),
     // Se maneja como texto porque viene de un grupo de radios; el servidor lo
     // convierte y lo vuelve a validar contra el tope real de la edición.
     partySize: z
@@ -116,25 +142,30 @@ export default function CourseRegistrationForm({
   courseSlug: string;
   /** Número de edición al que apunta el registro. */
   edition: number;
-  /** Fechas del sondeo y tope de lugares: lo único que valida el formulario. */
+  /** Fecha (confirmada o en sondeo) y tope de lugares: lo único que valida. */
   rules: CourseRegistrationRules;
 }) {
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const confirmationRef = useRef<HTMLDivElement>(null);
 
-  const dateChoices = [
-    ...rules.dateOptions.map((option) => ({
-      value: option.value,
-      label: option.label,
-      hint: "Prefiero este día",
-    })),
-    {
-      value: COURSE_ANY_DATE_VALUE,
-      label: "Cualquiera",
-      hint: "Me acomodan los dos",
-    },
-  ];
+  const confirmedDate = rules.confirmedDate;
+  /** Tarjetas del sondeo. Vacío cuando la fecha ya está confirmada. */
+  const dateChoices: { value: string; label: string; hint: string }[] =
+    confirmedDate
+      ? []
+      : [
+          ...rules.dateOptions.map((option) => ({
+            value: option.value,
+            label: option.label,
+            hint: "Prefiero este día",
+          })),
+          {
+            value: COURSE_ANY_DATE_VALUE,
+            label: "Cualquiera",
+            hint: "Me acomoda cualquiera",
+          },
+        ];
   const sizes = partySizeOptions(rules.maxPartySize);
 
   const {
@@ -168,7 +199,11 @@ export default function CourseRegistrationForm({
           name: values.name,
           phone: values.phone,
           email: values.email || undefined,
-          preferredDate: values.preferredDate,
+          // Con fecha confirmada NO se manda: la pone el servidor desde el
+          // catálogo (`resolveCoursePreferredDate`). `JSON.stringify` descarta
+          // la clave cuando vale `undefined`, y el esquema del servidor —que es
+          // `.strict()`— la acepta ausente justo en ese caso.
+          preferredDate: confirmedDate ? undefined : values.preferredDate,
           partySize: Number(values.partySize),
           comment: values.comment || undefined,
           // El campo trampa viaja siempre: si no se envía, no puede atrapar
@@ -265,7 +300,7 @@ export default function CourseRegistrationForm({
         <Field
           id="curso-whatsapp"
           label="¿A qué WhatsApp te escribimos?"
-          hint="Por aquí te confirmamos fecha y disponibilidad."
+          hint="Por aquí te confirmamos tu lugar y la forma de pago."
           error={errors.phone?.message}
         >
           <input
@@ -299,56 +334,85 @@ export default function CourseRegistrationForm({
           />
         </Field>
 
-        {/* Fecha: tarjetas grandes en vez de un desplegable. Es la pregunta
-            del sondeo y tiene que verse entera de un golpe. */}
-        {/* `role="radiogroup"` + `aria-invalid` en el GRUPO, no en cada radio:
-            ARIA no admite `aria-invalid` en `role="radio"` (lo marca
-            jsx-a11y/role-supports-aria-props) y un lector de pantalla lo
-            ignoraría ahí. El <legend> sigue dando el nombre accesible. */}
-        <fieldset
-          role="radiogroup"
-          aria-invalid={errors.preferredDate ? "true" : undefined}
-          aria-describedby={
-            errors.preferredDate ? "curso-fecha-error" : undefined
-          }
-        >
-          <legend className="text-base font-semibold text-ml-white">
-            ¿Qué día te acomoda?
-          </legend>
-          <p className="mt-1 text-sm text-ml-white/55">
-            Todavía estamos eligiendo entre los dos. Tu respuesta decide.
-          </p>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {dateChoices.map((choice) => (
-              <label
-                key={choice.value}
-                className="group relative flex cursor-pointer flex-col rounded-2xl border border-ml-white/12 bg-ml-white/[0.04] p-4 transition hover:border-ml-cyan/45 has-[:checked]:border-ml-cyan has-[:checked]:bg-ml-cyan/10 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ml-cyan/60"
-              >
-                <input
-                  type="radio"
-                  value={choice.value}
-                  className="sr-only"
-                  {...register("preferredDate")}
-                />
-                <span className="text-lg font-bold text-ml-white group-has-[:checked]:text-ml-cyan">
-                  {choice.label}
-                </span>
-                <span className="mt-0.5 text-sm text-ml-white/55">
-                  {choice.hint}
-                </span>
-              </label>
-            ))}
+        {confirmedDate ? (
+          /* Fecha CERRADA: se informa, no se pregunta. No es un campo —no hay
+             input, no hay nada que validar— sino el dato que la persona
+             necesita tener delante justo antes de dar sus datos. */
+          <div className="rounded-2xl border border-ml-cyan/25 bg-ml-cyan/[0.07] p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-ml-cyan/15 text-ml-cyan">
+                <CalendarClock className="h-5 w-5" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ml-cyan">
+                  Fecha confirmada
+                </p>
+                <p className="mt-1 text-lg font-bold leading-tight text-ml-white">
+                  <time
+                    dateTime={`${confirmedDate.iso}T${confirmedDate.startTime}`}
+                  >
+                    {confirmedDate.label}
+                  </time>
+                </p>
+                {/* Sólo la hora de inicio: la duración no está confirmada. */}
+                <p className="mt-0.5 text-sm text-ml-white/60">
+                  {confirmedDate.timeLabel}
+                </p>
+              </div>
+            </div>
           </div>
-          {errors.preferredDate?.message && (
-            <p
-              id="curso-fecha-error"
-              role="alert"
-              className="mt-2 text-sm font-medium text-ml-coral"
-            >
-              {errors.preferredDate.message}
+        ) : (
+          /* Edición EN SONDEO: tarjetas grandes en vez de un desplegable. Es la
+             pregunta del sondeo y tiene que verse entera de un golpe. */
+          /* `role="radiogroup"` + `aria-invalid` en el GRUPO, no en cada radio:
+             ARIA no admite `aria-invalid` en `role="radio"` (lo marca
+             jsx-a11y/role-supports-aria-props) y un lector de pantalla lo
+             ignoraría ahí. El <legend> sigue dando el nombre accesible. */
+          <fieldset
+            role="radiogroup"
+            aria-invalid={errors.preferredDate ? "true" : undefined}
+            aria-describedby={
+              errors.preferredDate ? "curso-fecha-error" : undefined
+            }
+          >
+            <legend className="text-base font-semibold text-ml-white">
+              ¿Qué día te acomoda?
+            </legend>
+            <p className="mt-1 text-sm text-ml-white/55">
+              Todavía estamos eligiendo el día. Tu respuesta decide.
             </p>
-          )}
-        </fieldset>
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {dateChoices.map((choice) => (
+                <label
+                  key={choice.value}
+                  className="group relative flex cursor-pointer flex-col rounded-2xl border border-ml-white/12 bg-ml-white/[0.04] p-4 transition hover:border-ml-cyan/45 has-[:checked]:border-ml-cyan has-[:checked]:bg-ml-cyan/10 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ml-cyan/60"
+                >
+                  <input
+                    type="radio"
+                    value={choice.value}
+                    className="sr-only"
+                    {...register("preferredDate")}
+                  />
+                  <span className="text-lg font-bold text-ml-white group-has-[:checked]:text-ml-cyan">
+                    {choice.label}
+                  </span>
+                  <span className="mt-0.5 text-sm text-ml-white/55">
+                    {choice.hint}
+                  </span>
+                </label>
+              ))}
+            </div>
+            {errors.preferredDate?.message && (
+              <p
+                id="curso-fecha-error"
+                role="alert"
+                className="mt-2 text-sm font-medium text-ml-coral"
+              >
+                {errors.preferredDate.message}
+              </p>
+            )}
+          </fieldset>
+        )}
 
         {/* Lugares: pastillas numéricas. Un `<select>` de 1 a 6 sería más
             código de accesibilidad y menos claro al tacto. */}
@@ -522,7 +586,8 @@ function ConfirmationPanel({
           ¡Tu registro quedó recibido! ✨
         </h3>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-ml-white/75">
-          Te contactaremos por WhatsApp para confirmar fecha y disponibilidad.
+          Te contactaremos por WhatsApp para confirmar tu lugar y la forma de
+          pago.
         </p>
         <p className="mx-auto mt-3 max-w-md text-sm text-ml-white/50">
           Todavía no hay pago ni lugar apartado en firme: eso lo cerramos

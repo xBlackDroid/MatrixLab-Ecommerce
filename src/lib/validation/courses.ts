@@ -11,9 +11,10 @@ import { COURSE_ANY_DATE_VALUE } from "@/lib/store/courses/matrixlab-tumbler";
  * endpoint vuelve a construir este esquema DESDE LOS DATOS DE LA EDICIÓN y
  * revalida el payload completo antes de escribir una sola fila.
  *
- * Por qué es un CONSTRUCTOR y no un esquema fijo: las fechas del sondeo y el
- * tope de lugares son datos de la edición. La Edición 3 tendrá otras fechas, y
- * un enum quemado aquí las aceptaría mal o las rechazaría todas. Derivando el
+ * Por qué es un CONSTRUCTOR y no un esquema fijo: la fecha y el tope de
+ * lugares son datos de la edición. Una edición puede tener la fecha YA CERRADA
+ * (y entonces no hay nada que elegir) u ofrecer un sondeo con sus propias
+ * opciones; un enum quemado aquí aceptaría mal o rechazaría todo. Derivando el
  * esquema de la edición, la validación sigue siendo exacta sin tocar código.
  */
 
@@ -117,12 +118,39 @@ export const COURSE_REGISTRATION_INITIAL_STATUS: CourseRegistrationStatus =
  */
 export const COURSE_HONEYPOT_FIELD = "website";
 
-/** Valores de fecha aceptados por una edición (sondeo + "cualquiera"). */
+/**
+ * Valores de fecha aceptados por una edición.
+ *
+ * Con fecha CONFIRMADA el único valor válido es el de esa fecha: no hay sondeo
+ * que contestar y "cualquiera" dejó de significar algo. En sondeo son las
+ * opciones de la edición más "cualquiera".
+ */
 export function courseDateValues(edition: CourseRegistrationRules): string[] {
+  if (edition.confirmedDate) return [edition.confirmedDate.value];
   return [
     ...edition.dateOptions.map((option) => option.value),
     COURSE_ANY_DATE_VALUE,
   ];
+}
+
+/**
+ * Qué se guarda en `course_registrations.preferred_date` para esta edición.
+ *
+ * Con fecha confirmada lo decide el SERVIDOR y no el payload: el formulario ya
+ * no manda nada (no hay pregunta que contestar) y la columna es `not null`, así
+ * que el valor sale del catálogo. Es el mismo criterio que con `status`, que
+ * tampoco se acepta del cliente.
+ *
+ * Devuelve `null` sólo en el caso imposible de una edición en sondeo sin fecha
+ * en el payload — el esquema ya lo rechaza antes, y el endpoint lo trata como
+ * datos inválidos en vez de escribir una fila a medias.
+ */
+export function resolveCoursePreferredDate(
+  edition: CourseRegistrationRules,
+  submitted: string | undefined,
+): string | null {
+  if (edition.confirmedDate) return edition.confirmedDate.value;
+  return submitted ?? null;
 }
 
 /**
@@ -135,12 +163,29 @@ export function buildCourseRegistrationFieldsSchema(edition: CourseRegistrationR
     name: nameField,
     phone: whatsappField,
     email: emailField,
-    preferredDate: z
-      .string()
-      .refine(
-        (value) => allowedDates.has(value),
-        "Elige una de las fechas del sondeo.",
-      ),
+    /**
+     * Fecha preferida.
+     *
+     * OPCIONAL cuando la edición ya tiene fecha: el formulario no la pregunta
+     * y el servidor la resuelve con `resolveCoursePreferredDate`. Si llega de
+     * todos modos —una pestaña vieja con el bundle del sondeo— sólo se admite
+     * la fecha publicada: antes que guardar "sabado-3" en una edición que ya
+     * cerró en viernes, se rechaza el envío.
+     */
+    preferredDate: edition.confirmedDate
+      ? z
+          .string()
+          .refine(
+            (value) => allowedDates.has(value),
+            "Esta edición ya tiene fecha confirmada.",
+          )
+          .optional()
+      : z
+          .string()
+          .refine(
+            (value) => allowedDates.has(value),
+            "Elige una de las fechas del sondeo.",
+          ),
     partySize: z.coerce
       .number()
       .int("Elige cuántos lugares quieres.")

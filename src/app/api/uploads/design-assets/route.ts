@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
+import { withDesignWriteLease } from "@/lib/designer/write-lease";
 import { jsonError, tooManyRequests } from "@/lib/api";
 import { requireServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl, uploadToBucket } from "@/lib/db/storage";
@@ -22,6 +23,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 /**
  * Subida de archivos del diseñador a storage PRIVADO.
@@ -168,17 +170,19 @@ export async function POST(request: NextRequest) {
     return jsonError("El archivo no es una imagen válida.", 415);
   }
 
+  const imageType = detected;
+  return withDesignWriteLease(request, design.id, async () => {
   // Renombrado en servidor: el nombre original jamás forma parte de la ruta.
   const sessionHash = hashSessionId(sessionId);
   const fileId = nanoid(14);
-  const originalPath = `${sessionHash}/${design.id}/${fileId}.${detected.ext}`;
+  const originalPath = `${sessionHash}/${design.id}/${fileId}.${imageType.ext}`;
   const previewPath = `${sessionHash}/${design.id}/${fileId}-preview.webp`;
 
   const originalUpload = await uploadToBucket({
     bucket: BUCKETS.designAssets,
     path: originalPath,
     body: buffer,
-    contentType: detected.mime,
+    contentType: imageType.mime,
   });
   if (!originalUpload.ok) {
     return jsonError(
@@ -237,5 +241,6 @@ export async function POST(request: NextRequest) {
     width,
     height,
     fileName: safeFileName(file.name),
+  });
   });
 }

@@ -20,10 +20,11 @@ export function checkAvailability(
   product: Pick<
     ProductRow,
     "status" | "min_quantity" | "max_quantity"
-  >,
+  > & { tags?: string[] },
   variant: Pick<ProductVariantRow, "status" | "stock"> | null,
   quantity: number,
 ): AvailabilityResult {
+  if (product.tags?.includes("precio-cotizacion")) return { ok: false, reason: "no_disponible" };
   if (!Number.isInteger(quantity) || quantity <= 0) {
     return { ok: false, reason: "cantidad_invalida" };
   }
@@ -104,18 +105,26 @@ export async function adjustStock(params: {
   return { ok: true, variant: updated as ProductVariantRow };
 }
 
-export async function listInventory(): Promise<
-  Array<ProductVariantRow & { products: Pick<ProductRow, "title" | "handle"> | null }>
-> {
+type InventoryEntry = ProductVariantRow & { products: Pick<ProductRow, "title" | "handle"> | null };
+
+export async function listInventory(): Promise<InventoryEntry[]> {
   const client = requireServiceClient();
-  const { data, error } = await client
-    .from("product_variants")
-    .select("*, products(title, handle)")
-    .order("created_at", { ascending: true });
-  if (error || !data) return [];
-  return data as Array<
-    ProductVariantRow & { products: Pick<ProductRow, "title" | "handle"> | null }
-  >;
+  const entries: InventoryEntry[] = [];
+  const pageSize = 500;
+  // La ampliación por color supera 1,000 variantes. Leer todas las páginas
+  // evita omitir existencias en el administrador por el límite del Data API.
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await client
+      .from("product_variants")
+      .select("*, products(title, handle)")
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(offset, offset + pageSize - 1);
+    if (error) throw new Error("No pudimos consultar el inventario.");
+    const page = (data ?? []) as InventoryEntry[];
+    entries.push(...page);
+    if (page.length < pageSize) return entries;
+  }
 }
 
 export async function listMovements(

@@ -1,4 +1,5 @@
 import AdminNav from "@/components/admin/AdminNav";
+import { getServerEnv } from "@/lib/security/env";
 
 /**
  * Shell del panel admin. Cada página admin valida la sesión en servidor
@@ -17,7 +18,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className="min-h-screen">
-      <AdminNav />
+      <AdminNav consignmentsEnabled={getServerEnv().consignmentsEnabled} />
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>

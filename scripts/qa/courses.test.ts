@@ -4,11 +4,13 @@
  * Cubre las cuatro cosas que, si se rompen, no se notan hasta que alguien
  * intenta registrarse:
  *
- *   1. Los datos del curso son coherentes (la edición publicada existe, las
- *      fechas del sondeo son valores estables, la ruta declarada es la ruta
- *      real del App Router).
+ *   1. Los datos del curso son coherentes (la edición publicada existe, su
+ *      fecha es un valor estable y lo que se lee coincide con la fecha real, la
+ *      ruta declarada es la ruta real del App Router).
  *   2. La validación del servidor acepta lo que debe y RECHAZA lo que debe:
- *      fechas inventadas, más lugares de los permitidos, claves de más.
+ *      fechas inventadas, más lugares de los permitidos, claves de más. Se
+ *      cubren LOS DOS modos de fecha —confirmada y en sondeo— porque el sondeo
+ *      sigue soportado para una edición futura aunque hoy no se use.
  *   3. Los enlaces de video se filtran por host y esquema (nada de
  *      `javascript:` ni de dominios ajenos con la marca encima).
  *   4. La galería descubre archivos por convención e IGNORA lo que no lo es.
@@ -37,12 +39,14 @@ import {
   MATRIXLAB_TUMBLER_COURSE_SLUG,
   safeCourseVideos,
 } from "../../src/lib/store/courses";
+import type { CourseRegistrationRules } from "../../src/lib/store/courses/types";
 import { listCourseGalleryImages } from "../../src/lib/store/courses/gallery";
 import {
   buildCourseRegistrationSchema,
   COURSE_HONEYPOT_FIELD,
   COURSE_REGISTRATION_INITIAL_STATUS,
   courseDateValues,
+  resolveCoursePreferredDate,
 } from "../../src/lib/validation/courses";
 import { isDynamicRoute, normalizePath } from "../../src/middleware";
 
@@ -107,20 +111,164 @@ check(
   course.categoryHref,
 );
 
+// --- Fecha -----------------------------------------------------------------
+/**
+ * Una edición está en UNO de dos modos y nunca en los dos: fecha CONFIRMADA
+ * (`confirmedDate`) o SONDEO (`dateOptions`). Declarar ambos dejaría la página
+ * publicando un día y preguntando al mismo tiempo por otro.
+ */
 check(
-  "los valores de fecha del sondeo son estables (kebab-case, sin acentos)",
-  edition.dateOptions.every((option) => /^[a-z0-9-]+$/.test(option.value)),
-  edition.dateOptions.map((o) => o.value).join(", "),
+  "la edición no tiene fecha confirmada y sondeo a la vez",
+  !(edition.confirmedDate && edition.dateOptions.length > 0),
+  edition.confirmedDate
+    ? `confirmada: ${edition.confirmedDate.label}`
+    : `sondeo de ${edition.dateOptions.length} opción(es)`,
 );
 check(
-  "ninguna opción de fecha colisiona con el valor 'cualquiera'",
-  edition.dateOptions.every((option) => option.value !== COURSE_ANY_DATE_VALUE),
+  "la edición publicada tiene una fecha que mostrar",
+  Boolean(edition.confirmedDate) || edition.dateOptions.length > 0,
 );
-check(
-  "los valores de fecha no se repiten",
-  new Set(edition.dateOptions.map((o) => o.value)).size ===
-    edition.dateOptions.length,
-);
+
+const confirmed = edition.confirmedDate;
+if (confirmed) {
+  // Nombres en español fijos y NO `Intl`: así el resultado no depende de los
+  // datos de locale del Node que corre el QA.
+  const WEEKDAYS_ES = [
+    "domingo",
+    "lunes",
+    "martes",
+    "miércoles",
+    "jueves",
+    "viernes",
+    "sábado",
+  ];
+  const MONTHS_ES = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
+
+  check(
+    "el valor que se guarda es estable (kebab-case, sin acentos)",
+    /^[a-z0-9-]+$/.test(confirmed.value),
+    confirmed.value,
+  );
+  /**
+   * El CHECK de la migración 0008 limita `preferred_date` a 40 caracteres. Un
+   * valor más largo pasaría el type-check y reventaría al INSERTAR, ya con la
+   * persona esperando la confirmación.
+   */
+  check(
+    "el valor cabe en la columna preferred_date (1..40)",
+    confirmed.value.length >= 1 && confirmed.value.length <= 40,
+    `${confirmed.value.length} caracteres`,
+  );
+  check(
+    "el valor no colisiona con 'cualquiera'",
+    confirmed.value !== COURSE_ANY_DATE_VALUE,
+  );
+  check(
+    "la fecha ISO está bien formada (YYYY-MM-DD)",
+    /^\d{4}-\d{2}-\d{2}$/.test(confirmed.iso),
+    confirmed.iso,
+  );
+  check(
+    "la hora de inicio está bien formada (HH:MM, 24 h)",
+    /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(confirmed.startTime),
+    confirmed.startTime,
+  );
+
+  /**
+   * LO QUE SE LEE TIENE QUE SER LA FECHA REAL.
+   *
+   * El `<time dateTime>` sale de `iso` y el texto visible de `label`: si uno
+   * dice 13 de noviembre y el otro 12, nada falla en build y la gente llega
+   * el día equivocado. Aquí se derivan el día de la semana, el día y el mes
+   * DESDE `iso` y se exige que `label` los diga.
+   */
+  const at = new Date(`${confirmed.iso}T12:00:00Z`);
+  const labelLower = confirmed.label.toLowerCase();
+  check("la fecha ISO es una fecha válida", !Number.isNaN(at.getTime()));
+  check(
+    "el día de la semana escrito coincide con la fecha ISO",
+    labelLower.includes(WEEKDAYS_ES[at.getUTCDay()]),
+    `${confirmed.label} → ${WEEKDAYS_ES[at.getUTCDay()]}`,
+  );
+  check(
+    "el día del mes escrito coincide con la fecha ISO",
+    new RegExp(`\\b${at.getUTCDate()}\\b`).test(labelLower),
+    String(at.getUTCDate()),
+  );
+  check(
+    "el mes escrito coincide con la fecha ISO",
+    labelLower.includes(MONTHS_ES[at.getUTCMonth()]),
+    MONTHS_ES[at.getUTCMonth()],
+  );
+  check(
+    "el año escrito coincide con la fecha ISO",
+    labelLower.includes(String(at.getUTCFullYear())),
+    String(at.getUTCFullYear()),
+  );
+
+  // La hora que se lee contra la hora que se declara (12 h vs 24 h).
+  const [hh24, mm] = confirmed.startTime.split(":").map(Number);
+  const hour12 = hh24 % 12 === 0 ? 12 : hh24 % 12;
+  const isMorning = hh24 < 12;
+  check(
+    "la hora escrita coincide con la hora de inicio",
+    confirmed.timeLabel.startsWith(`${hour12}:${String(mm).padStart(2, "0")}`),
+    `${confirmed.startTime} → ${confirmed.timeLabel}`,
+  );
+  check(
+    "la hora escrita lleva el meridiano correcto",
+    /a\.?\s?m\.?/i.test(confirmed.timeLabel) === isMorning,
+    confirmed.timeLabel,
+  );
+  check(
+    "la versión corta de la fecha no está vacía",
+    confirmed.short.trim().length > 0 && confirmed.short.length <= 20,
+    confirmed.short,
+  );
+
+  // Sondeo RETIRADO del flujo activo: ni opciones ni frase de sondeo.
+  check("no quedan opciones de sondeo", edition.dateOptions.length === 0);
+  check(
+    "no queda frase de sondeo",
+    edition.datePollLabel === undefined,
+    String(edition.datePollLabel),
+  );
+} else {
+  check(
+    "los valores de fecha del sondeo son estables (kebab-case, sin acentos)",
+    edition.dateOptions.every((option) => /^[a-z0-9-]+$/.test(option.value)),
+    edition.dateOptions.map((o) => o.value).join(", "),
+  );
+  check(
+    "ninguna opción de fecha colisiona con el valor 'cualquiera'",
+    edition.dateOptions.every(
+      (option) => option.value !== COURSE_ANY_DATE_VALUE,
+    ),
+  );
+  check(
+    "los valores de fecha no se repiten",
+    new Set(edition.dateOptions.map((o) => o.value)).size ===
+      edition.dateOptions.length,
+  );
+  check(
+    "el sondeo tiene una frase que mostrar",
+    Boolean(edition.datePollLabel?.trim()),
+  );
+}
+
 check("el precio es un entero positivo", Number.isInteger(edition.priceMxn) && edition.priceMxn > 0);
 check(
   "el precio se escribe sin centavos",
@@ -224,19 +372,90 @@ check(
   materialsFaq?.answer ?? "",
 );
 
+/**
+ * El FAQ es el sitio donde más fácil se queda un copy viejo: nadie lo lee
+ * entero al cambiar una fecha. Estas comprobaciones lo atan a los DATOS.
+ */
+const whenFaq = edition.faq.find((item) =>
+  item.question.toLowerCase().includes("cuándo"),
+);
+check("existe la pregunta de cuándo en el FAQ", Boolean(whenFaq));
+if (confirmed) {
+  check(
+    "la respuesta de cuándo dice la fecha confirmada",
+    (whenFaq?.answer.toLowerCase() ?? "").includes(
+      confirmed.label.toLowerCase(),
+    ),
+    whenFaq?.answer ?? "",
+  );
+  /**
+   * Y NO sigue hablando de un sondeo que ya se cerró. Un "estamos definiendo"
+   * olvidado aquí contradice al hero en la misma página.
+   */
+  const RASTROS_DE_SONDEO = [
+    /estamos\s+(definiendo|eligiendo|entre)/i,
+    /tu\s+preferencia/i,
+    /sondeo/i,
+  ];
+  check(
+    "la respuesta de cuándo no habla ya del sondeo",
+    RASTROS_DE_SONDEO.every(
+      (pattern) => !pattern.test(whenFaq?.answer ?? ""),
+    ),
+    whenFaq?.answer ?? "",
+  );
+}
+
+const whereFaq = edition.faq.find((item) =>
+  item.question.toLowerCase().includes("dónde"),
+);
+check("existe la pregunta de dónde en el FAQ", Boolean(whereFaq));
+check(
+  "la respuesta de dónde nombra la sede de la edición",
+  (whereFaq?.answer ?? "").includes(edition.venue.name),
+  `${whereFaq?.answer ?? ""} (sede: ${edition.venue.name})`,
+);
+
+/**
+ * La DURACIÓN no está confirmada: no se escribe en ningún copy de la edición.
+ * Si alguien la inventa ("dura 4 horas", "de 10 a 2"), esto lo frena.
+ */
+const COPY_DE_LA_EDICION = [
+  edition.pitch,
+  edition.hero.copy,
+  ...edition.faq.map((item) => `${item.question} ${item.answer}`),
+  ...edition.experience.map((item) => `${item.title} ${item.description}`),
+].join("\n");
+const AFIRMACIONES_DE_DURACION = [
+  /\bdura\w*\s+\d/i, // "dura 4 horas"
+  /\b\d+\s*(h|hrs?|horas?)\b/i, // "4 horas", "4h"
+  /\bde\s+\d{1,2}(:\d{2})?\s*(a|hasta)\s+\d{1,2}(:\d{2})?\b/i, // "de 10 a 2"
+];
+check(
+  "ningún copy de la edición inventa una duración",
+  AFIRMACIONES_DE_DURACION.every((pattern) => !pattern.test(COPY_DE_LA_EDICION)),
+);
+
 // ---------------------------------------------------------------------------
 // 2. Validación del registro (la del SERVIDOR)
 // ---------------------------------------------------------------------------
 console.log("\n--- 2. Validación del registro ---");
 
 const schema = buildCourseRegistrationSchema(edition);
+/**
+ * Payload mínimo correcto. La fecha se añade SÓLO si la edición la pregunta:
+ * con fecha confirmada el formulario no manda `preferredDate` y la pone el
+ * servidor, así que el caso bueno es justamente el que no la lleva.
+ */
 const validPayload = {
   courseSlug: course.slug,
   edition: edition.edition,
   name: "Ana López",
   phone: "5512345678",
-  preferredDate: edition.dateOptions[0].value,
   partySize: 2,
+  // `?.` para que una edición sin fecha ni sondeo haga FALLAR el check de
+  // arriba en vez de reventar el script entero con un TypeError.
+  ...(confirmed ? {} : { preferredDate: edition.dateOptions[0]?.value ?? "" }),
 };
 
 check("un registro correcto pasa", schema.safeParse(validPayload).success);
@@ -245,16 +464,128 @@ check(
   schema.safeParse({ ...validPayload, email: "" }).success &&
     schema.safeParse({ ...validPayload, email: "ana@ejemplo.com" }).success,
 );
+
+if (confirmed) {
+  check(
+    "con fecha confirmada, courseDateValues sólo admite esa fecha",
+    courseDateValues(edition).length === 1 &&
+      courseDateValues(edition)[0] === confirmed.value,
+    courseDateValues(edition).join(", "),
+  );
+  check(
+    "se acepta el registro SIN fecha (la pone el servidor)",
+    schema.safeParse(validPayload).success,
+  );
+  check(
+    "se acepta la fecha confirmada si llega en el payload",
+    schema.safeParse({ ...validPayload, preferredDate: confirmed.value })
+      .success,
+  );
+  /**
+   * Una pestaña vieja con el bundle del sondeo mandaría "sabado-3" o
+   * "cualquiera". Antes que guardar un día que ya no existe, se rechaza.
+   */
+  check(
+    "se rechaza 'cualquiera' (ya no significa nada)",
+    !schema.safeParse({
+      ...validPayload,
+      preferredDate: COURSE_ANY_DATE_VALUE,
+    }).success,
+  );
+  check(
+    "se rechaza una fecha del sondeo viejo",
+    !schema.safeParse({ ...validPayload, preferredDate: "sabado-3" }).success,
+  );
+
+  /**
+   * Y DECIDE EL SERVIDOR: lo que se escribe en `preferred_date` sale del
+   * catálogo, no del payload. Da igual qué llegue (o que no llegue nada).
+   */
+  check(
+    "el servidor guarda la fecha confirmada cuando no llega ninguna",
+    resolveCoursePreferredDate(edition, undefined) === confirmed.value,
+  );
+  check(
+    "el servidor ignora la fecha del payload y guarda la confirmada",
+    resolveCoursePreferredDate(edition, "sabado-3") === confirmed.value,
+  );
+} else {
+  check(
+    "en sondeo, courseDateValues incluye las opciones y 'cualquiera'",
+    courseDateValues(edition).length === edition.dateOptions.length + 1,
+  );
+  check(
+    "'cualquiera' es una fecha aceptada",
+    schema.safeParse({
+      ...validPayload,
+      preferredDate: COURSE_ANY_DATE_VALUE,
+    }).success,
+  );
+  check(
+    "en sondeo, la fecha es obligatoria",
+    !schema.safeParse({
+      ...validPayload,
+      preferredDate: undefined,
+    }).success,
+  );
+}
+
+/**
+ * EL SONDEO SIGUE SOPORTADO.
+ *
+ * Hoy ninguna edición lo usa, así que los `check` de arriba no lo ejercitan.
+ * Esta edición de mentira existe para que el modo no se rompa en silencio y
+ * reaparezca averiado el día que una Edición 3 vuelva a preguntar la fecha.
+ */
+const SONDEO_DE_PRUEBA: CourseRegistrationRules = {
+  dateOptions: [
+    { value: "viernes-20", label: "Viernes 20", short: "Vie 20" },
+    { value: "sabado-21", label: "Sábado 21", short: "Sáb 21" },
+  ],
+  maxPartySize: 4,
+};
+const pollSchema = buildCourseRegistrationSchema(SONDEO_DE_PRUEBA);
+const pollPayload = {
+  courseSlug: course.slug,
+  edition: 99,
+  name: "Ana López",
+  phone: "5512345678",
+  partySize: 2,
+  preferredDate: "viernes-20",
+};
 check(
-  "'cualquiera' es una fecha aceptada",
-  schema.safeParse({
-    ...validPayload,
+  "una edición en sondeo acepta una de sus opciones",
+  pollSchema.safeParse(pollPayload).success,
+);
+check(
+  "una edición en sondeo acepta 'cualquiera'",
+  pollSchema.safeParse({
+    ...pollPayload,
     preferredDate: COURSE_ANY_DATE_VALUE,
   }).success,
 );
 check(
-  "courseDateValues incluye el sondeo y 'cualquiera'",
-  courseDateValues(edition).length === edition.dateOptions.length + 1,
+  "una edición en sondeo exige la fecha",
+  !pollSchema.safeParse({ ...pollPayload, preferredDate: undefined }).success,
+);
+check(
+  "una edición en sondeo rechaza una fecha ajena",
+  !pollSchema.safeParse({ ...pollPayload, preferredDate: "lunes-9" }).success,
+);
+check(
+  "una edición en sondeo guarda la fecha elegida",
+  resolveCoursePreferredDate(SONDEO_DE_PRUEBA, "sabado-21") === "sabado-21",
+);
+check(
+  "una edición en sondeo sin fecha no resuelve ningún valor",
+  resolveCoursePreferredDate(SONDEO_DE_PRUEBA, undefined) === null,
+);
+check(
+  "una edición en sondeo respeta su propio tope de lugares",
+  !pollSchema.safeParse({
+    ...pollPayload,
+    partySize: SONDEO_DE_PRUEBA.maxPartySize + 1,
+  }).success,
 );
 
 // Teléfonos que la gente escribe de verdad: todos deben normalizar a 10 dígitos.
@@ -274,7 +605,10 @@ for (const raw of [
 }
 
 for (const [label, payload] of [
-  ["una fecha fuera del sondeo", { ...validPayload, preferredDate: "lunes-9" }],
+  [
+    "una fecha que la edición no acepta",
+    { ...validPayload, preferredDate: "lunes-9" },
+  ],
   [
     "más lugares que el tope de la edición",
     { ...validPayload, partySize: edition.maxPartySize + 1 },
@@ -522,6 +856,33 @@ for (const header of HEADERS) {
     !source.includes(`"${MATRIXLAB_TUMBLER_COURSE.href}"`),
     header.file,
   );
+}
+
+// ---------------------------------------------------------------------------
+console.log("\n--- 8. La fecha se lee de los datos, no del JSX ---");
+
+/**
+ * Las tres vistas que anuncian la fecha tienen que SACARLA de la edición.
+ *
+ * Es invisible en type-check y en build: una fecha escrita a mano en el JSX
+ * compila igual de bien y se queda vieja en silencio en cuanto cambie el día —
+ * y entonces el hero, el banner y el formulario pueden decir tres cosas
+ * distintas en la misma visita.
+ */
+const VISTAS_CON_FECHA: readonly string[] = [
+  "src/components/courses/CourseHero.tsx",
+  "src/components/courses/TumblerCoursesBanner.tsx",
+  "src/components/courses/CourseRegistrationForm.tsx",
+];
+for (const file of VISTAS_CON_FECHA) {
+  const source = readFileSync(join(ROOT, file), "utf8");
+  check(`${file} lee la fecha de la edición`, source.includes("confirmedDate"));
+  if (confirmed) {
+    check(
+      `${file} no escribe la fecha a mano`,
+      !source.includes(confirmed.label) && !source.includes(confirmed.iso),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -13,6 +13,7 @@ import {
   COURSE_HONEYPOT_FIELD,
   COURSE_REGISTRATION_INITIAL_STATUS,
   CourseRegistrationTargetSchema,
+  resolveCoursePreferredDate,
 } from "@/lib/validation/courses";
 
 export const runtime = "nodejs";
@@ -112,6 +113,17 @@ export async function POST(request: NextRequest) {
     return jsonError("Revisa los datos del formulario.", 400);
   }
 
+  /**
+   * Fecha que se guarda. Con la edición ya cerrada la pone el SERVIDOR desde el
+   * catálogo: el formulario no la pregunta y la columna es `not null`. El
+   * cliente no puede decidir en qué día quedó registrado nadie.
+   */
+  const preferredDate = resolveCoursePreferredDate(
+    edition,
+    parsed.data.preferredDate,
+  );
+  if (!preferredDate) return jsonError("Revisa los datos del formulario.", 400);
+
   if (!isSupabaseConfigured()) {
     // Degradación amable: el formulario muestra la salida por WhatsApp en vez
     // de un error técnico. Pasa en previews sin credenciales de base.
@@ -131,7 +143,7 @@ export async function POST(request: NextRequest) {
       name: parsed.data.name,
       phone: parsed.data.phone,
       email: parsed.data.email ?? null,
-      preferred_date: parsed.data.preferredDate,
+      preferred_date: preferredDate,
       party_size: parsed.data.partySize,
       comment: parsed.data.comment ?? null,
       // El estado inicial lo pone SIEMPRE el servidor. No se acepta del
@@ -179,7 +191,7 @@ export async function POST(request: NextRequest) {
     metadata: {
       course_slug: course.slug,
       edition: edition.edition,
-      preferred_date: parsed.data.preferredDate,
+      preferred_date: preferredDate,
       party_size: parsed.data.partySize,
     },
   });
