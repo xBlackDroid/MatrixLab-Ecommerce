@@ -136,6 +136,9 @@ export default function TumblerCoursesBanner() {
                   <dd className="text-sm font-semibold text-ml-white">
                     {edition.venue.name}
                   </dd>
+                  <dd className="text-xs text-ml-white/55">
+                    {edition.venue.city}
+                  </dd>
                 </div>
               </div>
 
@@ -159,18 +162,33 @@ export default function TumblerCoursesBanner() {
                 </span>
                 <div className="min-w-0">
                   <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ml-white/45">
-                    Sondeo de fecha
+                    {edition.confirmedDate ? "Fecha" : "Sondeo de fecha"}
                   </dt>
-                  <dd className="mt-1.5 flex flex-wrap gap-1.5">
-                    {edition.dateOptions.map((option) => (
-                      <span
-                        key={option.value}
-                        className="rounded-full border border-ml-cyan/30 bg-ml-cyan/10 px-2.5 py-1 text-xs font-semibold text-ml-cyan"
-                      >
-                        {option.label}
-                      </span>
-                    ))}
-                  </dd>
+                  {edition.confirmedDate ? (
+                    <>
+                      <dd className="text-sm font-semibold text-ml-white">
+                        <time
+                          dateTime={`${edition.confirmedDate.iso}T${edition.confirmedDate.startTime}`}
+                        >
+                          {edition.confirmedDate.label}
+                        </time>
+                      </dd>
+                      <dd className="text-xs text-ml-white/55">
+                        {edition.confirmedDate.timeLabel}
+                      </dd>
+                    </>
+                  ) : (
+                    <dd className="mt-1.5 flex flex-wrap gap-1.5">
+                      {edition.dateOptions.map((option) => (
+                        <span
+                          key={option.value}
+                          className="rounded-full border border-ml-cyan/30 bg-ml-cyan/10 px-2.5 py-1 text-xs font-semibold text-ml-cyan"
+                        >
+                          {option.label}
+                        </span>
+                      ))}
+                    </dd>
+                  )}
                 </div>
               </div>
             </dl>

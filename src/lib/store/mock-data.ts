@@ -118,7 +118,7 @@ export const MOCK_CATEGORIES: CategoryRow[] = [
   ),
   category(
     "c0000000-0000-4000-8000-000000000009",
-    "SnowGlobe Bar",
+    "Tumbler & SnowGlobe Bar",
     "snowglobe",
     "Todo para crear vasos con movimiento, brillo y efecto mágico.",
     9,

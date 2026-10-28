@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
+import { withDesignWriteLease } from "@/lib/designer/write-lease";
 import { jsonError, readJsonBody, tooManyRequests } from "@/lib/api";
 import { requireServiceClient } from "@/lib/db/admin";
 import { BUCKETS, createSignedUrl, uploadToBucket } from "@/lib/db/storage";
@@ -24,6 +25,7 @@ import { UuidSchema } from "@/lib/validation/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -176,6 +178,10 @@ async function buildPreviewPath(
  * todos los límites: nunca confía en el cliente.
  */
 export async function PATCH(request: NextRequest, context: RouteContext) {
+  return withDesignWriteLease(request, (await context.params).id, () => saveDesign(request, context));
+}
+
+async function saveDesign(request: NextRequest, context: RouteContext) {
   const ip = getClientIp(request);
   const limit = checkRateLimit(`designs:${ip}`, RATE_LIMITS.designs);
   if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);

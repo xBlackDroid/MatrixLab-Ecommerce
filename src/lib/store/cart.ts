@@ -16,6 +16,7 @@ import { getDesignerDisplayName } from "@/lib/designer/product-catalog";
 import { commercialUnitOf } from "@/lib/store/curated-lines";
 import { catalogImageOf, presentCatalogProduct } from "@/lib/store/products";
 import { computeTotals, resolveUnitPrice } from "@/lib/store/pricing";
+import { readyWearVariantImage } from "@/lib/store/ready-wear-colors";
 
 /**
  * Carrito por sesión. El navegador solo conoce su cookie httpOnly; toda
@@ -177,7 +178,9 @@ export async function buildCartView(sessionId: string): Promise<CartView> {
       // base, no de nada que haya mandado el cliente. Un producto sin unidad
       // propia devuelve null y la UI no cambia.
       unitLabel: commercialUnitOf(product.handle),
-      image: catalogImageOf(presented),
+      image:
+        readyWearVariantImage(product.handle, variant?.color) ??
+        catalogImageOf(presented),
       isCustom: item.is_custom,
       designProjectId: item.design_project_id,
       designPreviewUrl,

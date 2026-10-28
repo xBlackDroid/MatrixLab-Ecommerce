@@ -187,7 +187,7 @@ function resolveCupImages(p: ProductRow): ProductRow {
   if (Array.isArray(p.images) && p.images.length > 0) return p;
   const rel = cupImagePath(cup.code);
   const photo = publicImageExists(rel);
-  return { ...p, images: [photo ? rel : CUP_PLACEHOLDER_IMAGE] };
+  return { ...p, images: cup.imagePaths?.length ? cup.imagePaths : [photo ? rel : CUP_PLACEHOLDER_IMAGE] };
 }
 
 /**
@@ -814,6 +814,7 @@ export async function getStickerCatalog(
  * producto), nunca del frontend: el carrito los vuelve a resolver en servidor.
  */
 export interface CupCatalogEntry {
+  variants: ProductVariantRow[];
   /** Fila del Excel (nombre público, código, capacidad, colección). */
   item: CupItem;
   productId: string;
@@ -872,6 +873,7 @@ function buildCupEntry(
   const images = presentProduct(product).images;
   return {
     item,
+    variants,
     productId: product.id,
     handle: product.handle,
     title: product.title,
@@ -1118,6 +1120,14 @@ export async function getProductsByCategory(
 export const READY_TO_WEAR_CATEGORY_HANDLES = [
   "playeras-prendas",
   "gorras",
+  "wear-call-of-duty",
+  "wear-friends",
+  "wear-gta",
+  "wear-kpop",
+  "wear-music-rock",
+  "wear-resident-evil",
+  "wear-toluca",
+  "wear-totes",
 ] as const;
 
 /**

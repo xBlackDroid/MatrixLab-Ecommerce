@@ -16,9 +16,13 @@ import type { Course, CourseEdition } from "@/lib/store/courses/types";
  * PRIORIDAD DEL CONTENIDO (el público es muy visual y decide rápido): qué es,
  * cuánto cuesta, dónde y cuándo — y un botón enorme. Todo lo demás va abajo.
  *
- * El precio, la sede y el sondeo de fecha viven en un panel aparte y no dentro
- * del párrafo: alguien que ya sabe que le interesa no debería tener que leer
- * una frase entera para encontrar los $2,500.
+ * El precio, la sede y la fecha viven en un panel aparte y no dentro del
+ * párrafo: alguien que ya sabe que le interesa no debería tener que leer una
+ * frase entera para encontrar los $2,500.
+ *
+ * El bloque "Cuándo" tiene DOS modos y los dos siguen vivos: una edición con
+ * `confirmedDate` publica el día y la hora; una en sondeo pinta las opciones
+ * como chips. Hoy la edición publicada está en el primer modo.
  */
 export default function CourseHero({
   course,
@@ -146,28 +150,53 @@ export default function CourseHero({
                       <dt className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ml-white/45">
                         Cuándo
                       </dt>
-                      {/* Se dice EN SONDEO, no una fecha cerrada: todavía no
-                          lo está, y prometerla sería lo primero que habría
-                          que desdecir por WhatsApp. */}
-                      <dd className="text-base font-semibold text-ml-white">
-                        {edition.datePollLabel}
-                      </dd>
-                      <dd className="mt-2 flex flex-wrap gap-1.5">
-                        {edition.dateOptions.map((option) => (
-                          <span
-                            key={option.value}
-                            className="rounded-full border border-ml-cyan/30 bg-ml-cyan/10 px-3 py-1 text-xs font-semibold text-ml-cyan"
-                          >
-                            {option.label}
-                          </span>
-                        ))}
-                      </dd>
+                      {edition.confirmedDate ? (
+                        <>
+                          {/* La fecha ya está cerrada, así que se afirma. El
+                              `<time>` lleva la fecha en formato legible por
+                              máquina; el texto visible es el copy de marca. */}
+                          <dd className="text-base font-semibold text-ml-white">
+                            <time
+                              dateTime={`${edition.confirmedDate.iso}T${edition.confirmedDate.startTime}`}
+                            >
+                              {edition.confirmedDate.label}
+                            </time>
+                          </dd>
+                          {/* Sólo la hora de INICIO: la duración no está
+                              confirmada y no se insinúa un horario de cierre. */}
+                          <dd className="text-sm text-ml-white/55">
+                            {edition.confirmedDate.timeLabel}
+                          </dd>
+                        </>
+                      ) : (
+                        <>
+                          {/* Edición en sondeo: se dice que lo está, en vez de
+                              prometer un día que habría que desdecir. */}
+                          {edition.datePollLabel && (
+                            <dd className="text-base font-semibold text-ml-white">
+                              {edition.datePollLabel}
+                            </dd>
+                          )}
+                          <dd className="mt-2 flex flex-wrap gap-1.5">
+                            {edition.dateOptions.map((option) => (
+                              <span
+                                key={option.value}
+                                className="rounded-full border border-ml-cyan/30 bg-ml-cyan/10 px-3 py-1 text-xs font-semibold text-ml-cyan"
+                              >
+                                {option.label}
+                              </span>
+                            ))}
+                          </dd>
+                        </>
+                      )}
                     </div>
                   </div>
                 </dl>
 
                 <p className="mt-6 text-sm leading-relaxed text-ml-white/55">
-                  Tu preferencia de fecha nos ayuda a elegir el día.
+                  {edition.confirmedDate
+                    ? "Fecha y hora confirmadas. Apartas tu lugar aquí y lo cerramos por WhatsApp."
+                    : "Tu preferencia de fecha nos ayuda a elegir el día."}
                 </p>
               </div>
             </div>

@@ -16,11 +16,18 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-/**
- * `document: true` → la ruta es un documento HTML completo (route handler),
- * no una página de React: se navega con <a> normal, sin prefetch de RSC.
- */
-const LINKS = [
+type NavLink = {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  /**
+   * La ruta es un documento HTML completo (route handler), no una página de
+   * React: se navega con <a> normal, sin prefetch de RSC.
+   */
+  document?: boolean;
+};
+
+const LINKS: NavLink[] = [
   { href: "/admin", label: "Resumen", icon: LayoutDashboard },
   { href: "/admin/cotizador", label: "Cotizador", icon: Calculator, document: true },
   { href: "/admin/productos", label: "Productos", icon: Package },
@@ -30,7 +37,7 @@ const LINKS = [
   { href: "/admin/disenos", label: "Diseños", icon: Palette },
 ];
 
-export default function AdminNav() {
+export default function AdminNav({ consignmentsEnabled = false }: { consignmentsEnabled?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -57,8 +64,8 @@ export default function AdminNav() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1 overflow-x-auto">
-          {LINKS.map((link) => {
+        <nav aria-label="Administración" className="flex min-w-0 items-center gap-1 overflow-x-auto py-1">
+          {[...LINKS, ...(consignmentsEnabled ? [{ href: "/admin/distribuidores", label: "Distribuidores", icon: Boxes }] : [])].map((link: NavLink) => {
             const active =
               link.href === "/admin"
                 ? pathname === "/admin"
@@ -72,11 +79,11 @@ export default function AdminNav() {
             const content = (
               <>
                 <link.icon className="h-4 w-4" aria-hidden />
-                <span className="hidden md:inline">{link.label}</span>
+                <span>{link.label}</span>
               </>
             );
-            // En móvil sólo se ve el icono: aria-label da el nombre accesible.
-            return "document" in link ? (
+            // Conserva las etiquetas visibles del admin publicado.
+            return link.document ? (
               <a
                 key={link.href}
                 href={link.href}

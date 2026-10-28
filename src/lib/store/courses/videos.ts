@@ -1,19 +1,8 @@
 import type { CourseVideo } from "./types";
 
 /**
- * "Mira lo que hacemos" — enlaces de video SIN incrustar.
- *
- * POR QUÉ NO HAY EMBED
- * --------------------
- * El reproductor de TikTok necesita `frame-src https://www.tiktok.com` y su
- * script `https://www.tiktok.com/embed.js`. La CSP del sitio declara
- * `frame-src 'none'` y `script-src 'self' 'nonce-…' 'strict-dynamic'`, o sea
- * sin terceros. Habilitar ese embed significaría meter en la página un script
- * y un iframe de otro origen —con acceso al DOM de un formulario que recoge
- * nombre, teléfono y correo— a cambio de una miniatura.
- *
- * La CSP NO se debilita. Cada video se publica como TARJETA DE VISTA PREVIA
- * que abre el enlace en una pestaña nueva (rel="noopener noreferrer").
+ * Enlaces permitidos y reproductor oficial de TikTok. Se incrusta sólo el
+ * iframe del reproductor; no se carga embed.js en el documento del registro.
  *
  * LISTA BLANCA DE HOSTS
  * ---------------------
@@ -42,6 +31,7 @@ export type VideoPlatform = "TikTok" | "Instagram" | "YouTube" | "Facebook";
 
 export interface SafeCourseVideo extends CourseVideo {
   platform: VideoPlatform;
+  embedUrl?: string;
 }
 
 function platformOf(host: string): VideoPlatform | null {
@@ -75,7 +65,17 @@ export function safeCourseVideos(
     if (!ALLOWED_VIDEO_HOSTS.has(host)) continue;
     const platform = platformOf(host);
     if (!platform) continue;
-    out.push({ url: parsed.toString(), label: video.label, platform });
+    const postId = platform === "TikTok"
+      ? /^\/@[^/]+\/video\/(\d+)$/.exec(parsed.pathname)?.[1]
+      : undefined;
+    out.push({
+      url: parsed.toString(),
+      label: video.label,
+      platform,
+      ...(postId ? {
+        embedUrl: `https://www.tiktok.com/player/v1/${postId}?autoplay=0&controls=1&muted=1&volume_control=0&description=0&music_info=0&rel=0`,
+      } : {}),
+    });
   }
   return out;
 }

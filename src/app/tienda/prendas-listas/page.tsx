@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Palette, Shirt } from "lucide-react";
-import ProductGrid from "@/components/store/ProductGrid";
+import ReadyWearCatalog from "@/components/store/ReadyWearCatalog";
 import { getReadyToWearProducts } from "@/lib/store/products";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
@@ -31,7 +31,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Prendas listas",
   description:
-    "Playeras, gorras y tote bags con talla, color y precio definidos, listas para comprar sin pasar por el diseñador.",
+    "Playeras, gorras y tote bags listas para comprar. Elige tu diseño y encuentra las opciones disponibles.",
 };
 
 export default async function PrendasListasPage() {
@@ -57,9 +57,9 @@ export default async function PrendasListasPage() {
             Prendas <span className="text-gradient">listas</span>
           </h1>
           <p className="mt-3 max-w-2xl text-ml-white/65">
-            Prendas con talla, color y precio ya definidos. Eliges tu variante
-            en la ficha y la agregas al carrito: sin diseñar nada y sin esperar
-            producción.
+            Encuentra playeras, gorras y tote bags listas para llevar. En las playeras,
+            elige Blanca, Negra o Gris, corte Hombre o Mujer y talla Chica, Mediana o Grande en la ficha
+            del producto antes de agregarla al carrito.
           </p>
         </div>
 
@@ -75,12 +75,7 @@ export default async function PrendasListasPage() {
       </div>
 
       <div className="mt-10">
-        <ProductGrid
-          products={products}
-          /* El vacío NO promete stock futuro: la vitrina se arma con lo que
-             haya en inventario y puede quedarse sin piezas por completo. */
-          emptyMessage="Ahora mismo no hay prendas con inventario listo. Puedes crear la tuya en el Laboratorio o escribirnos por WhatsApp para revisar existencias."
-        />
+        <ReadyWearCatalog products={products} />
       </div>
 
       <div className="glass mt-10 rounded-2xl p-6 text-center">

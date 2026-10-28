@@ -15,6 +15,7 @@ import {
   MATRIXLAB_TUMBLER_COURSE,
 } from "@/lib/store/courses";
 import { listCourseGalleryImages } from "@/lib/store/courses/gallery";
+import { listLocalCourseVideos } from "@/lib/store/courses/local-videos";
 
 /**
  * Landing de los CURSOS de MatrixLab Tumbler.
@@ -46,7 +47,9 @@ const course = MATRIXLAB_TUMBLER_COURSE;
 export async function generateMetadata(): Promise<Metadata> {
   const edition = getFeaturedEdition(course);
   const title = `${course.name} — ${edition.hero.subtitle}`;
-  const description = edition.pitch;
+  const description = edition.confirmedDate
+    ? `${edition.pitch} ${edition.confirmedDate.label}, ${edition.confirmedDate.timeLabel}, en ${edition.venue.name}.`
+    : edition.pitch;
   return {
     title,
     description,
@@ -104,7 +107,10 @@ export default async function CursosMatrixLabTumblerPage() {
 
       <CourseExperience items={edition.experience} />
 
-      <CourseVideos videos={edition.videos} />
+      <CourseVideos
+        videos={edition.videos}
+        localVideos={edition.localVideos ?? listLocalCourseVideos(edition.edition)}
+      />
 
       {/* ================= REGISTRO ================= */}
       <section
@@ -136,20 +142,22 @@ export default async function CursosMatrixLabTumblerPage() {
                 <span className="text-gradient">{edition.hero.subtitle}</span>
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ml-white/70">
-                Déjanos tus datos y tu día preferido. Te escribimos por WhatsApp
-                para confirmar todo.
+                {edition.confirmedDate
+                  ? `Déjanos tus datos y te escribimos por WhatsApp para confirmar tu lugar. Nos vemos el ${edition.confirmedDate.label.toLowerCase()}.`
+                  : "Déjanos tus datos y tu día preferido. Te escribimos por WhatsApp para confirmar todo."}
               </p>
             </div>
           </Reveal>
 
           <Reveal delay={0.08} className="mt-9">
             {/* Props estrechas a propósito: al componente de cliente sólo
-                viajan el slug, el número de edición y las reglas del sondeo.
-                Ver el comentario de CourseRegistrationForm. */}
+                viajan el slug, el número de edición y las reglas de fecha /
+                lugares. Ver el comentario de CourseRegistrationForm. */}
             <CourseRegistrationForm
               courseSlug={course.slug}
               edition={edition.edition}
               rules={{
+                confirmedDate: edition.confirmedDate,
                 dateOptions: edition.dateOptions,
                 maxPartySize: edition.maxPartySize,
               }}

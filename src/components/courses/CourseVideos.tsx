@@ -1,134 +1,88 @@
 import { ExternalLink, MessageCircle } from "lucide-react";
 import Reveal from "@/components/landing/Reveal";
-import { PlayMark, SparkleMark } from "@/components/icons/CourseDecor";
+import { PlayMark } from "@/components/icons/CourseDecor";
 import { safeCourseVideos } from "@/lib/store/courses";
 import type { CourseVideo } from "@/lib/store/courses/types";
+import type { LocalCourseVideo } from "@/lib/store/courses/local-videos";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
-/**
- * "Mira lo que hacemos": vistas previas de los videos de TikTok / redes.
- *
- * NO HAY REPRODUCTOR INCRUSTADO, y es a propósito. El embed de TikTok exige
- * `frame-src https://www.tiktok.com` y cargar su script desde su dominio; la
- * CSP del sitio declara `frame-src 'none'` y `script-src 'self' 'nonce-…'
- * 'strict-dynamic'`. Abrir esas dos puertas metería un script y un iframe de
- * terceros en la MISMA página donde vive el formulario que recoge nombre,
- * teléfono y correo. La CSP no se toca: cada video es una tarjeta que abre el
- * enlace en una pestaña nueva.
- *
- * Los enlaces se filtran por host (`safeCourseVideos`): sólo https y sólo
- * dominios de video conocidos.
- */
-
-const PLACEHOLDER_TONES = [
-  { badge: "bg-ml-violet/15", text: "text-ml-violet" },
-  { badge: "bg-ml-cyan/15", text: "text-ml-cyan" },
-  { badge: "bg-ml-coral/15", text: "text-ml-coral" },
-] as const;
-
-export default function CourseVideos({ videos }: { videos: CourseVideo[] }) {
+/** Reproductores propios y TikTok aislado en iframe, sin scripts externos. */
+export default function CourseVideos({
+  videos,
+  localVideos = [],
+}: {
+  videos: CourseVideo[];
+  localVideos?: LocalCourseVideo[];
+}) {
   const safe = safeCourseVideos(videos);
+  const hasMedia = safe.length > 0 || localVideos.length > 0;
 
   return (
-    <section
-      id="videos"
-      className="relative scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20"
-    >
+    <section id="videos" className="relative scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
       <div className="mx-auto max-w-7xl">
         <Reveal>
           <div className="max-w-2xl">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ml-cyan">
-              En movimiento
-            </span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ml-cyan">En movimiento</span>
             <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-[2.5rem]">
               Mira lo que <span className="text-gradient">hacemos</span>
             </h2>
             <p className="mt-4 text-base leading-relaxed text-ml-white/70">
-              {safe.length > 0
-                ? "Videos cortos del taller y de los proyectos que salen de él."
-                : "Estamos subiendo los videos del taller. Mientras tanto, pídenos el último por WhatsApp."}
+              {hasMedia ? "Momentos del taller y proyectos Tumbler y SnowGlobe. Dale play para verlos de cerca." : "Pídenos el último video del taller por WhatsApp."}
             </p>
           </div>
         </Reveal>
 
-        <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-          {safe.length > 0
-            ? safe.map((video, index) => (
-                <Reveal key={video.url} delay={(index % 3) * 0.07} className="h-full">
-                  <a
-                    href={video.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-ml-white/10 bg-ml-white/[0.04] p-6 backdrop-blur-[14px] transition duration-300 hover:-translate-y-0.5 hover:border-ml-cyan/50"
-                  >
-                    <div
-                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-ml-cyan/15 via-transparent to-ml-violet/10"
-                      aria-hidden
-                    />
-                    <PlayMark
-                      className="pointer-events-none absolute -bottom-8 -right-6 h-36 w-36 text-ml-cyan opacity-[0.09] transition duration-500 group-hover:scale-105 group-hover:opacity-[0.16]"
-                      aria-hidden
-                    />
-
-                    <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-ml-cyan/15 text-ml-cyan">
-                      <PlayMark className="h-7 w-7" aria-hidden />
-                    </span>
-
-                    <span className="relative mt-5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-ml-white/45">
-                      {video.platform}
-                    </span>
-                    <h3 className="relative mt-1.5 text-lg font-bold leading-snug text-ml-white">
-                      {video.label}
-                    </h3>
-
-                    <span className="relative mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-ml-cyan transition group-hover:gap-3">
-                      Ver en {video.platform}
-                      <ExternalLink className="h-4 w-4" aria-hidden />
-                      {/* Se avisa que sale del sitio: abrir una pestaña sin
-                          previo aviso es de las cosas que más desorientan. */}
-                      <span className="sr-only">(se abre en una pestaña nueva)</span>
-                    </span>
-                  </a>
-                </Reveal>
-              ))
-            : PLACEHOLDER_TONES.map((tone, index) => (
-                <Reveal key={index} delay={index * 0.07} className="h-full">
-                  <div
-                    aria-hidden
-                    className="relative flex h-full min-h-44 flex-col justify-between overflow-hidden rounded-[1.5rem] border border-dashed border-ml-white/12 bg-ml-white/[0.02] p-6"
-                  >
-                    <span
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl ${tone.badge} ${tone.text} opacity-60`}
-                    >
-                      <PlayMark className="h-7 w-7" aria-hidden />
-                    </span>
-                    <SparkleMark
-                      className={`absolute right-6 top-6 h-4 w-4 opacity-25 ${tone.text}`}
-                    />
-                    <p className="mt-6 text-sm text-ml-white/40">
-                      Video próximamente
-                    </p>
-                  </div>
-                </Reveal>
-              ))}
-        </div>
-
-        {safe.length === 0 && (
-          <Reveal delay={0.1}>
-            <div className="mt-7 flex justify-center">
-              <a
-                href={buildWhatsAppUrl(
-                  "Hola MatrixLab, quiero ver videos del taller Cursos MatrixLab Tumbler.",
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-ml-green/40 bg-ml-green/10 px-6 py-3 font-semibold text-ml-green transition hover:bg-ml-green/20"
-              >
-                <MessageCircle className="h-5 w-5" aria-hidden />
-                Pídenos ver el taller
-              </a>
+        {localVideos.length > 0 && (
+          <div className="mt-9">
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="text-lg font-semibold">Desde el taller</h3>
+              <p className="text-sm text-ml-white/50">Desliza para ver los {localVideos.length} videos</p>
             </div>
-          </Reveal>
+            <div tabIndex={0} role="group" aria-label="Videos del taller" className="flex snap-x snap-mandatory gap-4 overflow-x-auto rounded-xl pb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ml-cyan sm:gap-5">
+              {localVideos.map((video) => (
+                <figure key={video.src} className="w-[min(78vw,18rem)] shrink-0 snap-start">
+                  <div className="aspect-[9/16] overflow-hidden rounded-2xl border border-ml-white/10 bg-black/40">
+                    <video controls muted playsInline preload="none" poster={video.poster} width={video.width} height={video.height} aria-label={video.label} className="h-full w-full object-contain">
+                      <source src={video.src} type="video/mp4" />
+                      Tu navegador no puede reproducir este video. <a href={video.src}>Abrir video</a>
+                    </video>
+                  </div>
+                  <figcaption className="mt-3 text-sm text-ml-white/65">{video.label}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {safe.length > 0 && (
+          <div className="mt-10">
+            <h3 className="mb-5 text-lg font-semibold">También en TikTok</h3>
+            <div className="grid grid-cols-1 justify-items-center gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {safe.map((video) => (
+                <article key={video.url} className="w-full max-w-[20rem] min-w-0">
+                  <div className="relative aspect-[9/16] overflow-hidden rounded-2xl border border-ml-white/10 bg-black/40">
+                    {video.embedUrl ? (
+                      <iframe src={video.embedUrl} title={video.label} loading="lazy" allow="fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" className="absolute inset-0 h-full w-full border-0" />
+                    ) : (
+                      <a href={video.url} target="_blank" rel="noopener noreferrer" aria-label={`Ver ${video.label} en ${video.platform}`} className="flex h-full items-center justify-center text-ml-cyan transition hover:bg-ml-cyan/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ml-cyan">
+                        <PlayMark className="h-16 w-16" aria-hidden />
+                      </a>
+                    )}
+                  </div>
+                  <h4 className="mt-3 text-sm font-medium text-ml-white/85">{video.label}</h4>
+                  <a href={video.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1.5 rounded text-sm text-ml-cyan underline-offset-4 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ml-cyan">
+                    Ver en {video.platform}<ExternalLink className="h-3.5 w-3.5" aria-hidden /><span className="sr-only"> (se abre en una pestaña nueva)</span>
+                  </a>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!hasMedia && (
+          <a href={buildWhatsAppUrl("Hola MatrixLab, quiero ver videos del taller Cursos MatrixLab Tumbler.")} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full border border-ml-green/40 bg-ml-green/10 px-6 py-3 font-semibold text-ml-green transition hover:bg-ml-green/20">
+            <MessageCircle className="h-5 w-5" aria-hidden />Pídenos ver el taller
+          </a>
         )}
       </div>
     </section>

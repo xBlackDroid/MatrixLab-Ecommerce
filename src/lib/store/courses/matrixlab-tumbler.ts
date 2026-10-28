@@ -7,10 +7,10 @@ import type { Course, CourseEdition } from "./types";
  * bloque de la categoría, el formulario y el QA leen de aquí. Nada de copy,
  * precio, sede ni fechas se escribe dentro de un componente.
  *
- * PARA PUBLICAR LA EDICIÓN 3
- *   1. Copiar `EDICION_2` como `EDICION_3` y ajustar sus campos.
+ * PARA PUBLICAR LA SIGUIENTE EDICIÓN
+ *   1. Copiar `EDICION_3` y ajustar sus campos.
  *   2. Añadirla a `editions`.
- *   3. Cambiar `featuredEdition: 3`.
+ *   3. Cambiar `featuredEdition` a su número.
  * No hay que tocar ni la página ni los componentes.
  */
 
@@ -25,37 +25,52 @@ export const COURSE_REGISTRATION_ANCHOR = "registro";
 
 /**
  * Valor que se guarda cuando a la persona le da igual la fecha. Vive aparte de
- * `dateOptions` porque NO es una fecha del sondeo: es "cualquiera de las dos",
- * y sirve igual en la Edición 3 con fechas distintas.
+ * `dateOptions` porque NO es una fecha del sondeo: es "cualquiera de ellas", y
+ * sirve igual en una edición futura con fechas distintas.
+ *
+ * NO lo usa la edición publicada hoy —su fecha ya está confirmada— pero se
+ * conserva porque el sondeo sigue siendo un modo soportado del modelo.
  */
 export const COURSE_ANY_DATE_VALUE = "cualquiera";
 
 /**
- * EDICIÓN 2 — Waffleando Metepec.
+ * EDICIÓN 3 — Waffleando Metepec.
  *
- * FECHA: todavía en sondeo. Se pregunta la preferencia (viernes 2 / sábado 3)
- * y con eso se cierra. Ningún copy afirma una fecha definitiva.
+ * FECHA: CONFIRMADA. Viernes 13 de noviembre de 2026, 10:00 a. m. El sondeo
+ * (viernes 2 / sábado 3) quedó resuelto y se retiró del flujo: ni el hero, ni
+ * el banner, ni el FAQ, ni el formulario preguntan ya la preferencia de día.
+ *
+ * DURACIÓN y QUÉ INCLUYE: sin confirmar. No se escriben aquí ni se insinúan en
+ * el copy; el FAQ remite a WhatsApp, que es donde se cierran.
  *
  * PAGO: esta página NO cobra. El registro es de INTERÉS / RESERVA y así se
  * dice en la confirmación: nada promete que el lugar quede pagado.
  */
-const EDICION_2: CourseEdition = {
-  edition: 2,
-  badge: "Workshop · Edición 2",
+const EDICION_3: CourseEdition = {
+  edition: 3,
+  badge: "Workshop · Edición 3",
   registrationOpen: true,
   priceMxn: 2500,
   venue: { name: "Waffleando Metepec", city: "Metepec, Estado de México" },
-  dateOptions: [
-    { value: "viernes-2", label: "Viernes 2", short: "Vie 2" },
-    { value: "sabado-3", label: "Sábado 3", short: "Sáb 3" },
-  ],
-  datePollLabel: "Estamos entre viernes 2 y sábado 3",
+  confirmedDate: {
+    // `value` es lo que se guarda en `course_registrations.preferred_date`:
+    // kebab-case, sin acentos y dentro del tope de 40 caracteres del CHECK.
+    value: "viernes-13-noviembre-2026",
+    iso: "2026-11-13",
+    startTime: "10:00",
+    label: "Viernes 13 de noviembre de 2026",
+    short: "Vie 13 nov",
+    timeLabel: "10:00 a. m.",
+  },
+  // Sondeo CERRADO: sin opciones y sin frase de sondeo. Los dos campos siguen
+  // existiendo en el modelo para la edición que vuelva a preguntar la fecha.
+  dateOptions: [],
   // Tope de lugares por registro. Más de eso se resuelve por WhatsApp, que es
   // donde de todos modos se confirma la disponibilidad real del taller.
   maxPartySize: 6,
   hero: {
     title: "Cursos MatrixLab Tumbler",
-    subtitle: "Edición 2",
+    subtitle: "Edición 3",
     copy: "Aprende, crea y llévate la experiencia completa de MatrixLab Tumbler.",
     cta: "Quiero registrarme",
   },
@@ -121,19 +136,17 @@ const EDICION_2: CourseEdition = {
     },
   ],
   gallery: {
-    dir: "images/tumbler/cursos/edicion-2",
-    altSubject: "Cursos MatrixLab Tumbler, Edición 2",
+    dir: "images/tumbler/cursos/edicion-3",
+    altSubject: "MatrixLab Tumbler en Waffleando Metepec",
   },
-  /**
-   * Videos de TikTok / redes. VACÍO a propósito: no se inventan enlaces.
-   *
-   * Para añadir uno, basta con una línea aquí:
-   *   { url: "https://www.tiktok.com/@usuario/video/123", label: "Cómo armamos un SnowGlobe" }
-   *
-   * El host se valida contra `ALLOWED_VIDEO_HOSTS` (videos.ts): un enlace a
-   * otro dominio se ignora en silencio en vez de publicarse.
-   */
-  videos: [],
+  /** Enlaces compartidos por MatrixLab; el reproductor usa su ID canónico. */
+  videos: [
+    { url: "https://www.tiktok.com/@matrixlab.stickers/video/7677072785704750357", label: "Proyectos MatrixLab Tumbler" },
+    { url: "https://www.tiktok.com/@matrixlab.stickers/video/7675186277070720277", label: "SnowGlobe de Halloween" },
+    { url: "https://www.tiktok.com/@matrixlab.stickers/video/7671846811132300564", label: "Detalles y movimiento SnowGlobe" },
+    { url: "https://www.tiktok.com/@matrixlab.stickers/video/7663922679224765717", label: "SnowGlobe inspirado en Toy Story" },
+    { url: "https://www.tiktok.com/@matrixlab.stickers/video/7648396730597199125", label: "Así vivimos el taller en Waffleando" },
+  ],
   faq: [
     {
       question: "¿Necesito experiencia?",
@@ -150,21 +163,23 @@ const EDICION_2: CourseEdition = {
     },
     {
       question: "¿Dónde es?",
-      answer: "En Waffleando Metepec.",
+      answer: "En Waffleando Metepec, Metepec, Estado de México.",
     },
     {
       question: "¿Cuánto cuesta?",
       answer: "$2,500 MXN.",
     },
     {
+      // Fecha y hora CONFIRMADAS. No se menciona a qué hora termina: la
+      // duración todavía no está cerrada y aquí no se inventa.
       question: "¿Cuándo será?",
       answer:
-        "Estamos definiendo entre viernes 2 y sábado 3; tu preferencia nos ayuda a elegir.",
+        "El viernes 13 de noviembre de 2026, a las 10:00 a. m., en Waffleando Metepec.",
     },
     {
       question: "¿Cómo aparto mi lugar?",
       answer:
-        "Llena el registro de esta página. Te escribimos por WhatsApp para confirmar fecha, disponibilidad y forma de pago.",
+        "Llena el registro de esta página. Te escribimos por WhatsApp para confirmar tu lugar y la forma de pago.",
     },
   ],
 };
@@ -175,8 +190,8 @@ export const MATRIXLAB_TUMBLER_COURSE: Course = {
   name: "Cursos MatrixLab Tumbler",
   href: MATRIXLAB_TUMBLER_COURSE_HREF,
   categoryHref: "/tienda/categoria/matrixlab-tumbler",
-  editions: [EDICION_2],
-  featuredEdition: 2,
+  editions: [EDICION_3],
+  featuredEdition: 3,
 };
 
 /**

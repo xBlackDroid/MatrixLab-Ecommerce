@@ -60,6 +60,9 @@ export function getServerEnv() {
     supabaseServiceRoleKey: clean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     adminAccessPassword: clean(process.env.ADMIN_ACCESS_PASSWORD),
     adminSessionSecret: clean(process.env.ADMIN_SESSION_SECRET),
+    consignmentsEnabled: clean(process.env.CONSIGNMENTS_ENABLED) === "true",
+    consignmentSessionSecret: clean(process.env.CONSIGNMENT_SESSION_SECRET),
+    consignmentSiteUrl: clean(process.env.CONSIGNMENTS_SITE_URL) ?? clean(process.env.NEXT_PUBLIC_SITE_URL),
     paymentProvider: clean(process.env.PAYMENT_PROVIDER) ?? "mercadopago",
     uploadMaxMb: Math.min(
       Math.max(Number(clean(process.env.UPLOAD_MAX_MB) ?? "10") || 10, 1),

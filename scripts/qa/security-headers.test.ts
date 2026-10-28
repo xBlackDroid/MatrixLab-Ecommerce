@@ -152,6 +152,12 @@ check(
 );
 check("la política estricta usa nonce", strict.includes("'nonce-abc123'"));
 check("la política estricta usa strict-dynamic", strict.includes("'strict-dynamic'"));
+const courseCsp = buildStrictCsp("abc123", false, true);
+check("el reproductor del curso admite sólo el origen TikTok en frame-src",
+  courseCsp.split("; ").includes("frame-src https://www.tiktok.com"));
+check("el curso mantiene idéntica la política de scripts con nonce",
+  courseCsp.split("; ").find((d) => d.startsWith("script-src")) ===
+    strict.split("; ").find((d) => d.startsWith("script-src")));
 check(
   "ninguna política permite 'unsafe-eval' en producción",
   !strict.includes("'unsafe-eval'") && !compat.includes("'unsafe-eval'"),

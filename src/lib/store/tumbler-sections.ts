@@ -53,9 +53,9 @@ export const TUMBLER_BLOCKS_DISPLAY: TumblerBlockDisplay[] = [
   },
   {
     handle: CUPS_CATEGORY_HANDLE, // "snowglobe"
-    title: "SnowGlobe Cups",
+    title: "Tumbler & SnowGlobe Bar",
     description:
-      "Vasos y bases para crear proyectos SnowGlobe, tumblers personalizados y diseños creativos.",
+      "Termos, vasos y bases para crear proyectos SnowGlobe, tumblers personalizados y diseños creativos.",
     icon: CupSoda,
     accentText: "text-ml-cyan",
     iconClasses: "bg-ml-cyan/15 text-ml-cyan",

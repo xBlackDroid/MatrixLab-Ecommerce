@@ -62,6 +62,8 @@ export interface CupItem {
   inventory: number;
   /** Precio unitario (columna J). */
   price: number;
+  imagePaths?: string[];
+  colors?: string[];
 }
 
 /** Los 5 vasos del Excel, en su orden original. */
@@ -121,6 +123,10 @@ export const TUMBLER_CUPS: readonly CupItem[] = [
     inventory: 5,
     price: 135,
   },
+  {"position":6,"code":"V006","name":"Termo con asa y tapa de rosca","collection":"Termos","description":"Termo de color liso con asa y tapa de rosca. Elige tu color favorito.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v006.webp","/images/tumbler/vasos/v006-2.webp","/images/tumbler/vasos/v006-3.webp","/images/tumbler/vasos/v006-4.webp"],"colors":["Negro","Rosa","Blanco","Lila","Azul marino"]},
+  {"position":7,"code":"V007","name":"Termo Game Over","collection":"Termos decorados","description":"Termo Game Over. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v007.webp"],"colors":["Negro"]},
+  {"position":8,"code":"V008","name":"Termo Patinaje","collection":"Termos decorados","description":"Termo Patinaje. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v008.webp"],"colors":["Negro"]},
+  {"position":9,"code":"V009","name":"Termo Toluca Bicampeón","collection":"Termos decorados","description":"Termo Toluca Bicampeón. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v009.webp"],"colors":["Blanco"]},
 ];
 
 /**
