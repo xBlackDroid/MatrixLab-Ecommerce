@@ -33,6 +33,7 @@ import {
   type Route,
 } from "@playwright/test";
 import { parseWorkspaceSave } from "../../src/lib/admin-cotizador/schema";
+import { formatFolio, parseFolioReserve } from "../../src/lib/admin-cotizador/folios";
 
 const ROOT = join(__dirname, "..", "..");
 const PORT = 3000 + Math.floor(Math.random() * 500) + 3200;
@@ -116,7 +117,7 @@ function track(page: Page, problems: Problems, label: string) {
     // Las respuestas 409/500/503 que el stub devuelve a propósito generan un
     // "Failed to load resource" en consola: es el escenario probado, no un bug.
     if (m.type() !== "error") return;
-    if (m.location().url.includes("/api/admin/cotizador/workspace")) return;
+    if (m.location().url.includes("/api/admin/cotizador/")) return;
     problems.errors.push(`${label} console: ${m.text()}`);
   });
   page.on("dialog", (d) => d.accept());
@@ -167,10 +168,79 @@ class CloudStub {
   }
 }
 
-async function openCotizador(ctx: BrowserContext, stub: CloudStub, problems: Problems, label: string): Promise<Page> {
+/**
+ * Stub de /api/admin/cotizador/folios con la semántica del servidor: valida
+ * con el MISMO Zod, exige CSRF, idempotencia por UUID + huella, y sólo el
+ * stub elige el número (contador global compartido entre "dispositivos").
+ */
+class FolioStub {
+  lastIssued = 38;
+  getStatus = 200;
+  reservations = new Map<string, { first: number; count: number; fingerprint: string }>();
+  posts: Array<{ requestId: string; mode: string; count: number; csrf: string | null; valid: boolean }> = [];
+  /** Paridad con el original: devuelve siempre este folio inicial, sin contador. */
+  fixedFirst: number | null = null;
+  /** Respuesta forzada al siguiente POST (no reserva nada). */
+  nextPost: { status: number; body?: Record<string, unknown> } | null = null;
+  /** Reserva y luego corta la conexión: respuesta perdida. */
+  dropNext = false;
+  /** Corta la conexión sin reservar (sin red). */
+  abortNext = false;
+  /** Nunca responde (timeout del cliente). */
+  hang = false;
+  delayMs = 0;
+
+  async handle(route: Route) {
+    const req = route.request();
+    if (req.method() === "GET") {
+      if (this.getStatus !== 200) {
+        return route.fulfill({ status: this.getStatus, contentType: "application/json", body: JSON.stringify({ ok: false }) });
+      }
+      return route.fulfill({ json: { ok: true, lastIssued: this.lastIssued, next: this.lastIssued + 1, nextFolio: formatFolio(this.lastIssued + 1) } });
+    }
+    const body = JSON.parse(req.postData() ?? "{}");
+    const parsed = parseFolioReserve(body);
+    const csrf = req.headers()["x-ml-csrf"] ?? null;
+    this.posts.push({ requestId: body.requestId, mode: body.mode, count: parsed.ok ? parsed.count : 0, csrf, valid: parsed.ok });
+    if (this.hang) return;
+    if (this.abortNext) { this.abortNext = false; return route.abort("failed"); }
+    if (this.nextPost) {
+      const forced = this.nextPost;
+      this.nextPost = null;
+      return route.fulfill({ status: forced.status, contentType: "application/json", body: JSON.stringify(forced.body ?? { ok: false }) });
+    }
+    if (csrf !== CSRF) return route.fulfill({ status: 401, json: { ok: false, code: "UNAUTHORIZED" } });
+    if (!parsed.ok) return route.fulfill({ status: 400, json: { ok: false, code: "INVALID" } });
+    if (this.delayMs) await new Promise((r) => setTimeout(r, this.delayMs));
+    let replayed = false;
+    let first: number;
+    const prior = this.reservations.get(parsed.request.requestId);
+    if (prior) {
+      if (prior.count !== parsed.count || prior.fingerprint !== parsed.fingerprint) {
+        return route.fulfill({ status: 409, json: { ok: false, code: "IDEMPOTENCY_CONFLICT" } });
+      }
+      first = prior.first;
+      replayed = true;
+    } else if (this.fixedFirst !== null) {
+      first = this.fixedFirst;
+      this.lastIssued = Math.max(this.lastIssued, first + parsed.count - 1);
+    } else {
+      first = this.lastIssued + 1;
+      this.lastIssued += parsed.count;
+      this.reservations.set(parsed.request.requestId, { first, count: parsed.count, fingerprint: parsed.fingerprint });
+    }
+    if (this.dropNext) { this.dropNext = false; return route.abort("failed"); }
+    const folios = Array.from({ length: parsed.count }, (_, i) => formatFolio(first + i));
+    return route.fulfill({ json: { ok: true, first, count: parsed.count, folios, lastIssued: this.lastIssued, next: this.lastIssued + 1, replayed } });
+  }
+}
+
+async function openCotizador(ctx: BrowserContext, stub: CloudStub, problems: Problems, label: string, folios = new FolioStub(), beforeGoto?: (page: Page) => Promise<unknown>): Promise<Page> {
   const page = await ctx.newPage();
   track(page, problems, label);
+  if (beforeGoto) await beforeGoto(page);
   await page.route("**/api/admin/cotizador/workspace", (route) => stub.handle(route));
+  await page.route("**/api/admin/cotizador/folios", (route) => folios.handle(route));
   await page.goto("/admin/cotizador");
   await page.waitForFunction(() => {
     const s = document.getElementById("mlz-status");
@@ -424,10 +494,13 @@ async function parity(browser: Browser) {
   original.on("dialog", (d) => d.accept());
   await original.goto("file:///" + ORIGINAL.replace(/\\/g, "/"));
   const ctxB = await newContext(browser, { viewport: { width: 1280, height: 900 } });
-  const adapted = await openCotizador(ctxB, stub, problems, "paridad:pdf");
+  // Mismo folio de partida en ambos: el original muestra COT-003 y no lo
+  // avanza tras imprimir; el servidor (stub) devuelve COT-003 en cada PDF.
+  const parityFolios = new FolioStub();
+  parityFolios.fixedFirst = 3;
+  const adapted = await openCotizador(ctxB, stub, problems, "paridad:pdf", parityFolios);
   for (const page of [original, adapted]) {
     await buildQuote(page, false);
-    // Mismo folio de partida en ambos (el original muestra COT-003).
     await page.evaluate(() => { const w = window as any; w.COT.cotNum = 3; w.syncCotNum(w.getCotNumStr()); });
     await page.click("text=Cotización integrada");
     await page.waitForFunction(() => (window as any).__prints.length === 1);
@@ -576,11 +649,11 @@ async function mobileSuite(browser: Browser, engine: string) {
   const prints = await page.evaluate(() => (window as any).__prints as string[]);
   check(`[${engine}] PDF integrado: 1 hoja con ambas líneas`, (prints[0]!.match(/class="pdf-page"/g) ?? []).length === 1 && prints[0]!.includes("COTIZACIÓN DE SERVICIO"));
   check(`[${engine}] PDF individual: 1 hoja por servicio con folios consecutivos`, (prints[1]!.match(/class="pdf-page/g) ?? []).length === 2 && /COT-\d{3}[\s\S]*COT-\d{3}/.test(prints[1]!));
+  check(`[${engine}] folios del servidor: integrada COT-039, individual COT-040 y COT-041`, prints[0]!.includes(">COT-039<") && />COT-040<[\s\S]*>COT-041</.test(prints[1]!) && !prints[1]!.includes(">COT-039<"));
   check(`[${engine}] PDF con fecha real del evento`, prints[0]!.includes("14/11/2026"));
-  const saved = await page.evaluate(() => (window as any).getSavedCots().length);
-  // Integrada guarda COT-n; la individual guarda COT-n y COT-n+1 y, como el
-  // original no avanza COT.cotNum tras imprimir, COT-n se reemplaza: 2 entradas.
-  check(`[${engine}] el historial guarda las cotizaciones generadas`, saved === 2, String(saved));
+  const saved = await page.evaluate(() => (window as unknown as FolioWin).getSavedCots().map((s) => s.cotNum).join());
+  // Cada folio emitido queda en el historial, sin reemplazos (folios únicos).
+  check(`[${engine}] el historial guarda las cotizaciones generadas`, saved === "COT-041,COT-040,COT-039", saved);
 
   // Recibo desde la cotización actual.
   await page.selectOption("#mlz-module", "recibos");
@@ -759,6 +832,366 @@ async function cloudSuite(browser: Browser) {
 }
 
 // ---------------------------------------------------------------------------
+// Folios COT-xxx asignados por el servidor (API sustituida por FolioStub)
+// ---------------------------------------------------------------------------
+type FolioWin = {
+  __prints: string[];
+  COT: { cotNum: number; lines: unknown[] };
+  getSavedCots(): Array<{ cotNum: string }>;
+  generatePDF(integrated: boolean): void;
+  generateReceiptPDF(): void;
+  nextCotNum(): void;
+  prevCotNum(): void;
+  syncCotNum(value: string): void;
+};
+const printsOf = (page: Page) => page.evaluate(() => (window as unknown as FolioWin).__prints);
+const folioOf = (html: string) => [...html.matchAll(/N° de Cotización:<\/span><span class="pdf-info-val v-purple">(COT-\d+)</g)].map((m) => m[1]).join(",");
+
+async function until(fn: () => boolean, label: string, ms = 10_000) {
+  const end = Date.now() + ms;
+  while (!fn()) {
+    if (Date.now() > end) throw new Error(`Timeout esperando: ${label}`);
+    await new Promise((r) => setTimeout(r, 25));
+  }
+}
+
+/** Pulsa generar y espera a que termine (impreso o rechazado). */
+async function generate(page: Page, folios: FolioStub, which: "integrada" | "individual") {
+  const posts = folios.posts.length;
+  const prints = (await printsOf(page)).length;
+  await page.click(`text=Cotización ${which}`);
+  await until(() => folios.posts.length > posts, "POST de folio");
+  await page.waitForFunction(() => !document.querySelector(".container")!.hasAttribute("inert"));
+  await page.waitForTimeout(250); // el original imprime con setTimeout(150)
+  const after = await printsOf(page);
+  return { printed: after.length > prints, html: after.length > prints ? after[after.length - 1]! : "" };
+}
+
+async function folioSuite(browser: Browser, engine: string) {
+  console.log(`\n--- 4. Folios del servidor (${engine}) ---`);
+  const problems: Problems = { errors: [] };
+  const cloud = new CloudStub();
+  const folios = new FolioStub();
+  const desktop = { viewport: { width: 1280, height: 900 } };
+  const ctx = await newContext(browser, desktop);
+  const page = await openCotizador(ctx, cloud, problems, `folios-${engine}`, folios);
+  await page.waitForFunction(() => document.getElementById("cot-num-display")!.textContent === "COT-038");
+
+  check(`[${engine}] arranque: última emitida COT-038 y siguiente COT-039`, (await page.textContent("#mlz-folio-next")) === "COT-039");
+  check(`[${engine}] leer el estado no reserva folios`, folios.posts.length === 0 && folios.lastIssued === 38);
+  check(
+    `[${engine}] sin flechas ni campo manual de folio`,
+    await page.evaluate(() => !document.getElementById("cot-num-input") && !document.querySelector("[data-ml-click*='CotNum']")),
+  );
+
+  // Intentos de fijar el folio a mano: no influyen en el PDF.
+  await buildQuote(page, false);
+  await page.evaluate(() => { const w = window as unknown as FolioWin; w.nextCotNum(); w.syncCotNum("COT-900"); w.prevCotNum(); w.COT.cotNum = 900; });
+  const first = await generate(page, folios, "integrada");
+  check(`[${engine}] integrada → COT-039 (folio manual ignorado)`, first.printed && folioOf(first.html) === "COT-039", folioOf(first.html));
+  check(`[${engine}] el POST lleva CSRF y contenido válido para el servidor`, folios.posts.every((p) => p.csrf === CSRF && p.valid) && folios.posts[0]!.mode === "integrated");
+  check(`[${engine}] tras emitir: última COT-039, siguiente COT-040`, (await page.textContent("#cot-num-display")) === "COT-039" && (await page.textContent("#mlz-folio-next")) === "COT-040");
+  check(`[${engine}] título del documento con el folio (nombre del PDF)`, (await page.title()).includes("COT-039"));
+  check(`[${engine}] botón para reabrir el PDF emitido`, (await page.isVisible("#mlz-reprint")) && ((await page.textContent("#mlz-reprint")) ?? "").includes("COT-039"));
+
+  const repeat = await generate(page, folios, "integrada");
+  check(`[${engine}] repetir el PDF → folio nuevo COT-040 (nunca recicla)`, folioOf(repeat.html) === "COT-040" && folios.posts[1]!.requestId !== folios.posts[0]!.requestId);
+  const batch = await generate(page, folios, "individual");
+  check(`[${engine}] individual de 2 → COT-041 y COT-042 contiguos`, folioOf(batch.html) === "COT-041,COT-042" && folios.posts.at(-1)!.count === 2);
+
+  // Reabrir: mismo PDF y folio, sin POST.
+  const posts = folios.posts.length;
+  await page.click("#mlz-reprint");
+  const reprinted = await printsOf(page);
+  check(`[${engine}] reabrir reimprime el mismo folio sin pedir otro`, reprinted.at(-1) === batch.html && folios.posts.length === posts);
+
+  // Recibo: sólo enlaza un folio ya emitido para ese mismo contenido.
+  await runStep(page, { page: "recibos" }, false);
+  await page.click("text=Cargar de cotización actual");
+  check(`[${engine}] recibo enlaza el folio emitido (COT-041)`, (await page.inputValue("#rec-cot-ref")) === "COT-041");
+  await page.click("text=Generar recibo PDF");
+  await page.waitForFunction(() => (window as unknown as FolioWin).__prints.length === 5);
+  check(`[${engine}] el PDF del recibo cita COT-041`, ((await printsOf(page)).at(-1) ?? "").includes("COT-041"));
+  await runStep(page, { page: "cotizacion" }, false);
+  await page.fill("#cot-cliente", "Cliente sin emitir");
+  await runStep(page, { page: "recibos" }, false);
+  await page.click("text=Cargar de cotización actual");
+  check(`[${engine}] contenido sin emitir: el recibo no apunta a un folio inexistente`, (await page.inputValue("#rec-cot-ref")) === "");
+  await runStep(page, { page: "cotizacion" }, false);
+
+  // Doble toque y bloqueo durante la solicitud.
+  folios.delayMs = 600;
+  const before = folios.posts.length;
+  await page.evaluate(() => {
+    const b = document.querySelector<HTMLButtonElement>("[data-ml-click='[\"generatePDF\",true]']")!;
+    b.click(); b.click(); (window as unknown as FolioWin).generatePDF(true);
+  });
+  await page.waitForFunction(() => document.querySelector(".container")!.hasAttribute("inert"));
+  const locked = await page.evaluate(() => ({
+    save: (document.getElementById("mlz-save") as HTMLButtonElement).disabled,
+    reload: (document.getElementById("mlz-reload") as HTMLButtonElement).disabled,
+    hint: document.getElementById("mlz-folio-hint")!.textContent,
+  }));
+  check(`[${engine}] en vuelo: edición, guardar y recargar bloqueados`, locked.save && locked.reload && /Asignando/.test(locked.hint ?? ""));
+  await page.waitForFunction(() => !document.querySelector(".container")!.hasAttribute("inert"));
+  folios.delayMs = 0;
+  check(`[${engine}] doble toque → un solo POST`, folios.posts.length === before + 1);
+  await page.waitForTimeout(250);
+  check(`[${engine}] doble toque → COT-043`, folioOf((await printsOf(page)).at(-1)!) === "COT-043");
+
+  // Respuesta perdida: el servidor reservó COT-044, el cliente no lo supo.
+  await page.fill("#cot-cliente", "Respuesta perdida");
+  folios.dropNext = true;
+  const lost = await generate(page, folios, "integrada");
+  check(`[${engine}] sin respuesta: no hay PDF y se avisa`, !lost.printed && ((await page.textContent("#mlz-notice")) ?? "").includes("No se generó el PDF"));
+  check(`[${engine}] sin respuesta: el folio visible no se inventa`, (await page.textContent("#cot-num-display")) === "COT-043");
+  // La solicitud pendiente sobrevive a recargar la página.
+  await page.reload();
+  await page.waitForFunction(() => document.getElementById("mlz-status")!.getAttribute("data-state") !== "loading");
+  await page.waitForFunction(() => document.getElementById("cot-num-display")!.textContent === "COT-044");
+  const lostId = folios.posts.at(-1)!.requestId;
+  const retry = await generate(page, folios, "integrada");
+  check(
+    `[${engine}] reintento tras recargar: mismo UUID → el mismo COT-044, sin consumir otro`,
+    folioOf(retry.html) === "COT-044" && folios.posts.at(-1)!.requestId === lostId && folios.lastIssued === 44,
+    `${folioOf(retry.html)} ${folios.lastIssued}`,
+  );
+
+  // Pendiente + contenido cambiado → UUID nuevo (nunca comparte folio).
+  await page.fill("#cot-cliente", "Otro pendiente");
+  folios.dropNext = true;
+  await generate(page, folios, "integrada");
+  const staleId = folios.posts.at(-1)!.requestId;
+  await page.fill("#cot-cliente", "Contenido cambiado");
+  const changed = await generate(page, folios, "integrada");
+  check(`[${engine}] contenido cambiado tras fallo → UUID nuevo y folio nuevo`, folios.posts.at(-1)!.requestId !== staleId && folioOf(changed.html) === "COT-046");
+
+  // Sin red, sesión vencida, nube sin configurar, rate limit: ni PDF ni folio.
+  for (const [label, arm, text] of [
+    ["sin red", () => { folios.abortNext = true; }, "sin conexión"],
+    ["sesión vencida (401)", () => { folios.nextPost = { status: 401 }; }, "sesión expiró"],
+    ["nube sin configurar (503)", () => { folios.nextPost = { status: 503 }; }, "no está configurada"],
+    ["demasiados intentos (429)", () => { folios.nextPost = { status: 429 }; }, "demasiados intentos"],
+  ] as const) {
+    arm();
+    const r = await generate(page, folios, "integrada");
+    const notice = (await page.textContent("#mlz-notice")) ?? "";
+    check(`[${engine}] ${label}: no se imprime y se avisa`, !r.printed && notice.includes(text) && notice.includes("sigue aquí"), notice.slice(0, 120));
+    if (label.includes("401")) check(`[${engine}] 401 ofrece iniciar sesión`, await page.isVisible("#mlz-notice a[href='/admin/login']"));
+  }
+  check(`[${engine}] los fallos no consumieron folios`, folios.lastIssued === 46);
+  check(`[${engine}] la cotización sigue intacta tras los fallos`, (await page.inputValue("#cot-cliente")) === "Contenido cambiado" && (await page.evaluate(() => (window as unknown as FolioWin).COT.lines.length)) === 2);
+  const okAgain = await generate(page, folios, "integrada");
+  check(`[${engine}] reintento correcto tras los fallos → COT-047`, folioOf(okAgain.html) === "COT-047");
+
+  // Borrar el historial no toca el contador.
+  await runStep(page, { page: "recibos" }, false);
+  await page.click("[aria-label='Borrar lista de cotizaciones guardadas']");
+  await runStep(page, { page: "cotizacion" }, false);
+  const afterClear = await generate(page, folios, "integrada");
+  check(`[${engine}] borrar historial no reinicia el folio → COT-048`, folioOf(afterClear.html) === "COT-048" && (await page.evaluate(() => (window as unknown as FolioWin).getSavedCots().length)) === 1);
+
+  // Guardar en la nube con una foto "vieja" (cot.num 5) y abrir otro dispositivo.
+  await page.click("#mlz-save");
+  await page.waitForFunction(() => document.getElementById("mlz-status")!.getAttribute("data-state") === "saved");
+  const old = cloud.snapshot as { cot: { num: number; nextNum: number | null } };
+  old.cot.num = 5;
+  old.cot.nextNum = 6;
+  const ctxB = await newContext(browser, desktop);
+  await ctxB.addInitScript("localStorage.setItem('mlCotNum', '7');");
+  const b = await openCotizador(ctxB, cloud, problems, `folios-B-${engine}`, folios);
+  await b.waitForFunction(() => document.getElementById("cot-num-display")!.textContent === "COT-048");
+  await runStep(b, { page: "cotizacion" }, false);
+  const restored = await generate(b, folios, "integrada");
+  check(`[${engine}] restaurar nube/caché viejo no hace retroceder: otro dispositivo → COT-049`, folioOf(restored.html) === "COT-049");
+
+  // Dos dispositivos a la vez: folios distintos.
+  const pa = generate(page, folios, "integrada");
+  const pb = generate(b, folios, "integrada");
+  const [ra, rb] = await Promise.all([pa, pb]);
+  const pair = [folioOf(ra.html), folioOf(rb.html)].sort().join();
+  check(`[${engine}] dos dispositivos simultáneos → COT-050 y COT-051`, pair === "COT-050,COT-051", pair);
+
+  // Carrera: respuesta → render de la plantilla → otro toque ANTES del
+  // print() programado (setTimeout 150 ms del original). El observador corre
+  // como microtarea justo tras el render, siempre antes de ese temporizador.
+  const racePosts = folios.posts.length;
+  const racePrints = (await printsOf(page)).length;
+  await page.evaluate(() => {
+    const w = window as unknown as FolioWin & { __race?: Record<string, unknown> };
+    const tpl = document.getElementById("print-template")!;
+    const obs = new MutationObserver(() => {
+      obs.disconnect();
+      const individual = document.querySelector<HTMLButtonElement>("[data-ml-click='[\"generatePDF\",false]']")!;
+      w.__race = {
+        printsAtRender: w.__prints.length,
+        disabled: individual.disabled,
+        inert: document.querySelector(".container")!.hasAttribute("inert"),
+        html: tpl.innerHTML,
+      };
+      individual.click();
+      w.generatePDF(true);
+      w.generateReceiptPDF();
+      document.getElementById("mlz-reprint")!.click();
+    });
+    obs.observe(tpl, { childList: true, subtree: true });
+  });
+  await page.click("text=Cotización integrada");
+  await page.waitForFunction((n) => (window as unknown as FolioWin).__prints.length > n, racePrints);
+  await page.waitForFunction(() => !document.querySelector(".container")!.hasAttribute("inert"));
+  await page.waitForTimeout(400);
+  const race = await page.evaluate(() => (window as unknown as { __race: { printsAtRender: number; disabled: boolean; inert: boolean; html: string } }).__race);
+  const racePrinted = (await printsOf(page)).slice(racePrints);
+  check(`[${engine}] carrera: el segundo toque llega tras el render y antes del print, con bloqueo activo`, race.printsAtRender === racePrints && race.disabled && race.inert);
+  check(
+    `[${engine}] carrera: un solo POST y una sola impresión, con el folio original COT-052`,
+    folios.posts.length === racePosts + 1 && racePrinted.length === 1 && folioOf(racePrinted[0]!) === "COT-052" && racePrinted[0] === race.html,
+    `${folios.posts.length - racePosts} POST, ${racePrinted.length} impresiones, ${racePrinted.map(folioOf).join("|")}`,
+  );
+  const legit = await generate(page, folios, "integrada");
+  check(`[${engine}] terminado el bloqueo, un toque legítimo sí genera COT-053`, folioOf(legit.html) === "COT-053");
+
+  for (const p of [page, b]) {
+    const v = await cspViolations(p);
+    check(`[${engine}] folios: sin violaciones de CSP`, v.length === 0, v.join(" | "));
+  }
+  const noDateInput = await page.evaluate(() => { const i = document.createElement("input"); i.type = "date"; return i.type !== "date"; });
+  const runtimeErrors = problems.errors.filter((e) => !(noDateInput && /pageerror: The object is in an invalid state/.test(e)));
+  check(`[${engine}] folios: sin errores de runtime`, runtimeErrors.length === 0, runtimeErrors.slice(0, 3).join(" | "));
+  await ctx.close();
+  await ctxB.close();
+
+  // Timeout real del cliente (12 s acortados) y arranque sin servidor de folios.
+  const slow = new FolioStub();
+  slow.hang = true;
+  const ctxT = await newContext(browser, desktop);
+  await ctxT.addInitScript(`
+    const nativeTimeout = window.setTimeout.bind(window);
+    window.setTimeout = function (fn, ms, ...args) { return nativeTimeout(fn, ms === 12000 ? 300 : ms, ...args); };
+  `);
+  const t = await openCotizador(ctxT, new CloudStub(), { errors: [] }, `folios-timeout-${engine}`, slow);
+  await buildQuote(t, false);
+  const timedOut = await generate(t, slow, "integrada");
+  check(`[${engine}] timeout: sin PDF y edición liberada`, !timedOut.printed && ((await t.textContent("#mlz-notice")) ?? "").includes("tardó demasiado"));
+  const pendingKept = await t.evaluate(() => JSON.parse(sessionStorage.getItem("mlCotizadorFolios:tab:v2") ?? "null")?.pending?.requestId);
+  check(`[${engine}] timeout: la solicitud queda pendiente para reintentar`, pendingKept === slow.posts[0]!.requestId);
+  await ctxT.close();
+
+  const down = new FolioStub();
+  down.getStatus = 503;
+  const ctxD = await newContext(browser, desktop);
+  const d = await openCotizador(ctxD, new CloudStub(), { errors: [] }, `folios-down-${engine}`, down);
+  await d.waitForTimeout(300);
+  check(`[${engine}] sin servidor de folios: no se muestra un folio inventado`, (await d.textContent("#cot-num-display")) === "—" && ((await d.textContent("#mlz-folio-hint")) ?? "").includes("requiere conexión"));
+  await ctxD.close();
+}
+
+/** Pestañas del MISMO navegador (BrowserContext compartido) y almacenamiento bloqueado. */
+async function folioTabSuite(browser: Browser, engine: string) {
+  console.log(`\n--- 5. Folios por pestaña (${engine}) ---`);
+  const problems: Problems = { errors: [] };
+  const cloud = new CloudStub();
+  const folios = new FolioStub();
+  const desktop = { viewport: { width: 1280, height: 900 } };
+  const TAB_KEY = "mlCotizadorFolios:tab:v2";
+  const ctx = await newContext(browser, desktop);
+
+  const p1 = await openCotizador(ctx, cloud, problems, `tab1-${engine}`, folios);
+  await buildQuote(p1, false);
+  await p1.waitForTimeout(400); // caché local del espacio de trabajo (compartido)
+  const p2 = await openCotizador(ctx, cloud, problems, `tab2-${engine}`, folios);
+  await runStep(p2, { page: "cotizacion" }, false);
+  check(`[${engine}] la segunda pestaña abre el mismo contenido`, (await p2.inputValue("#cot-cliente")) === (await p1.inputValue("#cot-cliente")));
+
+  const [g1, g2] = await Promise.all([generate(p1, folios, "integrada"), generate(p2, folios, "integrada")]);
+  const ids = folios.posts.slice(-2).map((p) => p.requestId);
+  const pair = [folioOf(g1.html), folioOf(g2.html)];
+  check(`[${engine}] dos pestañas, mismo contenido, a la vez → UUID distintos`, ids[0] !== ids[1]);
+  check(`[${engine}] dos pestañas → folios distintos COT-039 y COT-040`, [...pair].sort().join() === "COT-039,COT-040", pair.join());
+  for (const [p, own] of [[p1, pair[0]], [p2, pair[1]]] as const) {
+    await runStep(p, { page: "recibos" }, false);
+    await p.click("text=Cargar de cotización actual");
+    check(`[${engine}] cada pestaña: el recibo cita su propio folio (${own})`, (await p.inputValue("#rec-cot-ref")) === own);
+    await runStep(p, { page: "cotizacion" }, false);
+  }
+  check(`[${engine}] el estado de folios no usa localStorage compartido`, await p1.evaluate(() => localStorage.getItem("mlCotizadorFolios:v1") === null && Object.keys(localStorage).every((k) => !k.startsWith("mlCotizadorFolios"))));
+
+  // Pestaña duplicada: hereda una copia de sessionStorage con el pendiente.
+  await p1.fill("#cot-cliente", "Pestaña duplicada");
+  folios.dropNext = true;
+  await generate(p1, folios, "integrada");
+  const heldId = folios.posts.at(-1)!.requestId;
+  const copied = await p1.evaluate((k) => sessionStorage.getItem(k), TAB_KEY);
+  check(`[${engine}] el pendiente vive en sessionStorage de la pestaña`, !!copied && copied.includes(heldId));
+  await p1.waitForTimeout(400);
+  const p3 = await openCotizador(ctx, cloud, problems, `tab3-${engine}`, folios, (p) =>
+    p.addInitScript(([k, v]) => { if (!sessionStorage.getItem(k as string)) sessionStorage.setItem(k as string, v as string); }, [TAB_KEY, copied]));
+  await runStep(p3, { page: "cotizacion" }, false);
+  check(`[${engine}] la pestaña duplicada tiene el mismo contenido y el mismo pendiente`, (await p3.inputValue("#cot-cliente")) === "Pestaña duplicada" && ((await p3.evaluate((k) => sessionStorage.getItem(k), TAB_KEY)) ?? "").includes(heldId));
+  // Ambas a la vez, con la respuesta retrasada para que se traslapen.
+  folios.delayMs = 800;
+  const [r1, r3] = await Promise.all([generate(p1, folios, "integrada"), generate(p3, folios, "integrada")]);
+  folios.delayMs = 0;
+  const dupIds = folios.posts.slice(-2).map((p) => p.requestId);
+  check(`[${engine}] duplicada: sólo la pestaña dueña reutiliza el UUID pendiente`, dupIds.filter((id) => id === heldId).length === 1, dupIds.join(" "));
+  check(
+    `[${engine}] duplicada: la dueña recupera COT-041 y la copia recibe COT-042`,
+    folioOf(r1.html) === "COT-041" && folioOf(r3.html) === "COT-042" && folios.lastIssued === 42,
+    `${folioOf(r1.html)} ${folioOf(r3.html)} ${folios.lastIssued}`,
+  );
+  // Secuencial: la dueña termina (y suelta el lock) ANTES de que la copia
+  // genere. La copia no debe reutilizar el UUID ya resuelto.
+  await p1.fill("#cot-cliente", "Duplicada secuencial");
+  folios.dropNext = true;
+  await generate(p1, folios, "integrada");
+  const seqId = folios.posts.at(-1)!.requestId;
+  const seqCopy = await p1.evaluate((k) => sessionStorage.getItem(k), TAB_KEY);
+  await p1.waitForTimeout(400);
+  const p4 = await openCotizador(ctx, cloud, problems, `tab4-${engine}`, folios, (p) =>
+    p.addInitScript(([k, v]) => { if (!sessionStorage.getItem(k as string)) sessionStorage.setItem(k as string, v as string); }, [TAB_KEY, seqCopy]));
+  await runStep(p4, { page: "cotizacion" }, false);
+  const own = await generate(p1, folios, "integrada");
+  const copy = await generate(p4, folios, "integrada");
+  check(
+    `[${engine}] duplicada secuencial: la dueña recupera COT-043; la copia pide UUID nuevo → COT-044`,
+    folioOf(own.html) === "COT-043" && folioOf(copy.html) === "COT-044" && folios.posts.at(-1)!.requestId !== seqId && folios.lastIssued === 44,
+    `${folioOf(own.html)} ${folioOf(copy.html)} ${folios.lastIssued}`,
+  );
+  for (const p of [p1, p2, p3, p4]) {
+    const v = await cspViolations(p);
+    check(`[${engine}] pestañas: sin violaciones de CSP`, v.length === 0, v.join(" | "));
+  }
+  await ctx.close();
+
+  // Almacenamiento rechazado (Storage lanza) + respuesta perdida: el UUID
+  // sigue en memoria y el reintento recupera el mismo folio.
+  const blocked = new FolioStub();
+  const ctxS = await newContext(browser, desktop);
+  await ctxS.addInitScript(`
+    for (const m of ['getItem', 'setItem', 'removeItem']) {
+      Storage.prototype[m] = function () { throw new DOMException('Almacenamiento bloqueado', 'SecurityError'); };
+    }
+  `);
+  const s = await openCotizador(ctxS, new CloudStub(), problems, `storage-${engine}`, blocked);
+  await buildQuote(s, false);
+  blocked.dropNext = true;
+  const lost = await generate(s, blocked, "integrada");
+  const lostId = blocked.posts.at(-1)!.requestId;
+  const again = await generate(s, blocked, "integrada");
+  check(`[${engine}] almacenamiento bloqueado: sin respuesta no imprime`, !lost.printed);
+  check(
+    `[${engine}] almacenamiento bloqueado: el reintento usa el mismo UUID y recupera COT-039`,
+    blocked.posts.at(-1)!.requestId === lostId && folioOf(again.html) === "COT-039" && blocked.lastIssued === 39,
+    `${folioOf(again.html)} ${blocked.lastIssued}`,
+  );
+  await ctxS.close();
+
+  const noDate = /pageerror: The object is in an invalid state/;
+  const errors = problems.errors.filter((e) => !noDate.test(e));
+  check(`[${engine}] pestañas: sin errores de runtime`, errors.length === 0, errors.slice(0, 3).join(" | "));
+}
+
+// ---------------------------------------------------------------------------
 // Servidor real: auth, cabeceras, API sin base
 // ---------------------------------------------------------------------------
 async function loadingSuite(browser: Browser, engine: string) {
@@ -821,6 +1254,10 @@ async function serverSuite() {
   check("el token CSRF va en el documento, no el secreto", html.includes(`content="${CSRF}"`) && !html.includes(SECRET));
   const api = await fetch(`${BASE}/api/admin/cotizador/workspace`, { headers: { cookie: `ml_admin=${adminCookie()}` } });
   check("API sin Supabase → 503 NOT_CONFIGURED, no-store", api.status === 503 && /no-store/.test(api.headers.get("cache-control") ?? ""));
+  const folioGet = await fetch(`${BASE}/api/admin/cotizador/folios`, { headers: { cookie: `ml_admin=${adminCookie()}` } });
+  check("API de folios sin Supabase → 503, no-store (nunca un folio local)", folioGet.status === 503 && /no-store/.test(folioGet.headers.get("cache-control") ?? ""));
+  const folioAnon = await fetch(`${BASE}/api/admin/cotizador/folios`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+  check("POST de folios sin sesión ni CSRF → rechazado", folioAnon.status >= 400 && !(await folioAnon.text()).includes('"first"'));
   const nav = await fetch(`${BASE}/admin`, { headers: { cookie: `ml_admin=${adminCookie()}` } });
   check("el resumen admin enlaza al cotizador", (await nav.text()).includes('href="/admin/cotizador"'));
 }
@@ -836,12 +1273,14 @@ async function main() {
       await mobileSuite(browser, "chromium");
       await cloudSuite(browser);
       await loadingSuite(browser, "chromium");
+      await folioSuite(browser, "chromium");
+      await folioTabSuite(browser, "chromium");
     } finally {
       await browser.close();
     }
     const wk = await webkit.launch().catch(() => null);
     if (wk) {
-      try { await mobileSuite(wk, "webkit"); await loadingSuite(wk, "webkit"); } finally { await wk.close(); }
+      try { await mobileSuite(wk, "webkit"); await loadingSuite(wk, "webkit"); await folioSuite(wk, "webkit"); await folioTabSuite(wk, "webkit"); } finally { await wk.close(); }
     } else {
       console.log("(WebKit no disponible: se omite la pasada en WebKit)");
     }

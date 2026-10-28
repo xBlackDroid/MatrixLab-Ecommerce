@@ -10,13 +10,19 @@
  *      el de tarjetas de resultado (marca el precio sugerido como principal);
  *   3. guarda el historial de cotizaciones en memoria (no sólo localStorage);
  *   4. sincroniza la "foto" del espacio de trabajo con la nube
- *      (/api/admin/cotizador/workspace) con concurrencia optimista.
+ *      (/api/admin/cotizador/workspace) con concurrencia optimista;
+ *   5. pide al servidor el folio COT-xxx definitivo ANTES de construir cada
+ *      PDF de cotización (/api/admin/cotizador/folios): el navegador ya no
+ *      elige ni edita el número.
  */
 (function () {
   'use strict';
 
   var API = '/api/admin/cotizador/workspace';
+  var FOLIO_API = '/api/admin/cotizador/folios';
   var CACHE_KEY = 'mlCotizadorWorkspace:v1';
+  /** sessionStorage (POR PESTAÑA): folio pendiente (reintento idempotente) y último emitido. */
+  var FOLIO_KEY = 'mlCotizadorFolios:tab:v2';
   var MAX_SNAPSHOT_BYTES = 200 * 1024;
   var CSRF = (document.querySelector('meta[name="ml-csrf"]') || {}).content || '';
   var MODULE_PAGES = ['dulceros', 'tattoo', 'tshirt', 'caplab', 'prendas', 'stickers', 'imanes', 'accesorios', 'fablab'];
@@ -26,6 +32,50 @@
   function lsGet(key) { try { return window.localStorage.getItem(key); } catch (e) { return null; } }
   function lsSet(key, value) { try { window.localStorage.setItem(key, value); } catch (e) { /* sin almacenamiento local */ } }
   function lsInt(key) { var n = parseInt(lsGet(key) || '', 10); return n > 0 ? n : null; }
+
+  // =========================================================================
+  // 0. Folio automático: fuera las flechas y el campo manual del original.
+  //    Se hace ANTES de registrar ALLOWED para que sus acciones
+  //    (prevCotNum / nextCotNum / syncCotNum) ni siquiera queden permitidas.
+  // =========================================================================
+  (function () {
+    var manual = $('cot-num-input');
+    var controls = manual ? manual.parentNode : null;
+    var header = controls ? controls.parentNode : null;
+    if (!header) return;
+    var label = header.querySelector('.sec-label');
+    if (label) label.textContent = 'Última cotización emitida';
+    var display = $('cot-num-display');
+    if (display) display.textContent = '—';
+    var panel = document.createElement('div');
+    panel.className = 'mlz-folio';
+    panel.id = 'mlz-folio';
+    panel.innerHTML = '<span class="mlz-folio-label">Siguiente folio</span>'
+      + '<strong class="mlz-folio-next" id="mlz-folio-next">—</strong>'
+      + '<span class="mlz-folio-hint" id="mlz-folio-hint" role="status" aria-live="polite">Automático: lo asigna el servidor al generar el PDF</span>';
+    header.replaceChild(panel, controls);
+
+    var integratedBtn = document.querySelector('[data-ml-click=\'["generatePDF",true]\']');
+    var actions = integratedBtn ? integratedBtn.parentNode : null;
+    if (actions) {
+      var reprint = document.createElement('button');
+      reprint.type = 'button';
+      reprint.className = 'btn btn-outline';
+      reprint.id = 'mlz-reprint';
+      reprint.hidden = true;
+      reprint.textContent = '🖨 Reabrir último PDF';
+      actions.appendChild(reprint);
+      var note = document.createElement('p');
+      note.className = 'note mlz-folio-note';
+      note.id = 'mlz-folio-note';
+      note.textContent = 'Folio automático: al generar un PDF el servidor asigna el siguiente número '
+        + '(uno por hoja en la individual) aunque después canceles la impresión; un folio nunca se reutiliza '
+        + 'para otra cotización. Si el diálogo no se abre o lo cerraste, «Reabrir último PDF» lo vuelve a '
+        + 'mostrar con el mismo folio, sin gastar otro. Sin conexión no se genera el PDF.';
+      var origNote = actions.nextElementSibling;
+      actions.parentNode.insertBefore(note, origNote && origNote.classList.contains('note') ? origNote.nextSibling : actions.nextSibling);
+    }
+  })();
 
   // =========================================================================
   // 1. Despachador de acciones (sustituye a onclick/onchange/oninput)
@@ -211,16 +261,10 @@
     showToast('✓ Lista de cotizaciones borrada');
   };
 
-  // Siguiente folio tras el último PDF (el original sólo lo deja en
-  // localStorage para la próxima carga; aquí también viaja a la nube).
-  var nextCotNum = lsInt('mlCotNum');
-  var originalGeneratePDF = window.generatePDF;
-  window.generatePDF = function (integrated) {
-    var count = COT.lines.length;
-    var start = COT.cotNum;
-    originalGeneratePDF(integrated);
-    if (count > 0) nextCotNum = (integrated || count === 1) ? start + 1 : start + count;
-  };
+  // Siguiente folio tras el último PDF generado aquí. Sólo informativo (viaja
+  // en la foto como `cot.nextNum`): el número real lo decide el servidor, ver
+  // la sección 6b. Ni la nube ni el caché pueden hacer retroceder el folio.
+  var lastNextNum = lsInt('mlCotNum');
 
   // =========================================================================
   // 4. Accesibilidad, navegación de módulos y estado visual
@@ -353,7 +397,7 @@
       activePage: activePage,
       cot: {
         num: clampInt(COT.cotNum, 1, 1e9),
-        nextNum: nextCotNum ? clampInt(nextCotNum, 1, 1e9) : null,
+        nextNum: lastNextNum ? clampInt(lastNextNum, 1, 1e9) : null,
         iva: !!COT.iva,
         lines: COT.lines.map(cleanLine),
         fields: fields(COT_FIELDS)
@@ -428,9 +472,11 @@
     updateCosts();
 
     // f) Cotización.
+    // Folio de referencia: sólo para mostrar. Restaurar una foto vieja NUNCA
+    // cambia el siguiente folio (lo decide el servidor al generar).
     COT.cotNum = s.cot.num;
-    nextCotNum = s.cot.nextNum;
-    if (nextCotNum) lsSet('mlCotNum', String(nextCotNum));
+    lastNextNum = s.cot.nextNum;
+    if (lastNextNum) lsSet('mlCotNum', String(lastNextNum));
     COT.lines = s.cot.lines.map(cleanLine);
     Object.keys(COT_FIELDS).forEach(function (key) { $(COT_FIELDS[key]).value = s.cot.fields[key]; });
     syncCotNum(getCotNumStr());
@@ -494,6 +540,8 @@
   // 6. Sincronización con la nube
   // =========================================================================
   var WS = { version: 0, updatedAt: null, syncedHash: null, cloudSnapshot: null, saving: false, conflict: false, ready: false };
+  /** lastIssued: último folio emitido según el servidor (null = desconocido). */
+  var FOLIO = { lastIssued: null, busy: false, lastHtml: null, lastTitle: null };
   var statusEl = $('mlz-status');
   var saveBtn = $('mlz-save');
   var reloadBtn = $('mlz-reload');
@@ -509,15 +557,23 @@
   function setStatus(state, message) {
     statusEl.setAttribute('data-state', state);
     statusEl.textContent = message;
-    saveBtn.disabled = WS.saving || !WS.ready;
-    reloadBtn.disabled = WS.saving || !WS.ready;
+    applyLock();
+  }
+
+  /**
+   * Bloqueos de edición: la primera lectura (o una recarga confirmada)
+   * reemplaza los campos, y mientras el servidor asigna un folio la
+   * cotización no puede cambiar (el PDF debe ser exactamente lo que se envió).
+   */
+  function applyLock() {
+    var locked = !WS.ready || FOLIO.busy;
+    saveBtn.disabled = WS.saving || locked;
+    reloadBtn.disabled = WS.saving || locked;
     saveBtn.setAttribute('aria-busy', WS.saving ? 'true' : 'false');
     saveBtn.textContent = WS.saving ? 'Guardando…' : 'Guardar en la nube';
-    // La primera lectura (o una recarga confirmada) reemplaza los campos.
-    // Bloquearlos mientras llega evita perder una edición hecha en una red lenta.
     document.querySelectorAll('.container, .main-tabs, .mlz-picker').forEach(function (el) {
-      el.inert = !WS.ready;
-      el.setAttribute('aria-busy', WS.ready ? 'false' : 'true');
+      el.inert = locked;
+      el.setAttribute('aria-busy', locked ? 'true' : 'false');
     });
   }
 
@@ -592,7 +648,7 @@
     WS.syncedHash = hashOf(capture());
   }
 
-  function request(method, body) {
+  function request(method, body, url) {
     var controller = new AbortController();
     var timeout = setTimeout(function () { controller.abort(); }, 12000);
     var init = { method: method, credentials: 'same-origin', cache: 'no-store', signal: controller.signal, headers: { Accept: 'application/json' } };
@@ -601,7 +657,7 @@
       init.headers['x-ml-csrf'] = CSRF;
       init.body = JSON.stringify(body);
     }
-    return fetch(API, init).then(function (res) {
+    return fetch(url || API, init).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) { return { status: res.status, data: data || {}, retryAfter: res.headers.get('Retry-After') }; });
     }).finally(function () { clearTimeout(timeout); });
   }
@@ -620,7 +676,7 @@
   }
 
   function save(force) {
-    if (WS.saving || !WS.ready) return;
+    if (WS.saving || !WS.ready || FOLIO.busy) return;
     var snapshot = capture();
     var size = byteLength(snapshot);
     if (size > MAX_SNAPSHOT_BYTES) {
@@ -671,7 +727,7 @@
   }
 
   function reload(skipConfirm) {
-    if (WS.saving) return;
+    if (WS.saving || FOLIO.busy) return;
     if (!skipConfirm && isDirty() && !confirm('Tienes cambios sin guardar en la nube. ¿Descartarlos y cargar la versión guardada?')) return;
     WS.ready = false;
     setStatus('loading', 'Cargando guardado de la nube…');
@@ -694,6 +750,7 @@
       markSynced(r.data.version, r.data.updatedAt);
       writeCache(false);
       refreshIdleStatus();
+      refreshFolioStatus();
       showToast('✓ Versión de la nube cargada');
     }, function () {
       WS.ready = true;
@@ -705,6 +762,8 @@
   function boot() {
     var cache = readCache();
     setStatus('loading', 'Cargando guardado de la nube…');
+    // Sólo informativo (no reserva): el folio real se asigna al generar.
+    refreshFolioStatus();
     request('GET').then(function (r) {
       WS.ready = true;
       if (r.status !== 200 || !r.data.ok) { bootOffline(cache, r); return; }
@@ -760,18 +819,323 @@
     showNotice('error', describeFailure(r), failureActions(r).concat(r && r.status === 401 ? [] : [{ label: 'Reintentar', onClick: function () { reload(true); } }]));
   }
 
+  // =========================================================================
+  // 6b. Folios de cotización asignados por el servidor
+  // =========================================================================
+  // Cada PDF de cotización consume folios DEFINITIVOS que elige el servidor
+  // (integrada o de una línea: 1; individual: uno por hoja, contiguos). El
+  // navegador no puede saber si el PDF se guardó o se canceló, así que el
+  // folio se consume al generar y nunca se recicla. Sin respuesta confirmada
+  // no hay PDF ni número: nada de folios locales que puedan duplicarse.
+  //
+  // Idempotencia: la solicitud lleva un UUID que se guarda (con la huella del
+  // contenido) ANTES de enviarse. Si la respuesta se pierde (timeout, red,
+  // recarga), reintentar con el mismo contenido reutiliza el UUID y el
+  // servidor devuelve el mismo rango sin consumir otro. Si el contenido
+  // cambió, el UUID viejo se descarta: un folio jamás cubre dos contenidos.
+  //
+  // El estado (pendiente + último emitido) es POR PESTAÑA: vive en memoria y
+  // se refleja en sessionStorage para sobrevivir a recargar la misma pestaña.
+  // Nunca en localStorage: dos pestañas con el mismo contenido son dos
+  // generaciones distintas y no deben compartir UUID. Una pestaña duplicada
+  // hereda una copia de sessionStorage; por eso, además, cada pestaña toma un
+  // Web Lock con el UUID antes de usarlo y, si otra ya lo tiene, pide uno
+  // nuevo. Si el almacenamiento falla, el estado sigue en memoria.
+  function formatFolio(n) { return 'COT-' + String(n).padStart(3, '0'); }
+  function folioRange(first, count) { return count > 1 ? formatFolio(first) + ' a ' + formatFolio(first + count - 1) : formatFolio(first); }
+
+  var TAB_FOLIOS = (function () {
+    try {
+      var s = JSON.parse(window.sessionStorage.getItem(FOLIO_KEY) || 'null');
+      if (s && s.v === 2) return { v: 2, pending: s.pending || null, issued: s.issued || null };
+    } catch { /* sin sessionStorage o corrupto: sólo memoria */ }
+    return { v: 2, pending: null, issued: null };
+  })();
+  function readFolios() { return TAB_FOLIOS; }
+  function writeFolios(s) {
+    TAB_FOLIOS = s;
+    try { window.sessionStorage.setItem(FOLIO_KEY, JSON.stringify(s)); } catch { /* queda en memoria */ }
+  }
+
+  // Web Locks por UUID: sólo una pestaña viva puede usar un UUID pendiente.
+  var heldLocks = {};
+  function claimRequest(id) {
+    if (heldLocks[id]) return Promise.resolve(true);
+    var locks = navigator.locks;
+    if (!locks || typeof locks.request !== 'function') return Promise.resolve(true);
+    return new Promise(function (resolve) {
+      locks.request('mlz-cot-folio:' + id, { ifAvailable: true }, function (lock) {
+        if (!lock) { resolve(false); return undefined; }
+        // Se mantiene hasta que la solicitud se resuelva o la pestaña se cierre.
+        return new Promise(function (release) { heldLocks[id] = release; resolve(true); });
+      }).catch(function () { resolve(true); });
+    });
+  }
+  function releaseRequest(id) {
+    if (heldLocks[id]) { heldLocks[id](); delete heldLocks[id]; }
+  }
+  // UUIDs ya resueltos (PDF emitido o rechazo definitivo). Una pestaña
+  // duplicada puede heredar un pendiente que la original ya completó y soltó:
+  // esta lista (sólo UUIDs, compartida entre pestañas) impide reutilizarlo.
+  // Se marca ANTES de soltar el lock y se consulta DESPUÉS de tomarlo.
+  var DONE_KEY = 'mlCotizadorFolioDone:v2';
+  var doneMem = {};
+  function doneList() {
+    try { var l = JSON.parse(lsGet(DONE_KEY) || '[]'); return Array.isArray(l) ? l : []; } catch { return []; }
+  }
+  function isDone(id) { return !!doneMem[id] || doneList().indexOf(id) >= 0; }
+  function finishRequest(id) {
+    doneMem[id] = true;
+    var l = doneList().filter(function (x) { return x !== id; });
+    l.unshift(id);
+    lsSet(DONE_KEY, JSON.stringify(l.slice(0, 100)));
+    releaseRequest(id);
+  }
+  /** UUID para este contenido: reutiliza el pendiente propio, nunca uno ajeno ni uno ya resuelto. */
+  function requestIdFor(key) {
+    var store = readFolios();
+    var reuse = store.pending && store.pending.key === key ? store.pending.requestId : null;
+    var claim = reuse ? claimRequest(reuse) : Promise.resolve(false);
+    return claim.then(function (owned) {
+      if (owned && !isDone(reuse)) return reuse;
+      if (owned) releaseRequest(reuse);
+      if (store.pending && !reuse) releaseRequest(store.pending.requestId);
+      var fresh = newRequestId();
+      return claimRequest(fresh).then(function () {
+        writeFolios({ v: 2, pending: { requestId: fresh, key: key }, issued: readFolios().issued });
+        return fresh;
+      });
+    });
+  }
+
+  function newRequestId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+    var b = window.crypto.getRandomValues(new Uint8Array(16));
+    b[6] = (b[6] & 15) | 64;
+    b[8] = (b[8] & 63) | 128;
+    var h = Array.prototype.map.call(b, function (x) { return (x + 256).toString(16).slice(1); }).join('');
+    return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+  }
+
+  /** Contenido que identifica la cotización (mismo contrato que valida el servidor). */
+  function folioQuote() {
+    return {
+      iva: !!COT.iva,
+      lines: COT.lines.map(function (l) { var c = cleanLine(l); return { desc: c.desc, qty: c.qty, unitPrice: c.unitPrice }; }),
+      fields: fields(COT_FIELDS)
+    };
+  }
+
+  var folioNext = $('mlz-folio-next');
+  var folioHint = $('mlz-folio-hint');
+  var reprintBtn = $('mlz-reprint');
+  var genButtons = document.querySelectorAll('[data-ml-click^=\'["generatePDF"\']');
+  var originalTitle = document.title;
+
+  function renderFolio() {
+    var known = FOLIO.lastIssued !== null;
+    $('cot-num-display').textContent = known ? formatFolio(FOLIO.lastIssued) : '—';
+    if (folioNext) folioNext.textContent = known ? formatFolio(FOLIO.lastIssued + 1) : '—';
+    if (folioHint) {
+      folioHint.textContent = FOLIO.busy ? 'Asignando folio en el servidor…'
+        : known ? 'Automático: lo asigna el servidor al generar el PDF'
+        : 'Lo asigna el servidor al generar el PDF (requiere conexión)';
+    }
+  }
+  function noteLastIssued(n) {
+    if (typeof n === 'number' && isFinite(n) && n >= 1) FOLIO.lastIssued = Math.max(FOLIO.lastIssued || 0, Math.floor(n));
+  }
+
+  // El folio ya no se escribe a mano ni con flechas: sólo se muestra.
+  window.syncCotNum = function () { renderFolio(); };
+  window.prevCotNum = function () { renderFolio(); };
+  window.nextCotNum = function () { renderFolio(); };
+
+  function setFolioBusy(on) {
+    FOLIO.busy = on;
+    genButtons.forEach(function (b) { b.disabled = on; b.setAttribute('aria-busy', on ? 'true' : 'false'); });
+    if (reprintBtn) reprintBtn.disabled = on;
+    applyLock();
+    renderFolio();
+  }
+
+  function refreshFolioStatus() {
+    request('GET', undefined, FOLIO_API).then(function (r) {
+      if (r.status === 200 && r.data.ok) noteLastIssued(r.data.lastIssued);
+      renderFolio();
+    }, function () { renderFolio(); });
+  }
+
+  function describeFolioFailure(r) {
+    var keep = ' Tu cotización sigue aquí, sin cambios.';
+    if (!r) return 'No se generó el PDF: el servidor no confirmó el folio (sin conexión o tardó demasiado).' + keep + ' Vuelve a intentar: se reutiliza la misma solicitud, así que no se duplica ni se salta ningún folio.';
+    if (r.status === 401) return 'No se generó el PDF: tu sesión expiró. Inicia sesión y vuelve a generar.' + keep;
+    if (r.status === 429) return 'No se generó el PDF: demasiados intentos seguidos. Espera ' + (r.retryAfter || 'unos') + ' segundos y vuelve a intentar.' + keep;
+    if (r.status === 503) return 'No se generó el PDF: la nube no está configurada en este servidor, así que no se pueden asignar folios.' + keep;
+    if (r.status === 409) return 'No se generó el PDF: la solicitud anterior se hizo con otro contenido. Vuelve a generar para obtener un folio nuevo.' + keep;
+    if (r.status === 400 || r.status === 413) return 'No se generó el PDF: el servidor rechazó los datos de la cotización. Revisa cantidades y textos muy largos.' + keep;
+    return 'No se generó el PDF: no pudimos asignar el folio (error ' + r.status + ').' + keep + ' Vuelve a intentar.';
+  }
+
+  function restoreTitle() { document.title = originalTitle; }
+  window.addEventListener('afterprint', restoreTitle);
+
+  var originalGeneratePDF = window.generatePDF;
+  window.generatePDF = function (integrated) {
+    if (FOLIO.busy) return;
+    // Sin líneas: el original avisa y no genera nada (no se pide folio).
+    if (COT.lines.length === 0) { originalGeneratePDF(integrated); return; }
+    if (!WS.ready || WS.saving) { showToast('⚠ Espera a que termine la sincronización con la nube'); return; }
+
+    var mode = integrated ? 'integrated' : 'individual';
+    var quote = folioQuote();
+    var key = hashOf({ mode: mode, quote: quote });
+    var expected = (integrated || quote.lines.length === 1) ? 1 : quote.lines.length;
+
+    // Bloqueo SÍNCRONO desde el primer toque: el segundo toque no entra.
+    setFolioBusy(true);
+    var requestId = null;
+    // Reintento del mismo contenido → mismo UUID (no consume otro folio).
+    requestIdFor(key).then(function (id) {
+      requestId = id;
+      return request('POST', { requestId: id, mode: mode, quote: quote }, FOLIO_API);
+    }).then(function (r) {
+      var d = r.data;
+      var ok = r.status === 200 && d.ok && d.count === expected && typeof d.first === 'number' && d.first >= 1 && Math.floor(d.first) === d.first;
+      if (!ok) {
+        setFolioBusy(false);
+        // Rechazos definitivos: esa solicitud no prosperará nunca → se descarta.
+        if (r.status === 200 || r.status === 400 || r.status === 409 || r.status === 413) {
+          var s = readFolios();
+          if (s.pending && s.pending.requestId === requestId) writeFolios({ v: 2, pending: null, issued: s.issued });
+          finishRequest(requestId);
+        }
+        showNotice('error', r.status === 200 ? describeFolioFailure({ status: 500 }) : describeFolioFailure(r), failureActions(r));
+        showToast('⚠ No se generó el PDF');
+        return;
+      }
+      // El bloqueo sigue hasta que el print() programado por el original
+      // (setTimeout 150 ms) ya se haya llamado: un toque en esa ventana no
+      // puede reservar otro folio ni reemplazar la plantilla antes de imprimir.
+      var printing = { scheduled: false };
+      try {
+        issueAndPrint(integrated, d, requestId, quote, printing);
+      } finally {
+        if (printing.scheduled) setTimeout(function () { setFolioBusy(false); }, PRINT_SETTLE_MS);
+        else setFolioBusy(false);
+      }
+    }, function () {
+      setFolioBusy(false);
+      showNotice('error', describeFolioFailure(null));
+      showToast('⚠ No se generó el PDF');
+    });
+  };
+
+  /** Margen sobre el setTimeout(print, 150) del generatePDF original. */
+  var PRINT_SETTLE_MS = 250;
+
+  function issueAndPrint(integrated, d, requestId, quote, printing) {
+    var prev = readFolios();
+    var store = {
+      v: 2,
+      pending: prev.pending && prev.pending.requestId === requestId ? null : prev.pending,
+      issued: { first: d.first, count: d.count, quote: hashOf({ quote: quote }) }
+    };
+    writeFolios(store);
+    finishRequest(requestId);
+    noteLastIssued(d.lastIssued);
+    noteLastIssued(d.first + d.count - 1);
+    renderFolio();
+
+    // La edición está bloqueada durante la solicitud; si aun así cambió la
+    // cotización (p. ej. se eligió otra versión de la nube), no se imprime un
+    // folio sobre un contenido distinto del que se envió.
+    if (hashOf({ quote: folioQuote() }) !== store.issued.quote) {
+      showNotice('error', 'La cotización cambió mientras se asignaba el folio ' + folioRange(d.first, d.count) + ', así que no se generó el PDF. Vuelve a generarlo (recibirá un folio nuevo).');
+      return;
+    }
+    hideNotice();
+
+    // El renderer original numera desde COT.cotNum: se fija al folio confirmado.
+    COT.cotNum = d.first;
+    var label = folioRange(d.first, d.count);
+    document.title = 'MatrixLab ' + label;
+    printing.scheduled = true;
+    try {
+      originalGeneratePDF(integrated);
+    } catch {
+      // El original guarda `mlCotNum` con localStorage.setItem SIN try: con el
+      // almacenamiento bloqueado lanza DESPUÉS de armar la plantilla y antes de
+      // programar la impresión. Se imprime igual, con el mismo retraso.
+      setTimeout(function () { window.print(); }, 150);
+    }
+    lastNextNum = d.first + d.count;
+    FOLIO.lastHtml = $('print-template').innerHTML;
+    FOLIO.lastTitle = document.title;
+    if (reprintBtn) {
+      reprintBtn.textContent = '🖨 Reabrir PDF ' + label;
+      reprintBtn.hidden = false;
+    }
+    renderFolio();
+    showToast('✓ Folio ' + label + ' asignado');
+    afterInteraction();
+  }
+
+  if (reprintBtn) {
+    // Reimprime el PDF ya emitido con su mismo folio, sin pedir otro. Es
+    // síncrono dentro del toque: sirve si Safari bloqueó el print() diferido.
+    reprintBtn.addEventListener('click', function () {
+      if (!FOLIO.lastHtml || FOLIO.busy) return;
+      $('print-template').innerHTML = FOLIO.lastHtml;
+      document.title = FOLIO.lastTitle || originalTitle;
+      window.print();
+    });
+  }
+
+  // "Cargar de cotización actual" sólo enlaza un folio YA emitido para este
+  // mismo contenido: el recibo nunca apunta a un folio que no existe.
+  var originalLoadFromCurrentCot = window.loadFromCurrentCot;
+  window.loadFromCurrentCot = function () {
+    originalLoadFromCurrentCot();
+    if (COT.lines.length === 0) return;
+    var issued = readFolios().issued;
+    var ref = $('rec-cot-ref');
+    if (issued && issued.quote === hashOf({ quote: folioQuote() })) {
+      ref.value = formatFolio(issued.first);
+      showToast('✓ Datos cargados desde ' + ref.value);
+    } else {
+      ref.value = '';
+      showToast('Datos cargados. Esta cotización aún no tiene folio: genera su PDF o elige una guardada.');
+    }
+  };
+
+  // El recibo también usa #print-template: no puede reemplazar la plantilla
+  // mientras una cotización espera su impresión.
+  var originalGenerateReceiptPDF = window.generateReceiptPDF;
+  window.generateReceiptPDF = function () {
+    if (FOLIO.busy) return;
+    originalGenerateReceiptPDF();
+  };
+
+  // El aviso original mostraba el folio local (que ya no se usa).
+  var originalAddToCot = window.addToCot;
+  window.addToCot = function (serviceKey) {
+    var before = COT.lines.length;
+    originalAddToCot(serviceKey);
+    if (COT.lines.length > before) showToast('✓ Añadido a cotización');
+  };
+
   saveBtn.addEventListener('click', function () { save(false); });
   reloadBtn.addEventListener('click', function () { reload(false); });
   window.addEventListener('beforeunload', function (event) {
-    if (WS.ready && (WS.saving || isDirty())) { event.preventDefault(); event.returnValue = ''; }
+    if (FOLIO.busy || (WS.ready && (WS.saving || isDirty()))) { event.preventDefault(); event.returnValue = ''; }
   });
 
   // =========================================================================
   // 7. Arranque
   // =========================================================================
-  // El original nunca sincroniza el número visible con COT.cotNum al cargar
-  // (muestra COT-003 aunque localStorage diga otro): se corrige aquí.
-  syncCotNum(getCotNumStr());
+  // Folio visible: "—" hasta que el servidor responda (nunca el contador local).
+  renderFolio();
   // Navegadores sin <input type="date">: el `valueAsDate` del original lanza
   // InvalidStateError y la fecha queda vacía. Se rellena con hoy (AAAA-MM-DD).
   ['cot-fecha-evento', 'rec-fecha-pago'].forEach(function (id) {

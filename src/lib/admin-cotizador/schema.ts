@@ -74,7 +74,7 @@ const QuoteLineSchema = z
   })
   .strict();
 
-const SavedLineSchema = z
+export const SavedLineSchema = z
   .object({ desc: text(600), qty: quantity, unitPrice: money })
   .strict();
 
@@ -91,24 +91,30 @@ const SavedQuoteSchema = z
   })
   .strict();
 
+export const QuoteFieldsSchema = z
+  .object({
+    cliente: text(200),
+    tel: text(120),
+    fechaEvento: isoDate,
+    lugar: text(300),
+    tipo: text(200),
+    vigencia: text(60),
+    notas: text(4000),
+  })
+  .strict();
+
 const QuoteSchema = z
   .object({
+    /**
+     * Folio de referencia de la cotización en pantalla. Sólo informativo: el
+     * folio definitivo lo asigna el servidor al generar el PDF (ver folios.ts).
+     */
     num: folio,
     /** Siguiente folio tras el último PDF generado (o null si nunca). */
     nextNum: folio.nullable(),
     iva: z.boolean(),
     lines: z.array(QuoteLineSchema).max(200),
-    fields: z
-      .object({
-        cliente: text(200),
-        tel: text(120),
-        fechaEvento: isoDate,
-        lugar: text(300),
-        tipo: text(200),
-        vigencia: text(60),
-        notas: text(4000),
-      })
-      .strict(),
+    fields: QuoteFieldsSchema,
   })
   .strict();
 

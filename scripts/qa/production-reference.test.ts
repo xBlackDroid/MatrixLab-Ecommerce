@@ -56,7 +56,7 @@ const INTEGRATION_FILES: Record<string, { keep: string[]; add: string[] }> = {
   },
   "src/lib/security/rate-limit.ts": {
     keep: ["courseRegistration", "adminLogin", "webhook"],
-    add: ["adminQuoteWorkspaceSave"],
+    add: ["adminQuoteWorkspaceSave", "adminQuoteFolioReserve"],
   },
 };
 
@@ -159,6 +159,19 @@ const COTIZADOR_FILES = new Set([
   "supabase/migrations/20261027185726_admin_quote_workspace.sql",
 ]);
 
+/**
+ * Archivos nuevos de los folios consecutivos de cotización (COT-xxx asignado
+ * por el servidor). Lista cerrada; los del cotizador que toca (adapter,
+ * schema, QA de navegador) ya están en COTIZADOR_FILES.
+ */
+const COTIZADOR_FOLIO_FILES = new Set([
+  "scripts/qa/admin-cotizador-folios.test.ts",
+  "src/app/api/admin/cotizador/folios/route.ts",
+  "src/lib/admin-cotizador/folio-store.ts",
+  "src/lib/admin-cotizador/folios.ts",
+  "supabase/migrations/20261028192536_admin_quote_folios.sql",
+]);
+
 /** Metadatos del repo que el despliegue CLI no sube. */
 const REPO_META = new Set([".gitignore", ".env.example"]);
 
@@ -240,6 +253,16 @@ console.log("\n--- Editor de precio en Inventario (lista cerrada) ---");
   );
 }
 
+console.log("\n--- Folios de cotización (lista cerrada) ---");
+{
+  const absentFolio = [...COTIZADOR_FOLIO_FILES].filter((f) => !existsSync(join(ROOT, f)));
+  check("los archivos de folios existen", absentFolio.length === 0, absentFolio.join(", "));
+  check(
+    "ninguno pisa un archivo del snapshot",
+    [...COTIZADOR_FOLIO_FILES].every((f) => !receipt.files.some((e) => e.path === f)),
+  );
+}
+
 console.log("\n--- Nada fuera de la lista ---");
 const reference = new Set(receipt.files.map((f) => f.path));
 let tracked: string[] = [];
@@ -255,6 +278,7 @@ if (tracked.length) {
       !COTIZADOR_FILES.has(f) &&
       !INVENTORY_FILES.has(f) &&
       !INVENTORY_PRICE_FILES.has(f) &&
+      !COTIZADOR_FOLIO_FILES.has(f) &&
       !REPO_META.has(f),
   );
   check("todo archivo versionado es del snapshot, del cotizador, de inventario o metadato", extra.length === 0, extra.join(", "));
