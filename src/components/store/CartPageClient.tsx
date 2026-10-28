@@ -109,8 +109,8 @@ export default function CartPageClient() {
   const canCheckout = cart.items.every((line) => line.availability === "ok");
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
-      <div className="flex flex-col gap-4">
+    <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="flex min-w-0 flex-col gap-4">
         {cart.items.map((line) => (
           <CartLineItem
             key={line.id}

@@ -87,7 +87,7 @@ export default function CartLineItem({
           </p>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-3 pt-1">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
           <div
             className={cn(
               "flex items-center rounded-full border border-white/10 bg-white/5",
