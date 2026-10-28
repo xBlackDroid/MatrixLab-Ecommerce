@@ -7,10 +7,11 @@ import InventoryBadge, {
 } from "@/components/store/InventoryBadge";
 import ProductImagePlaceholder from "@/components/store/ProductImagePlaceholder";
 import ReadyWearProductCard from "@/components/store/ReadyWearProductCard";
-import { isReadyWearShirtHandle } from "@/lib/store/ready-wear-colors";
+import { isReadyWearGarmentHandle } from "@/lib/store/ready-wear-colors";
 
 export default function ProductCard({ product }: { product: ProductRow }) {
-  if (isReadyWearShirtHandle(product.handle)) {
+  // Playeras y sudaderas listas: tarjeta con selector de color por foto.
+  if (isReadyWearGarmentHandle(product.handle)) {
     return <ReadyWearProductCard product={product} />;
   }
 

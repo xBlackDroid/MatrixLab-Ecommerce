@@ -8,10 +8,13 @@ import { cn, formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 import {
   DEFAULT_READY_WEAR_COLOR,
-  READY_WEAR_COLORS,
+  getDefaultReadyWearColor,
+  getReadyWearColors,
   readyWearColorImage,
   readyWearColorImages,
   readyWearColorSlug,
+  readyWearGarmentOf,
+  readyWearPhotoDescription,
   type ReadyWearColor,
 } from "@/lib/store/ready-wear-colors";
 import AddToCartButton from "@/components/store/AddToCartButton";
@@ -49,20 +52,29 @@ function findVariant(
 interface ReadyWearProductProps {
   product: ProductWithVariants;
   /**
-   * Color leído en servidor de `?color=`; así el HTML del servidor y la
-   * hidratación arrancan con la misma foto.
+   * Color leído en servidor de `?color=`, ya validado contra la lista de ESA
+   * prenda; así el HTML del servidor y la hidratación arrancan con la misma
+   * foto.
    */
   initialColor?: ReadyWearColor | null;
 }
 
-/** Ficha de playera lista: galería por color + color/corte/talla + compra. */
+/**
+ * Ficha de prenda lista (playera o sudadera): galería por color + color /
+ * corte / talla + compra. Los colores y el color por defecto son los de la
+ * prenda: 3 en playeras (Negra), 9 en sudaderas (Lila).
+ */
 export default function ReadyWearProduct({
   product,
   initialColor,
 }: ReadyWearProductProps) {
   const variants = product.variants;
-  const [color, setColor] = useState<ReadyWearColor>(
-    initialColor ?? DEFAULT_READY_WEAR_COLOR,
+  const colors = getReadyWearColors(product.handle);
+  const garment = readyWearGarmentOf(product.handle) ?? "prenda";
+  const [color, setColor] = useState<ReadyWearColor>(() =>
+    initialColor && colors.some((c) => c.label === initialColor)
+      ? initialColor
+      : (getDefaultReadyWearColor(product.handle) ?? DEFAULT_READY_WEAR_COLOR),
   );
   const [cut, setCut] = useState<Cut>("Hombre");
   const [size, setSize] = useState<Size>("Mediana");
@@ -157,7 +169,7 @@ export default function ReadyWearProduct({
             <Image
               key={shownImage}
               src={shownImage}
-              alt={`${product.title} — playera color ${color}${
+              alt={`${product.title} — ${readyWearPhotoDescription(product.handle, color)}${
                 images.length > 1
                   ? `, foto ${Math.min(activeImage, images.length - 1) + 1} de ${images.length}`
                   : ""
@@ -179,14 +191,14 @@ export default function ReadyWearProduct({
           <div
             className="flex gap-2 overflow-x-auto pb-1"
             role="group"
-            aria-label={`Fotos de la playera ${color}`}
+            aria-label={`Fotos de la ${garment} ${color}`}
           >
             {images.map((image, index) => (
               <button
                 key={image}
                 type="button"
                 onClick={() => setActiveImage(index)}
-                aria-label={`Ver foto ${index + 1} de la playera ${color}`}
+                aria-label={`Ver foto ${index + 1} de la ${garment} ${color}`}
                 aria-pressed={index === activeImage}
                 className={cn(
                   "relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition",
@@ -232,8 +244,12 @@ export default function ReadyWearProduct({
             <legend className="mb-3 text-sm font-medium text-ml-white/70">
               Color: <span className="text-ml-white">{color}</span>
             </legend>
-            <div className="flex flex-wrap gap-4">
-              {READY_WEAR_COLORS.map(({ label, slug }) => {
+            {/* Rejilla de celdas de 4rem como mínimo y tope `max-w-sm`: 3
+                colores en una fila; los 9 de la sudadera en 5 + 4 a 390 px
+                (4 columnas a 320 px), sin desbordar. Radios nativos: una
+                parada de Tab y flechas para cambiar de color. */}
+            <div className="grid max-w-sm grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-x-2 gap-y-3">
+              {colors.map(({ label, slug }) => {
                 const thumb = readyWearColorImage(product.handle, label);
                 const checked = color === label;
                 return (
@@ -271,7 +287,7 @@ export default function ReadyWearProduct({
                     <span
                       aria-hidden
                       className={cn(
-                        "text-xs",
+                        "text-center text-xs leading-tight",
                         checked ? "font-semibold text-ml-violet" : "text-ml-white/70",
                       )}
                     >

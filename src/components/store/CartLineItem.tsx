@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { isReadyWearShirtHandle, parseReadyWearColor, readyWearColorSlug } from "@/lib/store/ready-wear-colors";
+import { readyWearProductHref, readyWearVariantColor } from "@/lib/store/ready-wear-colors";
 import { Loader2, Minus, Plus, Trash2, Wand2 } from "lucide-react";
 import type { CartLineView } from "@/lib/db/types";
 import { cn, formatPrice, formatUnitQuantity } from "@/lib/utils";
@@ -22,8 +22,9 @@ export default function CartLineItem({
   onRemove,
 }: CartLineItemProps) {
   const image = line.designPreviewUrl ?? line.image;
-  const color = isReadyWearShirtHandle(line.productHandle) ? parseReadyWearColor(line.variantTitle?.split(" / ").at(-1)) : null;
-  const productHref = `/tienda/producto/${line.productHandle}${color ? `?color=${readyWearColorSlug(color)}` : ""}`;
+  // Playeras y sudaderas listas vuelven a su ficha con el color de la línea.
+  const color = readyWearVariantColor(line.productHandle, { color: line.variantColor, title: line.variantTitle });
+  const productHref = readyWearProductHref(line.productHandle, color);
   const displayTitle = line.customTitle ?? line.title;
   // Unidad comercial resuelta en servidor. `null` en todo lo que se vende por
   // pieza (Tumbler, Laboratorio, resto del catálogo): ahí el copy no cambia.

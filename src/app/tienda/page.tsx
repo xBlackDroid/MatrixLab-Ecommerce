@@ -18,10 +18,10 @@ import {
   Package,
   PartyPopper,
   Shirt,
-  ShoppingBag,
   Sparkles,
   Sticker,
   User,
+  Wand2,
   Zap,
 } from "lucide-react";
 import {
@@ -29,6 +29,7 @@ import {
   HoodieIcon,
   ToteIcon,
 } from "@/components/icons/GarmentIcons";
+import { readyWearListHref, type ReadyWearType } from "@/lib/store/ready-wear";
 import BackToSchoolAccesses from "@/components/school/BackToSchoolAccesses";
 import StoreFamilySection, {
   FamilyWatermark,
@@ -70,17 +71,18 @@ const VOLUME_ITEMS = [
   },
 ];
 
-// Prendas del laboratorio, cada una con su icono específico (no genérico).
-// Mismos tipos/rutas que usaba el bloque "T-Shirt Lab": /tienda/disenador/<type>.
-const PRENDA_LAB_ITEMS: Array<{
+// Prendas listas por tipo, cada una con su icono específico (no genérico).
+// Abren la vitrina ya filtrada: /tienda/prendas-listas?tipo=<type>. El
+// Laboratorio sigue a un clic en la acción secundaria del bloque.
+const WEAR_TYPE_ITEMS: Array<{
   label: string;
-  type: string;
+  type: ReadyWearType;
   Icon: ComponentType<{ className?: string }>;
 }> = [
-  { label: "Playera", type: "playera", Icon: Shirt },
-  { label: "Sudadera", type: "sudadera", Icon: HoodieIcon },
-  { label: "Gorra", type: "gorra", Icon: CapIcon },
-  { label: "Tote bag", type: "tote", Icon: ToteIcon },
+  { label: "Playeras", type: "playeras", Icon: Shirt },
+  { label: "Sudaderas", type: "sudaderas", Icon: HoodieIcon },
+  { label: "Gorras", type: "gorras", Icon: CapIcon },
+  { label: "Tote bags", type: "totes", Icon: ToteIcon },
 ];
 
 // Plantillas reales del Laboratorio láser (src/lib/designer/laser-config.ts):
@@ -193,20 +195,19 @@ export default async function TiendaHomePage() {
               MatrixLab <span className="text-gradient">Wear</span>
             </>
           }
-          description="Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas. Diseña la tuya o llévate una prenda ya lista."
-          ctaLabel="Diseñar mi prenda"
-          ctaHref="/tienda/disenador"
+          description="Playeras, sudaderas, gorras y tote bags listas para llevar: encuentra tu diseño favorito y agrégalo al carrito. ¿Buscas algo único? Personaliza tu prenda en el Laboratorio."
+          ctaLabel="Comprar prendas listas"
+          ctaHref="/tienda/prendas-listas"
           /*
-            Segundo camino de la familia. Los dos accesos son distintos de
-            verdad —uno abre el Laboratorio, el otro vende inventario con talla
-            y color ya definidos— y hasta ahora sólo el primero era visible.
-            Se deja como acción SECUNDARIA para no desplazar al diseñador, que
-            sigue siendo el corazón de MatrixLab Wear.
+            Los dos caminos de la familia son distintos de verdad: uno vende
+            inventario con foto, color y talla ya definidos; el otro abre el
+            Laboratorio. Wear encabeza con lo que se compra hoy y deja el
+            diseñador como acción SECUNDARIA, a un clic.
           */
           secondaryCta={{
-            label: "Comprar prendas listas",
-            href: "/tienda/prendas-listas",
-            icon: ShoppingBag,
+            label: "Personalizar en el Laboratorio",
+            href: "/tienda/disenador",
+            icon: Wand2,
           }}
           blurSide="left"
           backgroundLogo={{
@@ -215,9 +216,9 @@ export default async function TiendaHomePage() {
           }}
           right={{
             kind: "items",
-            items: PRENDA_LAB_ITEMS.map((item) => ({
+            items: WEAR_TYPE_ITEMS.map((item) => ({
               label: item.label,
-              href: `/tienda/disenador/${item.type}`,
+              href: readyWearListHref({ type: item.type }),
               icon: item.Icon,
             })),
           }}

@@ -228,6 +228,29 @@ const HERO_AURA: readonly HeroAuraItem[] = [
 ];
 
 /**
+ * Los dos caminos de MatrixLab Wear, en orden de prioridad: primero lo que se
+ * compra hoy (prendas listas con foto, color y talla), después el Laboratorio.
+ */
+const WEAR_ACCESSES: ReadonlyArray<{
+  label: string;
+  href: string;
+  Icon: IconComponent;
+  primary?: boolean;
+}> = [
+  {
+    label: "Comprar prendas listas",
+    href: "/tienda/prendas-listas",
+    Icon: ShoppingBag,
+    primary: true,
+  },
+  {
+    label: "Personalizar en el Laboratorio",
+    href: "/tienda/disenador",
+    Icon: Wand2,
+  },
+];
+
+/**
  * Seis familias MatrixLab de la sección "El laboratorio". Todas comparten el
  * mismo sistema visual (ver FamilyCard), tomado 1:1 de las cards que ya
  * funcionaban en la home: MatrixLab Tumbler y Etiquetas escolares.
@@ -241,6 +264,8 @@ const FAMILY_CARDS: Array<{
   href?: string;
   /** Tarjeta con dos accesos independientes en vez de un solo enlace. */
   dual?: boolean;
+  /** Accesos de una tarjeta `dual`; sin ellos, los de Regreso a Clases. */
+  accesses?: typeof WEAR_ACCESSES;
   badgeIcon: IconComponent;
   badgeLabel: string;
   titlePrefix: string;
@@ -270,15 +295,17 @@ const FAMILY_CARDS: Array<{
     visual: { kind: "image", src: "/images/categories/matrixlab-stickers.png" },
   },
   {
+    // Dos caminos reales: prendas listas (principal) y Laboratorio. Ver
+    // WEAR_ACCESSES y FamilyDualCard.
     id: "wear",
-    href: "/tienda/disenador",
+    dual: true,
+    accesses: WEAR_ACCESSES,
     badgeIcon: Shirt,
     badgeLabel: "Prendas",
     titlePrefix: "MatrixLab",
     titleHighlight: "Wear",
     description:
       "Playeras, gorras y prendas personalizadas para personas, equipos, eventos y marcas.",
-    cta: "Explorar la línea",
     accent: "violet",
     gradient: "from-ml-violet/20 via-ml-cyan/10 to-transparent",
     visual: { kind: "image", src: "/images/categories/matrixlab-wear.png" },
@@ -707,7 +734,14 @@ export default function LandingPage() {
                         gradient={card.gradient}
                         visual={visual}
                         actions={
-                          <BackToSchoolAccesses accent="green" className="mt-6" />
+                          card.accesses ? (
+                            <FamilyAccesses
+                              accesses={card.accesses}
+                              className="mt-6"
+                            />
+                          ) : (
+                            <BackToSchoolAccesses accent="green" className="mt-6" />
+                          )
                         }
                       />
                     ) : (
@@ -1176,5 +1210,38 @@ export default function LandingPage() {
         </footer>
       </main>
     </>
+  );
+}
+
+/**
+ * Pastillas de una tarjeta de familia con dos caminos (hoy, MatrixLab Wear).
+ * Mismo formato que BackToSchoolAccesses: cada pastilla es su propio enlace y
+ * el fondo `bg-ml-bg/70` conserva el contraste sobre el logo. La principal
+ * lleva el acento de la familia; la secundaria va en neutro.
+ */
+function FamilyAccesses({
+  accesses,
+  className = "",
+}: {
+  accesses: typeof WEAR_ACCESSES;
+  className?: string;
+}) {
+  return (
+    <div className={`flex flex-wrap gap-2.5 ${className}`}>
+      {accesses.map((access) => (
+        <Link
+          key={access.href}
+          href={access.href}
+          className={`inline-flex items-center gap-2 rounded-full border bg-ml-bg/70 px-3.5 py-2.5 text-sm font-semibold backdrop-blur-sm transition hover:-translate-y-0.5 hover:text-ml-white ${
+            access.primary
+              ? "border-ml-violet/40 text-ml-violet hover:border-ml-violet/70"
+              : "border-white/12 text-ml-white/80 hover:border-white/30"
+          }`}
+        >
+          <access.Icon className="h-4 w-4 shrink-0" aria-hidden />
+          {access.label}
+        </Link>
+      ))}
+    </div>
   );
 }
