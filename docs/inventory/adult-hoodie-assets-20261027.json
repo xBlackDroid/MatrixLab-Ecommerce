@@ -1,0 +1,407 @@
+[
+  {
+    "code": "SU003",
+    "color": "Lila",
+    "slug": "lila",
+    "image": "/images/matrixlab-wear/hoodies/su003-lila.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-37d22616-323f-4d80-b8c1-7a0e152e384f.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Negro",
+    "slug": "negro",
+    "image": "/images/matrixlab-wear/hoodies/su003-negro.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-37d22616-323f-4d80-b8c1-7a0e152e384f.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Blanco",
+    "slug": "blanco",
+    "image": "/images/matrixlab-wear/hoodies/su003-blanco.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-37d22616-323f-4d80-b8c1-7a0e152e384f.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Azul marino",
+    "slug": "azul-marino",
+    "image": "/images/matrixlab-wear/hoodies/su004-azul-marino.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-3e2d44ce-385f-4956-817b-3ebd5b81753c.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Azul royal",
+    "slug": "azul-royal",
+    "image": "/images/matrixlab-wear/hoodies/su004-azul-royal.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-3e2d44ce-385f-4956-817b-3ebd5b81753c.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Rosa pastel",
+    "slug": "rosa-pastel",
+    "image": "/images/matrixlab-wear/hoodies/su004-rosa-pastel.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-3e2d44ce-385f-4956-817b-3ebd5b81753c.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Negro jaspe",
+    "slug": "negro-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su001-negro-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-465510fc-980c-435d-9f94-866387437c5c.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Gris jaspe",
+    "slug": "gris-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su001-gris-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-465510fc-980c-435d-9f94-866387437c5c.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Rojo",
+    "slug": "rojo",
+    "image": "/images/matrixlab-wear/hoodies/su001-rojo.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-465510fc-980c-435d-9f94-866387437c5c.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Negro jaspe",
+    "slug": "negro-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su004-negro-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-569fc2b9-a6d6-4b5e-a932-4a4a97afb654.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Gris jaspe",
+    "slug": "gris-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su004-gris-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-569fc2b9-a6d6-4b5e-a932-4a4a97afb654.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Rojo",
+    "slug": "rojo",
+    "image": "/images/matrixlab-wear/hoodies/su004-rojo.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-569fc2b9-a6d6-4b5e-a932-4a4a97afb654.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Azul marino",
+    "slug": "azul-marino",
+    "image": "/images/matrixlab-wear/hoodies/su005-azul-marino.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-7af1ac84-3c25-4f80-8357-13394771d834.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Azul royal",
+    "slug": "azul-royal",
+    "image": "/images/matrixlab-wear/hoodies/su005-azul-royal.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-7af1ac84-3c25-4f80-8357-13394771d834.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Rosa pastel",
+    "slug": "rosa-pastel",
+    "image": "/images/matrixlab-wear/hoodies/su005-rosa-pastel.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-7af1ac84-3c25-4f80-8357-13394771d834.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Negro jaspe",
+    "slug": "negro-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su005-negro-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-80ae25ea-8607-4d2e-8bf2-363b0b45b9da.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Gris jaspe",
+    "slug": "gris-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su005-gris-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-80ae25ea-8607-4d2e-8bf2-363b0b45b9da.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Rojo",
+    "slug": "rojo",
+    "image": "/images/matrixlab-wear/hoodies/su005-rojo.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-80ae25ea-8607-4d2e-8bf2-363b0b45b9da.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Lila",
+    "slug": "lila",
+    "image": "/images/matrixlab-wear/hoodies/su001-lila.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8acbc70e-13c2-4850-9428-1e4464f741ff.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Negro",
+    "slug": "negro",
+    "image": "/images/matrixlab-wear/hoodies/su001-negro.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8acbc70e-13c2-4850-9428-1e4464f741ff.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Blanco",
+    "slug": "blanco",
+    "image": "/images/matrixlab-wear/hoodies/su001-blanco.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8acbc70e-13c2-4850-9428-1e4464f741ff.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Azul marino",
+    "slug": "azul-marino",
+    "image": "/images/matrixlab-wear/hoodies/su003-azul-marino.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8b64d2bf-241b-443a-addf-7b0b962291ae.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Azul royal",
+    "slug": "azul-royal",
+    "image": "/images/matrixlab-wear/hoodies/su003-azul-royal.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8b64d2bf-241b-443a-addf-7b0b962291ae.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Rosa pastel",
+    "slug": "rosa-pastel",
+    "image": "/images/matrixlab-wear/hoodies/su003-rosa-pastel.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8b64d2bf-241b-443a-addf-7b0b962291ae.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Negro jaspe",
+    "slug": "negro-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su002-negro-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8f05461c-668f-48c5-8ad0-8252641c1e31.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Gris jaspe",
+    "slug": "gris-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su002-gris-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8f05461c-668f-48c5-8ad0-8252641c1e31.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Rojo",
+    "slug": "rojo",
+    "image": "/images/matrixlab-wear/hoodies/su002-rojo.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-8f05461c-668f-48c5-8ad0-8252641c1e31.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Azul marino",
+    "slug": "azul-marino",
+    "image": "/images/matrixlab-wear/hoodies/su001-azul-marino.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-9cae6fee-2f9c-41af-976b-f47a4cdca013.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Azul royal",
+    "slug": "azul-royal",
+    "image": "/images/matrixlab-wear/hoodies/su001-azul-royal.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-9cae6fee-2f9c-41af-976b-f47a4cdca013.png"
+  },
+  {
+    "code": "SU001",
+    "color": "Rosa pastel",
+    "slug": "rosa-pastel",
+    "image": "/images/matrixlab-wear/hoodies/su001-rosa-pastel.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-9cae6fee-2f9c-41af-976b-f47a4cdca013.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Azul marino",
+    "slug": "azul-marino",
+    "image": "/images/matrixlab-wear/hoodies/su002-azul-marino.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-a4eb12e3-97e0-43cc-8b64-9e14543cc865.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Azul royal",
+    "slug": "azul-royal",
+    "image": "/images/matrixlab-wear/hoodies/su002-azul-royal.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-a4eb12e3-97e0-43cc-8b64-9e14543cc865.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Rosa pastel",
+    "slug": "rosa-pastel",
+    "image": "/images/matrixlab-wear/hoodies/su002-rosa-pastel.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-a4eb12e3-97e0-43cc-8b64-9e14543cc865.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Lila",
+    "slug": "lila",
+    "image": "/images/matrixlab-wear/hoodies/su004-lila.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-be89374a-08b5-480b-bbe8-f7ff6e71dfe3.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Negro",
+    "slug": "negro",
+    "image": "/images/matrixlab-wear/hoodies/su004-negro.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-be89374a-08b5-480b-bbe8-f7ff6e71dfe3.png"
+  },
+  {
+    "code": "SU004",
+    "color": "Blanco",
+    "slug": "blanco",
+    "image": "/images/matrixlab-wear/hoodies/su004-blanco.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-be89374a-08b5-480b-bbe8-f7ff6e71dfe3.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Lila",
+    "slug": "lila",
+    "image": "/images/matrixlab-wear/hoodies/su002-lila.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-dc8d46b6-e4a1-4674-91a9-bd1b9a6fe85a.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Negro",
+    "slug": "negro",
+    "image": "/images/matrixlab-wear/hoodies/su002-negro.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-dc8d46b6-e4a1-4674-91a9-bd1b9a6fe85a.png"
+  },
+  {
+    "code": "SU002",
+    "color": "Blanco",
+    "slug": "blanco",
+    "image": "/images/matrixlab-wear/hoodies/su002-blanco.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-dc8d46b6-e4a1-4674-91a9-bd1b9a6fe85a.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Negro jaspe",
+    "slug": "negro-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su003-negro-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-e1b2502f-146d-4473-822c-d33bb7da510a.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Gris jaspe",
+    "slug": "gris-jaspe",
+    "image": "/images/matrixlab-wear/hoodies/su003-gris-jaspe.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-e1b2502f-146d-4473-822c-d33bb7da510a.png"
+  },
+  {
+    "code": "SU003",
+    "color": "Rojo",
+    "slug": "rojo",
+    "image": "/images/matrixlab-wear/hoodies/su003-rojo.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-e1b2502f-146d-4473-822c-d33bb7da510a.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Lila",
+    "slug": "lila",
+    "image": "/images/matrixlab-wear/hoodies/su005-lila.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-f293ef6e-fcfd-4006-b0ab-6a8e10107797.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Negro",
+    "slug": "negro",
+    "image": "/images/matrixlab-wear/hoodies/su005-negro.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-f293ef6e-fcfd-4006-b0ab-6a8e10107797.png"
+  },
+  {
+    "code": "SU005",
+    "color": "Blanco",
+    "slug": "blanco",
+    "image": "/images/matrixlab-wear/hoodies/su005-blanco.webp",
+    "width": 724,
+    "height": 724,
+    "source": "C:/Users/casta/.codex/generated_images/01a17e96-b803-7253-b681-04e7805abc8a/exec-f293ef6e-fcfd-4006-b0ab-6a8e10107797.png"
+  }
+]

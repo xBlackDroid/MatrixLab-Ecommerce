@@ -171,6 +171,7 @@ export async function buildCartView(sessionId: string): Promise<CartView> {
       customTitle,
       variantId: variant?.id ?? null,
       variantTitle: variant?.title ?? null,
+      variantColor: variant?.color ?? null,
       quantity: item.quantity,
       unitPrice,
       lineTotal: Math.round(unitPrice * item.quantity * 100) / 100,

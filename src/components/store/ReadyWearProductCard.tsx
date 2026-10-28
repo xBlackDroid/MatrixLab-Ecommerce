@@ -7,9 +7,10 @@ import type { ProductRow } from "@/lib/db/types";
 import { cn, formatPrice } from "@/lib/utils";
 import {
   DEFAULT_READY_WEAR_COLOR,
-  READY_WEAR_COLORS,
+  getDefaultReadyWearColor,
+  getReadyWearColors,
   readyWearColorImage,
-  readyWearColorSlug,
+  readyWearProductHref,
   type ReadyWearColor,
 } from "@/lib/store/ready-wear-colors";
 import InventoryBadge, {
@@ -17,21 +18,32 @@ import InventoryBadge, {
 } from "@/components/store/InventoryBadge";
 import ProductImagePlaceholder from "@/components/store/ProductImagePlaceholder";
 
+/** Más colores que esto ya no caben en una fila de muestras de 44 px. */
+const SINGLE_ROW_COLORS = 4;
+
 /**
- * Tarjeta de playera lista. Igual que ProductCard, con selector de color
- * debajo de la foto. Los botones quedan FUERA de los enlaces (foto y título
- * son enlaces hermanos) para no anidar elementos interactivos.
+ * Tarjeta de prenda lista (playera o sudadera). Igual que ProductCard, con
+ * selector de color debajo de la foto. Los botones quedan FUERA de los
+ * enlaces (foto y título son enlaces hermanos) para no anidar elementos
+ * interactivos.
  */
 export default function ReadyWearProductCard({
   product,
 }: {
   product: ProductRow;
 }) {
-  const [color, setColor] = useState<ReadyWearColor>(DEFAULT_READY_WEAR_COLOR);
+  const colors = getReadyWearColors(product.handle);
+  const [color, setColor] = useState<ReadyWearColor>(
+    getDefaultReadyWearColor(product.handle) ?? DEFAULT_READY_WEAR_COLOR,
+  );
   const image =
     readyWearColorImage(product.handle, color) ??
     (Array.isArray(product.images) ? product.images[0] : null);
-  const href = `/tienda/producto/${product.handle}?color=${readyWearColorSlug(color)}`;
+  const href = readyWearProductHref(product.handle, color);
+  // Playeras: 3 muestras de 44 px en una fila, como siempre. Sudaderas: 9 en
+  // una rejilla adaptable: 2–3 columnas en móvil y hasta 5 en escritorio,
+  // conservando muestras de 44 px sin desbordar tarjetas pequeñas.
+  const grid = colors.length > SINGLE_ROW_COLORS;
 
   return (
     <div className="group glass flex flex-col overflow-hidden rounded-2xl transition hover:-translate-y-1 hover:border-ml-violet/40 hover:shadow-glow-violet">
@@ -59,11 +71,16 @@ export default function ReadyWearProductCard({
       </Link>
 
       <div
-        className="flex flex-wrap justify-center gap-1 px-2 pt-2"
+        className={cn(
+          "px-2 pt-2",
+          grid
+            ? "grid grid-cols-2 justify-items-center gap-y-1 min-[360px]:grid-cols-3 sm:grid-cols-4 xl:grid-cols-5"
+            : "flex flex-wrap justify-center gap-1",
+        )}
         role="group"
         aria-label={`Color de ${product.title}`}
       >
-        {READY_WEAR_COLORS.map(({ label, slug }) => {
+        {colors.map(({ label, slug }) => {
           const thumb = readyWearColorImage(product.handle, label);
           const selected = color === label;
           return (
@@ -74,11 +91,15 @@ export default function ReadyWearProductCard({
               aria-pressed={selected}
               aria-label={`Ver ${product.title} en color ${label}`}
               title={label}
-              className="flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ml-cyan"
+              className={cn(
+                "flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ml-cyan",
+                grid ? "aspect-square w-full max-w-11" : "h-11 w-11",
+              )}
             >
               <span
                 className={cn(
-                  "relative block h-8 w-8 overflow-hidden rounded-full border-2 bg-white/5 transition",
+                  "relative block overflow-hidden rounded-full border-2 bg-white/5 transition",
+                  grid ? "aspect-square w-[78%]" : "h-8 w-8",
                   selected
                     ? "border-ml-violet ring-2 ring-ml-violet/60"
                     : "border-white/20 hover:border-white/50",

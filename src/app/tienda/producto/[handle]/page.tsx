@@ -9,8 +9,8 @@ import ProductGrid from "@/components/store/ProductGrid";
 import ProductOptions from "@/components/store/ProductOptions";
 import ReadyWearProduct from "@/components/store/ReadyWearProduct";
 import {
-  isReadyWearShirtHandle,
-  parseReadyWearColor,
+  isReadyWearGarmentHandle,
+  parseReadyWearColorFor,
 } from "@/lib/store/ready-wear-colors";
 import {
   DESIGNER_PRODUCT_HANDLES,
@@ -76,10 +76,13 @@ export default async function ProductPage({
         {product.category ? product.category.title : "Volver a la tienda"}
       </Link>
 
-      {isReadyWearShirtHandle(product.handle) ? (
+      {isReadyWearGarmentHandle(product.handle) ? (
+        // `?color=` se valida contra la lista de ESA prenda: un color ajeno
+        // (lila en una playera) cae al color por defecto de la prenda.
         <ReadyWearProduct
           product={product}
-          initialColor={parseReadyWearColor(
+          initialColor={parseReadyWearColorFor(
+            product.handle,
             typeof color === "string" ? color : null,
           )}
         />

@@ -23,6 +23,12 @@ import {
   MOCK_VARIANTS,
 } from "@/lib/store/mock-data";
 import { isRelatedProductVisible } from "@/lib/store/curated-lines";
+import {
+  isReadyWearListingHandle,
+  toReadyWearListing,
+  withProductPhotos,
+  type ReadyWearListing,
+} from "@/lib/store/ready-wear";
 import { repairMojibake, repairMojibakeNullable } from "@/lib/store/text";
 import {
   SPARKLE_PLACEHOLDER_IMAGE,
@@ -1099,24 +1105,26 @@ export async function getProductsByCategory(
  *   2. Variantes `sobre_pedido` con stock 0 ("Personalizado"), que son la
  *      puerta al diseñador y NO son una prenda lista.
  *
- * Este resolver publica SÓLO lo primero.
+ * Este resolver publica SÓLO lo primero, y sólo si tiene FOTO REAL.
  *
  * POR QUÉ EL FILTRO ES POR DATO Y NO UNA LISTA DE HANDLES
- * Si mañana Operaciones carga inventario de sudaderas en Supabase, la sudadera
- * aparece aquí sola, sin tocar código. Y si se agota, desaparece sola. Una
- * lista quemada de handles prometería prendas que no existen —justo lo que
- * hay que evitar— y obligaría a un deploy por cada cambio de inventario.
+ * Si mañana Operaciones carga inventario en Supabase, la prenda aparece aquí
+ * sola, sin tocar código. Y si se agota, desaparece sola. Una lista quemada de
+ * handles prometería prendas que no existen —justo lo que hay que evitar— y
+ * obligaría a un deploy por cada cambio de inventario.
  *
- * ESTADO ACTUAL DE LOS DATOS (seed.sql y mock-data.ts, idénticos)
- * Califican `playera-personalizada`, `gorra-personalizada` y
- * `tote-bag-personalizada`. NO califican `sudadera-personalizada`,
- * `gorra-trucker-personalizada` ni `gorra-clasica-personalizada`: su única
- * variante es `sobre_pedido` con stock 0. La sudadera SÍ existe como producto
- * (es el "hoodie"); lo que no existe es inventario listo para envío.
+ * FOTO REAL OBLIGATORIA (`toReadyWearListing`)
+ * Una vitrina de prendas LISTAS vende lo que se ve. `playera-personalizada`,
+ * `gorra-personalizada` y `tote-bag-personalizada` tienen inventario pero no
+ * foto (`images` vacío): eran tarjetas de placeholder. Se ocultan SÓLO de esta
+ * vitrina; siguen en la base, en el admin, en su categoría y en su ficha, con
+ * su stock intacto. La regla es por URL, sin filesystem: placeholders, logos
+ * y mockups del Laboratorio no cuentan como foto; las playeras y sudaderas con
+ * foto por color sí, aunque `images` venga vacío.
  * ---------------------------------------------------------------------------
  */
 
-/** Categorías que alojan prendas. No se crea ninguna categoría nueva. */
+/** Categorías que alojan prendas listas. */
 export const READY_TO_WEAR_CATEGORY_HANDLES = [
   "playeras-prendas",
   "gorras",
@@ -1128,6 +1136,7 @@ export const READY_TO_WEAR_CATEGORY_HANDLES = [
   "wear-resident-evil",
   "wear-toluca",
   "wear-totes",
+  "wear-sudaderas",
 ] as const;
 
 /**
@@ -1152,45 +1161,64 @@ function stripVariantRows(row: ProductWithVariantRows): ProductRow {
 }
 
 /**
- * Prendas con al menos una variante lista para comprar, ordenadas por precio
- * ascendente (el mismo criterio que el orden "featured" del catálogo).
- *
- * Devuelve `ProductRow[]` para que el consumidor use `ProductGrid`/`ProductCard`
- * sin adaptadores: la selección de talla/color y el alta al carrito ya viven en
- * la ficha `/tienda/producto/<handle>`, que es a donde apunta cada tarjeta.
+ * Presentación de la vitrina: pipeline público + SÓLO fotos reales + tipo de
+ * prenda (por handle, etiquetas y categoría). Lo que no tiene foto se omite.
  */
-export async function getReadyToWearProducts(): Promise<ProductRow[]> {
+function presentReadyToWear(
+  products: ProductRow[],
+  categoryHandles: ReadonlyMap<string, string>,
+): ReadyWearListing[] {
+  return products.flatMap((product) => {
+    const listing = toReadyWearListing(
+      presentProduct(product),
+      categoryHandles.get(product.category_id ?? "") ?? null,
+    );
+    return listing ? [listing] : [];
+  });
+}
+
+/**
+ * Prendas con al menos una variante lista para comprar y foto real, ordenadas
+ * por precio ascendente (el mismo criterio que el orden "featured" del
+ * catálogo).
+ *
+ * Cada fila sigue siendo un `ProductRow` para que el consumidor use
+ * `ProductGrid`/`ProductCard` sin adaptadores: la selección de talla/color y
+ * el alta al carrito ya viven en la ficha `/tienda/producto/<handle>`, que es
+ * a donde apunta cada tarjeta. `readyWearType` alimenta el filtro por tipo.
+ */
+export async function getReadyToWearProducts(): Promise<ReadyWearListing[]> {
   const client = getCatalogClient();
 
   if (!client) {
-    const categoryIds = new Set(
+    const categoryHandles = new Map(
       MOCK_CATEGORIES.filter((c) =>
         (READY_TO_WEAR_CATEGORY_HANDLES as readonly string[]).includes(
           c.handle,
         ),
-      ).map((c) => c.id),
+      ).map((c) => [c.id, c.handle]),
     );
     const ready = MOCK_PRODUCTS.filter(
       (p) =>
         p.category_id !== null &&
-        categoryIds.has(p.category_id) &&
+        categoryHandles.has(p.category_id) &&
         (VISIBLE_PRODUCT_FILTER as readonly string[]).includes(p.status) &&
         MOCK_VARIANTS.some(
           (v) => v.product_id === p.id && isReadyToWearVariant(v),
         ),
     );
-    return sortProducts(ready, "price_asc").map(presentProduct);
+    return presentReadyToWear(sortProducts(ready, "price_asc"), categoryHandles);
   }
 
   const { data: categories, error: categoryError } = await raceRead<
-    Pick<CategoryRow, "id">[]
+    Pick<CategoryRow, "id" | "handle">[]
   >(
     client
       .from("categories")
-      .select("id")
+      .select("id, handle")
       .in("handle", [...READY_TO_WEAR_CATEGORY_HANDLES])
       .eq("status", "activa") as unknown as PromiseLike<
-      ReadResult<Pick<CategoryRow, "id">[]>
+      ReadResult<Pick<CategoryRow, "id" | "handle">[]>
     >,
   );
   if (categoryError || !categories || categories.length === 0) return [];
@@ -1210,9 +1238,12 @@ export async function getReadyToWearProducts(): Promise<ProductRow[]> {
   );
   if (error || !data) return [];
 
-  return data
-    .filter((row) => (row.product_variants ?? []).some(isReadyToWearVariant))
-    .map((row) => presentProduct(stripVariantRows(row)));
+  return presentReadyToWear(
+    data
+      .filter((row) => (row.product_variants ?? []).some(isReadyToWearVariant))
+      .map(stripVariantRows),
+    new Map(categories.map((c) => [c.id, c.handle])),
+  );
 }
 
 export async function getAllVisibleProducts(): Promise<ProductRow[]> {
@@ -1280,6 +1311,10 @@ export async function getProductByHandle(
  * no reintroducir por la puerta de atrás lo que el catálogo declara
  * `legacyHidden`. Ver `isRelatedProductVisible`. Una ficha fuera de toda línea
  * curada conserva el comportamiento anterior sin filtro alguno.
+ *
+ * La ficha de una prenda lista (playera, sudadera o tote de la vitrina) sólo
+ * recomienda productos con foto real, igual que la vitrina: ni placeholders
+ * ni logos junto a una prenda fotografiada. El resto de fichas no cambia.
  */
 export async function getRelatedProducts(
   product: ProductRow,
@@ -1287,11 +1322,18 @@ export async function getRelatedProducts(
 ): Promise<ProductRow[]> {
   if (!product.category_id) return [];
   const all = await getProductsByCategory(product.category_id, "featured");
-  return all
-    .filter(
-      (p) =>
-        p.id !== product.id && isRelatedProductVisible(product.handle, p.handle),
-    )
+  const related = all.filter(
+    (p) =>
+      p.id !== product.id && isRelatedProductVisible(product.handle, p.handle),
+  );
+  if (!isReadyWearListingHandle(product.handle)) {
+    return related.slice(0, limit);
+  }
+  return related
+    .flatMap((p) => {
+      const shown = withProductPhotos(p);
+      return shown ? [shown] : [];
+    })
     .slice(0, limit);
 }
 

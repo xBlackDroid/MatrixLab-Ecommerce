@@ -314,6 +314,12 @@ export interface CartLineView {
   customTitle: string | null;
   variantId: string | null;
   variantTitle: string | null;
+  /**
+   * `product_variants.color` tal cual. Con él la línea de una prenda lista
+   * vuelve a su ficha con el mismo color (`?color=`). Opcional: las vistas que
+   * no lo traen caen al color escrito en `variantTitle`.
+   */
+  variantColor?: string | null;
   quantity: number;
   unitPrice: number;
   lineTotal: number;

@@ -3,6 +3,10 @@ import Link from "next/link";
 import { ArrowLeft, Palette, Shirt } from "lucide-react";
 import ReadyWearCatalog from "@/components/store/ReadyWearCatalog";
 import { getReadyToWearProducts } from "@/lib/store/products";
+import {
+  normalizeReadyWearFilters,
+  parseReadyWearFilters,
+} from "@/lib/store/ready-wear";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 /**
@@ -24,18 +28,37 @@ import { buildWhatsAppUrl } from "@/lib/whatsapp";
  * `/tienda/producto/<handle>`, a donde apunta cada tarjeta.
  *
  * La selección la decide el inventario, no una lista quemada: ver
- * `getReadyToWearProducts`.
+ * `getReadyToWearProducts` (que además exige foto real).
+ *
+ * FILTROS COMPARTIBLES
+ * `?tipo=playeras|sudaderas|totes|gorras`, `?coleccion=<id>` y `?q=<texto>`
+ * se leen AQUÍ, en servidor, contra listas cerradas: el HTML ya sale filtrado
+ * y la hidratación arranca del mismo estado. Una colección que no convive con
+ * el tipo pedido se descarta (misma regla que al hacer clic).
  */
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Prendas listas",
   description:
-    "Playeras, gorras y tote bags listas para comprar. Elige tu diseño y encuentra las opciones disponibles.",
+    "Playeras, sudaderas, gorras y tote bags listas para comprar. Filtra por tipo de prenda o colección y elige tus opciones en la ficha de cada producto.",
 };
 
-export default async function PrendasListasPage() {
-  const products = await getReadyToWearProducts();
+interface PrendasListasPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function PrendasListasPage({
+  searchParams,
+}: PrendasListasPageProps) {
+  const [products, params] = await Promise.all([
+    getReadyToWearProducts(),
+    searchParams,
+  ]);
+  const initialFilters = normalizeReadyWearFilters(
+    products,
+    parseReadyWearFilters(params ?? {}),
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -57,9 +80,10 @@ export default async function PrendasListasPage() {
             Prendas <span className="text-gradient">listas</span>
           </h1>
           <p className="mt-3 max-w-2xl text-ml-white/65">
-            Encuentra playeras, gorras y tote bags listas para llevar. En las playeras,
-            elige Blanca, Negra o Gris, corte Hombre o Mujer y talla Chica, Mediana o Grande en la ficha
-            del producto antes de agregarla al carrito.
+            Encuentra playeras, sudaderas, gorras y tote bags listas para llevar. Las playeras
+            vienen en Blanca, Negra o Gris y las sudaderas en nueve colores; en ambas eliges
+            corte Hombre o Mujer y talla Chica, Mediana o Grande en la ficha del producto
+            antes de agregarla al carrito.
           </p>
         </div>
 
@@ -75,7 +99,7 @@ export default async function PrendasListasPage() {
       </div>
 
       <div className="mt-10">
-        <ReadyWearCatalog products={products} />
+        <ReadyWearCatalog products={products} initialFilters={initialFilters} />
       </div>
 
       <div className="glass mt-10 rounded-2xl p-6 text-center">
@@ -84,7 +108,7 @@ export default async function PrendasListasPage() {
         </p>
         <a
           href={buildWhatsAppUrl(
-            "Hola MatrixLab, quiero preguntar por prendas listas (playeras, gorras o tote bags).",
+            "Hola MatrixLab, quiero preguntar por prendas listas (playeras, sudaderas, gorras o tote bags).",
           )}
           target="_blank"
           rel="noopener noreferrer"
