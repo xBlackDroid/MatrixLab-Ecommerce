@@ -113,5 +113,8 @@ export const RATE_LIMITS = {
   // Guardar la foto del cotizador reescribe hasta ~200 KB de jsonb: el uso
   // humano es de unos pocos guardados por minuto.
   adminQuoteWorkspaceSave: { limit: 20, windowMs: 60_000 },
+  // Reservar folios de cotización consume números definitivos: un humano
+  // genera unos pocos PDFs por minuto (los reintentos idempotentes cuentan).
+  adminQuoteFolioReserve: { limit: 30, windowMs: 60_000 },
   webhook: { limit: 120, windowMs: 60_000 },
 } as const;

@@ -43,6 +43,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
   gap: 12px;
 }
 .cot-num-badge { color: var(--text) !important; font-family: inherit; font-variant-numeric: tabular-nums; }
+/* Folio automático (lo asigna el servidor): última emitida + siguiente. */
+.mlz-folio { display: grid; justify-items: end; gap: 2px; text-align: right; }
+.mlz-folio-label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.mlz-folio-next { font-size: 18px; color: var(--text); font-variant-numeric: tabular-nums; }
+.mlz-folio-hint { font-size: 12px; color: var(--muted); max-width: 28ch; }
+.mlz-folio-note { margin-top: 6px; }
+#mlz-reprint[hidden] { display: none !important; }
 .sub-tab.active-cyan, .sub-tab.active-purple, .pill-opt.active {
   background: rgba(177, 151, 252, 0.14);
   color: var(--purple);
@@ -265,6 +272,8 @@ input[type=file] { width: 100%; color: var(--muted); }
   .card > div[style*="flex-wrap:wrap"] > .btn-sm[aria-label] { flex: 0 0 44px; }
   .cot-header > div[style*="display:flex"] { width: 100%; }
   .cot-header input[type=text] { flex: 1; min-width: 0; }
+  .mlz-folio { justify-items: start; text-align: left; width: 100%; }
+  .mlz-folio-hint { max-width: none; }
 
   /* Cada línea editable es una tarjeta con etiquetas visibles. */
   .cot-line-header { display: none; }

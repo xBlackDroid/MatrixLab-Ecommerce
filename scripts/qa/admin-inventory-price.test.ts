@@ -422,10 +422,17 @@ async function main() {
   let unchanged = "";
   try {
     unchanged = execSync(
-      `git diff --name-only ${BASE_COMMIT} -- src/app/api/admin/inventory/route.ts src/lib/validation/admin.ts src/lib/store/pricing.ts src/lib/store/cart.ts src/lib/store/orders.ts src/app/api/checkout src/lib/db/types.ts supabase`,
+      `git diff --name-status ${BASE_COMMIT} -- src/app/api/admin/inventory/route.ts src/lib/validation/admin.ts src/lib/store/pricing.ts src/lib/store/cart.ts src/lib/store/orders.ts src/app/api/checkout src/lib/db/types.ts supabase`,
       { cwd: ROOT, encoding: "utf8" },
     ).trim();
-    check("ruta de stock, validación admin, precios de checkout, tipos y SQL sin cambios", unchanged === "", unchanged);
+    // Única excepción autorizada: AÑADIR (status A) la migración de folios de
+    // cotización. Cualquier otro SQL creado, modificado o borrado sigue fallando.
+    const ALLOWED_ADDITIONS = new Set(["A\tsupabase/migrations/20261028192536_admin_quote_folios.sql"]);
+    const unexpected = unchanged
+      .split(/\r?\n/)
+      .filter((line) => line && !ALLOWED_ADDITIONS.has(line.replace(/\s+/, "\t")))
+      .join(", ");
+    check("ruta de stock, validación admin, precios de checkout, tipos y SQL sin cambios (salvo la migración nueva de folios)", unexpected === "", unexpected);
   } catch {
     console.log("(sin git o sin el commit base: se omite la comparación)");
   }
