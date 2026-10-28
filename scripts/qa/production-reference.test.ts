@@ -14,6 +14,9 @@
  *      deben perderse (p. ej. Distribuidores en el menú) y suman el cotizador.
  *   3. Todo archivo versionado es del snapshot, o del cotizador (lista
  *      cerrada), o metadatos del repo. Nada viejo de `main` se cuela.
+ *   4. Inventario (bloque comercial + miniatura + vista previa de muestra)
+ *      suma su propia lista cerrada: 3 archivos del snapshot modificados con
+ *      invariantes (paginación, ajuste auditado, CSRF, CSP) y 6 nuevos.
  *
  * Correr con: npx tsx scripts/qa/production-reference.test.ts
  */
@@ -57,6 +60,68 @@ const INTEGRATION_FILES: Record<string, { keep: string[]; add: string[] }> = {
   },
 };
 
+/**
+ * Archivos del snapshot modificados A PROPÓSITO para Inventario (bloque
+ * comercial + miniatura + vista previa de muestra). Lista cerrada: conservan
+ * paginación, ajuste auditado, auth/CSRF y CSP; `forbid` atrapa regresiones.
+ */
+const INVENTORY_INTEGRATION_FILES: Record<
+  string,
+  { keep: string[]; add: string[]; forbid?: string[]; onlyAdded?: string }
+> = {
+  "src/lib/store/inventory.ts": {
+    keep: [
+      "export function checkAvailability(",
+      "export async function adjustStock(",
+      'movement_type: params.delta > 0 ? "reposicion" : "ajuste"',
+      "const pageSize = 500;",
+      '.order("created_at", { ascending: true })',
+      '.order("id", { ascending: true })',
+      ".range(offset, offset + pageSize - 1)",
+      'if (error) throw new Error("No pudimos consultar el inventario.");',
+      "export async function listMovements(",
+    ],
+    add: ["categories(handle, title)", "presentInventoryEntries(entries)"],
+    forbid: ["!inner"],
+  },
+  "src/components/admin/InventoryTable.tsx": {
+    keep: [
+      'const CSRF_HEADER = "x-ml-csrf";',
+      'fetch("/api/admin/inventory"',
+      'method: "PATCH"',
+      "[CSRF_HEADER]: csrf",
+      "router.refresh()",
+      "VARIANT_STATUSES",
+      "Movimientos recientes de inventario",
+    ],
+    add: ['id: "block"', "Todos los bloques", "<Thumbnail", "if (readOnly)"],
+  },
+  "src/middleware.ts": {
+    keep: ["buildStrictCsp", "buildCompatibleCsp", "'strict-dynamic'", "frame-ancestors 'none'"],
+    add: ["/^\\/preview\\/inventario$/"],
+    forbid: ["/^\\/preview(?:", "/^\\/preview\\/inventario(?:"],
+    // Lo ÚNICO añadido: el patrón exacto de la vista previa. Quitando este
+    // bloque, el archivo debe ser idéntico byte a byte al del snapshot.
+    onlyAdded: `  /**
+   * Vista previa de Inventario con datos de muestra (sólo Preview/dev; en
+   * producción la página responde 404). Declara \`force-dynamic\`, así que le
+   * toca la política estricta. Coincidencia EXACTA, igual que las de arriba.
+   */
+  /^\\/preview\\/inventario$/,
+`,
+  },
+};
+
+/** Archivos nuevos de Inventario (no existen en el snapshot). Lista cerrada. */
+const INVENTORY_FILES = new Set([
+  "scripts/qa/admin-inventory.test.ts",
+  "scripts/qa/admin-inventory.browser.test.ts",
+  "src/app/preview/inventario/page.tsx",
+  "src/app/preview/inventario/sample.ts",
+  "src/lib/store/commercial-blocks.ts",
+  "src/lib/store/inventory-presentation.ts",
+]);
+
 /** Archivos que suma el cotizador (no existen en el snapshot). */
 const COTIZADOR_FILES = new Set([
   "docs/ADMIN_COTIZADOR.md",
@@ -95,7 +160,7 @@ for (const entry of receipt.files) {
     missing.push(entry.path);
     continue;
   }
-  if (entry.path in INTEGRATION_FILES) continue;
+  if (entry.path in INTEGRATION_FILES || entry.path in INVENTORY_INTEGRATION_FILES) continue;
   const buf = readFileSync(file);
   const raw = sha1(buf);
   if (raw === entry.sha1) {
@@ -108,7 +173,10 @@ for (const entry of receipt.files) {
   else if (lf === entry.sha1) exact += 1;
   else mismatched.push(entry.path);
 }
-const expected = receipt.files.length - Object.keys(INTEGRATION_FILES).length;
+const expected =
+  receipt.files.length -
+  Object.keys(INTEGRATION_FILES).length -
+  Object.keys(INVENTORY_INTEGRATION_FILES).length;
 check("ningún archivo del snapshot falta", missing.length === 0, missing.slice(0, 10).join(", "));
 check(
   `${expected} archivos del snapshot idénticos (${exact} exactos + ${eolOnly} sólo CRLF→LF)`,
@@ -125,6 +193,28 @@ for (const [path, rules] of Object.entries(INTEGRATION_FILES)) {
   check(`${path} suma el cotizador`, absent.length === 0, absent.join(", "));
 }
 
+console.log("\n--- Archivos de integración (snapshot + inventario) ---");
+const byPath = new Map(receipt.files.map((f) => [f.path, f]));
+for (const [path, rules] of Object.entries(INVENTORY_INTEGRATION_FILES)) {
+  check(`${path} es del snapshot`, byPath.has(path));
+  const source = readFileSync(join(ROOT, path), "utf8").replace(/\r\n/g, "\n");
+  const lost = rules.keep.filter((s) => !source.includes(s));
+  const absent = rules.add.filter((s) => !source.includes(s));
+  const forbidden = (rules.forbid ?? []).filter((s) => source.includes(s));
+  check(`${path} conserva lo del snapshot`, lost.length === 0, lost.join(", "));
+  check(`${path} suma inventario`, absent.length === 0, absent.join(", "));
+  check(`${path} sin regresiones prohibidas`, forbidden.length === 0, forbidden.join(", "));
+  if (rules.onlyAdded) {
+    const entry = byPath.get(path);
+    const once = source.split(rules.onlyAdded).length === 2;
+    const restored = sha1(source.replace(rules.onlyAdded, ""));
+    check(
+      `${path} = snapshot + sólo el bloque añadido`,
+      once && !!entry && (restored === entry.sha1 || restored === entry.sha1Lf),
+    );
+  }
+}
+
 console.log("\n--- Nada fuera de la lista ---");
 const reference = new Set(receipt.files.map((f) => f.path));
 let tracked: string[] = [];
@@ -134,10 +224,14 @@ try {
   console.log("(sin git: se omite la verificación de archivos versionados)");
 }
 if (tracked.length) {
-  const extra = tracked.filter((f) => !reference.has(f) && !COTIZADOR_FILES.has(f) && !REPO_META.has(f));
-  check("todo archivo versionado es del snapshot, del cotizador o metadato", extra.length === 0, extra.join(", "));
+  const extra = tracked.filter(
+    (f) => !reference.has(f) && !COTIZADOR_FILES.has(f) && !INVENTORY_FILES.has(f) && !REPO_META.has(f),
+  );
+  check("todo archivo versionado es del snapshot, del cotizador, de inventario o metadato", extra.length === 0, extra.join(", "));
   const notTracked = [...COTIZADOR_FILES].filter((f) => !tracked.includes(f));
   check("los archivos del cotizador están versionados", notTracked.length === 0, notTracked.join(", "));
+  const inventoryNotTracked = [...INVENTORY_FILES].filter((f) => !tracked.includes(f));
+  check("los archivos de inventario están versionados", inventoryNotTracked.length === 0, inventoryNotTracked.join(", "));
 }
 
 console.log(failures === 0 ? "\nTodo OK." : `\n${failures} fallo(s).`);

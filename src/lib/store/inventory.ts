@@ -6,6 +6,11 @@ import type {
   ProductRow,
   ProductVariantRow,
 } from "@/lib/db/types";
+import type { InventoryRow } from "@/lib/store/commercial-blocks";
+import {
+  presentInventoryEntries,
+  type InventoryEntry,
+} from "@/lib/store/inventory-presentation";
 
 /**
  * Reglas de disponibilidad. El stock del frontend nunca se usa para decidir:
@@ -105,25 +110,28 @@ export async function adjustStock(params: {
   return { ok: true, variant: updated as ProductVariantRow };
 }
 
-type InventoryEntry = ProductVariantRow & { products: Pick<ProductRow, "title" | "handle"> | null };
+type InventoryReadClient = Pick<ReturnType<typeof requireServiceClient>, "from">;
 
-export async function listInventory(): Promise<InventoryEntry[]> {
-  const client = requireServiceClient();
+export async function listInventory(
+  client: InventoryReadClient = requireServiceClient(),
+): Promise<InventoryRow[]> {
   const entries: InventoryEntry[] = [];
   const pageSize = 500;
   // La ampliación por color supera 1,000 variantes. Leer todas las páginas
   // evita omitir existencias en el administrador por el límite del Data API.
+  // Las relaciones anidadas son LEFT JOIN (nunca inner): una variante sin
+  // producto o un producto sin categoría siguen apareciendo.
   for (let offset = 0; ; offset += pageSize) {
     const { data, error } = await client
       .from("product_variants")
-      .select("*, products(title, handle)")
+      .select("*, products(title, handle, images, categories(handle, title))")
       .order("created_at", { ascending: true })
       .order("id", { ascending: true })
       .range(offset, offset + pageSize - 1);
     if (error) throw new Error("No pudimos consultar el inventario.");
     const page = (data ?? []) as InventoryEntry[];
     entries.push(...page);
-    if (page.length < pageSize) return entries;
+    if (page.length < pageSize) return presentInventoryEntries(entries);
   }
 }
 
