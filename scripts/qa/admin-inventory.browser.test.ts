@@ -9,6 +9,7 @@
  *
  * Sobre la vista de muestra verifica: banner, fotos reales que cargan,
  * fallback "Sin imagen", búsqueda y filtro por bloque, estado sin resultados,
+ * columna Precio MXN (variante, base heredada, $0, Sin precio) y su editor,
  * CERO peticiones de mutación (modo readOnly), tarjetas legibles sin overflow
  * a 320/375/390/430 px, objetivos táctiles ≥44px, campos ≥16px, tabla densa
  * a 1440 px, cero errores de runtime y cero violaciones de CSP.
@@ -148,7 +149,26 @@ async function previewSuite(browser: Browser, base: string, engine: string) {
   check(`[${engine}] banner de muestra visible`, await page.getByText("Datos de muestra · Solo lectura").isVisible());
   check(`[${engine}] ${PREVIEW_ROWS} variantes de muestra`, (await rowCount(page)) === PREVIEW_ROWS, String(await rowCount(page)));
   const headers = (await page.locator("thead th").allTextContents()).map((t) => t.trim());
-  check(`[${engine}] 1440: columnas Producto/Bloque/Variante/SKU/Stock/Estado`, headers.join("|") === "Producto|Bloque|Variante|SKU|Stock|Estado", headers.join("|"));
+  check(`[${engine}] 1440: columnas Producto/Bloque/Variante/SKU/Precio MXN/Stock/Estado`, headers.join("|") === "Producto|Bloque|Variante|SKU|Precio MXN|Stock|Estado", headers.join("|"));
+  const priceOf = async (needle: string) => {
+    const row = page.locator('[data-testid="inventory-row"]', { hasText: needle }).first();
+    return {
+      price: (await row.getByTestId("inventory-price").textContent())?.trim(),
+      source: (await row.getByTestId("inventory-price-source").textContent())?.trim(),
+    };
+  };
+  const inherited = await priceOf("MUESTRA-WR001-N-M");
+  check(`[${engine}] precio heredado del producto visible`, inherited.price === "$349.00" && inherited.source === "Hereda precio base", JSON.stringify(inherited));
+  const own = await priceOf("MUESTRA-WR001-B-L");
+  check(`[${engine}] precio propio de la variante`, own.price === "$379.00" && own.source === "Precio de variante", JSON.stringify(own));
+  const zero = await priceOf("MUESTRA-LASER");
+  check(`[${engine}] precio efectivo 0 se muestra $0.00`, zero.price === "$0.00", JSON.stringify(zero));
+  const orphan = await priceOf("Variante huérfana");
+  check(`[${engine}] huérfana sin precio → 'Sin precio' (no $0.00)`, orphan.price === "Sin precio", JSON.stringify(orphan));
+  const nowrap = await page.locator('[data-testid="inventory-price"]').evaluateAll((els) =>
+    els.every((el) => getComputedStyle(el).whiteSpace === "nowrap" && el.getBoundingClientRect().height < 30),
+  );
+  check(`[${engine}] cifras sin salto de línea`, nowrap);
   await loadAllImages(page);
   const imgs = await page.evaluate(() =>
     [...document.querySelectorAll<HTMLImageElement>('[data-testid="inventory-row"] img')].map((img) => ({
@@ -198,7 +218,7 @@ async function previewSuite(browser: Browser, base: string, engine: string) {
 
   // Solo lectura: nada llega a la API.
   const first = page.locator('[data-testid="inventory-row"]').first();
-  const stockBefore = await first.locator("td").nth(4).textContent();
+  const stockBefore = await first.locator("td").nth(5).textContent();
   // aria-disabled (solo lectura): Playwright no hace clic sin `force`, un
   // usuario sí puede pulsarlos; se fuerza para probar que no llaman a la API.
   await page.getByRole("button", { name: /^Sumar 1 a Playera MatrixLab Wear WR001 · Negra \/ M$/ }).click({ force: true });
@@ -208,9 +228,27 @@ async function previewSuite(browser: Browser, base: string, engine: string) {
     select.value = "agotado";
     select.dispatchEvent(new Event("change", { bubbles: true }));
   });
+  // Editor de precio: se abre y se puede escribir, pero Guardar/Usar base no
+  // llaman a la API en la muestra.
+  const firstPrice = await first.getByTestId("inventory-price").textContent();
+  await page.getByRole("button", { name: "Editar precio de Playera MatrixLab Wear WR001 · Negra / M" }).click();
+  const editor = first.getByTestId("inventory-price-editor");
+  check(`[${engine}] editor de precio abre con el precio vigente`, (await editor.getByLabel("Nuevo precio (MXN)").inputValue()) === "349.00");
+  await editor.getByLabel("Nuevo precio (MXN)").fill("399,50");
+  await editor.getByRole("button", { name: "Guardar" }).click({ force: true });
+  await page.waitForTimeout(300);
+  check(`[${engine}] muestra: Guardar no envía nada y conserva el borrador`, watch.mutations.length === 0 && (await editor.getByLabel("Nuevo precio (MXN)").inputValue()) === "399,50");
+  await editor.getByRole("button", { name: "Cancelar" }).click();
+  check(`[${engine}] Cancelar cierra sin cambiar el precio`, (await first.getByTestId("inventory-price-editor").count()) === 0 && (await first.getByTestId("inventory-price").textContent()) === firstPrice);
+  const ownRow = page.locator('[data-testid="inventory-row"]', { hasText: "MUESTRA-WR001-B-L" });
+  await ownRow.getByRole("button", { name: /^Editar precio de / }).click();
+  await ownRow.getByRole("button", { name: "Usar precio base ($349.00)" }).click({ force: true });
+  await page.waitForTimeout(300);
+  check(`[${engine}] muestra: 'Usar precio base' tampoco envía nada`, watch.mutations.length === 0 && (await ownRow.getByTestId("inventory-price").textContent()) === "$379.00");
+  await ownRow.getByRole("button", { name: "Cancelar" }).click();
   await page.waitForTimeout(400);
-  check(`[${engine}] +/−/estado no envían ninguna petición`, watch.mutations.length === 0, watch.mutations.join(", "));
-  check(`[${engine}] stock y estado sin cambios`, (await first.locator("td").nth(4).textContent()) === stockBefore && (await page.getByLabel("Estado de Playera MatrixLab Wear WR001 · Negra / M").inputValue()) === "disponible");
+  check(`[${engine}] +/−/estado/precio no envían ninguna petición`, watch.mutations.length === 0, watch.mutations.join(", "));
+  check(`[${engine}] stock y estado sin cambios`, (await first.locator("td").nth(5).textContent()) === stockBefore && (await page.getByLabel("Estado de Playera MatrixLab Wear WR001 · Negra / M").inputValue()) === "disponible");
   check(`[${engine}] aviso de solo lectura`, await page.getByText("Vista de muestra: solo lectura", { exact: false }).first().isVisible());
   check(`[${engine}] sin violaciones de CSP (1440)`, (await page.evaluate(() => (window as unknown as { __csp: string[] }).__csp)).length === 0);
   await ctx.close();
@@ -226,8 +264,8 @@ async function previewSuite(browser: Browser, base: string, engine: string) {
       thumb: Math.round(el.querySelector('[data-testid="inventory-thumb"]')!.getBoundingClientRect().width),
     }));
     check(
-      `[${engine}] ${width}: tarjeta apilada con Bloque/Variante/SKU/Stock/Estado`,
-      card.display === "flex" && ["Bloque", "Variante", "SKU", "Stock", "Estado"].every((l) => card.labels.includes(l)),
+      `[${engine}] ${width}: tarjeta apilada con Bloque/Variante/SKU/Precio MXN/Stock/Estado`,
+      card.display === "flex" && ["Bloque", "Variante", "SKU", "Precio MXN", "Stock", "Estado"].every((l) => card.labels.includes(l)),
       JSON.stringify(card.labels.slice(0, 8)),
     );
     check(`[${engine}] ${width}: miniatura 64px`, card.thumb === 64, String(card.thumb));
@@ -242,6 +280,33 @@ async function previewSuite(browser: Browser, base: string, engine: string) {
       [...document.querySelectorAll<HTMLElement>("input, select")].map((el) => parseFloat(getComputedStyle(el).fontSize)),
     );
     check(`[${engine}] ${width}: campos ≥16px (sin zoom en iOS)`, fonts.every((f) => f >= 16), fonts.join(","));
+    // Editor de precio abierto en la tarjeta: ancho completo, sin overflow.
+    const mFirst = m.locator('[data-testid="inventory-row"]').first();
+    await mFirst.getByRole("button", { name: /^Editar precio de / }).click();
+    const mEditor = mFirst.getByTestId("inventory-price-editor");
+    check(`[${engine}] ${width}: editor abierto sin overflow ni recortes`, (await layoutIssues(m)).length === 0, (await layoutIssues(m)).slice(0, 4).join(" | "));
+    const editorBox = await mEditor.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const card = el.closest('[data-testid="inventory-row"]')!.getBoundingClientRect();
+      const input = el.querySelector("input")!;
+      return {
+        widthRatio: r.width / (card.width - 32),
+        inputFont: parseFloat(getComputedStyle(input).fontSize),
+        inputMode: input.getAttribute("inputmode"),
+        small: [...el.querySelectorAll<HTMLElement>("button, input")].filter((b) => b.getBoundingClientRect().height < 44).length,
+      };
+    });
+    check(
+      `[${engine}] ${width}: editor a todo lo ancho, campo decimal ≥16px y botones ≥44px`,
+      editorBox.widthRatio > 0.95 && editorBox.inputFont >= 16 && editorBox.inputMode === "decimal" && editorBox.small === 0,
+      JSON.stringify(editorBox),
+    );
+    if (SHOTS && (width === 390 || width === 320)) {
+      await mEditor.getByLabel("Nuevo precio (MXN)").fill("1299,50");
+      await mFirst.scrollIntoViewIfNeeded();
+      await m.screenshot({ path: join(SHOTS, `inventario-preview-precio-editor-${width}-${engine}.png`) });
+    }
+    await mEditor.getByRole("button", { name: "Cancelar" }).click();
     if (SHOTS && (width === 390 || width === 320)) {
       await loadAllImages(m);
       await m.screenshot({ path: join(SHOTS, `inventario-preview-iphone-${width}-${engine}.png`), fullPage: true });

@@ -122,6 +122,21 @@ const INVENTORY_FILES = new Set([
   "src/lib/store/inventory-presentation.ts",
 ]);
 
+/**
+ * Archivos nuevos del editor de precio en Inventario (no existen en el
+ * snapshot). Lista cerrada; los archivos del snapshot que toca
+ * (`InventoryTable.tsx`, `inventory.ts`) ya están arriba con sus invariantes.
+ */
+const INVENTORY_PRICE_FILES = new Set([
+  "scripts/qa/admin-inventory-price.test.ts",
+  "scripts/qa/admin-inventory-price.browser.test.ts",
+  "src/app/api/admin/inventory/price/route.ts",
+  "src/components/admin/InventoryPriceCell.tsx",
+  "src/lib/store/inventory-price.ts",
+  "src/lib/store/inventory-pricing.ts",
+  "src/lib/validation/inventory-price.ts",
+]);
+
 /** Archivos que suma el cotizador (no existen en el snapshot). */
 const COTIZADOR_FILES = new Set([
   "docs/ADMIN_COTIZADOR.md",
@@ -215,6 +230,16 @@ for (const [path, rules] of Object.entries(INVENTORY_INTEGRATION_FILES)) {
   }
 }
 
+console.log("\n--- Editor de precio en Inventario (lista cerrada) ---");
+{
+  const absentPrice = [...INVENTORY_PRICE_FILES].filter((f) => !existsSync(join(ROOT, f)));
+  check("los archivos del editor de precio existen", absentPrice.length === 0, absentPrice.join(", "));
+  check(
+    "ninguno pisa un archivo del snapshot",
+    [...INVENTORY_PRICE_FILES].every((f) => !receipt.files.some((e) => e.path === f)),
+  );
+}
+
 console.log("\n--- Nada fuera de la lista ---");
 const reference = new Set(receipt.files.map((f) => f.path));
 let tracked: string[] = [];
@@ -225,7 +250,12 @@ try {
 }
 if (tracked.length) {
   const extra = tracked.filter(
-    (f) => !reference.has(f) && !COTIZADOR_FILES.has(f) && !INVENTORY_FILES.has(f) && !REPO_META.has(f),
+    (f) =>
+      !reference.has(f) &&
+      !COTIZADOR_FILES.has(f) &&
+      !INVENTORY_FILES.has(f) &&
+      !INVENTORY_PRICE_FILES.has(f) &&
+      !REPO_META.has(f),
   );
   check("todo archivo versionado es del snapshot, del cotizador, de inventario o metadato", extra.length === 0, extra.join(", "));
   const notTracked = [...COTIZADOR_FILES].filter((f) => !tracked.includes(f));

@@ -18,6 +18,7 @@ import {
   TUMBLER_PARENT_HANDLE,
   TUMBLER_SUBCATEGORY_HANDLES,
 } from "@/lib/store/products";
+import { resolveInventoryPricing } from "@/lib/store/inventory-pricing";
 import { readyWearVariantImage } from "@/lib/store/ready-wear-colors";
 import { repairMojibake } from "@/lib/store/text";
 
@@ -55,6 +56,8 @@ export function inventoryBlockOf(
 
 type InventoryCategoryJoin = Pick<CategoryRow, "handle" | "title">;
 type InventoryProductJoin = Pick<ProductRow, "title" | "handle" | "images"> & {
+  /** Opcional: lecturas anteriores al editor de precio no lo traían. */
+  base_price?: ProductRow["base_price"] | null;
   categories: InventoryCategoryJoin | InventoryCategoryJoin[] | null;
 };
 /** Fila tal cual llega del Data API (relaciones LEFT JOIN: pueden ser null). */
@@ -87,6 +90,8 @@ type PresentedInventoryProduct = Omit<InventoryDisplay, "thumbnail"> & {
  * color de `readyWearVariantImage`). La presentación del producto se calcula
  * UNA vez por producto en la lectura: tallas y colores comparten el resultado
  * sin repetir consultas al filesystem. No altera stock, estado ni orden.
+ * El precio efectivo es el de la tienda: `variant.price ?? base_price`; sin
+ * producto ni precio base queda en null ("Sin precio"), nunca en 0.
  */
 export function presentInventoryEntries(entries: InventoryEntry[]): InventoryRow[] {
   const cache = new Map<string, PresentedInventoryProduct>();
@@ -105,6 +110,7 @@ export function presentInventoryEntries(entries: InventoryEntry[]): InventoryRow
           blockLabel: NO_INVENTORY_BLOCK_LABEL,
           thumbnail: null,
         },
+        pricing: resolveInventoryPricing(variant.price, null),
       };
     }
 
@@ -140,6 +146,7 @@ export function presentInventoryEntries(entries: InventoryEntry[]): InventoryRow
           readyWearVariantImage(handle, variant.color) ?? image,
         ),
       },
+      pricing: resolveInventoryPricing(variant.price, product.base_price ?? null),
     };
   });
 }

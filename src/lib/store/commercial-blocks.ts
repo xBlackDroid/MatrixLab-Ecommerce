@@ -1,4 +1,5 @@
 import type { ProductRow, ProductVariantRow } from "@/lib/db/types";
+import type { InventoryPricing } from "@/lib/store/inventory-pricing";
 
 /**
  * Bloques comerciales del inventario admin (MatrixLab Wear, Stickers, …).
@@ -44,6 +45,8 @@ export interface InventoryDisplay {
 export type InventoryRow = ProductVariantRow & {
   products: Pick<ProductRow, "title" | "handle"> | null;
   display: InventoryDisplay;
+  /** Precio efectivo (variante ?? base) y su origen, resuelto en servidor. */
+  pricing: InventoryPricing;
 };
 
 /** Minúsculas y sin acentos: "laser" encuentra "MatrixLab Láser". */
