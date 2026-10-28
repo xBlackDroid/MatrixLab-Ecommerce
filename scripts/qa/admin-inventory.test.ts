@@ -7,7 +7,8 @@
  *     todas las sublíneas Tumbler, colecciones Wear, desconocido → Sin bloque);
  *   - miniaturas reales del pipeline público, foto por color, fallback, URLs
  *     no seguras descartadas y mojibake reparado;
- *   - paginación completa (>1000 variantes), orden y LEFT JOIN (sin !inner);
+ *   - paginación completa (>1000 variantes), orden y LEFT JOIN (sin !inner),
+ *     con el precio base del producto para el precio efectivo;
  *   - checkAvailability / adjustStock idénticos a `main`;
  *   - gate de /preview/inventario (Preview/dev sí, producción 404) y que la
  *     vista de muestra no lea base ni mute nada.
@@ -163,6 +164,10 @@ async function main() {
   check("relación entregada como arreglo también se lee", byId.j.display.block === "stickers" && byId.j.display.thumbnail === "/images/matrixlab-stickers/imn-auto001.webp");
   check("stock y estado intactos", rows.every((r) => r.stock === 1 && r.status === "disponible"));
   check(
+    "sin base_price en la lectura → Sin precio (nunca 0 inventado)",
+    rows.every((r) => r.pricing.effective === null && r.pricing.source === "none"),
+  );
+  check(
     "búsqueda incluye bloque y categoría (sin acentos)",
     blocks.inventorySearchText(byId.i).includes("matrixlab laser") &&
       blocks.inventorySearchText(byId.a).includes("wraps-glow-finish"),
@@ -217,7 +222,7 @@ async function main() {
         (c) =>
           c.order.join(",") === "created_at:true,id:true" &&
           !c.select?.includes("!inner") &&
-          c.select === "*, products(title, handle, images, categories(handle, title))",
+          c.select === "*, products(title, handle, images, base_price, categories(handle, title))",
       ),
     );
   }
@@ -298,6 +303,15 @@ async function main() {
   check("la muestra incluye fotos reales y un caso sin foto", sampleRows.filter((r) => r.display.thumbnail).length >= 9 && sampleRows.some((r) => !r.display.thumbnail));
   check("la muestra incluye una variante huérfana", sampleRows.some((r) => r.products === null));
   check("los SKUs de muestra se identifican como muestra", sampleRows.every((r) => !r.sku || r.sku.startsWith("MUESTRA-")));
+  const sources = sampleRows.map((r) => r.pricing.source);
+  check(
+    "la muestra cubre precio de variante, precio base heredado, $0 y Sin precio",
+    sources.includes("variant") &&
+      sources.includes("base") &&
+      sampleRows.some((r) => r.pricing.effective === 0) &&
+      sampleRows.some((r) => r.products === null && r.pricing.effective === null),
+  );
+  check("la muestra conserva 13 filas", sampleRows.length === 13, String(sampleRows.length));
 
   // -------------------------------------------------------------------------
   console.log("\n--- Tabla: contrato de mutación sin cambios ---");

@@ -124,7 +124,7 @@ export async function listInventory(
   for (let offset = 0; ; offset += pageSize) {
     const { data, error } = await client
       .from("product_variants")
-      .select("*, products(title, handle, images, categories(handle, title))")
+      .select("*, products(title, handle, images, base_price, categories(handle, title))")
       .order("created_at", { ascending: true })
       .order("id", { ascending: true })
       .range(offset, offset + pageSize - 1);

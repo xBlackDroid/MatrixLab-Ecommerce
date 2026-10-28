@@ -10,8 +10,8 @@ import { stickerHandle } from "@/lib/store/tumbler-stickers";
 
 /**
  * DATOS DE MUESTRA para la vista previa del inventario. Nombres y fotos del
- * catálogo público; stock, estados, SKUs e ids son INVENTADOS y no salen de
- * ninguna base. Pasan por la misma presentación que el admin real
+ * catálogo público; stock, estados, precios, SKUs e ids son INVENTADOS y no
+ * salen de ninguna base. Pasan por la misma presentación que el admin real
  * (`presentInventoryEntries`), así que el bloque y la miniatura se resuelven
  * igual que en producción.
  */
@@ -33,6 +33,7 @@ type SampleProduct = {
   title: string;
   handle: string;
   images?: string[];
+  base_price: number;
   category: { handle: string; title: string } | null;
 };
 
@@ -59,6 +60,7 @@ function variant(
           title: product.title,
           handle: product.handle,
           images: product.images ?? [],
+          base_price: product.base_price,
           categories: product.category,
         }
       : null,
@@ -69,12 +71,14 @@ const WEAR: SampleProduct = {
   id: "muestra-wear",
   title: "Playera MatrixLab Wear WR001",
   handle: "wear-lista-wr001",
+  base_price: 349,
   category: { handle: "playeras-prendas", title: "Playeras y prendas" },
 };
 const STICKERS: SampleProduct = {
   id: "muestra-imanes",
   title: "Imán para auto IMN-AUTO001",
   handle: "muestra-iman-auto001",
+  base_price: 89,
   images: ["/images/matrixlab-stickers/imn-auto001.webp"],
   category: { handle: "imanes", title: "Imanes" },
 };
@@ -82,30 +86,35 @@ const UV_STICKER: SampleProduct = {
   id: "muestra-uv",
   title: "UV Sticker 24oz A001",
   handle: stickerHandle("A001"),
+  base_price: 45,
   category: { handle: "wraps-glow-finish", title: "Wraps & Glow Finish" },
 };
 const SPARKLE: SampleProduct = {
   id: "muestra-sparkle",
   title: "Fairy Byte",
   handle: sparkleHandle("2002"),
+  base_price: 65,
   category: { handle: "repuestos-consumibles", title: "Sparkle Mix" },
 };
 const READY_TUMBLER: SampleProduct = {
   id: "muestra-vaso",
   title: "Vaso ToyStory Marcianitos",
   handle: readyTumblerHandle("VL001"),
+  base_price: 289,
   category: { handle: "snowglobe", title: "Tumbler & SnowGlobe Bar" },
 };
 const PIECE_3D: SampleProduct = {
   id: "muestra-3d",
   title: "Dragón Fuego Vivo - Lámpara RGB 3D",
   handle: matrixLab3dHandle("3D001"),
+  base_price: 1250,
   category: { handle: "impresion-3d", title: "Impresión 3D" },
 };
 const LASER: SampleProduct = {
   id: "muestra-laser",
   title: "Grabado láser personalizado",
   handle: "muestra-grabado-laser",
+  base_price: 0,
   images: ["/images/categories/matrixlab-laser.png"],
   category: { handle: "grabado-laser", title: "Grabado láser" },
 };
@@ -113,6 +122,7 @@ const SCHOOL: SampleProduct = {
   id: "muestra-escolar",
   title: "Etiquetas escolares personalizadas",
   handle: "muestra-etiquetas-escolares",
+  base_price: 180,
   images: ["/images/categories/etiquetas-escolares.png"],
   category: { handle: "etiquetas-escolares", title: "Etiquetas escolares" },
 };
@@ -120,18 +130,20 @@ const NO_PHOTO: SampleProduct = {
   id: "muestra-sin-foto",
   title: "Gorra trucker (sin foto cargada)",
   handle: "muestra-gorra-sin-foto",
+  base_price: 249.5,
   category: { handle: "gorras", title: "Gorras" },
 };
 const NO_CATEGORY: SampleProduct = {
   id: "muestra-sin-categoria",
   title: "Producto sin categoría asignada",
   handle: "muestra-sin-categoria",
+  base_price: 120,
   category: null,
 };
 
 export const SAMPLE_INVENTORY_ENTRIES: InventoryEntry[] = [
   variant(WEAR, 1, { title: "Negra / M", sku: "MUESTRA-WR001-N-M", color: "Negra", size: "M", stock: 6 }),
-  variant(WEAR, 2, { title: "Blanca / L", sku: "MUESTRA-WR001-B-L", color: "Blanca", size: "L", stock: 2 }),
+  variant(WEAR, 2, { title: "Blanca / L", sku: "MUESTRA-WR001-B-L", color: "Blanca", size: "L", stock: 2, price: 379 }),
   variant(WEAR, 3, { title: "Gris / S", sku: "MUESTRA-WR001-G-S", color: "Gris", size: "S", stock: 0, status: "agotado" }),
   variant(STICKERS, 1, { title: "Pieza", sku: "MUESTRA-IMN-AUTO001", stock: 14 }),
   variant(UV_STICKER, 1, { title: "24 oz", sku: "MUESTRA-UV-A001", stock: 3 }),
@@ -141,7 +153,7 @@ export const SAMPLE_INVENTORY_ENTRIES: InventoryEntry[] = [
   variant(LASER, 1, { title: "Pieza", sku: "MUESTRA-LASER", stock: 0, status: "sobre_pedido" }),
   variant(SCHOOL, 1, { title: "Planilla", sku: "MUESTRA-ESCOLAR", stock: 40 }),
   variant(NO_PHOTO, 1, { title: "Unitalla", sku: "MUESTRA-GORRA", stock: 4, status: "oculto" }),
-  variant(NO_CATEGORY, 1, { title: "Única", sku: "MUESTRA-SIN-BLOQUE", stock: 7 }),
+  variant(NO_CATEGORY, 1, { title: "Única", sku: "MUESTRA-SIN-BLOQUE", stock: 7, price: 99.9 }),
   variant(null, 1, { title: "Variante huérfana", sku: null, stock: 0, status: "oculto" }),
 ];
 

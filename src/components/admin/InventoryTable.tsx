@@ -21,6 +21,7 @@ import {
   type InventoryRow,
 } from "@/lib/store/commercial-blocks";
 import { VARIANT_STATUSES } from "@/lib/validation/store";
+import { InventoryPriceCell, PriceEditStore } from "./InventoryPriceCell";
 
 const CSRF_HEADER = "x-ml-csrf";
 
@@ -99,6 +100,7 @@ export default function InventoryTable({
   const [filter, setFilter] = useState("");
   const [block, setBlock] = useState<BlockFilter>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [priceEdits] = useState(() => new PriceEditStore());
 
   async function adjust(
     variantId: string,
@@ -222,6 +224,26 @@ export default function InventoryTable({
             </span>
           </>
         ),
+      }),
+      columnHelper.accessor((row) => row.pricing.effective, {
+        id: "price",
+        header: "Precio MXN",
+        cell: (info) => {
+          const row = info.row.original;
+          return (
+            <>
+              <CardLabel>Precio MXN</CardLabel>
+              <InventoryPriceCell
+                row={row}
+                name={rowName(row)}
+                store={priceEdits}
+                csrf={csrf}
+                readOnly={readOnly}
+                onSaved={() => router.refresh()}
+              />
+            </>
+          );
+        },
       }),
       columnHelper.accessor("stock", {
         header: "Stock",
@@ -390,7 +412,7 @@ export default function InventoryTable({
             {visibleRows.length === 0 && (
               <tr className="max-sm:block">
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-5 py-10 text-center text-ml-white/50 max-sm:block"
                 >
                   {inventory.length === 0 ? (
@@ -427,7 +449,9 @@ export default function InventoryTable({
                     className={
                       cell.column.id === "product"
                         ? "px-4 py-3 align-middle lg:px-5 max-sm:p-0 max-sm:pb-1"
-                        : "px-4 py-3 align-middle lg:px-5 max-sm:flex max-sm:min-h-11 max-sm:items-center max-sm:justify-between max-sm:gap-3 max-sm:p-0"
+                        : cell.column.id === "price"
+                          ? "px-4 py-3 align-middle lg:px-5 max-sm:flex max-sm:min-h-11 max-sm:flex-wrap max-sm:items-start max-sm:justify-between max-sm:gap-3 max-sm:p-0"
+                          : "px-4 py-3 align-middle lg:px-5 max-sm:flex max-sm:min-h-11 max-sm:items-center max-sm:justify-between max-sm:gap-3 max-sm:p-0"
                     }
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
