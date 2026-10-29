@@ -17,3 +17,5 @@ Las 36 fotografías se guardan en `public/images/matrixlab-wear/hoodies/su006-{c
 ## Inventario y conservación
 
 La semilla aditiva `supabase/seed_ice_skating_hoodies_20261028.sql` no reinicia stock existente y registra movimientos por las altas nuevas. Se guardó una instantánea de los 472 productos y 1,359 variantes previos para comprobar conservación. El inventario resultante esperado es de 476 productos y 1,575 variantes; la vitrina de prendas listas contiene 53 productos con fotografía.
+
+Para mantener el empaquetado dentro de los límites actuales de hosting, las 36 fotos nuevas se excluyen de los paquetes de servidor mediante `outputFileTracingExcludes`. Siguen en `public/` para el CDN. El selector resuelve sus rutas sin leer imágenes en servidor; las fuentes privadas del cotizador y el resto de archivos de catálogo mantienen su configuración anterior.
