@@ -19,3 +19,7 @@ Los prompts exactos y referencias están en `sports-cap-image-prompts-20261028.j
 ## Validación
 
 TypeScript y pruebas de colores de gorras, prendas listas, inventario administrativo y cotizador. Las altas SQL son aditivas e idempotentes y registran movimientos por las 23 existencias nuevas. Antes de la publicación se guardó una instantánea de los 467 productos y 1,336 variantes existentes para verificar conservación del inventario.
+
+Despliegue productivo inicial: `dpl_AXeJoS8SeWxbBC3jjSGRzEcqHHUi`. Comprobación posterior: 472 productos y 1,359 variantes totales; 49 productos listos con foto, de los cuales seis son gorras. Las 24 variantes de gorra aparecen en el bloque Wear del inventario con miniatura del color correcto. Los otros 466 productos no cambiaron.
+
+Comprobación en navegador de las seis fichas y sus 24 colores: fotografía correcta, compra habilitada y límite de una pieza. Compra desde la interfaz de Padel Queen Negra confirmada; 14 variantes comprobadas por API con precio de $279 e imagen correcta y rechazo de cantidades superiores al límite. Los carritos de prueba se vacían sin generar pedidos. Se ajustó el ancho mínimo nativo del fieldset de color para pantallas de 320 px.

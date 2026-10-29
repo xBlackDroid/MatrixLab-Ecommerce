@@ -160,7 +160,7 @@ async function main() {
       !["wear-lista-wr000", "wear-lista-wr035", TOTE].some(colors.isReadyWearShirtHandle),
   );
   check(
-    "isReadyWearGarmentHandle = playeras + sudaderas, nada más",
+    "las playeras y sudaderas con fotografía siguen admitidas y los genéricos quedan fuera",
     [...SHIRTS, ...HOODIES].every(colors.isReadyWearGarmentHandle) &&
       ![
         "wear-sudadera-su000",

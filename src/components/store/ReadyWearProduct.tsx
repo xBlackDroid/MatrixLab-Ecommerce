@@ -60,9 +60,8 @@ interface ReadyWearProductProps {
 }
 
 /**
- * Ficha de prenda lista (playera o sudadera): galería por color + color /
- * corte / talla + compra. Los colores y el color por defecto son los de la
- * prenda: 3 en playeras (Negra), 9 en sudaderas (Lila).
+ * Ficha de prenda lista: galería por color y compra. Playeras y sudaderas
+ * eligen corte y talla; las gorras resuelven su variante sólo por color.
  */
 export default function ReadyWearProduct({
   product,
@@ -240,7 +239,7 @@ export default function ReadyWearProduct({
             <span className="text-sm text-ml-white/50">MXN</span>
           </div>
 
-          <fieldset>
+          <fieldset className="min-w-0">
             <legend className="mb-3 text-sm font-medium text-ml-white/70">
               Color: <span className="text-ml-white">{color}</span>
             </legend>

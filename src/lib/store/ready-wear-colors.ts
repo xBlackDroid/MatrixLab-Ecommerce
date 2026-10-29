@@ -5,6 +5,8 @@
  *     defecto). Fotos en /public/images/matrixlab-wear/colors/.
  *   * sudaderas adulto `wear-sudadera-su001` … `su005`: nueve colores (Lila
  *     por defecto). Fotos en /public/images/matrixlab-wear/hoodies/.
+ *   * gorras `wear-gorra-go001` … `go006`: cuatro colores (Rosa por defecto).
+ *     Fotos en /public/images/matrixlab-wear/gorras/colors/.
  *
  * Sin dependencias de servidor: lo usan la ficha, la tarjeta, el carrito y la
  * miniatura del inventario admin. Cada prenda tiene su PROPIA lista cerrada de
@@ -47,7 +49,7 @@ type CapColorOption = (typeof READY_WEAR_CAP_COLORS)[number];
 
 export type ReadyWearShirtColor = ShirtColorOption["label"];
 export type ReadyWearHoodieColor = HoodieColorOption["label"];
-/** Cualquier color fotografiado de una prenda lista (playera o sudadera). */
+/** Cualquier color fotografiado de una prenda lista. */
 export type ReadyWearColor = ReadyWearShirtColor | ReadyWearHoodieColor | CapColorOption["label"];
 export type ReadyWearColorSlug = ShirtColorOption["slug"] | HoodieColorOption["slug"] | CapColorOption["slug"];
 
@@ -153,7 +155,7 @@ export function isReadyWearCapHandle(handle: string): boolean {
   return garmentOf(handle)?.spec === CAPS;
 }
 
-/** Playera o sudadera lista: ficha y tarjeta con selector de color por foto. */
+/** Playera, sudadera o gorra lista con selector de color por fotografía. */
 export function isReadyWearGarmentHandle(handle: string): boolean {
   return garmentOf(handle) !== null;
 }
