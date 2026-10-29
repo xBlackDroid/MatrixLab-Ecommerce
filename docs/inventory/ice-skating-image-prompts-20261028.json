@@ -1,0 +1,248 @@
+{
+  "tool": "ImageGen integrado",
+  "mode": "edición",
+  "colorJobs": [
+    {
+      "code": "su006",
+      "name": "IceSkating Coach",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/coach_hoodie.png",
+      "group": 0,
+      "colors": [
+        "Lila lavender #B79DD8",
+        "Negro solid black #171717",
+        "Blanco white #F6F5F2"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Coach. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Lila lavender #B79DD8; middle Negro solid black #171717; right Blanco white #F6F5F2. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Coach\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su006",
+      "name": "IceSkating Coach",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/coach_hoodie.png",
+      "group": 1,
+      "colors": [
+        "Negro jaspe black heather visibly mottled charcoal #303035",
+        "Gris jaspe light gray heather #A3A5A8",
+        "Rojo red #B92030"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Coach. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Negro jaspe black heather visibly mottled charcoal #303035; middle Gris jaspe light gray heather #A3A5A8; right Rojo red #B92030. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Coach\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su006",
+      "name": "IceSkating Coach",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/coach_hoodie.png",
+      "group": 2,
+      "colors": [
+        "Azul marino dark navy #192B4D",
+        "Azul royal vivid royal blue #2354C4",
+        "Rosa pastel soft light pink #F2BDC9"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Coach. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Azul marino dark navy #192B4D; middle Azul royal vivid royal blue #2354C4; right Rosa pastel soft light pink #F2BDC9. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Coach\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su007",
+      "name": "IceSkating Dad",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/dad_hoodie.png",
+      "group": 0,
+      "colors": [
+        "Lila lavender #B79DD8",
+        "Negro solid black #171717",
+        "Blanco white #F6F5F2"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Dad. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Lila lavender #B79DD8; middle Negro solid black #171717; right Blanco white #F6F5F2. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Dad\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su007",
+      "name": "IceSkating Dad",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/dad_hoodie.png",
+      "group": 1,
+      "colors": [
+        "Negro jaspe black heather visibly mottled charcoal #303035",
+        "Gris jaspe light gray heather #A3A5A8",
+        "Rojo red #B92030"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Dad. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Negro jaspe black heather visibly mottled charcoal #303035; middle Gris jaspe light gray heather #A3A5A8; right Rojo red #B92030. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Dad\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su007",
+      "name": "IceSkating Dad",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/dad_hoodie.png",
+      "group": 2,
+      "colors": [
+        "Azul marino dark navy #192B4D",
+        "Azul royal vivid royal blue #2354C4",
+        "Rosa pastel soft light pink #F2BDC9"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Dad. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Azul marino dark navy #192B4D; middle Azul royal vivid royal blue #2354C4; right Rosa pastel soft light pink #F2BDC9. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Dad\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su008",
+      "name": "IceSkating",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/ice_hoodie.png",
+      "group": 0,
+      "colors": [
+        "Lila lavender #B79DD8",
+        "Negro solid black #171717",
+        "Blanco white #F6F5F2"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Lila lavender #B79DD8; middle Negro solid black #171717; right Blanco white #F6F5F2. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su008",
+      "name": "IceSkating",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/ice_hoodie.png",
+      "group": 1,
+      "colors": [
+        "Negro jaspe black heather visibly mottled charcoal #303035",
+        "Gris jaspe light gray heather #A3A5A8",
+        "Rojo red #B92030"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Negro jaspe black heather visibly mottled charcoal #303035; middle Gris jaspe light gray heather #A3A5A8; right Rojo red #B92030. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su008",
+      "name": "IceSkating",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/ice_hoodie.png",
+      "group": 2,
+      "colors": [
+        "Azul marino dark navy #192B4D",
+        "Azul royal vivid royal blue #2354C4",
+        "Rosa pastel soft light pink #F2BDC9"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Azul marino dark navy #192B4D; middle Azul royal vivid royal blue #2354C4; right Rosa pastel soft light pink #F2BDC9. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su009",
+      "name": "IceSkating Mom",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/mom_hoodie.png",
+      "group": 0,
+      "colors": [
+        "Lila lavender #B79DD8",
+        "Negro solid black #171717",
+        "Blanco white #F6F5F2"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Mom. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Lila lavender #B79DD8; middle Negro solid black #171717; right Blanco white #F6F5F2. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Mom\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su009",
+      "name": "IceSkating Mom",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/mom_hoodie.png",
+      "group": 1,
+      "colors": [
+        "Negro jaspe black heather visibly mottled charcoal #303035",
+        "Gris jaspe light gray heather #A3A5A8",
+        "Rojo red #B92030"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Mom. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Negro jaspe black heather visibly mottled charcoal #303035; middle Gris jaspe light gray heather #A3A5A8; right Rojo red #B92030. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Mom\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    },
+    {
+      "code": "su009",
+      "name": "IceSkating Mom",
+      "file": "C:/Dev/MatrixLab-Ecommerce/tmp/ice-skating-release-20261028/source/exports/editorial-master/mom_hoodie.png",
+      "group": 2,
+      "colors": [
+        "Azul marino dark navy #192B4D",
+        "Azul royal vivid royal blue #2354C4",
+        "Rosa pastel soft light pink #F2BDC9"
+      ],
+      "prompt": "EDIT TARGET: the supplied rear-view hoodie product photograph IceSkating Mom. Create ONE WIDE HORIZONTAL 3:1 triptych with EXACTLY THREE EQUAL SQUARE PANELS, side by side, no gaps, borders, labels, added text or extra objects. Left hoodie fabric Azul marino dark navy #192B4D; middle Azul royal vivid royal blue #2354C4; right Rosa pastel soft light pink #F2BDC9. In each panel preserve the exact same original model, rear view, high hair bun, pose, complete sleeves and cuffs, hem, hood shape, garment silhouette, proportions and dark cyan/magenta studio background. Change ONLY the hoodie fabric color and monochrome ink contrast. CRITICAL preserve the entire original industrial label print EXACTLY: headline \"IceSkating Mom\" with exact source capitalization, all smaller lettering, secondary headline, microtext, percentage, energy bars, barcode, recycle mark, five square icons, horizontal rules, spacing, geometry, proportions, and location on the back. Keep ink light cream on dark fabric and dark charcoal on pale fabric, no design changes or new text. Preserve washed cotton/fleece texture, seam folds and natural shading. Main illumination must stay neutral enough to show truthful fabric colors. Black heather and gray heather must visibly have a mottled textile texture, unlike solid black; navy is distinctly darker than royal blue. Each equal square panel contains the full original hoodie, centered, with all hood, sleeves and hem visible. Exact 3:1 atlas ideally 2400x800 or 3072x1024, three square catalog photos that will be split into standalone ecommerce images. Do not output a square grid or compress the hoodie proportions."
+    }
+  ],
+  "backgroundJobs": [
+    {
+      "code": "su006",
+      "name": "IceSkating Coach",
+      "group": 0,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-aaaa0654-3863-4e3f-8893-df8c469a3ef1.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-60e395aa-6a77-4596-8a60-765308d522ad.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating Coach three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating Coach\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su006",
+      "name": "IceSkating Coach",
+      "group": 1,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-438c88f6-a399-4460-8238-936e2ef15474.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-b6ea2495-071d-4ca1-8a00-56c38deefc8d.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating Coach three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating Coach\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su006",
+      "name": "IceSkating Coach",
+      "group": 2,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-80e65073-43f9-45bb-bf8f-5a6bca2e61eb.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-be59b36f-9006-46e4-8fdb-4de257fafc79.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating Coach three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating Coach\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su007",
+      "name": "IceSkating Dad",
+      "group": 0,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-02dd69d4-324f-4c14-8231-dce687a40cc1.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-75b52ad5-e10b-41e4-9951-3b8062630913.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating Dad three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating Dad\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su007",
+      "name": "IceSkating Dad",
+      "group": 1,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-e6decbe3-86e0-4c33-9260-ba4dacefcc61.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-8ce517ed-5ff6-4296-93cd-38fd29568bf3.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating Dad three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating Dad\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su007",
+      "name": "IceSkating Dad",
+      "group": 2,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-fd31f732-7788-4e4d-bcb4-d99d1e51c3a9.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-c50ad770-f353-4232-9a99-b5030c08d838.png",
+      "prompt": "BACKGROUND-ONLY EDIT of supplied IceSkating Dad 3:1 triptych. Keep the same three equal square panels, exact order, complete identical model and garment framing. Change ONLY the background to a realistic indoor ICE-SKATING RINK with bright white ice, distant rink boards, subtle red/blue line and softly blurred stands/roof, clean neutral sports arena light. The foreground woman, pose, hair, hands, hoodie silhouette, cuffs/hem, fabric COLOR and texture, all printed typography, headline \"IceSkating Dad\", tiny text, icons, barcode, recycle mark, rules, ink color, layout and proportions must stay EXACTLY the same as in each original panel. Do not recolor or redesign any part of the hoodie. Preserve all three already-generated color variants exactly. Show the model with her back to camera in the rink area with white ice around her, same waist-up crop, no skates or new props. Remove neon studio fixtures from background. No extra people, logos, text, borders or labels. Exact 3:1 high-resolution output ideally 2400x800 or 3072x1024, three full square ecommerce photos. This is only a scene/background replacement for already-approved product color photos."
+    },
+    {
+      "code": "su008",
+      "name": "IceSkating",
+      "group": 0,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-96274729-1234-41a1-ac85-3904d8f2bd57.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-dc1915e6-49a5-4964-9d5a-ceb8993f593c.png",
+      "prompt": "BACKGROUND-ONLY EDIT of supplied IceSkating 3:1 triptych. Keep the same three equal square panels, exact order, complete identical model and garment framing. Change ONLY the background to a realistic indoor ICE-SKATING RINK with bright white ice, distant rink boards, subtle red/blue line and softly blurred stands/roof, clean neutral sports arena light. The foreground woman, pose, hair, hands, hoodie silhouette, cuffs/hem, fabric COLOR and texture, all printed typography, headline \"IceSkating\", tiny text, icons, barcode, recycle mark, rules, ink color, layout and proportions must stay EXACTLY the same as in each original panel. Do not recolor or redesign any part of the hoodie. Preserve all three already-generated color variants exactly. Show the model with her back to camera in the rink area with white ice around her, same waist-up crop, no skates or new props. Remove neon studio fixtures from background. No extra people, logos, text, borders or labels. Exact 3:1 high-resolution output ideally 2400x800 or 3072x1024, three full square ecommerce photos. This is only a scene/background replacement for already-approved product color photos."
+    },
+    {
+      "code": "su008",
+      "name": "IceSkating",
+      "group": 1,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-c4353f67-9de2-4ad6-8c35-f935e2e963a7.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-11cf0420-bafd-4420-a080-37625755d624.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su008",
+      "name": "IceSkating",
+      "group": 2,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-d27a6047-9063-45a7-bd08-03b3fc1d4c2d.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-734716da-e226-4c56-8540-56967aecb219.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su009",
+      "name": "IceSkating Mom",
+      "group": 0,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-eda43138-7354-472a-b5b8-eb18fd045b11.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-ccf4e33a-0d66-463b-9dd9-da0fdadcf4f7.png",
+      "prompt": "BACKGROUND-ONLY EDIT of the supplied IceSkating Mom three-panel product atlas. Preserve the exact horizontal 3:1 canvas and all THREE equal SQUARE panels in the same order. In EACH panel, KEEP THE FOREGROUND MODEL AND HOODIE EXACTLY AS GENERATED: unchanged pose, hair, hands, hood, cuffs, hem, proportions, fabric color, heather texture, folds, print ink color, entire original \"IceSkating Mom\" headline, small text, icons, rules, barcode and artwork positioning. Do not recolor, redesign, relabel, retouch the print, or change the garment size. ONLY REPLACE the dark neon studio BACKGROUND with a realistic indoor ICE-SKATING RINK: clearly visible white ice surface around/behind the waist-up model, distant rink boards, a subtle red/blue rink line and softly blurred arena stands/roof. Bright clean neutral rink illumination, pale cool sporting atmosphere. The model is standing with her back to camera in the rink area, keeping the same original crop; no new skates, people, logos or text. Each panel repeats the same rink perspective, shallow depth of field and framing, so the garment remains the focus. Remove cyan/magenta studio fixtures from background. Preserve existing colors and foreground print exactly; this edit is only to situate the already-generated product photos inside a skating rink. No panel labels or borders. Output exact 3:1 high-resolution atlas, ideally 2400x800 or 3072x1024, three square photos."
+    },
+    {
+      "code": "su009",
+      "name": "IceSkating Mom",
+      "group": 1,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-654862ae-9e88-40d7-85ee-0fd86a5aee7c.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-c0b07f58-abea-4ff6-89ac-1c68df6392e9.png",
+      "prompt": "BACKGROUND-ONLY EDIT of supplied IceSkating Mom 3:1 triptych. Keep the same three equal square panels, exact order, complete identical model and garment framing. Change ONLY the background to a realistic indoor ICE-SKATING RINK with bright white ice, distant rink boards, subtle red/blue line and softly blurred stands/roof, clean neutral sports arena light. The foreground woman, pose, hair, hands, hoodie silhouette, cuffs/hem, fabric COLOR and texture, all printed typography, headline \"IceSkating Mom\", tiny text, icons, barcode, recycle mark, rules, ink color, layout and proportions must stay EXACTLY the same as in each original panel. Do not recolor or redesign any part of the hoodie. Preserve all three already-generated color variants exactly. Show the model with her back to camera in the rink area with white ice around her, same waist-up crop, no skates or new props. Remove neon studio fixtures from background. No extra people, logos, text, borders or labels. Exact 3:1 high-resolution output ideally 2400x800 or 3072x1024, three full square ecommerce photos. This is only a scene/background replacement for already-approved product color photos."
+    },
+    {
+      "code": "su009",
+      "name": "IceSkating Mom",
+      "group": 2,
+      "input": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-ddf81f02-86bd-4a54-9d24-64cbfbb934ae.png",
+      "output": "C:\\Users\\casta\\.codex\\generated_images\\01a17e96-b803-7253-b681-04e7805abc8a\\exec-39ab182d-b7ae-4944-ab84-ab35b147251a.png",
+      "prompt": "BACKGROUND-ONLY EDIT of supplied IceSkating Mom 3:1 triptych. Keep the same three equal square panels, exact order, complete identical model and garment framing. Change ONLY the background to a realistic indoor ICE-SKATING RINK with bright white ice, distant rink boards, subtle red/blue line and softly blurred stands/roof, clean neutral sports arena light. The foreground woman, pose, hair, hands, hoodie silhouette, cuffs/hem, fabric COLOR and texture, all printed typography, headline \"IceSkating Mom\", tiny text, icons, barcode, recycle mark, rules, ink color, layout and proportions must stay EXACTLY the same as in each original panel. Do not recolor or redesign any part of the hoodie. Preserve all three already-generated color variants exactly. Show the model with her back to camera in the rink area with white ice around her, same waist-up crop, no skates or new props. Remove neon studio fixtures from background. No extra people, logos, text, borders or labels. Exact 3:1 high-resolution output ideally 2400x800 or 3072x1024, three full square ecommerce photos. This is only a scene/background replacement for already-approved product color photos."
+    }
+  ]
+}

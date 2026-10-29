@@ -39,6 +39,7 @@ export const READY_WEAR_COLLECTIONS = [
   { id: "totes", label: "Totes", handle: "wear-totes", type: "totes" },
   { id: "sudaderas", label: "Sudaderas", handle: "wear-sudaderas", type: "sudaderas" },
   { id: "gorras", label: "Gorras", handle: "gorras", type: "gorras" },
+  { id: "ice-skating", label: "IceSkating", handle: "wear-sudaderas", type: "sudaderas" },
 ] as const satisfies readonly {
   id: string;
   label: string;

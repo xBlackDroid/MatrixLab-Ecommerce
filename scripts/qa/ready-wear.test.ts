@@ -164,7 +164,7 @@ async function main() {
     [...SHIRTS, ...HOODIES].every(colors.isReadyWearGarmentHandle) &&
       ![
         "wear-sudadera-su000",
-        "wear-sudadera-su006",
+        "wear-sudadera-su010",
         "wear-sudadera-su01",
         TOTE,
         "sudadera-personalizada",
@@ -374,9 +374,9 @@ async function main() {
       wear.readyWearCollectionsFor(products, "gorras").length === 0,
   );
   check(
-    "sin tipo se conservan las colecciones previas y se agregan Sudaderas y Gorras",
+    "sin tipo se conservan las colecciones existentes y se agrega IceSkating",
     same(wear.readyWearCollectionsFor(products, null).map((c) => c.id), [
-      "call-of-duty", "friends", "gta", "kpop", "music-rock", "resident-evil", "toluca", "totes", "sudaderas", "gorras",
+      "call-of-duty", "friends", "gta", "kpop", "music-rock", "resident-evil", "toluca", "totes", "sudaderas", "gorras", "ice-skating",
     ]) && wear.READY_WEAR_COLLECTIONS.some((c) => c.id === "sudaderas" && c.handle === "wear-sudaderas"),
   );
   const fromUrl = wear.parseReadyWearFilters({ tipo: "sudaderas", coleccion: "toluca", q: "  Architect  " });

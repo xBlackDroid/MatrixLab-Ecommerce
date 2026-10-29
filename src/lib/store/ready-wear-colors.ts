@@ -3,7 +3,7 @@
  *
  *   * playeras `wear-lista-wr001` … `wr034`: Blanca, Negra o Gris (Negra por
  *     defecto). Fotos en /public/images/matrixlab-wear/colors/.
- *   * sudaderas adulto `wear-sudadera-su001` … `su005`: nueve colores (Lila
+ *   * sudaderas adulto `wear-sudadera-su001` … `su009`: nueve colores (Lila
  *     por defecto). Fotos en /public/images/matrixlab-wear/hoodies/.
  *   * gorras `wear-gorra-go001` … `go006`: cuatro colores (Rosa por defecto).
  *     Fotos en /public/images/matrixlab-wear/gorras/colors/.
@@ -99,7 +99,7 @@ const HOODIES: GarmentSpec = {
   pattern: /^wear-sudadera-su(\d{3})$/,
   prefix: "su",
   first: 1,
-  last: 5,
+  last: 9,
   colors: READY_WEAR_HOODIE_COLORS,
   defaultColor: DEFAULT_READY_WEAR_HOODIE_COLOR,
   dir: "/images/matrixlab-wear/hoodies",
@@ -146,7 +146,7 @@ export function isReadyWearShirtHandle(handle: string): boolean {
   return garmentOf(handle)?.spec === SHIRTS;
 }
 
-/** SÓLO sudaderas adulto (`wear-sudadera-su001` … `su005`). */
+/** SÓLO sudaderas adulto (`wear-sudadera-su001` … `su009`). */
 export function isReadyWearHoodieHandle(handle: string): boolean {
   return garmentOf(handle)?.spec === HOODIES;
 }
