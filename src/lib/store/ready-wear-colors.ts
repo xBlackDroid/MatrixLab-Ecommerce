@@ -34,14 +34,22 @@ export const READY_WEAR_HOODIE_COLORS = [
   { label: "Rosa pastel", slug: "rosa-pastel" },
 ] as const;
 
+export const READY_WEAR_CAP_COLORS = [
+  { label: "Rosa", slug: "rosa" },
+  { label: "Negro", slug: "negro" },
+  { label: "Blanco", slug: "blanco" },
+  { label: "Rosa pastel", slug: "rosa-pastel" },
+] as const;
+
 type ShirtColorOption = (typeof READY_WEAR_COLORS)[number];
 type HoodieColorOption = (typeof READY_WEAR_HOODIE_COLORS)[number];
+type CapColorOption = (typeof READY_WEAR_CAP_COLORS)[number];
 
 export type ReadyWearShirtColor = ShirtColorOption["label"];
 export type ReadyWearHoodieColor = HoodieColorOption["label"];
 /** Cualquier color fotografiado de una prenda lista (playera o sudadera). */
-export type ReadyWearColor = ReadyWearShirtColor | ReadyWearHoodieColor;
-export type ReadyWearColorSlug = ShirtColorOption["slug"] | HoodieColorOption["slug"];
+export type ReadyWearColor = ReadyWearShirtColor | ReadyWearHoodieColor | CapColorOption["label"];
+export type ReadyWearColorSlug = ShirtColorOption["slug"] | HoodieColorOption["slug"] | CapColorOption["slug"];
 
 export interface ReadyWearColorOption {
   readonly label: ReadyWearColor;
@@ -53,7 +61,7 @@ export const DEFAULT_READY_WEAR_COLOR: ReadyWearShirtColor = "Negra";
 export const DEFAULT_READY_WEAR_HOODIE_COLOR: ReadyWearHoodieColor = "Lila";
 
 /** Prenda lista con foto por color. El valor sirve tal cual en los textos. */
-export type ReadyWearGarment = "playera" | "sudadera";
+export type ReadyWearGarment = "playera" | "sudadera" | "gorra";
 
 interface GarmentSpec {
   garment: ReadyWearGarment;
@@ -98,11 +106,25 @@ const HOODIES: GarmentSpec = {
   photoView: "vista de espalda",
 };
 
-const GARMENTS: readonly GarmentSpec[] = [SHIRTS, HOODIES];
+const CAPS: GarmentSpec = {
+  garment: "gorra",
+  pattern: /^wear-gorra-go(\d{3})$/,
+  prefix: "go",
+  first: 1,
+  last: 6,
+  colors: READY_WEAR_CAP_COLORS,
+  defaultColor: "Rosa",
+  dir: "/images/matrixlab-wear/gorras/colors",
+  withSecondaryPhoto: new Set(),
+  photoView: "vista frontal",
+};
+
+const GARMENTS: readonly GarmentSpec[] = [SHIRTS, HOODIES, CAPS];
 
 const ALL_COLORS: readonly ReadyWearColorOption[] = [
   ...READY_WEAR_COLORS,
   ...READY_WEAR_HOODIE_COLORS,
+  ...READY_WEAR_CAP_COLORS,
 ];
 
 /** Prenda y código (`wr005`, `su001`) del handle; null si no es una soportada. */
@@ -125,6 +147,10 @@ export function isReadyWearShirtHandle(handle: string): boolean {
 /** SÓLO sudaderas adulto (`wear-sudadera-su001` … `su005`). */
 export function isReadyWearHoodieHandle(handle: string): boolean {
   return garmentOf(handle)?.spec === HOODIES;
+}
+
+export function isReadyWearCapHandle(handle: string): boolean {
+  return garmentOf(handle)?.spec === CAPS;
 }
 
 /** Playera o sudadera lista: ficha y tarjeta con selector de color por foto. */

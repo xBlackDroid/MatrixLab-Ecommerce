@@ -11,6 +11,7 @@ import {
   getReadyWearColors,
   readyWearColorImage,
   readyWearProductHref,
+  readyWearGarmentOf,
   type ReadyWearColor,
 } from "@/lib/store/ready-wear-colors";
 import InventoryBadge, {
@@ -51,7 +52,7 @@ export default function ReadyWearProductCard({
         href={href}
         tabIndex={-1}
         aria-hidden
-        className="relative block aspect-square w-full overflow-hidden"
+        className={cn("relative block w-full overflow-hidden", readyWearGarmentOf(product.handle) === "gorra" ? "aspect-[3/4]" : "aspect-square")}
       >
         {image ? (
           <Image

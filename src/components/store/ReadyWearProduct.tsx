@@ -37,14 +37,14 @@ function findVariant(
   color: ReadyWearColor,
   size: Size,
   cut: Cut,
+  colorOnly = false,
 ): ProductVariantRow | null {
   return (
     variants.find(
       (v) =>
         v.status !== "oculto" &&
         same(v.color, color) &&
-        same(v.size, size) &&
-        same(v.option_label, cut),
+        (colorOnly || (same(v.size, size) && same(v.option_label, cut))),
     ) ?? null
   );
 }
@@ -88,8 +88,8 @@ export default function ReadyWearProduct({
   const shownImage = images[Math.min(activeImage, images.length - 1)];
 
   const selectedVariant = useMemo(
-    () => findVariant(variants, color, size, cut),
-    [variants, color, size, cut],
+    () => findVariant(variants, color, size, cut, garment === "gorra"),
+    [variants, color, size, cut, garment],
   );
 
   const unitPrice =
@@ -158,13 +158,13 @@ export default function ReadyWearProduct({
     return !vOnDemand && v.stock <= 0;
   }
 
-  const choiceLabel = `${cut} / ${size} / ${color}`;
+  const choiceLabel = garment === "gorra" ? color : `${cut} / ${size} / ${color}`;
   const whatsappText = `${whatsappMessages.product(product.title)} — ${choiceLabel}`;
 
   return (
     <div className="mt-8 grid gap-10 lg:grid-cols-2">
       <div className="flex min-w-0 flex-col gap-3">
-        <div className="glass relative aspect-square w-full overflow-hidden rounded-2xl">
+        <div className={cn("glass relative w-full overflow-hidden rounded-2xl", garment === "gorra" ? "aspect-[3/4]" : "aspect-square")}>
           {shownImage ? (
             <Image
               key={shownImage}
@@ -299,7 +299,7 @@ export default function ReadyWearProduct({
             </div>
           </fieldset>
 
-          <OptionGroup
+          {garment !== "gorra" && <><OptionGroup
             legend="Corte"
             name={`corte-${product.id}`}
             options={CUTS}
@@ -315,6 +315,7 @@ export default function ReadyWearProduct({
             onChange={setSize}
             isUnavailable={sizeUnavailable}
           />
+          </>}
 
           <div className="flex flex-wrap items-center gap-4">
             <p id={`cantidad-${product.id}`} className="text-sm font-medium text-ml-white/70">

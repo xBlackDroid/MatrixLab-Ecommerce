@@ -374,9 +374,9 @@ async function main() {
       wear.readyWearCollectionsFor(products, "gorras").length === 0,
   );
   check(
-    "sin tipo se ofrecen las 8 colecciones previas + Sudaderas",
+    "sin tipo se conservan las colecciones previas y se agregan Sudaderas y Gorras",
     same(wear.readyWearCollectionsFor(products, null).map((c) => c.id), [
-      "call-of-duty", "friends", "gta", "kpop", "music-rock", "resident-evil", "toluca", "totes", "sudaderas",
+      "call-of-duty", "friends", "gta", "kpop", "music-rock", "resident-evil", "toluca", "totes", "sudaderas", "gorras",
     ]) && wear.READY_WEAR_COLLECTIONS.some((c) => c.id === "sudaderas" && c.handle === "wear-sudaderas"),
   );
   const fromUrl = wear.parseReadyWearFilters({ tipo: "sudaderas", coleccion: "toluca", q: "  Architect  " });
