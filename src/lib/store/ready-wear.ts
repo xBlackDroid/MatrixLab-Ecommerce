@@ -16,10 +16,10 @@ import {
 
 /** Tipos de prenda, en el orden del filtro (`?tipo=`). */
 export const READY_WEAR_TYPES = [
-  { id: "playeras", label: "Playeras", designerHref: "/tienda/disenador/playera" },
   { id: "sudaderas", label: "Sudaderas", designerHref: "/tienda/disenador/sudadera" },
-  { id: "totes", label: "Totes", designerHref: "/tienda/disenador/tote" },
   { id: "gorras", label: "Gorras", designerHref: "/tienda/disenador/gorra" },
+  { id: "totes", label: "Totes", designerHref: "/tienda/disenador/tote" },
+  { id: "playeras", label: "Playeras", designerHref: "/tienda/disenador/playera" },
 ] as const;
 
 export type ReadyWearType = (typeof READY_WEAR_TYPES)[number]["id"];

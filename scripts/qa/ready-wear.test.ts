@@ -272,8 +272,8 @@ async function main() {
       wear.parseReadyWearType(undefined) === null,
   );
   check(
-    "filtro: Todos los tipos + Playeras, Sudaderas, Totes, Gorras",
-    same(wear.READY_WEAR_TYPES.map((t) => t.label), ["Playeras", "Sudaderas", "Totes", "Gorras"]),
+    "filtro: Todos los tipos + Sudaderas, Gorras, Totes, Playeras",
+    same(wear.READY_WEAR_TYPES.map((t) => t.label), ["Sudaderas", "Gorras", "Totes", "Playeras"]),
   );
 
   // -------------------------------------------------------------------------
@@ -363,7 +363,7 @@ async function main() {
   check("tipo Gorras sin gorras con foto → vacío honesto (0)", run({ type: "gorras" }).length === 0 && wear.countReadyWearTypes(products).gorras === 0);
   check(
     "conteos por tipo",
-    same(wear.countReadyWearTypes(products), { playeras: 3, sudaderas: 5, totes: 1, gorras: 0 }),
+    same(Object.entries(wear.countReadyWearTypes(products)).sort(), Object.entries({ playeras: 3, sudaderas: 5, totes: 1, gorras: 0 }).sort()),
   );
   check("búsqueda sin acentos y por nombre", same(run({ query: "campeon" }), ["wear-lista-wr001"]) && same(run({ query: "  dance " }), ["wear-sudadera-su003"]));
   check("búsqueda + tipo se combinan", same(run({ type: "playeras", query: "toluca" }), ["wear-lista-wr001", "wear-lista-wr002"]) && run({ type: "sudaderas", query: "toluca" }).length === 0);

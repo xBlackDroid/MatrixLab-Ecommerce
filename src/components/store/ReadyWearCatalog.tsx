@@ -41,10 +41,14 @@ export default function ReadyWearCatalog({
   const [filters, setFilters] = useState(() =>
     normalizeReadyWearFilters(products, initialFilters),
   );
-  const visible = useMemo(
-    () => filterReadyWearListings(products, filters),
-    [products, filters],
-  );
+  const visible = useMemo(() => {
+    const priority = new Map<string, number>(READY_WEAR_TYPES.map((type, index) => [type.id, index]));
+    // La prioridad comercial agrupa tipos y conserva el orden dentro de cada uno.
+    return filterReadyWearListings(products, filters).sort((a, b) =>
+      (priority.get(a.readyWearType ?? "") ?? priority.size) -
+      (priority.get(b.readyWearType ?? "") ?? priority.size),
+    );
+  }, [products, filters]);
   const collections = useMemo(
     () => readyWearCollectionsFor(products, filters.type),
     [products, filters.type],
