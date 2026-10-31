@@ -1,0 +1,286 @@
+{
+  "date": "2026-10-31",
+  "sources": [
+    "IMG_4879.HEIC",
+    "IMG_4880.HEIC",
+    "IMG_4881.HEIC"
+  ],
+  "items": [
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000001",
+      "name": "UV DTF 16 oz",
+      "sku": "UV-16OZ",
+      "category": "UV DTF",
+      "quantity": 166,
+      "priceCents": 6500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000002",
+      "name": "UV DTF 24 oz",
+      "sku": "UV-24OZ",
+      "category": "UV DTF",
+      "quantity": 3,
+      "priceCents": 8500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000003",
+      "name": "UV DTF mini",
+      "sku": "UV-MINI",
+      "category": "UV DTF",
+      "quantity": 17,
+      "priceCents": 4500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000004",
+      "name": "UV DTF glitter",
+      "sku": "UV-GLITTER",
+      "category": "UV DTF",
+      "quantity": 8,
+      "priceCents": 8500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000005",
+      "name": "UV DTF holográfico",
+      "sku": "UV-HOLO",
+      "category": "UV DTF",
+      "quantity": 2,
+      "priceCents": 9500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000006",
+      "name": "Lápiz 3D",
+      "sku": "LAPIZ-3D",
+      "category": "3D",
+      "quantity": null,
+      "priceCents": 8000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000007",
+      "name": "Tarjeta lunch",
+      "sku": "TARJETA-LUNCH",
+      "category": "Accesorios",
+      "quantity": null,
+      "priceCents": 28000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000008",
+      "name": "Vaso Pooh",
+      "sku": "VASO-POOH",
+      "category": "Vasos",
+      "quantity": null,
+      "priceCents": 35000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000009",
+      "name": "Vaso Up",
+      "sku": "VASO-UP",
+      "category": "Vasos",
+      "quantity": null,
+      "priceCents": 38000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000010",
+      "name": "Vaso fantasma sencillo",
+      "sku": "VASO-FANTASMA",
+      "category": "Vasos",
+      "quantity": null,
+      "priceCents": 38000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000011",
+      "name": "Vaso fantasma brillo",
+      "sku": "VASO-FANTASMA-BRILLO",
+      "category": "Vasos",
+      "quantity": null,
+      "priceCents": 46000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000012",
+      "name": "Vaso Joy Snow",
+      "sku": "VASO-JOY-SNOW",
+      "category": "Vasos",
+      "quantity": null,
+      "priceCents": 79000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000013",
+      "name": "Vaso Navidad",
+      "sku": "VASO-NAVIDAD",
+      "category": "Vasos",
+      "quantity": null,
+      "priceCents": 138000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000014",
+      "name": "Imán Felicidades",
+      "sku": "IMAN-FELICIDADES",
+      "category": "Imanes",
+      "quantity": 2,
+      "priceCents": 48500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000015",
+      "name": "Imán Feliz cumpleaños",
+      "sku": "IMAN-CUMPLE",
+      "category": "Imanes",
+      "quantity": 0,
+      "priceCents": 65000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000016",
+      "name": "Imán Mickey",
+      "sku": "IMAN-MICKEY",
+      "category": "Imanes",
+      "quantity": 2,
+      "priceCents": 19000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000017",
+      "name": "Imán Kitty",
+      "sku": "IMAN-KITTY",
+      "category": "Imanes",
+      "quantity": 1,
+      "priceCents": 22500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000018",
+      "name": "Imán Soy el graduado",
+      "sku": "IMAN-GRADUADO",
+      "category": "Imanes",
+      "quantity": 3,
+      "priceCents": 21500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000019",
+      "name": "Imán Kinder graduación",
+      "sku": "IMAN-KINDER",
+      "category": "Imanes",
+      "quantity": 2,
+      "priceCents": 20000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000020",
+      "name": "Imán Cinnamoroll",
+      "sku": "IMAN-CINNAMOROLL",
+      "category": "Imanes",
+      "quantity": 1,
+      "priceCents": 15000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000021",
+      "name": "Caja jardín chica",
+      "sku": "CAJA-JARDIN-CH",
+      "category": "Accesorios",
+      "quantity": 2,
+      "priceCents": 11000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000022",
+      "name": "Caja jardín grande",
+      "sku": "CAJA-JARDIN-G",
+      "category": "Accesorios",
+      "quantity": 2,
+      "priceCents": 13000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000023",
+      "name": "Letras 3D",
+      "sku": "LETRAS-3D",
+      "category": "3D",
+      "quantity": null,
+      "priceCents": 1000,
+      "bundle": {
+        "quantity": 6,
+        "totalCents": 5000
+      }
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000024",
+      "name": "Pines",
+      "sku": "PINES",
+      "category": "Accesorios",
+      "quantity": null,
+      "priceCents": 5000,
+      "bundle": {
+        "quantity": 3,
+        "totalCents": 12000
+      }
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000025",
+      "name": "Dragón con lámpara",
+      "sku": "DRAGON-LAMPARA",
+      "category": "3D",
+      "quantity": null,
+      "priceCents": 110000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000026",
+      "name": "Sticker mate",
+      "sku": "STICKER-MATE",
+      "category": "Stickers",
+      "quantity": null,
+      "priceCents": 500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000027",
+      "name": "Sticker holográfico",
+      "sku": "STICKER-HOLO",
+      "category": "Stickers",
+      "quantity": null,
+      "priceCents": 1000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000028",
+      "name": "Calabaza 3D",
+      "sku": "CALABAZA-3D",
+      "category": "3D",
+      "quantity": null,
+      "priceCents": 5000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000029",
+      "name": "Calavera 3D",
+      "sku": "CALAVERA-3D",
+      "category": "3D",
+      "quantity": null,
+      "priceCents": 8000,
+      "bundle": {
+        "quantity": 3,
+        "totalCents": 20000
+      }
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000030",
+      "name": "Termo gym 900 ml",
+      "sku": "TERMO-GYM-900",
+      "category": "Termos",
+      "quantity": null,
+      "priceCents": 20000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000031",
+      "name": "Termo para agua",
+      "sku": "TERMO-AGUA",
+      "category": "Termos",
+      "quantity": null,
+      "priceCents": 18000
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000032",
+      "name": "Termo tipo Stanley",
+      "sku": "TERMO-STANLEY",
+      "category": "Termos",
+      "quantity": null,
+      "priceCents": 22500
+    },
+    {
+      "id": "ba2a2026-1031-4000-8000-000000000033",
+      "name": "Portavasos calabaza",
+      "sku": "PORTAVASOS-CALABAZA",
+      "category": "Accesorios",
+      "quantity": null,
+      "priceCents": 30000
+    }
+  ]
+}
