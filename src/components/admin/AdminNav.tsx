@@ -11,6 +11,7 @@ import {
   Package,
   Palette,
   ShoppingCart,
+  Store,
   Tags,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ type NavLink = {
 
 const LINKS: NavLink[] = [
   { href: "/admin", label: "Resumen", icon: LayoutDashboard },
+  { href: "/admin/bazar", label: "Bazar", icon: Store },
   { href: "/admin/cotizador", label: "Cotizador", icon: Calculator, document: true },
   { href: "/admin/productos", label: "Productos", icon: Package },
   { href: "/admin/categorias", label: "Categorías", icon: Tags },
