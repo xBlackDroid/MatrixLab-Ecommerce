@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { isCatalogImageNavigation, isCatalogImageUrl } from "./lib/store/catalog-media-protection";
 
 /**
  * Content-Security-Policy por petición.
@@ -182,6 +183,22 @@ export function normalizePath(pathname: string): string {
 }
 
 export function middleware(request: NextRequest) {
+  // Fetch Metadata distinguishes opening a photo as a document from embedding
+  // it in the catalog. Headers can be forged: this is not an authorization gate.
+  if (isCatalogImageNavigation(request.url, request.headers)) {
+    return new NextResponse("Esta imagen sólo se muestra dentro del catálogo de MatrixLab.", {
+      status: 403,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "Vary": "Sec-Fetch-Dest, Sec-Fetch-Mode",
+      },
+    });
+  }
+  if (isCatalogImageUrl(request.url)) return NextResponse.next();
+
   const isDev = process.env.NODE_ENV === "development";
   const path = normalizePath(request.nextUrl.pathname);
 
@@ -212,11 +229,13 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Photo requests also pass through the browser navigation deterrent.
+    "/images/:path*",
+    "/_next/image",
     /**
-     * Documentos y rutas de API. Se excluyen los estáticos ya inmutables
-     * (`_next/static`, imágenes optimizadas, iconos, fuentes): no son
-     * documentos, no ejecutan scripts, y pasarlos por el middleware sólo
-     * añadiría latencia a cada asset.
+     * Documentos y rutas de API. Las dos entradas anteriores también pasan
+     * las imágenes por el control de navegación directa. Los demás recursos
+     * estáticos (scripts, iconos y fuentes) conservan su exclusión.
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|webp|gif|svg|ico|woff2?|ttf|otf|txt|xml|mp4|mov)$).*)",
   ],

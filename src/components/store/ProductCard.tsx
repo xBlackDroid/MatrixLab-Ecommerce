@@ -1,4 +1,5 @@
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
+import { imageWatermarkBrand } from "@/lib/store/image-watermark";
 import Link from "next/link";
 import type { ProductRow } from "@/lib/db/types";
 import { formatPrice } from "@/lib/utils";
@@ -9,7 +10,7 @@ import ProductImagePlaceholder from "@/components/store/ProductImagePlaceholder"
 import ReadyWearProductCard from "@/components/store/ReadyWearProductCard";
 import { isReadyWearGarmentHandle } from "@/lib/store/ready-wear-colors";
 
-export default function ProductCard({ product }: { product: ProductRow }) {
+export default function ProductCard({ product, brandContext = "" }: { product: ProductRow; brandContext?: string }) {
   // Playeras y sudaderas listas: tarjeta con selector de color por foto.
   if (isReadyWearGarmentHandle(product.handle)) {
     return <ReadyWearProductCard product={product} />;
@@ -24,7 +25,7 @@ export default function ProductCard({ product }: { product: ProductRow }) {
     >
       <div className="relative aspect-square w-full overflow-hidden">
         {image ? (
-          <Image
+          <Image brand={imageWatermarkBrand(brandContext)} brandContext={`${product.handle} ${product.tags.join(" ")}`}
             src={image}
             alt={product.title}
             fill

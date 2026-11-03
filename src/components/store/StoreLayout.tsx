@@ -132,6 +132,10 @@ export default function StoreLayout({
               WhatsApp
             </a>
           </div>
+          <p className="max-w-xl text-xs leading-relaxed text-ml-white/45">
+            Las imágenes del catálogo requieren autorización para su reproducción.{" "}
+            <a href="/ai-usage.txt" className="underline underline-offset-4 hover:text-ml-white">Uso de imágenes</a>
+          </p>
         </div>
       </footer>
     </div>

@@ -1,0 +1,82 @@
+.frame {
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+  vertical-align: middle;
+  isolation: isolate;
+  container-type: inline-size;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.fill {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.photo {
+  -webkit-user-drag: none;
+}
+
+.watermark {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42%;
+  height: 42%;
+  object-fit: contain;
+  transform: translate(-50%, -50%) rotate(-12deg);
+  opacity: var(--product-watermark-opacity, 0.24);
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.2));
+}
+
+.signature {
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
+  width: 20%;
+  height: 20%;
+  object-fit: contain;
+  opacity: 0.52;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
+}
+
+.credit {
+  position: absolute;
+  left: 5%;
+  bottom: 5%;
+  max-width: 65%;
+  color: rgb(255 255 255 / 0.8);
+  font: 500 clamp(8px, 2.5cqw, 12px) / 1.4 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px #000, 0 0 2px #000;
+}
+
+.fallback {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  color: white;
+  font: 750 clamp(12px, 9cqw, 64px) / 1.1 ui-sans-serif, system-ui, sans-serif;
+  opacity: var(--product-watermark-opacity, 0.24);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.7);
+}
+
+@container (max-width: 100px) {
+  .logo { width: 62%; height: 62%; transform: translate(-50%, -50%); }
+  .signature, .credit { display: none; }
+}

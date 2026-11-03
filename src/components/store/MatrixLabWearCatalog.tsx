@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import Link from "next/link";
 import { Search, Wand2 } from "lucide-react";
 import type { MatrixLabWearCatalogEntry } from "@/lib/store/products";
@@ -159,7 +159,7 @@ function WearCard({ entry }: { entry: MatrixLabWearCatalogEntry }) {
   return (
     <article className="glass flex flex-col overflow-hidden rounded-2xl transition hover:border-ml-violet/40">
       <div className="relative aspect-square w-full overflow-hidden">
-        <Image
+        <Image brand="wear"
           src={entry.image}
           alt={entry.title}
           fill

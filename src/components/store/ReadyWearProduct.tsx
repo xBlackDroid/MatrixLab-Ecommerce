@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import { Clock, MessageCircle, Minus, Plus } from "lucide-react";
 import type { ProductVariantRow, ProductWithVariants } from "@/lib/db/types";
 import { cn, formatPrice } from "@/lib/utils";
@@ -165,7 +165,7 @@ export default function ReadyWearProduct({
       <div className="flex min-w-0 flex-col gap-3">
         <div className={cn("glass relative w-full overflow-hidden rounded-2xl", garment === "gorra" ? "aspect-[3/4]" : "aspect-square")}>
           {shownImage ? (
-            <Image
+            <Image brand="wear"
               key={shownImage}
               src={shownImage}
               alt={`${product.title} — ${readyWearPhotoDescription(product.handle, color)}${
@@ -206,7 +206,7 @@ export default function ReadyWearProduct({
                     : "border-white/10 opacity-60 hover:opacity-100",
                 )}
               >
-                <Image
+                <Image brand="wear"
                   src={image}
                   alt=""
                   fill
@@ -274,7 +274,7 @@ export default function ReadyWearProduct({
                       )}
                     >
                       {thumb && (
-                        <Image
+                        <Image brand="wear"
                           src={thumb}
                           alt=""
                           fill

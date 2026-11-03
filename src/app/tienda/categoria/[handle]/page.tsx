@@ -436,7 +436,7 @@ export default async function CategoryPage({
         <SparklesCatalog entries={sparkles.entries} />
       ) : (
         <div className="mt-10">
-          <ProductGrid products={products} />
+          <ProductGrid products={products} brandContext={category.handle} />
         </div>
       )}
     </div>

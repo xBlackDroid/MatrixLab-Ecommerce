@@ -176,7 +176,7 @@ function ReadyTumblerCard({ entry }: { entry: ReadyTumblerCatalogEntry }) {
       )}
     >
       <div className="relative">
-        <ProductPhotoGallery
+        <ProductPhotoGallery brand="tumbler"
           images={entry.imagePaths}
           title={entry.title}
           placeholder={READY_TUMBLER_PLACEHOLDER}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PhotoFrameArt, SparkleMark } from "@/components/icons/CourseDecor";
 import type { CourseGalleryImage } from "@/lib/store/courses/gallery";
@@ -159,7 +159,7 @@ export default function CourseGallery({
                   key={image.src}
                   className="relative aspect-[4/5] w-[84%] shrink-0 snap-start overflow-hidden rounded-[1.5rem] border border-ml-white/10 bg-ml-white/[0.03] sm:w-[58%] lg:w-[38%]"
                 >
-                  <Image
+                  <Image brand="tumbler"
                     src={image.src}
                     alt={image.alt}
                     fill

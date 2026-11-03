@@ -3,9 +3,11 @@ import ProductCard from "@/components/store/ProductCard";
 
 export default function ProductGrid({
   products,
+  brandContext,
   emptyMessage = "Aún no hay productos en esta categoría. Pregúntanos por WhatsApp: seguro podemos crearlo.",
 }: {
   products: ProductRow[];
+  brandContext?: string;
   emptyMessage?: string;
 }) {
   if (products.length === 0) {
@@ -18,7 +20,7 @@ export default function ProductGrid({
   return (
     <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product.id} product={product} brandContext={brandContext} />
       ))}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import Link from "next/link";
 import type { ProductRow } from "@/lib/db/types";
 import { cn, formatPrice } from "@/lib/utils";
@@ -55,7 +55,7 @@ export default function ReadyWearProductCard({
         className={cn("relative block w-full overflow-hidden", readyWearGarmentOf(product.handle) === "gorra" ? "aspect-[3/4]" : "aspect-square")}
       >
         {image ? (
-          <Image
+          <Image brand="wear"
             key={image}
             src={image}
             alt=""
@@ -107,7 +107,7 @@ export default function ReadyWearProductCard({
                 )}
               >
                 {thumb && (
-                  <Image
+                  <Image brand="wear"
                     src={thumb}
                     alt=""
                     fill

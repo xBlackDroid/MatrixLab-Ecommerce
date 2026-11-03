@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import Link from "next/link";
 import { Minus, Plus, Search } from "lucide-react";
 import AddToCartButton from "@/components/store/AddToCartButton";
@@ -151,7 +151,7 @@ function SparkleCard({ entry }: { entry: SparkleCatalogEntry }) {
         href={`/tienda/producto/${entry.handle}`}
         className="group relative block aspect-square w-full overflow-hidden"
       >
-        <Image
+        <Image brand="tumbler"
           src={entry.image}
           alt={entry.title}
           fill

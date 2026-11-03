@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
+import type { ImageWatermarkBrand } from "@/lib/store/image-watermark";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
 export default function ProductPhotoGallery({
   images,
   title,
+  brand,
   placeholder,
   aspectClass = "aspect-square",
   variant = "stacked",
@@ -31,6 +33,7 @@ export default function ProductPhotoGallery({
 }: {
   images: readonly string[];
   title: string;
+  brand?: ImageWatermarkBrand;
   placeholder: string;
   aspectClass?: string;
   variant?: "stacked" | "overlay";
@@ -111,7 +114,7 @@ export default function ProductPhotoGallery({
             : "bg-ml-bg/40",
         )}
       >
-        <Image
+        <Image brand={brand}
           src={photos[index]}
           alt={`${title} — foto ${index + 1} de ${photos.length}`}
           fill

@@ -83,7 +83,7 @@ export default function ReadyWearCatalog({
     </div>
 
     <p role="status" className="text-sm text-ml-white/60">{visible.length} {visible.length === 1 ? "producto disponible" : "productos disponibles"}</p>
-    {visible.length > 0 ? <ProductGrid products={visible} /> : selectedType && typeCounts[selectedType.id] === 0 ? (
+    {visible.length > 0 ? <ProductGrid products={visible} brandContext="wear" /> : selectedType && typeCounts[selectedType.id] === 0 ? (
       // Tipo sin ninguna prenda con foto (hoy, gorras): se dice tal cual.
       <div className="glass rounded-2xl p-10 text-center text-ml-white/60">
         <p>Por ahora no hay {selectedType.label.toLowerCase()} disponibles en prendas listas.</p>

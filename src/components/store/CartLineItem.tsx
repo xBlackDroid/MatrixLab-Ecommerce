@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import Link from "next/link";
 import { readyWearProductHref, readyWearVariantColor } from "@/lib/store/ready-wear-colors";
 import { Loader2, Minus, Plus, Trash2, Wand2 } from "lucide-react";
@@ -34,7 +34,7 @@ export default function CartLineItem({
     <div className="glass flex gap-4 rounded-2xl p-4">
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10">
         {image ? (
-          <Image
+          <Image brandContext={line.productHandle}
             src={image}
             alt={displayTitle}
             fill

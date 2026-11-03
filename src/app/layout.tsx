@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { IMAGE_USAGE_NOTICE } from "@/lib/store/image-watermark";
+import CatalogMediaProtection from "@/components/store/CatalogMediaProtection";
 
 export const metadata: Metadata = {
   // Dominio único de producción del proyecto combinado (landing + tienda + admin).
@@ -12,6 +14,10 @@ export const metadata: Metadata = {
   },
   description:
     "Un solo ecosistema creativo. Infinitas posibilidades. Productos personalizados, pedidos especiales y experiencias creativas desde una pieza hasta miles.",
+  other: {
+    "image-usage-policy": IMAGE_USAGE_NOTICE,
+    "ai-usage-policy": "No se autoriza copiar imágenes, quitar marcas de agua ni usar el catálogo para entrenamiento de IA. Consulta /ai-usage.txt.",
+  },
   openGraph: {
     siteName: "MatrixLab Intelligence",
     type: "website",
@@ -34,6 +40,7 @@ export default function RootLayout({
           <style>{`.reveal-motion{opacity:1!important;transform:none!important}`}</style>
         </noscript>
         {children}
+        <CatalogMediaProtection />
         <Toaster
           theme="dark"
           position="top-center"

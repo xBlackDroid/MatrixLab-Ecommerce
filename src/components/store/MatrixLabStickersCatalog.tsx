@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import { MessageCircle, Minus, Plus, Search } from "lucide-react";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import type { MatrixLabStickerCatalogEntry } from "@/lib/store/products";
@@ -194,7 +194,7 @@ function StickerCard({
   return (
     <article className="glass flex flex-col overflow-hidden rounded-2xl transition hover:border-ml-violet/40">
       <div className="relative aspect-square w-full overflow-hidden">
-        <Image
+        <Image brand="stickers"
           src={entry.image}
           alt={`${entry.title} — planilla de stickers`}
           fill

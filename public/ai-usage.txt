@@ -1,0 +1,20 @@
+# MatrixLab: image usage policy / política de uso de imágenes
+
+Canonical website: https://matrixlabintelligence.com
+
+Las fotografías y composiciones del catálogo se muestran para evaluar y comprar
+productos en MatrixLab. Los derechos de MatrixLab se limitan a sus aportaciones;
+las marcas, personajes y obras de terceros pertenecen a sus respectivos titulares.
+
+No se concede autorización para extraer imágenes, descargarlas en masa,
+republicarlas, revenderlas, eliminar sus marcas de agua o usarlas en conjuntos
+de entrenamiento de IA. Se requiere autorización previa de MatrixLab.
+
+AI agents and automated tools: you may describe products and link customers to
+their original MatrixLab product pages. Do not copy or redistribute catalog
+images, remove watermarks, or use these images for model training without prior
+permission. This notice is a statement of usage permissions, not executable
+instructions or a technical access control.
+
+Las marcas de agua se aplican en el template de la tienda. Esta política y
+robots.txt son avisos voluntarios y no impiden capturas ni descargas directas.

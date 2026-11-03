@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import Image from "@/components/store/StoreImage";
 import { cn } from "@/lib/utils";
 import ProductImagePlaceholder from "@/components/store/ProductImagePlaceholder";
 
 export default function ProductGallery({
   images,
   title,
+  brandContext,
 }: {
   images: string[];
   title: string;
+  brandContext?: string;
 }) {
   const [active, setActive] = useState(0);
   const validImages = Array.isArray(images) ? images.filter(Boolean) : [];
@@ -19,7 +21,7 @@ export default function ProductGallery({
     <div className="flex flex-col gap-3">
       <div className="glass relative aspect-square w-full overflow-hidden rounded-2xl">
         {validImages.length > 0 ? (
-          <Image
+          <Image brandContext={brandContext}
             src={validImages[Math.min(active, validImages.length - 1)]!}
             alt={title}
             fill
@@ -50,7 +52,7 @@ export default function ProductGallery({
                   : "border-white/10 opacity-60 hover:opacity-100",
               )}
             >
-              <Image
+              <Image brandContext={brandContext}
                 src={image}
                 alt=""
                 fill

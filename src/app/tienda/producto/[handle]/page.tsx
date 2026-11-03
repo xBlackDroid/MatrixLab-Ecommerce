@@ -88,7 +88,7 @@ export default async function ProductPage({
         />
       ) : (
         <div className="mt-8 grid gap-10 lg:grid-cols-2">
-          <Gallery
+          <Gallery brandContext={product.category?.handle}
             images={Array.isArray(product.images) ? product.images : []}
             title={product.title}
           />
@@ -114,7 +114,7 @@ export default async function ProductPage({
       {related.length > 0 && (
         <section className="mt-16">
           <h2 className="mb-6 text-2xl font-bold">También te puede gustar</h2>
-          <ProductGrid products={related} />
+          <ProductGrid products={related} brandContext={product.category?.handle} />
         </section>
       )}
     </div>
