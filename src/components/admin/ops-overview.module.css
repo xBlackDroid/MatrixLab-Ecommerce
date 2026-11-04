@@ -1,0 +1,13 @@
+@media (max-width: 639px) {
+  .stats > a { min-width: 0; padding: 16px; }
+  .stats :is(strong,span,p) { overflow-wrap: anywhere; }
+  .table { display: block; min-width: 0; }
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .table tbody { display: grid; gap: 12px; }
+  .table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; padding: 14px; border: 1px solid var(--ui-border); border-radius: 12px; }
+  .table td { min-width: 0; padding: 0; overflow-wrap: anywhere; font-size: 14px; }
+  .table td::before { display: block; margin-bottom: 4px; content: attr(data-label); font-size: 11px; color: var(--ui-text-muted); font-family: var(--font-sans); font-weight: 500; }
+  .table [data-label="Pedido"], .table [data-label="Cliente"] { grid-column: 1 / -1; }
+  .table [data-label="Pedido"]::before { display: none; }
+  .table [data-label="Total"] { white-space: nowrap; font-size: 18px; }
+}

@@ -70,7 +70,7 @@ export default function ShippingAddressBlock({
     const rescatadas = formatAddressLines(address);
     return (
       <div className="flex flex-col gap-3 text-sm">
-        <h3 className="text-xs font-bold uppercase text-ml-white/45">
+        <h3 className="text-xs font-bold uppercase text-ui-text-muted">
           Datos de entrega
         </h3>
         <p className="rounded-lg bg-white/5 px-3.5 py-2.5 text-ml-white/60">
@@ -79,7 +79,7 @@ export default function ShippingAddressBlock({
         </p>
         {rescatadas.length > 0 && (
           <div className="rounded-lg bg-white/5 px-3.5 py-2.5 text-ml-white/70">
-            <p className="text-xs text-ml-white/45">
+            <p className="text-xs text-ui-text-muted">
               Datos parciales encontrados en el pedido:
             </p>
             {rescatadas.map((linea) => (
@@ -117,7 +117,7 @@ export default function ShippingAddressBlock({
   return (
     <div className="flex flex-col gap-3 text-sm">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-xs font-bold uppercase text-ml-white/45">
+        <h3 className="text-xs font-bold uppercase text-ui-text-muted">
           Datos de entrega
         </h3>
         <button
@@ -135,15 +135,15 @@ export default function ShippingAddressBlock({
       </div>
 
       <p>
-        <span className="text-ml-white/50">Recibe:</span>{" "}
+        <span className="text-ui-text-muted">Recibe:</span>{" "}
         {texto(address.recipient_name) || "—"}
       </p>
       <p>
-        <span className="text-ml-white/50">WhatsApp / teléfono:</span>{" "}
+        <span className="text-ui-text-muted">WhatsApp / teléfono:</span>{" "}
         {texto(address.phone) || "—"}
       </p>
       <p>
-        <span className="text-ml-white/50">Correo:</span>{" "}
+        <span className="text-ui-text-muted">Correo:</span>{" "}
         {texto(address.email) || "—"}
       </p>
 
@@ -163,7 +163,7 @@ export default function ShippingAddressBlock({
 
       {address.references && (
         <p className="rounded-lg bg-white/5 px-3.5 py-2.5 text-ml-white/70">
-          <span className="text-ml-white/50">Referencias:</span>{" "}
+          <span className="text-ui-text-muted">Referencias:</span>{" "}
           {address.references}
         </p>
       )}

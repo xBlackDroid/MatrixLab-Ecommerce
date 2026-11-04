@@ -6,7 +6,12 @@ import { ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Modal from "@/components/ui/Modal";
+import { controlClass } from "@/components/ui/Field";
+import { statusLabel } from "@/lib/ui/status";
 import StatusBadge from "@/components/admin/StatusBadge";
+import styles from "./product-editor.module.css";
 import type {
   CategoryRow,
   ProductRow,
@@ -72,8 +77,7 @@ interface ProductEditorProps {
   onSaved: () => void;
 }
 
-const inputClass =
-  "w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-ml-white outline-none transition placeholder:text-ml-white/35 focus:border-ml-violet";
+const inputClass = controlClass;
 
 export default function ProductEditor({
   product,
@@ -195,8 +199,8 @@ export default function ProductEditor({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8">
-      <div className="glass-strong w-full max-w-2xl rounded-3xl p-6 sm:p-8">
+    <Modal title={isEdit ? "Editar producto" : "Nuevo producto"} busy={submitting} onClose={onClose}>
+      <div className={`${styles.editor} glass-strong rounded-3xl p-6 sm:p-8`}>
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold">
             {isEdit ? "Editar producto" : "Nuevo producto"}
@@ -216,14 +220,16 @@ export default function ProductEditor({
           className="flex flex-col gap-4"
           noValidate
         >
+        {Object.keys(errors).length > 0 && <div role="alert" className="mb-4 rounded-md border border-ui-danger p-3"><h3 className="font-semibold">Revisa los datos del producto</h3><ul>{Object.entries(errors).map(([key, error]) => <li id={`product-${key}-summary`} key={key}><a href={`#product-${key}`} onClick={e => { e.preventDefault(); document.getElementById(`product-${key}`)?.focus(); }}>{error?.message}</a></li>)}</ul></div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-title" className="mb-1.5 block text-sm text-ui-text-muted">
                 Título *
               </label>
               <input
                 type="text"
                 className={inputClass}
+                id="product-title" aria-invalid={errors.title ? true : undefined} aria-describedby={errors.title ? "product-title-summary" : undefined}
                 {...register("title", {
                   onChange: (event) => {
                     if (!isEdit) {
@@ -233,25 +239,25 @@ export default function ProductEditor({
                 })}
               />
               {errors.title && (
-                <p className="mt-1 text-xs text-ml-coral">{errors.title.message}</p>
+                <p id="product-title-error" className="mt-1 text-sm text-ui-danger">{errors.title.message}</p>
               )}
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-handle" className="mb-1.5 block text-sm text-ui-text-muted">
                 Handle (URL) *
               </label>
-              <input type="text" className={inputClass} {...register("handle")} />
+              <input type="text" className={inputClass} id="product-handle" aria-invalid={errors.handle ? true : undefined} aria-describedby={errors.handle ? "product-handle-summary" : undefined} {...register("handle")} />
               {errors.handle && (
-                <p className="mt-1 text-xs text-ml-coral">{errors.handle.message}</p>
+                <p id="product-handle-error" className="mt-1 text-sm text-ui-danger">{errors.handle.message}</p>
               )}
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-categoryId" className="mb-1.5 block text-sm text-ui-text-muted">
                 Categoría *
               </label>
-              <select className={inputClass} {...register("categoryId")}>
+              <select className={inputClass} id="product-categoryId" aria-invalid={errors.categoryId ? true : undefined} aria-describedby={errors.categoryId ? "product-categoryId-summary" : undefined} {...register("categoryId")}>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id} className="bg-ml-bg">
                     {category.title}
@@ -261,104 +267,102 @@ export default function ProductEditor({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-basePrice" className="mb-1.5 block text-sm text-ui-text-muted">
                 Precio base (MXN) *
               </label>
               <input
-                type="number"
-                step="0.01"
+                type="number" onWheel={event => event.currentTarget.blur()}
+                step="0.01" inputMode="decimal"
                 min="0"
                 className={inputClass}
-                {...register("basePrice")}
+                id="product-basePrice" aria-invalid={errors.basePrice ? true : undefined} aria-describedby={errors.basePrice ? "product-basePrice-summary" : undefined} {...register("basePrice")}
               />
               {errors.basePrice && (
-                <p className="mt-1 text-xs text-ml-coral">
-                  {errors.basePrice.message}
-                </p>
+                <p id="product-basePrice-error" className="mt-1 text-sm text-ui-danger">{errors.basePrice.message}</p>
               )}
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-compareAtPrice" className="mb-1.5 block text-sm text-ui-text-muted">
                 Precio de comparación
               </label>
               <input
-                type="number"
-                step="0.01"
+                type="number" onWheel={event => event.currentTarget.blur()}
+                step="0.01" inputMode="decimal"
                 min="0"
                 placeholder="Opcional"
                 className={inputClass}
-                {...register("compareAtPrice")}
+                id="product-compareAtPrice" aria-invalid={errors.compareAtPrice ? true : undefined} aria-describedby={errors.compareAtPrice ? "product-compareAtPrice-summary" : undefined} {...register("compareAtPrice")}
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-status" className="mb-1.5 block text-sm text-ui-text-muted">
                 Estado *
               </label>
-              <select className={inputClass} {...register("status")}>
+              <select className={inputClass} id="product-status" aria-invalid={errors.status ? true : undefined} aria-describedby={errors.status ? "product-status-summary" : undefined} {...register("status")}>
                 {PRODUCT_STATUSES.map((status) => (
                   <option key={status} value={status} className="bg-ml-bg">
-                    {status}
+                    {statusLabel(status)}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-productionTime" className="mb-1.5 block text-sm text-ui-text-muted">
                 Tiempo de producción
               </label>
               <input
                 type="text"
                 placeholder="Ej. 3 a 5 días hábiles"
                 className={inputClass}
-                {...register("productionTime")}
+                id="product-productionTime" aria-invalid={errors.productionTime ? true : undefined} aria-describedby={errors.productionTime ? "product-productionTime-summary" : undefined} {...register("productionTime")}
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-minQuantity" className="mb-1.5 block text-sm text-ui-text-muted">
                 Cantidad mínima
               </label>
               <input
-                type="number"
-                min="1"
+                type="number" onWheel={event => event.currentTarget.blur()}
+                min="1" inputMode="numeric"
                 max="999"
                 className={inputClass}
-                {...register("minQuantity")}
+                id="product-minQuantity" aria-invalid={errors.minQuantity ? true : undefined} aria-describedby={errors.minQuantity ? "product-minQuantity-summary" : undefined} {...register("minQuantity")}
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-maxQuantity" className="mb-1.5 block text-sm text-ui-text-muted">
                 Cantidad máxima
               </label>
               <input
-                type="number"
-                min="1"
+                type="number" onWheel={event => event.currentTarget.blur()}
+                min="1" inputMode="numeric"
                 max="999"
                 className={inputClass}
-                {...register("maxQuantity")}
+                id="product-maxQuantity" aria-invalid={errors.maxQuantity ? true : undefined} aria-describedby={errors.maxQuantity ? "product-maxQuantity-summary" : undefined} {...register("maxQuantity")}
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-description" className="mb-1.5 block text-sm text-ui-text-muted">
                 Descripción
               </label>
-              <textarea rows={4} className={inputClass} {...register("description")} />
+              <textarea rows={4} className={inputClass} id="product-description" aria-invalid={errors.description ? true : undefined} aria-describedby={errors.description ? "product-description-summary" : undefined} {...register("description")} />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-sm text-ml-white/70">
+              <label htmlFor="product-tagsText" className="mb-1.5 block text-sm text-ui-text-muted">
                 Tags (separados por coma)
               </label>
               <input
                 type="text"
                 placeholder="personalizable, eventos"
                 className={inputClass}
-                {...register("tagsText")}
+                id="product-tagsText" aria-invalid={errors.tagsText ? true : undefined} aria-describedby={errors.tagsText ? "product-tagsText-summary" : undefined} {...register("tagsText")}
               />
             </div>
 
@@ -391,7 +395,7 @@ export default function ProductEditor({
                         setImages((current) => current.filter((u) => u !== url))
                       }
                       aria-label="Quitar imagen"
-                      className="text-ml-white/40 hover:text-ml-coral"
+                      className="text-ui-text-muted hover:text-ml-coral"
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden />
                     </button>
@@ -402,7 +406,7 @@ export default function ProductEditor({
             <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 type="url"
-                value={imageUrlInput}
+                aria-label="URL de imagen del producto" value={imageUrlInput}
                 onChange={(event) => setImageUrlInput(event.target.value)}
                 placeholder="https://… (pegar URL)"
                 className={cn(inputClass, "flex-1")}
@@ -471,7 +475,7 @@ export default function ProductEditor({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -494,6 +498,7 @@ function VariantManager({
   const [status, setStatus] =
     useState<(typeof VARIANT_STATUSES)[number]>("disponible");
   const [busy, setBusy] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const variants = product.product_variants ?? [];
 
@@ -531,6 +536,9 @@ function VariantManager({
       setColor("");
       setSize("");
       onChanged();
+    } catch {
+      toast.error("No pudimos confirmar el alta. Revisa las variantes antes de intentarlo de nuevo.");
+      onChanged();
     } finally {
       setBusy(false);
     }
@@ -549,6 +557,10 @@ function VariantManager({
         return;
       }
       toast.success("Variante eliminada");
+      setDeleteTarget(null);
+      onChanged();
+    } catch {
+      toast.error("No pudimos confirmar la eliminación. Revisa las variantes antes de intentarlo de nuevo.");
       onChanged();
     } finally {
       setBusy(false);
@@ -557,6 +569,7 @@ function VariantManager({
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <ConfirmDialog open={Boolean(deleteTarget)} title="Eliminar variante" busy={busy} onCancel={() => setDeleteTarget(null)} onConfirm={() => { if (deleteTarget) void deleteVariant(deleteTarget); }} confirmLabel="Eliminar variante"><p>Se eliminará la variante {variants.find(v => v.id === deleteTarget)?.title}. Revisa que no la necesites antes de confirmar.</p></ConfirmDialog>
       <p className="mb-3 text-sm font-medium text-ml-white/70">
         Variantes ({variants.length})
       </p>
@@ -570,7 +583,7 @@ function VariantManager({
               <span className="truncate">
                 <span className="font-semibold">{variant.title}</span>
                 {variant.sku && (
-                  <span className="ml-2 text-ml-white/45">{variant.sku}</span>
+                  <span className="ml-2 text-ui-text-muted">{variant.sku}</span>
                 )}
                 <span className="ml-2 text-ml-white/55">
                   stock {variant.stock}
@@ -580,10 +593,10 @@ function VariantManager({
                 <StatusBadge status={variant.status} />
                 <button
                   type="button"
-                  onClick={() => deleteVariant(variant.id)}
+                  onClick={() => setDeleteTarget(variant.id)}
                   disabled={busy}
-                  aria-label="Eliminar variante"
-                  className="text-ml-white/40 hover:text-ml-coral disabled:opacity-40"
+                  aria-label={`Eliminar variante ${variant.title}`}
+                  className="text-ui-text-muted hover:text-ml-coral disabled:opacity-40"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden />
                 </button>
@@ -594,13 +607,13 @@ function VariantManager({
       )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título *" className={inputClass} />
-        <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" className={inputClass} />
-        <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" min="0" step="0.01" placeholder="Precio" className={inputClass} />
-        <input value={stock} onChange={(e) => setStock(e.target.value)} type="number" min="0" placeholder="Stock" className={inputClass} />
-        <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" className={inputClass} />
-        <input value={size} onChange={(e) => setSize(e.target.value)} placeholder="Talla" className={inputClass} />
-        <select
+        <input aria-label="Título de la variante" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título *" className={inputClass} />
+        <input aria-label="SKU de la variante" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" className={inputClass} />
+        <input aria-label="Precio de la variante MXN" value={price} onChange={(e) => setPrice(e.target.value)} type="number" onWheel={event => event.currentTarget.blur()} min="0" step="0.01" inputMode="decimal" placeholder="Precio" className={inputClass} />
+        <input aria-label="Stock inicial de la variante" value={stock} onChange={(e) => setStock(e.target.value)} type="number" onWheel={event => event.currentTarget.blur()} min="0" inputMode="numeric" placeholder="Stock" className={inputClass} />
+        <input aria-label="Color de la variante" value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color" className={inputClass} />
+        <input aria-label="Talla de la variante" value={size} onChange={(e) => setSize(e.target.value)} placeholder="Talla" className={inputClass} />
+        <select aria-label="Estado de la variante"
           value={status}
           onChange={(e) =>
             setStatus(e.target.value as (typeof VARIANT_STATUSES)[number])
@@ -609,7 +622,7 @@ function VariantManager({
         >
           {VARIANT_STATUSES.map((option) => (
             <option key={option} value={option} className="bg-ml-bg">
-              {option}
+              {statusLabel(option)}
             </option>
           ))}
         </select>

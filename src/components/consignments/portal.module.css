@@ -861,3 +861,79 @@ textarea.input {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Compact operational navigation. Desktop keeps the published workspace. */
+.mobileDock, .mobileOverview, .mobileSectionPicker, .setupToggle { display: none; }
+.setupBody { min-width: 0; }
+.moneyEditor { display: grid; min-width: 0; gap: 6px; }
+.fieldError { min-height: 2.8em; color: #ff8787; font-size: 13px; line-height: 1.4; }
+.formHelp { margin-bottom: 16px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.formHelp summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; }
+.formHelp p { padding: 4px 0 12px; }
+.formHelp[open] svg { transform: rotate(180deg); }
+.saleEntryToggle { display: none; }
+@media (max-width: 639px) {
+  .header { position: sticky; top: 0; z-index: 40; background: #0b0f19f5; }
+  .portal { gap: 14px; }
+  .portal:has(.mobileDock) { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+  .portal :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea), .auth :is(input,select,textarea), .scan input { min-width: 0; width: 100%; min-height: 48px; font-size: 16px; }
+  .portal :is(button, summary), .auth button, .scan :is(button,a) { min-height: 44px; }
+  .field { min-width: 0; gap: 7px; }
+  .topline { gap: 10px; }
+  .title { font-size: 24px; line-height: 1.2; }
+  .topline .subtitle { display: none; }
+  .adminPortal .topline .eyebrow { display: none; }
+  .adminPortal .topline .title { font-size: 20px; }
+  .saleEntryCollapsed { display: none; }
+  .saleEntryToggle { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: space-between; gap: 8px; color: var(--accent); font-size: 14px; text-align: left; }
+  .saleEntryToggle[aria-expanded="true"] { margin-bottom: 12px; }
+  .saleEntryToggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .toplineActions { gap: 6px; }
+  .toplineActions .btn { padding-inline: 10px; font-size: 12px; }
+  .meta { margin: 0; font-size: 11px; }
+  .desktopSectionNav, .desktopStats, .desktopStatHint { display: none; }
+  .mobileSectionPicker { display: block; min-width: 0; }
+  .sectionTrigger, .setupToggle { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 12px; background: #151b27; color: var(--ink); font-size: 14px; text-align: left; }
+  .sectionTrigger strong { margin-left: 8px; color: var(--accent); }
+  .sectionChoices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+  .sectionChoices button { min-height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--surface); text-align: left; font-size: 14px; }
+  .sectionChoices [aria-current="page"] { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
+  .setupPanel { border: 0; padding: 0; background: transparent; box-shadow: none; }
+  .setupBody { display: none; padding: 16px 4px 4px; }
+  .setupBodyOpen { display: block; }
+  .setupToggle { background: transparent; font-size: 13px; color: var(--muted); }
+  .mobileOverview { display: block; min-width: 0; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  .mobileOverview > summary { display: flex; min-height: 52px; align-items: center; justify-content: space-between; gap: 10px; list-style: none; cursor: pointer; }
+  .mobileOverview > summary::-webkit-details-marker { display: none; }
+  .mobileOverview > summary > span:first-child { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; font-size: 12px; color: var(--muted); }
+  .mobileOverview strong { color: var(--ink); font-size: 20px; white-space: nowrap; letter-spacing: -.03em; }
+  .mobileOverview > summary > span:last-child { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
+  .mobileOverview[open] > summary svg, .sectionTrigger[aria-expanded="true"] svg, .setupToggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .overviewFigures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 10px; margin: 10px 0 16px; }
+  .overviewFigures dt { color: var(--muted); font-size: 11px; line-height: 1.4; }
+  .overviewFigures dd { margin: 4px 0 0; font-size: 16px; font-weight: 600; white-space: nowrap; }
+  .mobileOverview > p { padding-bottom: 12px; }
+  .itemGrid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .itemCard { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 10px 12px; padding: 14px; }
+  .itemCard > .itemImage { grid-column: 1; grid-row: 1 / 3; width: 72px; height: 90px; margin: 0; border-radius: 9px; object-fit: cover; }
+  .itemCard > div:first-of-type, .itemCard > .stockLine { grid-column: 2; }
+  .itemCard:not(:has(.itemImage)) > div:first-of-type, .itemCard:not(:has(.itemImage)) > .stockLine { grid-column: 1 / -1; }
+  .itemCard > :is(.priceGrid, .itemActions, .statusTag, details) { grid-column: 1 / -1; }
+  .itemName { font-size: 15px; line-height: 1.4; }
+  .itemMeta { font-size: 11px; line-height: 1.5; }
+  .stockLine { margin: 0; align-self: end; }
+  .stockValue { font-size: 24px; }
+  .priceGrid { margin: 2px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
+  .priceValue { font-size: 17px; white-space: nowrap; }
+  .priceLabel { font-size: 11px; }
+  .itemActions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .itemActions > button:first-child { grid-column: 1 / -1; }
+  .statusTag { padding: 0; border: 0; background: transparent; font-size: 11px; }
+  .statValue { font-size: clamp(18px, 6vw, 28px); white-space: nowrap; }
+  .summaryRow { min-height: 44px; }
+  .mobileDock { position: fixed; z-index: 40; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 5px; border: 1px solid var(--line-strong); border-radius: 18px; background: #151b27f5; box-shadow: 0 6px 24px #0004; backdrop-filter: blur(16px); }
+  .mobileDock :is(a,button) { display: flex; min-width: 0; min-height: 56px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px 2px; border-radius: 13px; color: var(--muted); font-size: 11px; text-decoration: none; }
+  .mobileDock [aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+  .portal:has(input:focus,select:focus,textarea:focus) .mobileDock { display: none; }
+  .mobileDock.dockHidden { display: none; }
+}

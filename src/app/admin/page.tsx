@@ -16,6 +16,7 @@ import type { OrderRow } from "@/lib/db/types";
 import { requireAdminPage } from "@/lib/security/admin-auth";
 import { isSupabaseConfigured } from "@/lib/security/env";
 import { formatPrice } from "@/lib/utils";
+import mobile from "@/components/admin/ops-overview.module.css";
 
 export const metadata: Metadata = {
   title: "Resumen | MatrixLab Admin",
@@ -94,7 +95,7 @@ export default async function AdminDashboardPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={`${mobile.stats} grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4`}>
             {[
               {
                 label: "Productos",
@@ -144,7 +145,7 @@ export default async function AdminDashboardPage() {
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className={`${mobile.table} w-full text-left text-sm`}>
                   <thead className="text-xs uppercase text-ml-white/45">
                     <tr>
                       <th className="pb-3 pr-4">Pedido</th>
@@ -157,17 +158,17 @@ export default async function AdminDashboardPage() {
                   <tbody className="divide-y divide-white/5">
                     {stats.recentOrders.map((order) => (
                       <tr key={order.id}>
-                        <td className="py-3 pr-4 font-mono text-ml-violet">
+                        <td data-label="Pedido" className="py-3 pr-4 font-mono text-ml-violet">
                           {order.order_number}
                         </td>
-                        <td className="py-3 pr-4">{order.customer_name}</td>
-                        <td className="py-3 pr-4 font-semibold">
+                        <td data-label="Cliente" className="py-3 pr-4">{order.customer_name}</td>
+                        <td data-label="Total" className="py-3 pr-4 font-semibold">
                           {formatPrice(order.total)}
                         </td>
-                        <td className="py-3 pr-4">
+                        <td data-label="Pago" className="py-3 pr-4">
                           <StatusBadge status={order.payment_status} />
                         </td>
-                        <td className="py-3">
+                        <td data-label="Estado" className="py-3">
                           <StatusBadge status={order.status} />
                         </td>
                       </tr>

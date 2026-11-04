@@ -1,5 +1,7 @@
 import AdminNav from "@/components/admin/AdminNav";
 import { getServerEnv } from "@/lib/security/env";
+import { ChevronDown } from "lucide-react";
+import styles from "./mobile-admin.module.css";
 
 /**
  * Shell del panel admin. Cada página admin valida la sesión en servidor
@@ -17,14 +19,14 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen">
+    <div className={styles.shell}>
       <AdminNav consignmentsEnabled={getServerEnv().consignmentsEnabled} />
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-        <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+      <main id="main-content" tabIndex={-1} className={styles.page}>
+        <div className={styles.pageHeading}>
           <div>
             <h1 className="text-2xl font-bold sm:text-3xl">{title}</h1>
             {description && (
-              <p className="mt-1.5 text-sm text-ml-white/60">{description}</p>
+              <><p className={styles.desktopDescription}>{description}</p><details className={styles.mobileDescription}><summary>Información<ChevronDown size={14} aria-hidden /></summary><p>{description}</p></details></>
             )}
           </div>
           {actions}

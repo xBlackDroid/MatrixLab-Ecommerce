@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, Loader2 } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminLoginForm() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -36,12 +37,15 @@ export default function AdminLoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
-      <label htmlFor="admin-password" className="sr-only">
+      <label htmlFor="admin-password" className="text-sm font-medium text-ui-text-muted">
         Contraseña de acceso
       </label>
-      <input
+      <div className="relative"><input
         id="admin-password"
-        type="password"
+        type={showPassword ? "text" : "password"}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         autoComplete="current-password"
         required
         minLength={8}
@@ -49,8 +53,8 @@ export default function AdminLoginForm() {
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         placeholder="Contraseña de acceso"
-        className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3.5 text-ml-white outline-none transition placeholder:text-ml-white/35 focus:border-ml-violet"
-      />
+        className="min-h-12 w-full rounded-xl border border-white/15 bg-white/5 py-3.5 pl-4 pr-14 text-base text-ml-white outline-none transition placeholder:text-ml-white/35 focus:border-ml-violet"
+      /><button type="button" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-1 flex min-h-11 w-11 items-center justify-center text-ui-text-muted">{showPassword ? <EyeOff size={20} aria-hidden /> : <Eye size={20} aria-hidden />}</button></div>
       <button
         type="submit"
         disabled={loading || password.length < 8}

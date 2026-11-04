@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import StatusBadge from "@/components/admin/StatusBadge";
 import type { CategoryRow } from "@/lib/db/types";
 import { toHandle } from "@/lib/security/sanitize";
+import Modal from "@/components/ui/Modal";
+import styles from "./mobile-categories.module.css";
 
 const CSRF_HEADER = "x-ml-csrf";
 
@@ -30,15 +32,15 @@ export default function CategoriesAdminClient({
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-2 rounded-full bg-ml-violet px-5 py-2.5 text-sm font-semibold text-ml-bg transition hover:bg-ml-violet/90"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-ml-violet px-5 py-2.5 text-sm font-semibold text-ml-bg transition hover:bg-ml-violet/90"
         >
           <Plus className="h-4 w-4" aria-hidden />
           Nueva categoría
         </button>
       </div>
 
-      <div className="glass overflow-x-auto rounded-2xl">
-        <table className="w-full text-left text-sm">
+      <div className={`${styles.tableWrap} glass overflow-x-auto rounded-2xl`}>
+        <table className={`${styles.table} w-full text-left text-sm`}>
           <thead className="border-b border-white/10 text-xs uppercase text-ml-white/45">
             <tr>
               <th className="px-5 py-3.5">Orden</th>
@@ -51,17 +53,17 @@ export default function CategoriesAdminClient({
           <tbody className="divide-y divide-white/5">
             {categories.map((category) => (
               <tr key={category.id} className="hover:bg-white/[0.03]">
-                <td className="px-5 py-3.5 text-ml-white/55">
+                <td data-label="Orden" className="px-5 py-3.5 text-ml-white/55">
                   {category.sort_order}
                 </td>
-                <td className="px-5 py-3.5 font-semibold">{category.title}</td>
-                <td className="px-5 py-3.5 text-ml-white/55">
+                <td data-label="Categoría" className="px-5 py-3.5 font-semibold">{category.title}</td>
+                <td data-label="Enlace" className="px-5 py-3.5 text-ml-white/55">
                   /{category.handle}
                 </td>
-                <td className="px-5 py-3.5">
+                <td data-label="Estado" className="px-5 py-3.5">
                   <StatusBadge status={category.status} />
                 </td>
-                <td className="px-5 py-3.5 text-right">
+                <td data-label="Acciones" className="px-5 py-3.5 text-right">
                   <button
                     type="button"
                     onClick={() => setEditing(category)}
@@ -147,10 +149,10 @@ function CategoryForm({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8">
+    <Modal title={isEdit ? "Editar categoría" : "Nueva categoría"} onClose={onClose} busy={busy}>
       <form
         onSubmit={handleSubmit}
-        className="glass-strong w-full max-w-md rounded-3xl p-6 sm:p-8"
+        className={`${styles.form} glass-strong w-full rounded-2xl p-6 sm:p-8`}
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-xl font-bold">
@@ -167,7 +169,7 @@ function CategoryForm({
         </div>
 
         <div className="flex flex-col gap-3.5">
-          <input
+          <label className={styles.field}>Nombre de la categoría<input
             value={title}
             onChange={(event) => {
               setTitle(event.target.value);
@@ -178,35 +180,39 @@ function CategoryForm({
             minLength={2}
             maxLength={80}
             className={inputClass}
-          />
-          <input
+          /></label>
+          <label className={styles.field}>Enlace de la categoría<input
             value={handle}
             onChange={(event) => setHandle(event.target.value)}
             placeholder="handle-url *"
             required
             pattern="[a-z0-9-]+"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             maxLength={120}
             className={inputClass}
-          />
-          <textarea
+          /></label>
+          <label className={styles.field}>Descripción<textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Descripción"
             rows={3}
             maxLength={1000}
             className={inputClass}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <input
+          /></label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className={styles.field}>Orden de aparición<input
               value={sortOrder}
               onChange={(event) => setSortOrder(event.target.value)}
               type="number"
+              inputMode="numeric"
               min="0"
               max="999"
               placeholder="Orden"
               className={inputClass}
-            />
-            <select
+            /></label>
+            <label className={styles.field}>Estado<select
               value={status}
               onChange={(event) =>
                 setStatus(event.target.value as "activa" | "oculta")
@@ -219,7 +225,7 @@ function CategoryForm({
               <option value="oculta" className="bg-ml-bg">
                 Oculta
               </option>
-            </select>
+            </select></label>
           </div>
         </div>
 
@@ -232,6 +238,6 @@ function CategoryForm({
           {isEdit ? "Guardar cambios" : "Crear categoría"}
         </button>
       </form>
-    </div>
+    </Modal>
   );
 }

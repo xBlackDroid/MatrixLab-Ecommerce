@@ -1,0 +1,20 @@
+.field { display: grid; min-width: 0; gap: 7px; font-size: 13px; font-weight: 500; color: var(--ui-text-muted); }
+:global(dialog):has(.form) { width: min(448px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; border-radius: 16px; }
+.form { background: var(--color-ml-bg); color: var(--ui-text); }
+.form :is(input,textarea,select) { min-height: 46px; font-size: 16px; }
+.form button { min-height: 44px; }
+@media (max-width: 639px) {
+  .tableWrap { overflow: visible; border: 0; background: transparent; box-shadow: none; }
+  .table { display: block; min-width: 0; }
+  .table thead { position: absolute; height: 1px; width: 1px; overflow: hidden; clip-path: inset(50%); }
+  .table tbody { display: grid; gap: 12px; }
+  .table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; padding: 6px; border: 1px solid var(--ui-border); border-radius: 14px; background: var(--ui-surface); }
+  .table td { display: block; min-width: 0; padding: 8px 10px; text-align: left; overflow-wrap: anywhere; }
+  .table td::before { display: block; margin-bottom: 4px; content: attr(data-label); font-size: 11px; font-weight: 500; color: var(--ui-text-muted); }
+  .table [data-label="Categoría"] { grid-column: 1 / -1; grid-row: 1; font-size: 17px; }
+  .table [data-label="Categoría"]::before, .table [data-label="Acciones"]::before { display: none; }
+  .table [data-label="Enlace"], .table [data-label="Acciones"] { grid-column: 1 / -1; }
+  .table button { width: 100%; min-height: 44px; justify-content: center; }
+  .form { padding: 18px; }
+  .form > button[type="submit"] { position: sticky; bottom: 0; margin-bottom: env(safe-area-inset-bottom, 0px); }
+}

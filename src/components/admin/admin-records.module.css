@@ -1,0 +1,26 @@
+@media (max-width: 639px) {
+  .tableWrap { overflow: visible; border: 0; background: transparent; box-shadow: none; }
+  .table { display: block; min-width: 0; }
+  .table tbody { display: block; }
+  .table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0; padding: 16px; border: 1px solid var(--ui-border); border-radius: 14px; background: var(--ui-surface); }
+  .table tbody td { display: block; min-width: 0; padding: 0; text-align: left; overflow-wrap: anywhere; }
+  .table.table td[data-label]::before { margin-bottom: 5px; font-size: 11px; font-weight: 500; }
+  .table :is([data-label="Pedido"],[data-label="Cliente"],[data-label="Producto"],[data-label="Acciones"]) { grid-column: 1 / -1; }
+  .table.table td:is([data-label="Pedido"],[data-label="Producto"],[data-label="Acciones"])::before { display: none; }
+  .table.table td[data-label="Pedido"] { grid-column: 1 / -1; font-weight: 600; }
+  .table.table td[data-label="Fecha"] { grid-column: 1 / -1; font-size: 12px; color: var(--ui-text-muted); }
+  .table.table td[data-label="Fecha"]::before { display: none; }
+  .table.table td[data-label="Estado"] { grid-column: 1 / -1; }
+  .table.table td[data-label="Estado"] select { width: 100%; border-radius: 10px; }
+  .table [data-label="Producto"] > p:first-child { font-size: 17px; line-height: 1.4; }
+  .table.table td:is([data-label="Precio"],[data-label="Total"]) { white-space: nowrap; text-align: left; font-size: 20px; font-weight: 650; }
+  .table [data-label="Acciones"]::before { display: none; }
+  .table [data-label="Acciones"] button { width: 100%; min-height: 44px; justify-content: center; }
+  .table tbody tr:has(+ tr[data-order-detail]) { margin-bottom: 0; border-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .table tbody tr[data-order-detail] { display: block; margin-top: 0; border-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
+  .table td[colspan] { grid-column: 1 / -1; padding: 0; }
+  .table td[colspan]::before { display: none; }
+  .table td[colspan] :is(p,span,a,li) { min-width: 0; overflow-wrap: anywhere; }
+  .table td[colspan] li { flex-wrap: wrap; }
+  .filterChoices a { display: flex; min-height: 44px; align-items: center; padding: 10px 12px; font-size: 13px; }
+}
