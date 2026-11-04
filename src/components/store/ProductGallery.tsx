@@ -19,9 +19,10 @@ export default function ProductGallery({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="glass relative aspect-square w-full overflow-hidden rounded-2xl">
+      <div className="product-gallery-main glass relative aspect-square w-full overflow-hidden rounded-2xl">
         {validImages.length > 0 ? (
-          <Image brandContext={brandContext}
+          <Image
+            brandContext={brandContext}
             src={validImages[Math.min(active, validImages.length - 1)]!}
             alt={title}
             fill
@@ -52,7 +53,8 @@ export default function ProductGallery({
                   : "border-white/10 opacity-60 hover:opacity-100",
               )}
             >
-              <Image brandContext={brandContext}
+              <Image
+                brandContext={brandContext}
                 src={image}
                 alt=""
                 fill

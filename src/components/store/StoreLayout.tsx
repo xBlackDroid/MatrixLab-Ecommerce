@@ -2,6 +2,9 @@ import Link from "next/link";
 import { FlaskConical, MessageCircle, Sparkles, Ticket } from "lucide-react";
 import CartBadge from "@/components/store/CartBadge";
 import StoreMobileMenu from "@/components/store/StoreMobileMenu";
+import StoreMobileNavigation from "@/components/store/StoreMobileNavigation";
+import BackToTop from "@/components/store/BackToTop";
+import StoreAppearance from "./StoreAppearance";
 import {
   MATRIXLAB_TUMBLER_COURSE,
   MATRIXLAB_TUMBLER_COURSE_NAV,
@@ -9,8 +12,7 @@ import {
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 /**
- * Shell de la tienda: navegación superior + footer. La landing principal
- * NO usa este layout; vive únicamente bajo /tienda.
+ * Store shell. Header/footer are shared with the compact mobile landing.
  */
 export default function StoreLayout({
   children,
@@ -18,8 +20,19 @@ export default function StoreLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-ml-bg/85 backdrop-blur-xl">
+    <StoreAppearance className="ui-numeric flex min-h-dvh flex-col">
+      <StoreHeader />
+      <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">{children}</main>
+      <StoreFooter />
+      <StoreMobileNavigation />
+      <BackToTop />
+    </StoreAppearance>
+  );
+}
+
+export function StoreHeader() {
+  return (
+      <header className="store-header sticky top-0 z-40 border-b border-white/10 bg-ml-bg/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           {/*
             Logo (izquierda en móvil y escritorio).
@@ -31,19 +44,19 @@ export default function StoreLayout({
           */}
           <Link
             href="/tienda"
-            className="flex shrink-0 items-center gap-2 whitespace-nowrap"
+            className="store-identity flex shrink-0 items-center gap-2 whitespace-nowrap"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ml-violet/15 text-ml-violet">
               <FlaskConical className="h-5 w-5" aria-hidden />
             </span>
             <span className="text-lg font-bold tracking-tight">
-              MatrixLab{" "}
+              Matrix<span className="store-identity-lab">Lab</span>{" "}
               <span className="text-gradient hidden sm:inline">Tienda</span>
             </span>
           </Link>
 
           {/* Navegación de escritorio: visible, sin hamburguesa */}
-          <nav className="hidden items-center gap-6 text-sm text-ml-white/75 md:flex">
+          <nav aria-label="Tienda" className="hidden items-center gap-6 text-sm text-ml-white/75 md:flex">
             <Link href="/" className="transition hover:text-ml-white">
               Inicio
             </Link>
@@ -87,7 +100,7 @@ export default function StoreLayout({
           </nav>
 
           {/* Derecha: carrito siempre visible + hamburguesa (solo móvil) */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="store-header-actions flex items-center gap-2 sm:gap-3">
             <CartBadge />
             <StoreMobileMenu
               whatsappUrl={buildWhatsAppUrl(whatsappMessages.customRequest())}
@@ -96,14 +109,17 @@ export default function StoreLayout({
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+  );
+}
 
-      <footer className="border-t border-white/10 bg-ml-bg">
+export function StoreFooter() {
+  return (
+      <footer className="store-footer border-t border-white/10 bg-ml-bg">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-6 py-10 text-center">
           <p className="text-lg font-semibold">
             MatrixLab <span className="text-gradient">Intelligence</span>
           </p>
-          <p className="max-w-xl text-sm text-ml-white/60">
+          <p className="hidden max-w-xl text-sm text-ml-white/60 sm:block">
             Desde una pieza hasta miles. Desde personas hasta empresas. Un solo
             ecosistema creativo. Infinitas posibilidades.
           </p>
@@ -132,12 +148,11 @@ export default function StoreLayout({
               WhatsApp
             </a>
           </div>
-          <p className="max-w-xl text-xs leading-relaxed text-ml-white/45">
+          <p className="max-w-xl text-xs leading-relaxed text-ui-text-muted sm:text-ml-white/45">
             Las imágenes del catálogo requieren autorización para su reproducción.{" "}
             <a href="/ai-usage.txt" className="underline underline-offset-4 hover:text-ml-white">Uso de imágenes</a>
           </p>
         </div>
       </footer>
-    </div>
   );
 }

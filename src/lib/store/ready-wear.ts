@@ -18,8 +18,8 @@ import {
 export const READY_WEAR_TYPES = [
   { id: "sudaderas", label: "Sudaderas", designerHref: "/tienda/disenador/sudadera" },
   { id: "gorras", label: "Gorras", designerHref: "/tienda/disenador/gorra" },
-  { id: "totes", label: "Totes", designerHref: "/tienda/disenador/tote" },
   { id: "playeras", label: "Playeras", designerHref: "/tienda/disenador/playera" },
+  { id: "totes", label: "Totes", designerHref: "/tienda/disenador/tote" },
 ] as const;
 
 export type ReadyWearType = (typeof READY_WEAR_TYPES)[number]["id"];
@@ -371,4 +371,12 @@ export function readyWearListHref(filters: Partial<ReadyWearFilters> = {}): stri
   writeReadyWearFilters(params, { ...EMPTY_READY_WEAR_FILTERS, ...filters });
   const search = params.toString();
   return search ? `${READY_WEAR_LIST_PATH}?${search}` : READY_WEAR_LIST_PATH;
+}
+
+export const READY_WEAR_TYPE_IDS = READY_WEAR_TYPES.map(({ id }) => id);
+
+/** Merchandising order; existing photo, inventory and category rules remain authoritative. */
+export function orderReadyWearProducts<T extends Pick<ProductRow, "handle" | "title" | "tags">>(products: T[]): T[] {
+  const rank = (product: T) => { const i = READY_WEAR_TYPES.findIndex(type => type.id === readyWearTypeOf(product)); return i < 0 ? 99 : i; };
+  return [...products].sort((a, b) => rank(a) - rank(b));
 }

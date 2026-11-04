@@ -1,0 +1,39 @@
+.check { display: none; }
+.resultRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; min-height: 22px; }
+.compactResults { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; }
+.clear { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding-inline: 4px; color: var(--color-ml-cyan); font-size: 12px; font-weight: 600; }
+.clear svg { width: 14px; height: 14px; }
+/* Compra rápida sólo móvil; en escritorio el precio sigue su flujo original. */
+.priceRow { display: contents; }
+.quickAdd { display: none; }
+@media (max-width: 639px) {
+  .filters.filters.filters { flex-wrap: nowrap; gap: 6px; margin-top: 12px; padding-bottom: 0; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter.filter { display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border-radius: 7px; border-color: var(--ui-border); background: transparent; color: var(--ui-text-muted); font-size: 12px; font-weight: 500; white-space: nowrap; transition: background-color 90ms, color 90ms; }
+  .filter[aria-pressed="true"] { border-color: var(--color-ml-cyan); background: transparent; color: var(--ui-text); font-weight: 600; }
+  .check { display: block; width: 14px; height: 14px; color: var(--color-ml-cyan); }
+  .filter:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: -3px; }
+  .resultRow { margin-top: 10px; min-height: 32px; }
+  .resultRow.resultRowQuiet { min-height: 0; margin-top: 0; }
+  .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; margin-top: 10px; }
+  .productPhoto { aspect-ratio: 1; border-radius: 10px; }
+  .card.card { border: 0; border-radius: 0; overflow: visible; background: transparent; box-shadow: none; }
+  .cardContent.cardContent { padding: 10px 0 0; gap: 6px; }
+  .cardContent > details { order: 2; }
+  .cardTitle.cardTitle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-height: 38px; font-size: 12px; font-weight: 500; line-height: 1.5; }
+  .titleLink { display: block; min-height: 44px; }
+  .priceRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; margin-top: auto; }
+  .quickAdd { display: inline-flex; flex: 0 0 44px; width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; }
+  .quickAdd svg { width: 18px; height: 18px; }
+  .cardPrice.cardPrice { margin-top: 0; font-size: 18px; font-weight: 550; letter-spacing: -.03em; white-space: nowrap; }
+  .cardPrice > span { display: block; font-size: 10px; font-weight: 400; letter-spacing: 0; }
+  .mobileHidden { display: none; }
+  .stock.stock { font-size: 10px; font-weight: 450; }
+  .stockAvailable { display: none; }
+  .quantity.quantity { padding: 0; border: 0; border-radius: 0; background: transparent; }
+  .quantity.quantity button { width: 44px; height: 44px; border-radius: 6px; border: 1px solid #29262f20; }
+  .quantity.quantity > span { min-width: 20px; font-size: 13px; }
+  /* Selector de cantidad y CTA completo quedan para escritorio, la ficha y el carrito. */
+  .actions.actions { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .filter.filter { transition: none; } }

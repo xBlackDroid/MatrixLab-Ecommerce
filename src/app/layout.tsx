@@ -1,9 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
+import "./studio-store.css";
 import { IMAGE_USAGE_NOTICE } from "@/lib/store/image-watermark";
 import CatalogMediaProtection from "@/components/store/CatalogMediaProtection";
+
+const studioFont = Geist({ subsets: ["latin"], display: "swap", variable: "--font-studio" });
 
 export const metadata: Metadata = {
   // Dominio único de producción del proyecto combinado (landing + tienda + admin).
@@ -25,6 +29,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = { themeColor: "#0b0f19", colorScheme: "dark", viewportFit: "cover" };
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +38,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="min-h-screen bg-ml-bg text-ml-white antialiased">
+      <body className={`${studioFont.variable} min-h-screen bg-ml-bg text-ml-white antialiased`}>
+        <a href="#main-content" className="skip-link">Ir al contenido</a>
         {/* Sin JS, framer-motion nunca anima y el `opacity:0` en línea que ya
             viene en el HTML dejaría secciones enteras invisibles. Esto las
             devuelve a su estado final; con JS activo el bloque ni se aplica. */}

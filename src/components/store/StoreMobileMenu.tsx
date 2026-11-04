@@ -55,24 +55,25 @@ export default function StoreMobileMenu({ whatsappUrl }: StoreMobileMenuProps) {
   ];
 
   return (
-    <Drawer.Root open={open} onOpenChange={setOpen}>
+    <Drawer.Root open={open} onOpenChange={setOpen} autoFocus modal>
       <Drawer.Trigger asChild>
         <button
           type="button"
           aria-label="Abrir menú"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-ml-white transition hover:border-ml-violet/60 hover:text-ml-violet md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-ml-white transition hover:border-ml-violet/60 hover:text-ml-violet md:hidden"
         >
           <Menu className="h-5 w-5" aria-hidden />
         </button>
       </Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/60" />
-        <Drawer.Content className="glass-strong fixed inset-x-0 bottom-0 z-50 rounded-t-3xl p-5 pb-9">
+        <Drawer.Content className="studio-drawer glass-strong ui-drawer-safe fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] overflow-y-auto rounded-t-3xl p-5 pb-9">
           <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-white/20" />
           <div className="mb-3 flex items-center justify-between">
             <Drawer.Title className="text-base font-bold">
               MatrixLab <span className="text-gradient">Tienda</span>
             </Drawer.Title>
+            <Drawer.Description className="sr-only">Navegación de MatrixLab. Pulsa Escape para cerrar y volver al botón de menú.</Drawer.Description>
             <Drawer.Close asChild>
               <button
                 type="button"

@@ -1,0 +1,11 @@
+.dock { position: fixed; inset: auto max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); z-index: 40; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 5px; border: 1px solid #ffffff20; border-radius: 22px; background: #151b28f5; box-shadow: 0 8px 28px #03060b66, inset 0 1px 0 #ffffff08; }
+.link { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 56px; border-radius: 16px; color: var(--ui-text-muted); font-size: 10px; font-weight: 550; transition: background-color 90ms, color 90ms; }
+.link[aria-current] { background: #b197fc1c; color: #c7b5ff; }
+.dock > button { border-radius: 16px; font-size: 10px; }
+.link:focus-visible, .dock > button:focus-visible { outline: 2px solid var(--color-ml-violet); outline-offset: -2px; }
+@supports (backdrop-filter: blur(20px)) { .dock { background: #151b28e8; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); } }
+@media (hover: hover) { .link:hover { color: var(--ui-text); background-color: #ffffff0b; } }
+.link:active { background-color: #b197fc29; }
+@media (min-width: 640px) { .dock { display: none; } }
+@media (prefers-reduced-motion: reduce) { .link { transition: none; } }
+@media (prefers-reduced-transparency: reduce) { .dock { background: #151b28; backdrop-filter: none; -webkit-backdrop-filter: none; } }

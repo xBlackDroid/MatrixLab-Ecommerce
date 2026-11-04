@@ -31,10 +31,11 @@ export default function CartLineItem({
   const unitQuantity = formatUnitQuantity(line.quantity, line.unitLabel);
 
   return (
-    <div className="glass flex gap-4 rounded-2xl p-4">
+    <div className="store-cart-line glass flex gap-4 rounded-2xl p-4">
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10">
         {image ? (
-          <Image brandContext={line.productHandle}
+          <Image
+            brandContext={line.productHandle}
             src={image}
             alt={displayTitle}
             fill
@@ -65,7 +66,7 @@ export default function CartLineItem({
             onClick={() => onRemove(line.id)}
             disabled={busy}
             aria-label="Eliminar del carrito"
-            className="text-ml-white/40 transition hover:text-ml-coral disabled:opacity-40"
+            className="text-ui-text-muted transition hover:text-ml-coral disabled:opacity-40"
           >
             <Trash2 className="h-4.5 w-4.5" aria-hidden />
           </button>
@@ -87,7 +88,7 @@ export default function CartLineItem({
           </p>
         )}
 
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
+        <div className="cart-line-controls mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
           <div
             className={cn(
               "flex items-center rounded-full border border-white/10 bg-white/5",
@@ -131,12 +132,12 @@ export default function CartLineItem({
                 la unidad ("$85.00 / planilla"): "c/u" se leería como "cada
                 sticker". Sin unidad propia, el copy de siempre. */}
             {line.unitLabel ? (
-              <p className="text-xs text-ml-white/45">
+              <p className="text-xs text-ui-text-muted">
                 {formatPrice(line.unitPrice)} / {line.unitLabel.one}
               </p>
             ) : (
               line.quantity > 1 && (
-                <p className="text-xs text-ml-white/45">
+                <p className="text-xs text-ui-text-muted">
                   {formatPrice(line.unitPrice)} c/u
                 </p>
               )

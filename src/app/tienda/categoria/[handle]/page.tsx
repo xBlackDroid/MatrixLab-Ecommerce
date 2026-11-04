@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import BrandWordmark from "@/components/store/BrandWordmark";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
-  ArrowRight,
   MessageCircle,
 } from "lucide-react";
-import { tumblerSections } from "@/lib/store/tumbler-sections";
+import TumblerCategoryPage from "@/components/store/TumblerCategoryPage";
+import TumblerSubcategoryNav, { TUMBLER_CATALOG_SECTIONS } from "@/components/store/TumblerSubcategoryNav";
 import {
   READY_TUMBLER_HANDLE,
   READY_TUMBLER_TITLE,
@@ -33,12 +35,9 @@ import {
   getMatrixLabStickersCatalog,
   getMatrixLabWearCatalog,
   getMatrixLab3dCatalog,
-  getTumblerSubcategories,
   LEGACY_TUMBLER_PARENT_HANDLE,
   TUMBLER_PARENT_HANDLE,
-  TUMBLER_SUBCATEGORY_HANDLES,
 } from "@/lib/store/products";
-import type { CategoryRow } from "@/lib/db/types";
 import { SPARKLES_CATEGORY_HANDLE } from "@/lib/store/tumbler-sparkles";
 import {
   STICKERS_CATEGORY_HANDLE,
@@ -137,7 +136,7 @@ function curatedFallback(
 
 interface CategoryPageProps {
   params: Promise<{ handle: string }>;
-  searchParams: Promise<{ orden?: string }>;
+  searchParams: Promise<{ orden?: string; subcategoria?: string }>;
 }
 
 export async function generateMetadata({
@@ -193,7 +192,7 @@ export default async function CategoryPage({
   searchParams,
 }: CategoryPageProps) {
   const { handle } = await params;
-  const { orden } = await searchParams;
+  const { orden, subcategoria } = await searchParams;
 
   // Compatibilidad: el handle histórico de la línea de vasos/insumos redirige
   // a la URL pública oficial de MatrixLab Tumbler.
@@ -206,27 +205,10 @@ export default async function CategoryPage({
     return <ReadyTumblerCatalog items={items} />;
   }
 
-  const category = await getCategoryByHandle(handle);
-  const isTumblerParent = handle === TUMBLER_PARENT_HANDLE;
-
-  // MatrixLab Tumbler presenta sus líneas aunque la base todavía no tenga
-  // sembrada la fila madre (por ejemplo, durante una primera instalación).
-  // Así la ruta pública conserva el layout comercial y sus enlaces siguen
-  // siendo visibles desde la tienda.
-  if (!category && isTumblerParent) {
-    const fallback = curatedFallback(handle);
-    const subcategories = await getTumblerSubcategories();
-    return (
-      <MatrixLabCategoryShell
-        title={fallback?.title ?? "MatrixLab Tumbler"}
-        description={fallback?.description ?? null}
-        imageUrl="/images/categories/matrixlab-tumbler.png"
-        summary={`${tumblerPageBlocks(subcategories).length} líneas para crear, personalizar y terminar tu próximo proyecto`}
-      >
-        <TumblerBlocks subcategories={subcategories} />
-      </MatrixLabCategoryShell>
-    );
+  if (handle === TUMBLER_PARENT_HANDLE) {
+    return <TumblerCategoryPage selectedHandle={subcategoria} />;
   }
+  const category = await getCategoryByHandle(handle);
 
   // MatrixLab Stickers / Wear / 3D publican el catálogo real del Excel. A
   // diferencia de las líneas de Tumbler, su seed sigue BLOQUEADO por precios
@@ -297,9 +279,6 @@ export default async function CategoryPage({
       >
         <MatrixLab3DCatalog
           entries={catalog.entries}
-          whatsappUrl={buildWhatsAppUrl(
-            "Hola MatrixLab, quiero cotizar una pieza de MatrixLab 3D.",
-          )}
           customizationWhatsappUrl={buildWhatsAppUrl(
             "Hola MatrixLab, quiero personalizar una pieza de MatrixLab 3D.",
           )}
@@ -327,11 +306,6 @@ export default async function CategoryPage({
     notFound();
   }
 
-  // "MatrixLab Tumbler" (categoría madre) presenta sus subcategorías
-  // comerciales como bloques; no tiene productos propios. El resto de
-  // categorías muestra su grilla de productos normal.
-  const subcategories = isTumblerParent ? await getTumblerSubcategories() : [];
-
   // Sparkle Mix es un catálogo propio: 46 Sparkles individuales con buscador,
   // filtros por colección y orden fijo del Excel (no usa el selector de orden).
   const isSparkles = handle === SPARKLES_CATEGORY_HANDLE;
@@ -353,12 +327,12 @@ export default async function CategoryPage({
   // Whitelist de ordenamiento: cualquier valor extraño cae en "newest".
   const sort = ProductSortSchema.parse(orden ?? "newest");
   const products =
-    isTumblerParent || isSparkles || isStickers || isCups
+    isSparkles || isStickers || isCups
       ? []
       : await getProductsByCategory(category.id, sort);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+    <div className="mobile-catalog-page mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <Link
         href="/tienda"
         className="inline-flex items-center gap-1.5 text-sm text-ml-white/60 transition hover:text-ml-violet"
@@ -386,7 +360,7 @@ export default async function CategoryPage({
                 presentación: el título y el handle de la categoría en base no
                 se tocan, así que /tienda/categoria/wraps-glow-finish y las
                 referencias internas a "Wraps & Glow Finish" siguen sirviendo. */}
-            <h1 className="text-3xl font-bold sm:text-4xl">
+            <Breadcrumbs items={[{label:"Tienda",href:"/tienda"},{label:"Categoría"}]} /><h1 className="text-3xl font-bold sm:text-4xl">
               {isStickers ? STICKERS_PUBLIC_TITLE : category.title}
             </h1>
             {/* Alineación de marca SOLO a nivel de presentación: el título y
@@ -403,20 +377,20 @@ export default async function CategoryPage({
               </p>
             )}
             {category.description && (
-              <p className="mt-3 max-w-2xl text-ml-white/65">
+              <p className="mobile-catalog-description mt-3 max-w-2xl text-ml-white/65">
                 {category.description}
               </p>
             )}
           </div>
         </div>
-        {!isTumblerParent && !isSparkles && !isStickers && !isCups && (
+        {!isSparkles && !isStickers && !isCups && (
           <SortSelect current={sort} />
         )}
       </div>
 
-      {isTumblerParent ? (
-        <TumblerBlocks subcategories={subcategories} />
-      ) : cups ? (
+      {TUMBLER_CATALOG_SECTIONS.some(item => item.handle === handle) && <TumblerSubcategoryNav selected={handle} />}
+
+      {cups ? (
         /* Solo los vasos del Excel. Los productos SnowGlobe históricos (kit
            base, vaso para rellenar, vaso de vidrio) siguen en la base y en el
            admin: únicamente se ocultan de ESTA presentación para no mezclarse
@@ -463,8 +437,9 @@ function MatrixLabCategoryShell({
   summary: string;
   children: React.ReactNode;
 }) {
+  const wordmarkFamily = title === MATRIXLAB_WEAR_PUBLIC_TITLE ? "wear" : title === MATRIXLAB_3D_PUBLIC_TITLE ? "3d" : title === MATRIXLAB_STICKERS_PUBLIC_TITLE ? "stickers" : null;
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+    <div className="mobile-catalog-page mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <Link
         href="/tienda"
         className="inline-flex items-center gap-1.5 text-sm text-ml-white/60 transition hover:text-ml-violet"
@@ -473,8 +448,8 @@ function MatrixLabCategoryShell({
         Volver a la tienda
       </Link>
 
-      <div className="mt-6 flex items-start gap-4">
-        {imageUrl && (
+      <div className="mt-3 flex items-start gap-4 sm:mt-6">
+        {!wordmarkFamily && imageUrl && (
           <Image
             src={imageUrl}
             alt={title}
@@ -484,12 +459,12 @@ function MatrixLabCategoryShell({
           />
         )}
         <div>
-          <h1 className="text-3xl font-bold sm:text-4xl">{title}</h1>
-          <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-ml-cyan">
+          <Breadcrumbs items={[{label:"Tienda",href:"/tienda"},{label:"Categoría"}]} /><h1 className="text-3xl font-bold sm:text-4xl">{wordmarkFamily ? <BrandWordmark family={wordmarkFamily} label={wordmarkFamily === "3d" ? "3D" : wordmarkFamily === "wear" ? "Wear" : "Stickers"} pageHeading /> : title}</h1>
+          <p className="mt-2 hidden text-sm font-semibold uppercase tracking-wide text-ml-cyan sm:block">
             {summary}
           </p>
           {description && (
-            <p className="mt-3 max-w-2xl text-ml-white/65">{description}</p>
+            <p className="mobile-catalog-description mt-3 max-w-2xl text-ml-white/65">{description}</p>
           )}
         </div>
       </div>
@@ -513,7 +488,7 @@ function CategoryComingSoon({
   showTumblerCourses?: boolean;
 }) {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+    <div className="mobile-catalog-page mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <Link
         href="/tienda"
         className="inline-flex items-center gap-1.5 text-sm text-ml-white/60 transition hover:text-ml-violet"
@@ -526,9 +501,9 @@ function CategoryComingSoon({
         <span className="glass inline-flex items-center rounded-full px-4 py-2 text-sm text-ml-cyan">
           Próximamente
         </span>
-        <h1 className="mt-5 text-3xl font-bold">{title}</h1>
+        <Breadcrumbs items={[{label:"Tienda",href:"/tienda"},{label:"Categoría"}]} /><h1 className="mt-5 text-3xl font-bold">{title}</h1>
         <p className="mt-3 text-ml-white/65">{description}</p>
-        <p className="mt-3 text-sm text-ml-white/50">
+        <p className="mt-3 text-sm text-ui-text-muted">
           Estamos preparando esta sección del catálogo. Mientras tanto,
           cuéntanos tu idea y la cotizamos contigo directamente.
         </p>
@@ -544,92 +519,6 @@ function CategoryComingSoon({
       </div>
 
       {showTumblerCourses && <TumblerCoursesBanner />}
-    </div>
-  );
-}
-
-/**
- * Tarjetas visibles de la categoría madre, en el orden curado. Qué líneas se
- * publican lo decide `tumblerSections`, la presentación compartida con
- * /tienda, para que las dos vistas no puedan discrepar. La consulta se
- * conserva para añadir handles futuros activos sin desplazar ese orden.
- */
-function tumblerPageBlocks(subcategories: CategoryRow[]) {
-  const handles = [
-    ...TUMBLER_SUBCATEGORY_HANDLES,
-    ...subcategories.map((c) => c.handle),
-  ];
-  return tumblerSections(handles);
-}
-
-/** Bloques de las subcategorías comerciales de MatrixLab Tumbler. */
-function TumblerBlocks({ subcategories }: { subcategories: CategoryRow[] }) {
-  const blocks = tumblerPageBlocks(subcategories);
-
-  return (
-    <div className="mt-10">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {blocks.map((item) => (
-          <Link
-            key={item.handle}
-            href={`/tienda/categoria/${item.handle}`}
-            className={`group glass relative flex h-full min-h-60 flex-col overflow-hidden rounded-[1.75rem] p-7 transition hover:-translate-y-1 ${item.hover}`}
-          >
-            <div
-              className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-80 transition group-hover:opacity-100`}
-              aria-hidden
-            />
-            <item.icon
-              className={`pointer-events-none absolute -bottom-6 -right-6 h-36 w-36 ${item.accentText} opacity-[0.08] transition duration-300 group-hover:scale-110 group-hover:opacity-[0.16]`}
-              aria-hidden
-            />
-            <span
-              className={`relative flex h-14 w-14 items-center justify-center rounded-2xl ${item.iconClasses}`}
-            >
-              <item.icon className="h-7 w-7" aria-hidden />
-            </span>
-            <div className="relative mt-5 flex-1">
-              <h2 className="text-lg font-bold text-ml-white">{item.title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-ml-white/65">
-                {item.description}
-              </p>
-            </div>
-            <span
-              className={`relative mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${item.accentText}`}
-            >
-              Explorar
-              <ArrowRight
-                className="h-4 w-4 transition group-hover:translate-x-1"
-                aria-hidden
-              />
-            </span>
-          </Link>
-        ))}
-      </div>
-
-      {/* CURSOS: va DEBAJO de la grilla y por encima del CTA de WhatsApp.
-          Es de ancho completo y tiene tratamiento editorial propio porque no
-          es otra línea de producto sino una experiencia con fecha, sede y
-          cupo. Ver TumblerCoursesBanner. */}
-      <TumblerCoursesBanner />
-
-      <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-        <p className="text-ml-white/75">
-          ¿Buscas un insumo específico? Escríbenos por WhatsApp y te ayudamos a
-          conseguirlo.
-        </p>
-        <a
-          href={buildWhatsAppUrl(
-            "Hola, busco un insumo de MatrixLab Tumbler. ¿Me pueden ayudar?",
-          )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-ml-coral px-6 py-3 font-semibold text-ml-bg transition hover:bg-ml-coral/90"
-        >
-          <MessageCircle className="h-5 w-5" aria-hidden />
-          Escribir por WhatsApp
-        </a>
-      </div>
     </div>
   );
 }

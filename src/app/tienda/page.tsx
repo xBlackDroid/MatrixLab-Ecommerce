@@ -8,6 +8,7 @@ import {
 } from "@/lib/store/back-to-school";
 import { MATRIXLAB_TUMBLER_COURSE_HREF } from "@/lib/store/courses/matrixlab-tumbler";
 import type { ComponentType } from "react";
+import MobileStorefront from "@/components/store/MobileStorefront";
 import {
   Box,
   Building2,
@@ -99,7 +100,8 @@ const LASER_CHIPS = [
 export const dynamic = "force-dynamic";
 
 export default async function TiendaHomePage() {
-  const subcategories = await getTumblerSubcategories();
+  // The canonical navigation still works if a catalog read is temporarily unavailable.
+  const subcategories = await getTumblerSubcategories().catch(() => []);
   // Las ocho líneas son parte del layout comercial de Tumbler. La consulta
   // permite respetar datos activos de la base, pero el layout conserva todas
   // las tarjetas aunque una lectura de catálogo llegue vacía o incompleta.
@@ -113,6 +115,8 @@ export default async function TiendaHomePage() {
   tumblerItems.push({ label: "Cursos", href: MATRIXLAB_TUMBLER_COURSE_HREF, icon: GraduationCap });
   return (
     <>
+      <div className="sm:hidden"><MobileStorefront /></div>
+      <div className="hidden sm:contents">
       <StoreHero />
 
       {/* 1. Grandes bloques de familias MatrixLab.
@@ -341,6 +345,7 @@ export default async function TiendaHomePage() {
       <Reveal>
         <StoreCTA />
       </Reveal>
+      </div>
     </>
   );
 }

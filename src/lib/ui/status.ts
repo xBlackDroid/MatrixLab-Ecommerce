@@ -1,0 +1,13 @@
+import type { BadgeTone } from "@/components/ui/Badge";
+type Presentation = { label: string; tone: BadgeTone };
+/** Labels and tones describe existing values; they never define allowed transitions. */
+export const statusPresentation: Record<string, Presentation> = {
+  pendiente_pago: { label: "Pendiente de pago", tone: "warning" }, pagado: { label: "Pagado", tone: "success" }, pago_rechazado: { label: "Pago rechazado", tone: "danger" }, revisando_diseno: { label: "Revisando diseño", tone: "warning" }, en_produccion: { label: "En producción", tone: "info" }, listo: { label: "Listo para entrega", tone: "info" }, enviado: { label: "Enviado", tone: "info" }, entregado: { label: "Entregado", tone: "success" }, cancelado: { label: "Cancelado", tone: "neutral" },
+  pending: { label: "Pago pendiente", tone: "warning" }, in_process: { label: "Pago en proceso", tone: "warning" }, approved: { label: "Pago aprobado", tone: "success" }, rejected: { label: "Pago rechazado", tone: "danger" }, cancelled: { label: "Pago cancelado", tone: "neutral" }, refunded: { label: "Pago reembolsado", tone: "info" },
+  disponible: { label: "Disponible", tone: "info" }, agotado: { label: "Agotado", tone: "neutral" }, sobre_pedido: { label: "Sobre pedido", tone: "info" }, oculto: { label: "Oculto", tone: "neutral" }, proximamente: { label: "Próximamente", tone: "neutral" }, activa: { label: "Activa", tone: "success" }, oculta: { label: "Oculta", tone: "neutral" },
+  draft: { label: "Borrador", tone: "neutral" }, added_to_cart: { label: "En carrito", tone: "info" }, ordered: { label: "Con pedido", tone: "info" }, production_ready: { label: "Listo para producción", tone: "info" }, in_review: { label: "En revisión", tone: "warning" }, in_production: { label: "Diseño en producción", tone: "info" }, completed: { label: "Diseño completado", tone: "success" },
+};
+export function presentStatus(status: string): Presentation { return statusPresentation[status] ?? { label: "Estado no reconocido", tone: "neutral" }; }
+export function statusLabel(status: string) { return presentStatus(status).label; }
+export function movementLabel(value: string) { return ({ sale: "Venta", return: "Devolución", adjustment: "Ajuste", restock: "Reposición", initial: "Inventario inicial", purchase: "Entrada", reservation: "Reserva", release: "Liberación", entrada: "Entrada", salida: "Salida", ajuste: "Ajuste", venta: "Venta", devolucion: "Devolución", reposicion: "Reposición", cancelacion: "Cancelación" } as Record<string, string>)[value] ?? "Movimiento de inventario"; }
+export function paymentProviderLabel(value: string) { return value === "mercadopago" ? "Mercado Pago" : "Otro proveedor"; }

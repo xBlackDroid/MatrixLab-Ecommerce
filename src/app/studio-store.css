@@ -1,0 +1,33 @@
+/* Mobile shopping layout. MatrixLab's original dark palette is inherited unchanged. */
+@media (max-width: 639px) {
+  .studio-store, .studio-drawer { color-scheme: dark; background: var(--color-ml-bg); color: var(--ui-text); font-family: var(--font-studio), ui-sans-serif, system-ui, sans-serif; }
+  .studio-store .store-header { border-color: var(--ui-border); background: #0b0f19f5; }
+  .studio-store .store-identity > span:last-child { font-size: 20px; font-weight: 650; letter-spacing: -.045em; }
+  .studio-store .store-identity-lab { color: var(--color-ml-violet); }
+  .studio-store .store-header-actions { gap: 2px; }
+  .studio-store .store-header-actions > :is(a,button) { border-color: transparent; background: transparent; color: var(--ui-text); }
+  .studio-store .mobile-catalog-page { padding: 12px 16px 24px; }
+  .studio-store .mobile-catalog-page > a:first-child { color: var(--ui-text-muted); font-size: 12px; }
+  .studio-store .mobile-catalog-page h1 { font-size: 26px; line-height: 1.15; letter-spacing: -.035em; }
+  .studio-store .mobile-catalog-page h3 { font-size: 13px; line-height: 1.4; }
+  .studio-store .mobile-catalog-page .grid-cols-2 { gap: 16px 12px; }
+  .studio-store .product-description { margin-top: 0; }
+  .studio-store .product-description summary { list-style: none; }
+  .studio-store .product-description summary::-webkit-details-marker { display: none; }
+  .studio-store .product-description[open] summary svg { transform: rotate(180deg); }
+  .studio-store .product-description p { white-space: pre-line; }
+  .studio-store .product-description { overflow-wrap: anywhere; }
+  .studio-store .mobile-3d-catalog { margin-top: 16px; }
+  .studio-store .ready-garment-colors-many { display: flex; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--color-ml-violet) transparent; }
+  .studio-store .ready-garment-colors-many > button { flex-shrink: 0; }
+  .studio-store .mobile-product-page .product-gallery-main { width: calc(100% + 32px); margin-inline: -16px; border: 0; border-radius: 0; background: var(--ui-surface); }
+  .studio-store .mobile-product-page .product-quantity { border: 1px solid var(--ui-border); background: var(--ui-surface); }
+  .studio-store .pdp-buy-bar { position: fixed; z-index: 40; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 64px auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 5px; border: 1px solid var(--ui-border); border-radius: 20px; background: #151b28f5; box-shadow: 0 5px 28px #03060b50; }
+  .studio-store .pdp-buy-bar > .store-back-to-top-navigation { min-height: 48px; border-radius: 15px; color: var(--ui-text-muted); font-size: 10px; }
+  .studio-store .pdp-buy-bar > .ui-money { font-size: 16px; font-weight: 650; white-space: nowrap; }
+  .studio-store .pdp-buy-bar > button:last-child { min-height: 48px; padding: 0 12px; border-radius: 15px; background: var(--color-ml-cyan); color: var(--color-ml-bg); font-size: 13px; box-shadow: none; }
+  .studio-store:has(.pdp-buy-bar) .store-bottom-nav { display: none; }
+  .studio-drawer.glass-strong { background: var(--ui-surface); color: var(--ui-text); }
+  .studio-store .ready-tumbler-intro { border: 0; background: transparent; padding: 0; }
+  .studio-store .ready-tumbler-intro > svg { display: none; }
+}

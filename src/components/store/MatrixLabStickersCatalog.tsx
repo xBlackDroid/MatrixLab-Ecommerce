@@ -1,8 +1,13 @@
 "use client";
 
+import ProductDescription from "./ProductDescription";
+import CollapsibleCatalogFilters from "./CollapsibleCatalogFilters";
+
+import useUrlState from "@/lib/ui/useUrlState";
+import { CatalogSearch, CatalogCount, CatalogEmpty } from "./CatalogControls";
 import { useMemo, useState } from "react";
 import Image from "@/components/store/StoreImage";
-import { MessageCircle, Minus, Plus, Search } from "lucide-react";
+import { MessageCircle, Minus, Plus } from "lucide-react";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import type { MatrixLabStickerCatalogEntry } from "@/lib/store/products";
 import {
@@ -62,8 +67,8 @@ export default function MatrixLabStickersCatalog({
   /** CTA de cotización mientras la planilla no exista como producto en base. */
   whatsappUrl: string;
 }) {
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<MatrixLabStickerCategoryId | null>(null);
+  const [query, setQuery] = useUrlState<string>("q", "", undefined, "replace");
+  const [filter, setFilter] = useUrlState<MatrixLabStickerCategoryId | null>("filtro", null, MATRIXLAB_STICKER_CATEGORY_ORDER);
 
   const filters = useMemo(() => buildFilters(entries), [entries]);
 
@@ -83,24 +88,7 @@ export default function MatrixLabStickersCatalog({
   return (
     <div className="mt-10">
       <div className="flex flex-col gap-4">
-        <label className="relative block">
-          <span className="sr-only">
-            Buscar planilla por código, SKU, nombre o categoría
-          </span>
-          <Search
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ml-white/40"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar por código, SKU, nombre o categoría (GE001, STK-GE001, Anime…)"
-            className="glass h-12 w-full rounded-full border border-white/10 bg-white/5 pl-12 pr-4 text-base text-ml-white placeholder:text-ml-white/40 focus:border-ml-cyan/50 focus:outline-none"
-          />
-        </label>
-
-        <div className="flex flex-wrap gap-2">
+        <CollapsibleCatalogFilters label="Filtrar stickers" selected={filters.find(option => option.id === filter)?.label ?? "Todos"}><div className="catalog-filters flex flex-wrap gap-2">
           {filters.map((option) => {
             const active = filter === option.id;
             return (
@@ -120,7 +108,7 @@ export default function MatrixLabStickersCatalog({
                 <span
                   className={cn(
                     "text-xs font-medium",
-                    active ? "text-ml-cyan/70" : "text-ml-white/40",
+                    active ? "text-ml-cyan/70" : "text-ui-text-muted",
                   )}
                 >
                   ({option.count})
@@ -128,20 +116,21 @@ export default function MatrixLabStickersCatalog({
               </button>
             );
           })}
-        </div>
+        </div></CollapsibleCatalogFilters>
 
-        <p className="text-sm text-ml-white/50" aria-live="polite">
-          {visible.length} de {entries.length} diseños de planilla
-        </p>
+        <CatalogSearch label="Buscar planilla por código, SKU, nombre o categoría" value={query} onChange={setQuery} placeholder="Buscar por código, SKU, nombre o categoría (GE001, STK-GE001, Anime…)" />
+
+        <CatalogCount visible={visible.length} total={entries.length} noun="diseños de planilla" />
       </div>
 
       {visible.length === 0 ? (
-        <div className="glass mt-6 rounded-2xl p-10 text-center text-ml-white/60">
-          No encontramos planillas con esa búsqueda. Prueba con el código o el
-          SKU (por ejemplo: GE001 o STK-GE001).
-        </div>
+        <CatalogEmpty
+          emptyCatalog={entries.length === 0}
+          message="No encontramos planillas con esa búsqueda. Prueba con el código o el SKU (por ejemplo: GE001 o STK-GE001)."
+          onClear={() => { setQuery(""); setFilter(null); }}
+        />
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
           {visible.map((entry) => (
             <StickerCard
               key={entry.handle}
@@ -194,7 +183,9 @@ function StickerCard({
   return (
     <article className="glass flex flex-col overflow-hidden rounded-2xl transition hover:border-ml-violet/40">
       <div className="relative aspect-square w-full overflow-hidden">
-        <Image brand="stickers"
+        <Image
+
+          brand="stickers"
           src={entry.image}
           alt={`${entry.title} — planilla de stickers`}
           fill
@@ -211,7 +202,7 @@ function StickerCard({
           {entry.title}
         </h3>
 
-        <p className="text-sm text-ml-white/60">{item.description}</p>
+        <ProductDescription><p className="text-sm text-ml-white/60">{item.description}</p></ProductDescription>
 
         {/* La disponibilidad sale SIEMPRE de la variante real, nunca de la
             columna H del Excel (que es 99 en las 110 filas y afirmaría "hay
@@ -224,7 +215,7 @@ function StickerCard({
               ? "text-ml-white/70"
               : entry.sellable
                 ? "text-ml-cyan"
-                : "text-ml-white/50",
+                : "text-ui-text-muted",
           )}
         >
           {entry.stock === null
@@ -243,7 +234,7 @@ function StickerCard({
         {priceConfirmed ? (
           <p className="text-xl font-bold text-ml-white">
             {formatPrice(entry.price as number)}{" "}
-            <span className="text-sm font-medium text-ml-white/50">
+            <span className="text-sm font-medium text-ui-text-muted">
               / {MATRIXLAB_STICKERS_UNIT_LABEL}
             </span>
           </p>
@@ -258,12 +249,12 @@ function StickerCard({
             inventa uno por SKU. */}
         <p className="text-sm font-semibold text-ml-white/75">
           Planilla de stickers
-          <span className="block text-xs font-medium text-ml-white/50">
+          <span className="block text-xs font-medium text-ui-text-muted">
             {MATRIXLAB_STICKERS_SHEET_CONTENTS_COPY}
           </span>
         </p>
 
-        <p className="text-xs text-ml-white/40">
+        <p className="text-xs text-ui-text-muted">
           {matrixLabStickerRefLabel(item.code)} · {entry.sku}
         </p>
 

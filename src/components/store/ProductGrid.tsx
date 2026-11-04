@@ -1,5 +1,7 @@
 import type { ProductRow } from "@/lib/db/types";
 import ProductCard from "@/components/store/ProductCard";
+import EmptyState from "@/components/ui/EmptyState";
+import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
 
 export default function ProductGrid({
   products,
@@ -12,9 +14,21 @@ export default function ProductGrid({
 }) {
   if (products.length === 0) {
     return (
-      <div className="glass rounded-2xl p-10 text-center text-ml-white/60">
+      <EmptyState
+        title="Aún no hay productos"
+        action={
+          <a
+            href={buildWhatsAppUrl(whatsappMessages.customRequest())}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-ui-control-border px-4 py-2 text-sm font-semibold text-ui-accent transition-colors hover:bg-ui-surface-raised"
+          >
+            Consultar por WhatsApp
+          </a>
+        }
+      >
         {emptyMessage}
-      </div>
+      </EmptyState>
     );
   }
   return (

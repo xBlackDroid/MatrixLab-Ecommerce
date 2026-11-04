@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import ProductDescription from "./ProductDescription";
+import CollapsibleCatalogFilters from "./CollapsibleCatalogFilters";
+
+import useUrlState from "@/lib/ui/useUrlState";
+import { CatalogSearch, CatalogCount, CatalogEmpty } from "./CatalogControls";
+import { useMemo } from "react";
 import Image from "@/components/store/StoreImage";
 import Link from "next/link";
-import { Search, Wand2 } from "lucide-react";
+import { Wand2 } from "lucide-react";
 import type { MatrixLabWearCatalogEntry } from "@/lib/store/products";
 import {
   MATRIXLAB_WEAR_CATEGORY_LABELS,
@@ -49,8 +54,8 @@ export default function MatrixLabWearCatalog({
 }: {
   entries: MatrixLabWearCatalogEntry[];
 }) {
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<MatrixLabWearCategoryId | null>(null);
+  const [query, setQuery] = useUrlState<string>("q", "", undefined, "replace");
+  const [filter, setFilter] = useUrlState<MatrixLabWearCategoryId | null>("filtro", null, MATRIXLAB_WEAR_CATEGORY_ORDER);
 
   const filters = useMemo(() => buildFilters(entries), [entries]);
 
@@ -70,7 +75,7 @@ export default function MatrixLabWearCatalog({
       {/* La talla y el color NO se eligen aquí: el Excel los declara "Por
           definir" y el modelo real vive en el Laboratorio. Decirlo de frente
           evita que el cliente espere un selector que no existe todavía. */}
-      <div className="glass rounded-2xl border border-ml-violet/25 p-4 text-sm text-ml-white/70">
+      <div className="glass hidden rounded-2xl border border-ml-violet/25 p-4 text-sm text-ml-white/70 sm:block">
         Estos son los <strong className="text-ml-white">diseños</strong> de
         MatrixLab Wear. Elige el que te guste y personalízalo en el
         Laboratorio: ahí eliges talla, color y confirmas el precio de tu
@@ -78,24 +83,7 @@ export default function MatrixLabWearCatalog({
       </div>
 
       <div className="mt-6 flex flex-col gap-4">
-        <label className="relative block">
-          <span className="sr-only">
-            Buscar diseño por código, SKU, nombre o categoría
-          </span>
-          <Search
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ml-white/40"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar por código, SKU, nombre o categoría (GE001, WEAR-GE001, Gamer…)"
-            className="glass h-12 w-full rounded-full border border-white/10 bg-white/5 pl-12 pr-4 text-base text-ml-white placeholder:text-ml-white/40 focus:border-ml-cyan/50 focus:outline-none"
-          />
-        </label>
-
-        <div className="flex flex-wrap gap-2">
+        <CollapsibleCatalogFilters label="Filtrar diseños Wear" selected={filters.find(option => option.id === filter)?.label ?? "Todos"}><div className="catalog-filters flex flex-wrap gap-2">
           {filters.map((option) => {
             const active = filter === option.id;
             return (
@@ -115,7 +103,7 @@ export default function MatrixLabWearCatalog({
                 <span
                   className={cn(
                     "text-xs font-medium",
-                    active ? "text-ml-cyan/70" : "text-ml-white/40",
+                    active ? "text-ml-cyan/70" : "text-ui-text-muted",
                   )}
                 >
                   ({option.count})
@@ -123,20 +111,21 @@ export default function MatrixLabWearCatalog({
               </button>
             );
           })}
-        </div>
+        </div></CollapsibleCatalogFilters>
 
-        <p className="text-sm text-ml-white/50" aria-live="polite">
-          {visible.length} de {entries.length} diseños
-        </p>
+        <CatalogSearch label="Buscar diseño por código, SKU, nombre o categoría" value={query} onChange={setQuery} placeholder="Buscar por código, SKU, nombre o categoría (GE001, WEAR-GE001, Gamer…)" />
+
+        <CatalogCount visible={visible.length} total={entries.length} noun="diseños" />
       </div>
 
       {visible.length === 0 ? (
-        <div className="glass mt-6 rounded-2xl p-10 text-center text-ml-white/60">
-          No encontramos diseños con esa búsqueda. Prueba con el código o el SKU
-          (por ejemplo: GE001 o WEAR-GE001).
-        </div>
+        <CatalogEmpty
+          emptyCatalog={entries.length === 0}
+          message="No encontramos diseños con esa búsqueda. Prueba con el código o el SKU (por ejemplo: GE001 o WEAR-GE001)."
+          onClear={() => { setQuery(""); setFilter(null); }}
+        />
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
           {visible.map((entry) => (
             <WearCard key={entry.handle} entry={entry} />
           ))}
@@ -159,7 +148,9 @@ function WearCard({ entry }: { entry: MatrixLabWearCatalogEntry }) {
   return (
     <article className="glass flex flex-col overflow-hidden rounded-2xl transition hover:border-ml-violet/40">
       <div className="relative aspect-square w-full overflow-hidden">
-        <Image brand="wear"
+        <Image
+
+          brand="wear"
           src={entry.image}
           alt={entry.title}
           fill
@@ -176,7 +167,7 @@ function WearCard({ entry }: { entry: MatrixLabWearCatalogEntry }) {
           {entry.title}
         </h3>
 
-        <p className="text-sm text-ml-white/60">{item.description}</p>
+        <ProductDescription><p className="text-sm text-ml-white/60">{item.description}</p></ProductDescription>
 
         <p className="text-sm text-ml-white/60">{item.garmentType}</p>
 
@@ -192,7 +183,7 @@ function WearCard({ entry }: { entry: MatrixLabWearCatalogEntry }) {
           </p>
         )}
 
-        <p className="text-xs text-ml-white/40">
+        <p className="text-xs text-ui-text-muted">
           {matrixLabWearRefLabel(item.code)} · {entry.sku}
         </p>
 

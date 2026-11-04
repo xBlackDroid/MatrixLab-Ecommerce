@@ -1,4 +1,8 @@
 import type { ComponentType, SVGProps } from "react";
+import MobileStorefront from "@/components/store/MobileStorefront";
+import { StoreHeader, StoreFooter } from "@/components/store/StoreLayout";
+import StoreMobileNavigation from "@/components/store/StoreMobileNavigation";
+import BackToTop from "@/components/store/BackToTop";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -594,12 +598,18 @@ const PRENDA_TILES: Array<{
   },
 ];
 
+// The mobile landing now contains prices and availability; read them per request.
+export const dynamic = "force-dynamic";
+
 export default function LandingPage() {
   return (
-    <>
-      <LandingNav />
+    <div className="store-shell studio-store">
+      <div className="sticky top-0 z-40 sm:hidden"><StoreHeader /></div>
+      <div className="hidden sm:contents"><LandingNav /></div>
 
-      <main className="pt-16">
+      <main id="main-content" tabIndex={-1} className="pt-0 sm:pt-16">
+        <div className="sm:hidden"><MobileStorefront /></div>
+        <div className="hidden sm:contents">
         {/* ================= HERO ================= */}
         <section className="relative overflow-hidden px-4 pb-24 pt-16 sm:px-6 sm:pt-24">
           <div className="grid-overlay pointer-events-none absolute inset-0" />
@@ -1208,8 +1218,12 @@ export default function LandingPage() {
             </p>
           </div>
         </footer>
+        </div>
       </main>
-    </>
+      <div className="sm:hidden"><StoreFooter /></div>
+      <StoreMobileNavigation />
+      <BackToTop />
+    </div>
   );
 }
 

@@ -1,9 +1,13 @@
 "use client";
 
+import CollapsibleCatalogFilters from "./CollapsibleCatalogFilters";
+
+import useUrlState, { updateUrlState } from "@/lib/ui/useUrlState";
+import { CatalogSearch, CatalogCount, CatalogEmpty } from "./CatalogControls";
 import { useMemo, useState } from "react";
 import Image from "@/components/store/StoreImage";
 import Link from "next/link";
-import { Minus, Plus, Search } from "lucide-react";
+import { Check, Minus, Plus, X } from "lucide-react";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import type { StickerCatalogEntry } from "@/lib/store/products";
 import {
@@ -16,6 +20,7 @@ import {
   type StickerFinishId,
 } from "@/lib/store/tumbler-stickers";
 import { cn, formatPrice } from "@/lib/utils";
+import styles from "./TumblerCatalog.module.css";
 
 interface StickerFilter {
   id: StickerFinishId | null;
@@ -50,8 +55,8 @@ export default function TumblerStickersCatalog({
 }: {
   entries: StickerCatalogEntry[];
 }) {
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<StickerFinishId | null>(null);
+  const [query, setQuery] = useUrlState<string>("q", "", undefined, "replace");
+  const [filter, setFilter] = useUrlState<StickerFinishId | null>("filtro", null, STICKER_FINISH_ORDER);
 
   const filters = useMemo(() => buildFilters(entries), [entries]);
 
@@ -70,24 +75,7 @@ export default function TumblerStickersCatalog({
   return (
     <div className="mt-10">
       <div className="flex flex-col gap-4">
-        <label className="relative block">
-          <span className="sr-only">
-            Buscar UV Sticker por código, nombre o SKU
-          </span>
-          <Search
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ml-white/40"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar por código, nombre o SKU (A050, STK-A187…)"
-            className="glass h-12 w-full rounded-full border border-white/10 bg-white/5 pl-12 pr-4 text-base text-ml-white placeholder:text-ml-white/40 focus:border-ml-cyan/50 focus:outline-none"
-          />
-        </label>
-
-        <div className="flex flex-wrap gap-2">
+        <CollapsibleCatalogFilters label="Filtrar UV y wraps" selected={filters.find(option => option.id === filter)?.label ?? "Todos"}><div className={`catalog-filters flex flex-wrap gap-2 ${styles.filters}`} role="group" aria-label="Acabados de UV y wraps">
           {filters.map((option) => {
             const active = filter === option.id;
             return (
@@ -97,7 +85,7 @@ export default function TumblerStickersCatalog({
                 onClick={() => setFilter(option.id)}
                 aria-pressed={active}
                 className={cn(
-                  "inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition",
+                  `inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition ${styles.filter}`,
                   active
                     ? "border-ml-cyan/60 bg-ml-cyan/15 text-ml-cyan"
                     : "border-white/10 bg-white/5 text-ml-white/70 hover:border-white/25 hover:text-ml-white",
@@ -107,28 +95,33 @@ export default function TumblerStickersCatalog({
                 <span
                   className={cn(
                     "text-xs font-medium",
-                    active ? "text-ml-cyan/70" : "text-ml-white/40",
+                    active ? "text-ml-cyan/70" : "text-ui-text-muted",
                   )}
                 >
                   ({option.count})
                 </span>
+                {active && <Check aria-hidden className={styles.check} />}
               </button>
             );
           })}
-        </div>
+        </div></CollapsibleCatalogFilters>
 
-        <p className="text-sm text-ml-white/50" aria-live="polite">
-          {visible.length} de {entries.length} UV Stickers
-        </p>
+        <CatalogSearch label="Buscar UV Sticker por código, nombre o SKU" value={query} onChange={setQuery} placeholder="Buscar por código, nombre o SKU (A050, STK-A187…)" />
+
+        <div className={styles.compactResults}>
+          <CatalogCount visible={visible.length} total={entries.length} noun="UV Stickers" />
+          {(filter || query) && <button type="button" className={styles.clear} onClick={() => updateUrlState({ filtro: null, q: null })}><X aria-hidden />Limpiar filtros</button>}
+        </div>
       </div>
 
       {visible.length === 0 ? (
-        <div className="glass mt-6 rounded-2xl p-10 text-center text-ml-white/60">
-          No encontramos UV Stickers con esa búsqueda. Prueba con el código o el
-          SKU (por ejemplo: A050 o STK-A050).
-        </div>
+        <CatalogEmpty
+          emptyCatalog={entries.length === 0}
+          message="No encontramos UV Stickers con esa búsqueda. Prueba con el código o el SKU (por ejemplo: A050 o STK-A050)."
+          onClear={() => updateUrlState({ filtro: null, q: null })}
+        />
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
           {visible.map((entry) => (
             <StickerCard key={entry.productId} entry={entry} />
           ))}
@@ -160,7 +153,9 @@ function StickerCard({ entry }: { entry: StickerCatalogEntry }) {
         href={`/tienda/producto/${entry.handle}`}
         className="group relative block aspect-square w-full overflow-hidden"
       >
-        <Image brand="tumbler"
+        <Image
+
+          brand="tumbler"
           src={entry.image}
           alt={entry.title}
           fill
@@ -169,7 +164,7 @@ function StickerCard({ entry }: { entry: StickerCatalogEntry }) {
         />
         {soldOut && (
           <span className="absolute left-3 top-3 rounded-full bg-ml-bg/85 px-3 py-1 text-xs font-semibold text-ml-white/80">
-            Agotado
+            SoldOut
           </span>
         )}
       </Link>
@@ -183,21 +178,21 @@ function StickerCard({ entry }: { entry: StickerCatalogEntry }) {
 
         <p className="text-xl font-bold text-ml-white">
           {formatPrice(entry.price)}{" "}
-          <span className="text-sm font-medium text-ml-white/50">/ pieza</span>
+          <span className="text-sm font-medium text-ui-text-muted">/ pieza</span>
         </p>
 
         <p
           className={cn(
             "text-sm font-semibold",
-            soldOut ? "text-ml-white/50" : "text-ml-cyan",
+            soldOut ? "text-ui-text-muted" : "text-ml-cyan",
           )}
         >
-          {soldOut ? "Agotado" : `Disponible: ${maxQuantity}`}
+          {soldOut ? "SoldOut" : `Disponible: ${maxQuantity}`}
         </p>
 
         <p className="text-sm text-ml-white/60">{entry.item.finishLabel}</p>
 
-        <p className="text-xs text-ml-white/40">
+        <p className="text-xs text-ui-text-muted">
           {stickerRefLabel(entry.item.code)}
         </p>
 
@@ -234,7 +229,7 @@ function StickerCard({ entry }: { entry: StickerCatalogEntry }) {
             variantId={entry.variantId}
             quantity={quantity}
             disabled={soldOut}
-            label={soldOut ? "Agotado" : "Agregar"}
+            label={soldOut ? "SoldOut" : "Agregar"}
             className="min-h-11 px-4 py-2.5 text-sm"
           />
         </div>

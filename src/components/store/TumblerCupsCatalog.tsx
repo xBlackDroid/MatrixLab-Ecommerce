@@ -24,11 +24,11 @@ export default function TumblerCupsCatalog({
 }) {
   return (
     <div className="mt-10">
-      <p className="text-sm text-ml-white/50">
+      <p className="text-sm text-ui-text-muted">
         {entries.length} {entries.length === 1 ? "vaso" : "vasos"} disponibles
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
         {entries.map((entry) => (
           <CupCard key={entry.productId} entry={entry} />
         ))}
@@ -61,7 +61,9 @@ function CupCard({ entry }: { entry: CupCatalogEntry }) {
         href={`/tienda/producto/${entry.handle}`}
         className="group relative block aspect-square w-full overflow-hidden"
       >
-        <Image brand="tumbler"
+        <Image
+
+          brand="tumbler"
           src={entry.image}
           alt={entry.title}
           fill
@@ -84,7 +86,7 @@ function CupCard({ entry }: { entry: CupCatalogEntry }) {
 
         <p className="text-xl font-bold text-ml-white">
           {formatPrice(selectedVariant?.price ?? entry.price)}{" "}
-          <span className="text-sm font-medium text-ml-white/50">/ pieza</span>
+          <span className="text-sm font-medium text-ui-text-muted">/ pieza</span>
         </p>
 
         <p className="text-sm text-ml-white/60">{entry.item.capacity}</p>
@@ -93,13 +95,13 @@ function CupCard({ entry }: { entry: CupCatalogEntry }) {
         <p
           className={cn(
             "text-sm font-semibold",
-            soldOut ? "text-ml-white/50" : "text-ml-cyan",
+            soldOut ? "text-ui-text-muted" : "text-ml-cyan",
           )}
         >
           {soldOut ? "Agotado" : `Disponible: ${maxQuantity}`}
         </p>
 
-        <p className="text-xs text-ml-white/40">{cupRefLabel(entry.item.code)}</p>
+        <p className="text-xs text-ui-text-muted">{cupRefLabel(entry.item.code)}</p>
 
         <div className="mt-auto flex flex-col gap-2 pt-2">
           {!soldOut && (

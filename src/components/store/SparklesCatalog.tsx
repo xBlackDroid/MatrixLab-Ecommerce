@@ -1,9 +1,13 @@
 "use client";
 
+import CollapsibleCatalogFilters from "./CollapsibleCatalogFilters";
+
+import useUrlState, { updateUrlState } from "@/lib/ui/useUrlState";
+import { CatalogSearch, CatalogCount, CatalogEmpty } from "./CatalogControls";
 import { useMemo, useState } from "react";
 import Image from "@/components/store/StoreImage";
 import Link from "next/link";
-import { Minus, Plus, Search } from "lucide-react";
+import { Check, Minus, Plus, X } from "lucide-react";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import type { SparkleCatalogEntry } from "@/lib/store/products";
 import {
@@ -16,6 +20,7 @@ import {
   UNCLASSIFIED_FILTER,
 } from "@/lib/store/tumbler-sparkles";
 import { cn, formatPrice } from "@/lib/utils";
+import styles from "./TumblerCatalog.module.css";
 
 interface SparkleFilter {
   id: string | null;
@@ -53,8 +58,8 @@ export default function SparklesCatalog({
 }: {
   entries: SparkleCatalogEntry[];
 }) {
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<string | null>(null);
+  const [query, setQuery] = useUrlState<string>("q", "", undefined, "replace");
+  const [filter, setFilter] = useUrlState<string | null>("filtro", null, [...SPARKLE_COLLECTIONS, LIMITED_EDITION_FILTER, UNCLASSIFIED_FILTER]);
 
   const filters = useMemo(() => buildFilters(entries), [entries]);
 
@@ -72,22 +77,7 @@ export default function SparklesCatalog({
   return (
     <div className="mt-10">
       <div className="flex flex-col gap-4">
-        <label className="relative block">
-          <span className="sr-only">Buscar Sparkle por nombre o código</span>
-          <Search
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ml-white/40"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar por nombre o código (Dragon, C08R, Glow…)"
-            className="glass h-12 w-full rounded-full border border-white/10 bg-white/5 pl-12 pr-4 text-base text-ml-white placeholder:text-ml-white/40 focus:border-ml-cyan/50 focus:outline-none"
-          />
-        </label>
-
-        <div className="flex flex-wrap gap-2">
+        <CollapsibleCatalogFilters label="Filtrar Sparkles" selected={filters.find(option => option.id === filter)?.label ?? "Todos"}><div className={`catalog-filters flex flex-wrap gap-2 ${styles.filters}`} role="group" aria-label="Colecciones de Sparkles">
           {filters.map((option) => {
             const active = filter === option.id;
             return (
@@ -97,30 +87,35 @@ export default function SparklesCatalog({
                 onClick={() => setFilter(option.id)}
                 aria-pressed={active}
                 className={cn(
-                  "inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold transition",
+                  `inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold transition ${styles.filter}`,
                   active
                     ? "border-ml-cyan/60 bg-ml-cyan/15 text-ml-cyan"
                     : "border-white/10 bg-white/5 text-ml-white/70 hover:border-white/25 hover:text-ml-white",
                 )}
               >
                 {option.label}
+                {active && <Check aria-hidden className={styles.check} />}
               </button>
             );
           })}
-        </div>
+        </div></CollapsibleCatalogFilters>
 
-        <p className="text-sm text-ml-white/50" aria-live="polite">
-          {visible.length} de {entries.length} Sparkles
-        </p>
+        <CatalogSearch label="Buscar Sparkle por nombre o código" value={query} onChange={setQuery} placeholder="Buscar por nombre o código (Dragon, C08R, Glow…)" />
+
+        <div className={styles.compactResults}>
+          <CatalogCount visible={visible.length} total={entries.length} noun="Sparkles" />
+          {(filter || query) && <button type="button" className={styles.clear} onClick={() => updateUrlState({ filtro: null, q: null })}><X aria-hidden />Limpiar filtros</button>}
+        </div>
       </div>
 
       {visible.length === 0 ? (
-        <div className="glass mt-6 rounded-2xl p-10 text-center text-ml-white/60">
-          No encontramos Sparkles con esa búsqueda. Prueba con el nombre o el
-          código (por ejemplo: C08R).
-        </div>
+        <CatalogEmpty
+          emptyCatalog={entries.length === 0}
+          message="No encontramos Sparkles con esa búsqueda. Prueba con el nombre o el código (por ejemplo: C08R)."
+          onClear={() => updateUrlState({ filtro: null, q: null })}
+        />
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
           {visible.map((entry) => (
             <SparkleCard key={entry.productId} entry={entry} />
           ))}
@@ -151,7 +146,9 @@ function SparkleCard({ entry }: { entry: SparkleCatalogEntry }) {
         href={`/tienda/producto/${entry.handle}`}
         className="group relative block aspect-square w-full overflow-hidden"
       >
-        <Image brand="tumbler"
+        <Image
+
+          brand="tumbler"
           src={entry.image}
           alt={entry.title}
           fill
@@ -174,19 +171,19 @@ function SparkleCard({ entry }: { entry: SparkleCatalogEntry }) {
 
         <p className="text-xl font-bold text-ml-white">
           {formatPrice(entry.price)}{" "}
-          <span className="text-sm font-medium text-ml-white/50">/ bote</span>
+          <span className="text-sm font-medium text-ui-text-muted">/ bote</span>
         </p>
 
         <p
           className={cn(
             "text-sm font-semibold",
-            soldOut ? "text-ml-white/50" : "text-ml-cyan",
+            soldOut ? "text-ui-text-muted" : "text-ml-cyan",
           )}
         >
           {soldOut ? "Agotado" : `Disponible: ${maxQuantity}`}
         </p>
 
-        <p className="text-xs text-ml-white/40">
+        <p className="text-xs text-ui-text-muted">
           {sparkleRefLabel(entry.item.code)}
         </p>
 

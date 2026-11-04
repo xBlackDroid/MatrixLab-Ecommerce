@@ -7,20 +7,24 @@ import { toast } from "sonner";
 import type { CartView } from "@/lib/db/types";
 import { emitCartUpdated } from "@/components/store/CartBadge";
 import CartLineItem from "@/components/store/CartLineItem";
+import LoadingState from "@/components/ui/LoadingState";
 import CartSummary from "@/components/store/CartSummary";
 
 export default function CartPageClient() {
   const [cart, setCart] = useState<CartView | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyItem, setBusyItem] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState("");
 
   const load = useCallback(async () => {
+    setLoading(true); setLoadError("");
     try {
       const res = await fetch("/api/cart", { cache: "no-store" });
       const data = await res.json().catch(() => null);
-      if (res.ok && data?.ok) setCart(data.cart as CartView);
+      if (!res.ok || !data?.ok) throw new Error("cart");
+      setCart(data.cart as CartView);
     } catch {
-      toast.error("No pudimos cargar tu carrito.");
+      setLoadError("No pudimos consultar tu carrito. Tus productos no se han modificado.");
     } finally {
       setLoading(false);
     }
@@ -69,13 +73,8 @@ export default function CartPageClient() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-ml-violet" aria-hidden />
-      </div>
-    );
-  }
+  if (loading) return <LoadingState variant="form" label="Cargando carrito…" />;
+  if (loadError) return <div role="alert" className="rounded-xl border border-ui-danger p-6"><h2 className="text-xl font-semibold">No pudimos consultar tu carrito</h2><p className="mt-2 text-ui-text-muted">{loadError}</p><button onClick={() => void load()} className="mt-4 min-h-11 rounded-md bg-ui-accent px-4 py-2 font-semibold text-ui-on-accent">Reintentar</button></div>;
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -109,7 +108,7 @@ export default function CartPageClient() {
   const canCheckout = cart.items.every((line) => line.availability === "ok");
 
   return (
-    <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-4">
         {cart.items.map((line) => (
           <CartLineItem

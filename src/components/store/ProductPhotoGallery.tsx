@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Image from "@/components/store/StoreImage";
 import type { ImageWatermarkBrand } from "@/lib/store/image-watermark";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import styles from "./ProductPhotoGallery.module.css";
 
 /**
  * Galería independiente por producto: hasta tres fotos, con avance cada 5 s.
@@ -21,6 +23,9 @@ import { cn } from "@/lib/utils";
  * `aspectClass` permite ajustar la proporción al formato real de las fotos.
  * Con `object-contain` la foto NUNCA se recorta: se centra sobre el fondo de
  * la tarjeta, así que la proporción sólo decide cuánto espacio ocupa.
+ *
+ * `href` (opcional) sólo actúa en móvil compacto: la foto lleva a la ficha en
+ * vez de avanzar. En escritorio y sin `href` el comportamiento no cambia.
  */
 export default function ProductPhotoGallery({
   images,
@@ -29,7 +34,10 @@ export default function ProductPhotoGallery({
   placeholder,
   aspectClass = "aspect-square",
   variant = "stacked",
+  compactOnMobile = false,
   sizes = "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw",
+  href,
+  linkOnDesktop = false,
 }: {
   images: readonly string[];
   title: string;
@@ -37,11 +45,16 @@ export default function ProductPhotoGallery({
   placeholder: string;
   aspectClass?: string;
   variant?: "stacked" | "overlay";
+  compactOnMobile?: boolean;
   sizes?: string;
+  href?: string;
+  /** Las tarjetas 3D abren la ficha también en escritorio; sus controles siguen disponibles. */
+  linkOnDesktop?: boolean;
 }) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [compactViewport, setCompactViewport] = useState(false);
   const [failed, setFailed] = useState<string[]>([]);
   const available = [...new Set(images.filter(Boolean))]
     .slice(0, 3)
@@ -60,12 +73,19 @@ export default function ProductPhotoGallery({
   }, []);
 
   useEffect(() => {
-    if (!multiple || paused || reducedMotion) return;
+    const viewport = matchMedia("(max-width: 639px)");
+    const update = () => setCompactViewport(viewport.matches);
+    update(); viewport.addEventListener("change", update);
+    return () => viewport.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!multiple || paused || reducedMotion || (compactOnMobile && compactViewport)) return;
     const timer = window.setInterval(() => {
       if (!document.hidden) setActive((current) => (current + 1) % photos.length);
     }, 5000);
     return () => window.clearInterval(timer);
-  }, [active, multiple, paused, reducedMotion, photos.length]);
+  }, [active, multiple, paused, reducedMotion, photos.length, compactOnMobile, compactViewport]);
 
   function move(offset: number) {
     setActive((index + offset + photos.length) % photos.length);
@@ -114,12 +134,13 @@ export default function ProductPhotoGallery({
             : "bg-ml-bg/40",
         )}
       >
-        <Image brand={brand}
+        <Image
+          brand={brand}
           src={photos[index]}
           alt={`${title} — foto ${index + 1} de ${photos.length}`}
           fill
           sizes={sizes}
-          className="object-contain"
+          className={compactOnMobile ? `object-contain ${styles.mobilePhoto}` : "object-contain"}
           onError={() => {
             const src = photos[index];
             if (src !== placeholder) {
@@ -127,16 +148,22 @@ export default function ProductPhotoGallery({
             }
           }}
         />
-        {multiple && (
+        {href && (linkOnDesktop || (compactOnMobile && compactViewport)) ? (
+          <Link
+            href={href}
+            aria-label={`Ver ${title}`}
+            className="absolute inset-0 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ml-cyan"
+          >{multiple && <span className={styles.counter} aria-hidden>{index + 1}/{photos.length}</span>}</Link>
+        ) : multiple && (
           <button
             type="button"
             onClick={() => move(1)}
             aria-label={`Ver siguiente foto de ${title}`}
             className="absolute inset-0 cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ml-cyan"
-          />
+          >{compactOnMobile && <span className={styles.counter} aria-hidden>{index + 1}/{photos.length}</span>}</button>
         )}
         {overlay && controls && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-3">
+          <div className={cn("pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-3", compactOnMobile && styles.fullControls)}>
             <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-ml-bg/70 p-1 backdrop-blur-sm">
               {controls}
             </div>
@@ -144,9 +171,9 @@ export default function ProductPhotoGallery({
         )}
       </div>
       {!overlay && (
-        <div className="flex min-h-[60px] items-center justify-center gap-1.5 px-2 py-2">
+        <div className={cn("flex min-h-[60px] items-center justify-center gap-1.5 px-2 py-2", compactOnMobile && styles.fullControls)}>
           {controls ?? (
-            <span className="text-xs text-ml-white/50">
+            <span className="text-xs text-ui-text-muted">
               {photos[0] === placeholder ? "Fotografía próximamente" : "1 foto"}
             </span>
           )}

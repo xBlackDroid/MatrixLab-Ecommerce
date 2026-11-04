@@ -13,6 +13,9 @@ interface AddToCartButtonProps {
   designProjectId?: string | null;
   disabled?: boolean;
   label?: string;
+  compactLabel?: string;
+  /** Muestra sólo el icono; `label` sigue siendo el nombre accesible completo. */
+  iconOnly?: boolean;
   className?: string;
   onAdded?: () => void;
 }
@@ -24,6 +27,8 @@ export default function AddToCartButton({
   designProjectId,
   disabled,
   label = "Agregar al carrito",
+  compactLabel,
+  iconOnly = false,
   className,
   onAdded,
 }: AddToCartButtonProps) {
@@ -73,7 +78,7 @@ export default function AddToCartButton({
       ) : (
         <ShoppingBag className="h-5 w-5" aria-hidden />
       )}
-      {label}
+      {iconOnly ? <span className="sr-only">{label}</span> : compactLabel ? <><span className="sm:hidden">{compactLabel}</span><span className="hidden sm:inline">{label}</span></> : label}
     </button>
   );
 }

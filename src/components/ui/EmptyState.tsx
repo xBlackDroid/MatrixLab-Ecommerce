@@ -1,0 +1,2 @@
+import type { ReactNode } from "react";
+export default function EmptyState({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) { return <section className="rounded-xl border border-ui-border bg-ui-surface p-6 text-center"><h2 className="text-lg font-semibold">{title}</h2><div className="mx-auto mt-2 max-w-prose text-sm text-ui-text-muted">{children}</div>{action && <div className="mt-5">{action}</div>}</section>; }

@@ -1,8 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import ProductDescription from "./ProductDescription";
+import CollapsibleCatalogFilters from "./CollapsibleCatalogFilters";
+
+import useUrlState from "@/lib/ui/useUrlState";
+import { CatalogCount, CatalogEmpty } from "./CatalogControls";
+import { useMemo } from "react";
+import Link from "next/link";
 import ThreeDProductGallery from "@/components/store/ThreeDProductGallery";
-import { MessageCircle, Sparkles } from "lucide-react";
+import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
 import type { MatrixLab3dCatalogEntry } from "@/lib/store/products";
 import {
   MATRIXLAB_3D_CATEGORY_LABELS,
@@ -40,16 +46,13 @@ function buildFilters(entries: MatrixLab3dCatalogEntry[]): ThreeDFilter[] {
 
 export default function MatrixLab3DCatalog({
   entries,
-  whatsappUrl,
   customizationWhatsappUrl,
 }: {
   entries: MatrixLab3dCatalogEntry[];
-  /** CTA de cotización general mientras el precio no esté confirmado. */
-  whatsappUrl: string;
   /** CTA específico de las piezas marcadas como personalizables. */
   customizationWhatsappUrl: string;
 }) {
-  const [filter, setFilter] = useState<MatrixLab3dCategoryId | null>(null);
+  const [filter, setFilter] = useUrlState<MatrixLab3dCategoryId | null>("filtro", null, MATRIXLAB_3D_CATEGORY_ORDER);
   const filters = useMemo(() => buildFilters(entries), [entries]);
   const customRequestUrl = new URL(customizationWhatsappUrl);
   customRequestUrl.searchParams.set(
@@ -64,7 +67,7 @@ export default function MatrixLab3DCatalog({
   );
 
   return (
-    <div className="mt-10">
+    <div className="mobile-3d-catalog mt-10">
       <section
         aria-labelledby="custom-3d-heading"
         className="mb-8 overflow-hidden rounded-2xl border border-ml-violet/40 bg-linear-to-br from-ml-violet/20 via-ml-bg to-ml-cyan/10 p-5 sm:p-8"
@@ -99,7 +102,7 @@ export default function MatrixLab3DCatalog({
           </div>
         </div>
       </section>
-      <div className="flex flex-wrap gap-2">
+      <CollapsibleCatalogFilters label="Filtrar piezas 3D" selected={filters.find(option => option.id === filter)?.label ?? "Todas"}><div className="catalog-filters flex flex-wrap gap-2">
         {filters.map((option) => {
           const active = filter === option.id;
           return (
@@ -119,7 +122,7 @@ export default function MatrixLab3DCatalog({
               <span
                 className={cn(
                   "text-xs font-medium",
-                  active ? "text-ml-cyan/70" : "text-ml-white/40",
+                  active ? "text-ml-cyan/70" : "text-ui-text-muted",
                 )}
               >
                 ({option.count})
@@ -127,40 +130,42 @@ export default function MatrixLab3DCatalog({
             </button>
           );
         })}
+      </div></CollapsibleCatalogFilters>
+
+      <div className="mt-4">
+        <CatalogCount visible={visible.length} total={entries.length} noun="piezas" />
       </div>
 
-      <p className="mt-4 text-sm text-ml-white/50" aria-live="polite">
-        {visible.length} de {entries.length} piezas
-      </p>
-
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-        {visible.map((entry) => (
-          <ThreeDCard
-            key={entry.handle}
-            entry={entry}
-            whatsappUrl={whatsappUrl}
-            customizationWhatsappUrl={customizationWhatsappUrl}
-          />
-        ))}
-      </div>
+      {visible.length === 0 ? (
+        <CatalogEmpty
+          emptyCatalog={entries.length === 0}
+          message="No encontramos piezas en esta categoría. Prueba con otra categoría o cuéntanos qué pieza quieres crear."
+          clearLabel="Limpiar filtros"
+          onClear={() => setFilter(null)}
+        />
+      ) : (
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          {visible.map((entry) => (
+            <ThreeDCard
+              key={entry.handle}
+              entry={entry}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-/** Tarjeta con precio del Excel y consulta de la pieza por WhatsApp. */
+/** La tarjeta abre la ficha; las consultas comerciales se hacen dentro de ella. */
 function ThreeDCard({
   entry,
-  whatsappUrl,
-  customizationWhatsappUrl,
 }: {
   entry: MatrixLab3dCatalogEntry;
-  whatsappUrl: string;
-  customizationWhatsappUrl: string;
 }) {
   const { item } = entry;
   const priceConfirmed = entry.price !== null;
-  const contactUrl = new URL(item.customizable ? customizationWhatsappUrl : whatsappUrl);
-  contactUrl.searchParams.set("text", `Hola MatrixLab, quiero ${item.customizable ? "personalizar" : "consultar"} ${entry.title} (${item.code}), ${item.salesUnit}.`);
+  const href = `/tienda/producto/${entry.handle}`;
 
   return (
     <article
@@ -172,7 +177,7 @@ function ThreeDCard({
       )}
     >
       <div className="relative">
-        <ThreeDProductGallery images={entry.images} title={entry.title} />
+        <ThreeDProductGallery images={entry.images} title={entry.title} href={href} sizes="(max-width: 639px) 50vw, (max-width: 1023px) 50vw, 33vw" />
         <div className="pointer-events-none absolute inset-x-3 top-3 flex flex-wrap items-start justify-between gap-1.5">
         <span className="rounded-full bg-ml-bg/85 px-3 py-1 text-xs font-semibold text-ml-cyan">
           {MATRIXLAB_3D_CATEGORY_LABELS[item.category]}
@@ -188,14 +193,15 @@ function ThreeDCard({
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="text-base font-bold leading-snug text-ml-white sm:text-lg">
-          {entry.title}
+          <Link href={href} className="transition hover:text-ml-cyan focus-visible:outline-2 focus-visible:outline-ml-cyan">{entry.title}</Link>
         </h3>
 
-        <p className="text-sm text-ml-white/60">{item.description}</p>
+        <ProductDescription><p className="text-sm text-ml-white/60">{item.description}</p>
 
         <p className="text-sm text-ml-white/60">
           {item.usageLabel} · {item.finishLabel}
         </p>
+        <p className="text-xs sm:hidden">{matrixLab3dRefLabel(item.code)} · {entry.sku}</p></ProductDescription>
 
         {priceConfirmed ? (
           <p className="text-xl font-bold text-ml-white">
@@ -210,34 +216,23 @@ function ThreeDCard({
           </p>
         )}
 
-        <p className="text-xs text-ml-white/40">
+        <p className="hidden text-xs text-ui-text-muted sm:block">
           {matrixLab3dRefLabel(item.code)} · {entry.sku}
         </p>
 
         <div className="mt-auto pt-2">
-          <a
-            href={contactUrl.toString()}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={href}
+            aria-label={`Ver pieza: ${entry.title}`}
             className={cn(
               "inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition",
               item.customizable
-                ? "bg-ml-violet text-ml-white hover:bg-ml-violet/90"
+                ? "bg-ml-violet text-ml-bg hover:bg-ml-violet/90"
                 : "bg-ml-green text-ml-bg hover:bg-ml-green/90",
             )}
           >
-            {item.customizable ? (
-              <>
-                <Sparkles className="h-4 w-4" aria-hidden />
-                Consultar personalización
-              </>
-            ) : (
-              <>
-                <MessageCircle className="h-4 w-4" aria-hidden />
-                {priceConfirmed ? "Pedir por WhatsApp" : "Consultar precio"}
-              </>
-            )}
-          </a>
+            Ver pieza <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
         </div>
       </div>
     </article>

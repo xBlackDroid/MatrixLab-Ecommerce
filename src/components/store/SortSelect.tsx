@@ -19,9 +19,11 @@ export default function SortSelect({ current }: { current: ProductSort }) {
       Ordenar por
       <select
         value={current}
-        onChange={(event) =>
-          router.push(`${pathname}?orden=${event.target.value}`)
-        }
+        onChange={(event) => {
+          const params = new URLSearchParams(window.location.search);
+          params.set("orden", event.target.value);
+          router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        }}
         className="glass rounded-full border-white/15 bg-ml-bg/80 px-4 py-2 text-sm text-ml-white outline-none transition focus:border-ml-violet"
       >
         {PRODUCT_SORT_OPTIONS.map((option) => (

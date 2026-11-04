@@ -10,7 +10,10 @@ import type {
 } from "@/lib/db/types";
 import { cn, formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl, whatsappMessages } from "@/lib/whatsapp";
+import Badge from "@/components/ui/Badge";
+import { stickerByHandle } from "@/lib/store/tumbler-stickers";
 import AddToCartButton from "@/components/store/AddToCartButton";
+import BackToTop from "@/components/store/BackToTop";
 import InventoryBadge, {
   CustomizableBadge,
   VolumeBadge,
@@ -28,6 +31,10 @@ export default function ProductOptions({
   designerType,
 }: ProductOptionsProps) {
   const variants = product.variants;
+  const isSticker = Boolean(stickerByHandle(product.handle));
+  const stickerSoldOut = isSticker && !variants.some(
+    (variant) => variant.stock > 0 && ["disponible", "sobre_pedido"].includes(variant.status),
+  );
   const hasColorSize = variants.some((v) => v.color || v.size);
   const colors = useMemo(
     () => [...new Set(variants.map((v) => v.color).filter(Boolean))] as string[],
@@ -45,7 +52,9 @@ export default function ProductOptions({
     sizes[0] ?? null,
   );
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    !hasColorSize && variants.length > 0 ? variants[0]!.id : null,
+    !hasColorSize
+      ? (variants.find((variant) => !isSticker || (variant.stock > 0 && ["disponible", "sobre_pedido"].includes(variant.status)))?.id ?? null)
+      : null,
   );
   const [quantity, setQuantity] = useState(product.min_quantity);
 
@@ -73,23 +82,28 @@ export default function ProductOptions({
   );
   const variantBlocked =
     selectedVariant !== null &&
-    ["agotado", "oculto"].includes(selectedVariant.status);
+    (["agotado", "oculto"].includes(selectedVariant.status) ||
+      (isSticker && selectedVariant.stock <= 0));
   const onDemand =
-    product.status === "sobre_pedido" ||
-    selectedVariant?.status === "sobre_pedido";
+    !isSticker && (product.status === "sobre_pedido" ||
+    selectedVariant?.status === "sobre_pedido");
   const stockLimited =
-    !onDemand && selectedVariant !== null && product.status === "disponible";
+    !onDemand && selectedVariant !== null && (isSticker || product.status === "disponible");
   const maxByStock = stockLimited
     ? Math.max(0, selectedVariant.stock)
     : product.max_quantity;
   const maxQuantity = Math.min(product.max_quantity, maxByStock || 0);
   const needsVariant = variants.length > 0 && selectedVariant === null;
   const isOutOfStock =
+    stickerSoldOut ||
     product.status === "agotado" ||
     variantBlocked ||
     (stockLimited && selectedVariant.stock <= 0);
   const canBuy =
-    productSellable && !isOutOfStock && !needsVariant && quantity >= 1;
+    productSellable && !isOutOfStock && !needsVariant &&
+    quantity >= product.min_quantity && quantity <= maxQuantity;
+  // Sólo móvil: la barra fija sustituye al dock cuando el producto se compra aquí.
+  const showBuyBar = productSellable && !isOutOfStock;
 
   function step(delta: number) {
     setQuantity((current) => {
@@ -110,20 +124,20 @@ export default function ProductOptions({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-2">
-        <InventoryBadge status={effectiveStatus} />
+        {isSticker && isOutOfStock ? <Badge>SoldOut</Badge> : <InventoryBadge status={effectiveStatus} />}
         {product.is_customizable && <CustomizableBadge />}
         {product.max_quantity >= 100 && <VolumeBadge />}
       </div>
 
       <div className="flex items-baseline gap-3">
-        <span className="text-3xl font-bold">{formatPrice(unitPrice)}</span>
+        <span className="ui-money text-3xl font-bold">{formatPrice(unitPrice)}</span>
         {product.compare_at_price &&
           Number(product.compare_at_price) > unitPrice && (
-            <span className="text-lg text-ml-white/40 line-through">
+            <span className="text-lg text-ui-text-muted line-through">
               {formatPrice(product.compare_at_price)}
             </span>
           )}
-        <span className="text-sm text-ml-white/50">MXN</span>
+        <span className="text-sm text-ui-text-muted">MXN</span>
       </div>
 
       {colors.length > 0 && (
@@ -181,15 +195,18 @@ export default function ProductOptions({
                 key={variant.id}
                 type="button"
                 onClick={() => setSelectedVariantId(variant.id)}
+                disabled={isSticker && (!productSellable || variant.stock <= 0 || ["agotado", "oculto"].includes(variant.status))}
                 className={cn(
                   "rounded-full border px-4 py-2 text-sm transition",
                   selectedVariantId === variant.id
                     ? "border-ml-violet bg-ml-violet/15 text-ml-violet"
                     : "border-white/15 bg-white/5 text-ml-white/75 hover:border-white/30",
                   variant.status === "agotado" && "opacity-45",
+                  "disabled:cursor-not-allowed disabled:opacity-45",
                 )}
               >
                 {variant.option_label ?? variant.title}
+                {isSticker && (variant.stock <= 0 || variant.status === "agotado" || product.status === "agotado") && " · SoldOut"}
                 {variant.price !== null &&
                   Number(variant.price) !== Number(product.base_price) &&
                   ` · ${formatPrice(variant.price)}`}
@@ -201,10 +218,11 @@ export default function ProductOptions({
 
       <div className="flex items-center gap-4">
         <p className="text-sm font-medium text-ml-white/70">Cantidad</p>
-        <div className="glass flex items-center rounded-full">
+        <div className="product-quantity glass flex items-center rounded-full">
           <button
             type="button"
             onClick={() => step(-1)}
+            disabled={!canBuy || quantity <= product.min_quantity}
             aria-label="Disminuir cantidad"
             className="flex h-11 w-11 items-center justify-center rounded-l-full text-ml-white/70 transition hover:text-ml-violet"
           >
@@ -214,6 +232,7 @@ export default function ProductOptions({
           <button
             type="button"
             onClick={() => step(1)}
+            disabled={!canBuy || quantity >= maxQuantity}
             aria-label="Aumentar cantidad"
             className="flex h-11 w-11 items-center justify-center rounded-r-full text-ml-white/70 transition hover:text-ml-violet"
           >
@@ -221,7 +240,7 @@ export default function ProductOptions({
           </button>
         </div>
         {stockLimited && selectedVariant.stock > 0 && (
-          <span className="text-xs text-ml-white/50">
+          <span className="text-xs text-ui-text-muted">
             {selectedVariant.stock} disponibles
           </span>
         )}
@@ -248,7 +267,7 @@ export default function ProductOptions({
               variantId={selectedVariant?.id}
               quantity={quantity}
               disabled
-              label="Agotado"
+              label={isSticker ? "SoldOut" : "Agotado"}
             />
             <a
               href={buildWhatsAppUrl(whatsappMessages.outOfStock(product.title))}
@@ -266,6 +285,7 @@ export default function ProductOptions({
             variantId={selectedVariant?.id}
             quantity={quantity}
             disabled={!canBuy}
+            className={showBuyBar ? "max-sm:hidden" : undefined}
           />
         )}
 
@@ -300,6 +320,20 @@ export default function ProductOptions({
           Pregúntanos por WhatsApp
         </a>
       </div>
+
+      {showBuyBar && (
+        <div className="pdp-buy-bar sm:hidden" role="group" aria-label={`Comprar ${product.title}`}>
+          <BackToTop inNavigation />
+          <p className="ui-money">{formatPrice(unitPrice)}</p>
+          <AddToCartButton
+            productId={product.id}
+            variantId={selectedVariant?.id}
+            quantity={quantity}
+            disabled={!canBuy}
+            compactLabel="Agregar"
+          />
+        </div>
+      )}
     </div>
   );
 }

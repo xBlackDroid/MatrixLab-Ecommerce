@@ -46,13 +46,13 @@ export default function ProductImagePlaceholder({
   return (
     <div
       className={cn(
-        "flex h-full w-full items-center justify-center bg-gradient-to-br",
+        "flex h-full w-full items-center justify-center bg-linear-to-br",
         gradient,
         className,
       )}
     >
       <Icon
-        className={cn("h-14 w-14 text-ml-white/30", iconClassName)}
+        className={cn("h-14 w-14 text-ui-text-muted", iconClassName)}
         aria-hidden
       />
     </div>

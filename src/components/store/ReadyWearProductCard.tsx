@@ -74,6 +74,7 @@ export default function ReadyWearProductCard({
       <div
         className={cn(
           "px-2 pt-2",
+          grid && "ready-garment-colors-many",
           grid
             ? "grid grid-cols-2 justify-items-center gap-y-1 min-[360px]:grid-cols-3 sm:grid-cols-4 xl:grid-cols-5"
             : "flex flex-wrap justify-center gap-1",
