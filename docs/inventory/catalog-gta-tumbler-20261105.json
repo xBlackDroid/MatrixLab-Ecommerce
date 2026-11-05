@@ -3,7 +3,7 @@
   "date": "2026-11-05",
   "sourceZip": "gta-rosa-pastel-4-modelos-2026-11-05-v2.zip",
   "sourceProductionCommit": "300d109feabf5dc93ce0fdfc3b328cc5b7bda98e",
-  "status": "prepared; production evidence recorded separately",
+  "status": "published and verified on production",
   "confidence": {
     "dataAndPaths": "T1, verified by tests and database receipts",
     "recolorAndMaterial": "T2, visual review of all 56 images; not colorimetric measurement"
@@ -172,8 +172,8 @@
     },
     {
       "handle": "wear-sudadera-su013",
-      "title": "Sudadera GTA VI VI Palm Club",
-      "description": "Sudadera GTA VI VI Palm Club. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre nueve colores, corte Hombre o Mujer y talla Chica, Mediana o Grande.",
+      "title": "Sudadera GTA VI Palm Club",
+      "description": "Sudadera GTA VI Palm Club. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre nueve colores, corte Hombre o Mujer y talla Chica, Mediana o Grande.",
       "category": "wear-sudaderas",
       "base_price": 645,
       "images": [
@@ -193,8 +193,8 @@
     },
     {
       "handle": "wear-gorra-go010",
-      "title": "Gorra GTA VI VI Palm Club",
-      "description": "Gorra GTA VI VI Palm Club. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre cinco colores. Sin selección de corte o talla.",
+      "title": "Gorra GTA VI Palm Club",
+      "description": "Gorra GTA VI Palm Club. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre cinco colores. Sin selección de corte o talla.",
       "category": "gorras",
       "base_price": 279,
       "images": [
@@ -1276,5 +1276,141 @@
       "visualConfidence": "T2 inherited, reviewed as batch",
       "sourceFile": "IMG_4161_master.png"
     }
-  ]
+  ],
+  "production": {
+    "domain": "https://www.matrixlabintelligence.com",
+    "deployment": "https://matrix-lab-ecommerce-b71qgj35u-matrixlabintelligence.vercel.app",
+    "deploymentId": "dpl_Ce7cDUcSGQJTX6CmWF3DTcjQJFDs",
+    "sourceCommit": "794a46f2180d40492bb2bd358ad4305d18854979",
+    "state": "READY",
+    "aliasesVerified": [
+      "www.matrixlabintelligence.com",
+      "matrixlabintelligence.com"
+    ]
+  },
+  "verification": {
+    "staticAssetsSha256": 70,
+    "colorCardChanges": 56,
+    "productDetails": 8,
+    "cartScenarios": [
+      {
+        "handle": "wear-sudadera-su010",
+        "cut": "Hombre",
+        "color": "Rosa pastel",
+        "price": 645,
+        "stockLimitVerified": true
+      },
+      {
+        "handle": "wear-sudadera-su011",
+        "cut": "Mujer",
+        "color": "Azul royal",
+        "price": 645,
+        "stockLimitVerified": true
+      },
+      {
+        "handle": "wear-gorra-go007",
+        "cut": null,
+        "color": "Azul royal",
+        "price": 279,
+        "stockLimitVerified": true
+      }
+    ],
+    "responsiveChecks": 18,
+    "viewportWidths": [
+      320,
+      390,
+      1440
+    ],
+    "cartClean": true,
+    "runtimeErrors": [],
+    "previousProductsPreserved": 10,
+    "previousVariantsPreserved": 14,
+    "unexpectedDifferences": 0,
+    "insertedProducts": 9,
+    "insertedVariants": 237,
+    "insertedStock": 1101,
+    "inventoryMovementRows": 237,
+    "inventoryMovementQuantity": 1101,
+    "thermosFilterProducts": 5,
+    "cupsFilterProducts": 5,
+    "alienGallery": [
+      "vl001-2.webp",
+      "vl001.webp",
+      "vl001-3.webp"
+    ],
+    "finalProducts": [
+      {
+        "handle": "vaso-v010",
+        "title": "Termo rosa con asa y tapa deslizante",
+        "status": "disponible",
+        "base_price": "180.00",
+        "variants": 1,
+        "stock": 1
+      },
+      {
+        "handle": "wear-gorra-go007",
+        "title": "Gorra GTA VI Dúo Vice",
+        "status": "disponible",
+        "base_price": "279.00",
+        "variants": 5,
+        "stock": 5
+      },
+      {
+        "handle": "wear-gorra-go008",
+        "title": "Gorra GTA VI Vice City Sunset",
+        "status": "disponible",
+        "base_price": "279.00",
+        "variants": 5,
+        "stock": 5
+      },
+      {
+        "handle": "wear-gorra-go009",
+        "title": "Gorra GTA VI Leonida Night Drive",
+        "status": "disponible",
+        "base_price": "279.00",
+        "variants": 5,
+        "stock": 5
+      },
+      {
+        "handle": "wear-gorra-go010",
+        "title": "Gorra GTA VI Palm Club",
+        "status": "disponible",
+        "base_price": "279.00",
+        "variants": 5,
+        "stock": 5
+      },
+      {
+        "handle": "wear-sudadera-su010",
+        "title": "Sudadera GTA VI Dúo Vice",
+        "status": "disponible",
+        "base_price": "645.00",
+        "variants": 54,
+        "stock": 270
+      },
+      {
+        "handle": "wear-sudadera-su011",
+        "title": "Sudadera GTA VI Vice City Sunset",
+        "status": "disponible",
+        "base_price": "645.00",
+        "variants": 54,
+        "stock": 270
+      },
+      {
+        "handle": "wear-sudadera-su012",
+        "title": "Sudadera GTA VI Leonida Night Drive",
+        "status": "disponible",
+        "base_price": "645.00",
+        "variants": 54,
+        "stock": 270
+      },
+      {
+        "handle": "wear-sudadera-su013",
+        "title": "Sudadera GTA VI Palm Club",
+        "status": "disponible",
+        "base_price": "645.00",
+        "variants": 54,
+        "stock": 270
+      }
+    ]
+  }
 }
