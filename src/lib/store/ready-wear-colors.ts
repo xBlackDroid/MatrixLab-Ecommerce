@@ -3,9 +3,10 @@
  *
  *   * playeras `wear-lista-wr001` … `wr034`: Blanca, Negra o Gris (Negra por
  *     defecto). Fotos en /public/images/matrixlab-wear/colors/.
- *   * sudaderas adulto `wear-sudadera-su001` … `su009`: nueve colores (Lila
- *     por defecto). Fotos en /public/images/matrixlab-wear/hoodies/.
- *   * gorras `wear-gorra-go001` … `go006`: cuatro colores (Rosa por defecto).
+ *   * sudaderas adulto `wear-sudadera-su001` … `su013`: nueve colores (GTA:
+ *     Rosa pastel por defecto; anteriores: Lila). Fotos en /public/images/matrixlab-wear/hoodies/.
+ *   * gorras `wear-gorra-go001` … `go010`: cuatro colores anteriores y cinco
+ *     en GTA, con Azul royal y Rosa pastel por defecto (anteriores: Rosa).
  *     Fotos en /public/images/matrixlab-wear/gorras/colors/.
  *
  * Sin dependencias de servidor: lo usan la ficha, la tarjeta, el carrito y la
@@ -99,7 +100,7 @@ const HOODIES: GarmentSpec = {
   pattern: /^wear-sudadera-su(\d{3})$/,
   prefix: "su",
   first: 1,
-  last: 9,
+  last: 13,
   colors: READY_WEAR_HOODIE_COLORS,
   defaultColor: DEFAULT_READY_WEAR_HOODIE_COLOR,
   dir: "/images/matrixlab-wear/hoodies",
@@ -113,7 +114,7 @@ const CAPS: GarmentSpec = {
   pattern: /^wear-gorra-go(\d{3})$/,
   prefix: "go",
   first: 1,
-  last: 6,
+  last: 10,
   colors: READY_WEAR_CAP_COLORS,
   defaultColor: "Rosa",
   dir: "/images/matrixlab-wear/gorras/colors",
@@ -122,6 +123,22 @@ const CAPS: GarmentSpec = {
 };
 
 const GARMENTS: readonly GarmentSpec[] = [SHIRTS, HOODIES, CAPS];
+
+const GTA_HOODIES = new Set(["su010", "su011", "su012", "su013"]);
+const GTA_CAPS = new Set(["go007", "go008", "go009", "go010"]);
+const GTA_HOODIE_COLORS: readonly ReadyWearColorOption[] = [
+  { label: "Rosa pastel", slug: "rosa-pastel" },
+  { label: "Azul royal", slug: "azul-royal" },
+  { label: "Azul marino", slug: "azul-marino" },
+  ...READY_WEAR_HOODIE_COLORS.filter(
+    (color) => !["rosa-pastel", "azul-royal", "azul-marino"].includes(color.slug),
+  ),
+];
+const GTA_CAP_COLORS: readonly ReadyWearColorOption[] = [
+  { label: "Rosa pastel", slug: "rosa-pastel" },
+  { label: "Azul royal", slug: "azul-royal" },
+  ...READY_WEAR_CAP_COLORS.filter((color) => color.slug !== "rosa-pastel"),
+];
 
 const ALL_COLORS: readonly ReadyWearColorOption[] = [
   ...READY_WEAR_COLORS,
@@ -168,11 +185,18 @@ export function readyWearGarmentOf(handle: string): ReadyWearGarment | null {
 export function getReadyWearColors(
   handle: string,
 ): readonly ReadyWearColorOption[] {
-  return garmentOf(handle)?.spec.colors ?? [];
+  const garment = garmentOf(handle);
+  if (!garment) return [];
+  if (GTA_HOODIES.has(garment.code)) return GTA_HOODIE_COLORS;
+  if (GTA_CAPS.has(garment.code)) return GTA_CAP_COLORS;
+  return garment.spec.colors;
 }
 
 export function getDefaultReadyWearColor(handle: string): ReadyWearColor | null {
-  return garmentOf(handle)?.spec.defaultColor ?? null;
+  const garment = garmentOf(handle);
+  if (!garment) return null;
+  if (GTA_HOODIES.has(garment.code) || GTA_CAPS.has(garment.code)) return "Rosa pastel";
+  return garment.spec.defaultColor;
 }
 
 function findColor<T extends ReadyWearColorOption>(
@@ -205,7 +229,7 @@ export function parseReadyWearColorFor(
 ): ReadyWearColor | null {
   const garment = garmentOf(handle);
   if (!garment) return null;
-  return findColor(garment.spec.colors, value)?.label ?? null;
+  return findColor(getReadyWearColors(handle), value)?.label ?? null;
 }
 
 /** Color pedido (`?color=`) o, si no es de esa prenda, su color por defecto. */
@@ -228,7 +252,7 @@ export function readyWearColorImages(
   if (!garment) return [];
   const { spec, code } = garment;
   // Un color de OTRA prenda (Lila en una playera) no arma una ruta inexistente.
-  const option = spec.colors.find((c) => c.label === color);
+  const option = getReadyWearColors(handle).find((c) => c.label === color);
   if (!option) return [];
   const images = [`${spec.dir}/${code}-${option.slug}.webp`];
   if (spec.withSecondaryPhoto.has(code)) {
@@ -289,7 +313,9 @@ export function readyWearPhotoDescription(
   handle: string,
   color: ReadyWearColor,
 ): string {
-  const spec = garmentOf(handle)?.spec;
+  const garment = garmentOf(handle);
+  const spec = garment?.spec;
   const base = `${spec?.garment ?? "prenda"} color ${color}`;
+  if (garment && ["su011", "su013"].includes(garment.code)) return `${base}, vista frontal`;
   return spec?.photoView ? `${base}, ${spec.photoView}` : base;
 }

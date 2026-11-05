@@ -95,11 +95,17 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/admin/cotizador": ["./src/lib/admin-cotizador/legacy/**/*"],
   },
-  // Las fotos IceSkating se sirven como archivos estáticos. Sus rutas se
+  // Las fotos IceSkating, GTA y vasos aprobados se sirven como estáticos. Sus rutas se
   // resuelven por el catálogo/selector, sin leer su contenido en servidor.
   // Evita copiarlas a cada función por el chequeo genérico de public/.
   outputFileTracingExcludes: {
-    "/*": ["./public/images/matrixlab-wear/hoodies/su00[6-9]-*.webp"],
+    "/*": [
+      "./public/images/matrixlab-wear/hoodies/su00[6-9]-*.webp",
+      "./public/images/matrixlab-wear/hoodies/su01[0-3]-*.webp",
+      "./public/images/matrixlab-wear/gorras/colors/go00[7-9]-*.webp",
+      "./public/images/matrixlab-wear/gorras/colors/go010-*.webp",
+      "./public/images/tumbler/vasos/aprobadas-20261105/*.webp",
+    ],
   },
 };
 

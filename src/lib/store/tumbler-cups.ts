@@ -71,6 +71,7 @@ export const TUMBLER_CUPS: readonly CupItem[] = [
   {
     position: 1,
     code: "V001",
+    imagePaths: ["/images/tumbler/vasos/aprobadas-20261105/v001.webp", "/images/tumbler/vasos/aprobadas-20261105/v001-2.webp"],
     name: "24 oz Transparente",
     collection: "Colección Clásica",
     description:
@@ -82,6 +83,7 @@ export const TUMBLER_CUPS: readonly CupItem[] = [
   {
     position: 2,
     code: "V002",
+    imagePaths: ["/images/tumbler/vasos/aprobadas-20261105/v002.webp"],
     name: "24 oz Tapa de Color",
     collection: "Color Collection",
     description:
@@ -93,6 +95,7 @@ export const TUMBLER_CUPS: readonly CupItem[] = [
   {
     position: 3,
     code: "V003",
+    imagePaths: ["/images/tumbler/vasos/aprobadas-20261105/v003.webp"],
     name: "24 oz Slip",
     collection: "Slip Collection",
     description:
@@ -104,6 +107,7 @@ export const TUMBLER_CUPS: readonly CupItem[] = [
   {
     position: 4,
     code: "V004",
+    imagePaths: ["/images/tumbler/vasos/aprobadas-20261105/v004.webp"],
     name: "20 oz Slip",
     collection: "Slip Collection",
     description:
@@ -115,6 +119,7 @@ export const TUMBLER_CUPS: readonly CupItem[] = [
   {
     position: 5,
     code: "V005",
+    imagePaths: ["/images/tumbler/vasos/aprobadas-20261105/v005.webp"],
     name: "16 oz Can",
     collection: "Can Collection",
     description:
@@ -123,10 +128,11 @@ export const TUMBLER_CUPS: readonly CupItem[] = [
     inventory: 5,
     price: 135,
   },
-  {"position":6,"code":"V006","name":"Termo con asa y tapa de rosca","collection":"Termos","description":"Termo de color liso con asa y tapa de rosca. Elige tu color favorito.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v006.webp","/images/tumbler/vasos/v006-2.webp","/images/tumbler/vasos/v006-3.webp","/images/tumbler/vasos/v006-4.webp"],"colors":["Negro","Rosa","Blanco","Lila","Azul marino"]},
-  {"position":7,"code":"V007","name":"Termo Game Over","collection":"Termos decorados","description":"Termo Game Over. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v007.webp"],"colors":["Negro"]},
-  {"position":8,"code":"V008","name":"Termo Patinaje","collection":"Termos decorados","description":"Termo Patinaje. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v008.webp"],"colors":["Negro"]},
-  {"position":9,"code":"V009","name":"Termo Toluca Bicampeón","collection":"Termos decorados","description":"Termo Toluca Bicampeón. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/v009.webp"],"colors":["Blanco"]},
+  {"position":6,"code":"V006","name":"Termo con asa y tapa de rosca","collection":"Termos","description":"Termo de color liso con asa y tapa de rosca. Elige tu color favorito.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/aprobadas-20261105/v006.webp","/images/tumbler/vasos/aprobadas-20261105/v006-2.webp","/images/tumbler/vasos/aprobadas-20261105/v006-3.webp","/images/tumbler/vasos/aprobadas-20261105/v006-4.webp"],"colors":["Negro","Rosa","Blanco","Lila","Azul marino"]},
+  {"position":7,"code":"V007","name":"Termo Game Over","collection":"Termos decorados","description":"Termo Game Over. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/aprobadas-20261105/v007.webp"],"colors":["Negro"]},
+  {"position":8,"code":"V008","name":"Termo Patinaje","collection":"Termos decorados","description":"Termo Patinaje. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/aprobadas-20261105/v008.webp"],"colors":["Negro"]},
+  {"position":9,"code":"V009","name":"Termo Toluca Bicampeón","collection":"Termos decorados","description":"Termo Toluca Bicampeón. Una pieza con diseño lista para acompañarte todos los días.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/aprobadas-20261105/v009.webp"],"colors":["Blanco"]},
+  {"position":10,"code":"V010","name":"Termo rosa con asa y tapa deslizante","collection":"Termos","description":"Termo rosa con asa lateral y tapa deslizante. Una base lisa para acompañarte cada día o preparar tu siguiente proyecto personalizado.","capacity":"","inventory":1,"price":180,"imagePaths":["/images/tumbler/vasos/aprobadas-20261105/v010.webp"],"colors":["Rosa"]},
 ];
 
 /**
@@ -186,4 +192,11 @@ const BY_CODE = new Map(TUMBLER_CUPS.map((item) => [item.code.toUpperCase(), ite
 /** Vaso a partir de su código interno. */
 export function cupByCode(code: string): CupItem | null {
   return BY_CODE.get(code.toUpperCase()) ?? null;
+}
+
+export type CupCatalogKind = "vasos" | "termos";
+
+/** Clasifica la ficha comercial, sin convertir cada foto o vista en un producto. */
+export function cupCatalogKind(item: Pick<CupItem, "name" | "collection">): CupCatalogKind {
+  return /termo/i.test(`${item.collection} ${item.name}`) ? "termos" : "vasos";
 }

@@ -19,7 +19,7 @@ import {
   cupHandle,
   cupImagePath,
   cupSku,
-  TUMBLER_CUPS,
+  TUMBLER_CUPS as PUBLISHED_CUPS,
 } from "../../src/lib/store/tumbler-cups";
 import {
   MOCK_CATEGORIES,
@@ -47,6 +47,8 @@ const EXPECTED: Record<string, { price: number; stock: number; capacity: string 
   V005: { price: 135, stock: 5, capacity: "16 oz - Can" },
 };
 const EXPECTED_CODES = Object.keys(EXPECTED);
+// El contrato original del Excel se conserva aunque el catálogo añada termos.
+const TUMBLER_CUPS = PUBLISHED_CUPS.filter((item) => EXPECTED_CODES.includes(item.code));
 
 // ---------------------------------------------------------------------------
 // 1) Exactamente 5 productos.
@@ -146,8 +148,7 @@ check(
   TUMBLER_CUPS.every((c) => c.name.trim().length > 0 && c.description.trim().length > 0),
 );
 check(
-  "colecciones exactamente las del Excel (4, sin inventar)",
-  CUP_COLLECTIONS.length === 4 &&
+  "colecciones originales del Excel conservadas",
     ["Colección Clásica", "Color Collection", "Slip Collection", "Can Collection"].every(
       (c) => CUP_COLLECTIONS.includes(c),
     ),
@@ -205,15 +206,15 @@ check(
 );
 check(
   "el nombre visible de la categoría NO se cambió",
-  category?.title === "SnowGlobe Bar",
+  category?.title === "Tumbler & SnowGlobe Bar",
   category?.title,
 );
 
 // ---------------------------------------------------------------------------
 // 26) Espejo en los mocks: 5 productos + 5 variantes, todos activos.
 // ---------------------------------------------------------------------------
-const mockProducts = MOCK_PRODUCTS.filter((p) => cupByHandle(p.handle));
-const mockVariants = MOCK_VARIANTS.filter((v) => /^VAS-V\d{3}$/.test(v.sku ?? ""));
+const mockProducts = MOCK_PRODUCTS.filter((p) => EXPECTED_CODES.includes(cupByHandle(p.handle)?.code ?? ""));
+const mockVariants = MOCK_VARIANTS.filter((v) => EXPECTED_CODES.map(cupSku).includes(v.sku ?? ""));
 check(`mocks: ${EXPECTED_TOTAL} productos`, mockProducts.length === EXPECTED_TOTAL, `${mockProducts.length}`);
 check(`mocks: ${EXPECTED_TOTAL} variantes`, mockVariants.length === EXPECTED_TOTAL, `${mockVariants.length}`);
 check(

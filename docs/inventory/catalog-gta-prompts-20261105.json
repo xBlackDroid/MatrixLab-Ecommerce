@@ -1,0 +1,686 @@
+{
+  "batch": "catalog-gta-tumbler-20261105",
+  "tool": "integrated imagegen",
+  "jobs": [
+    {
+      "id": "su010-azul-royal",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go007-azul-royal",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "gorra",
+      "code": "go007",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "01-duo-vice-gorra.png",
+      "references": [
+        "01-duo-vice-gorra.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice baseball cap photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-azul-royal",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go008-azul-royal",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "gorra",
+      "code": "go008",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "02-vice-city-sunset-gorra.png",
+      "references": [
+        "02-vice-city-sunset-gorra.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset baseball cap photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-azul-royal",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go009-azul-royal",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "gorra",
+      "code": "go009",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "03-leonida-night-drive-gorra.png",
+      "references": [
+        "03-leonida-night-drive-gorra.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive baseball cap photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-azul-royal",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go010-azul-royal",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "gorra",
+      "code": "go010",
+      "color": "Azul royal",
+      "slug": "azul-royal",
+      "source": "04-palm-club-gorra.png",
+      "references": [
+        "04-palm-club-gorra.png",
+        "su002-azul-royal.webp"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club baseball cap photograph to edit. Input2 is ONLY a fabric COLOR authority, ignore its Barista words and graphic.\nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clear rich royal BLUE #2455B8, same fabric shade as the supplied existing store blue hoodie; not cyan, not navy. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su010-azul-marino",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Azul marino",
+      "slug": "azul-marino",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to deep NAVY BLUE #182A4C, visibly blue in neutral light; not pitch black. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-azul-marino",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Azul marino",
+      "slug": "azul-marino",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to deep NAVY BLUE #182A4C, visibly blue in neutral light; not pitch black. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-azul-marino",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Azul marino",
+      "slug": "azul-marino",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to deep NAVY BLUE #182A4C, visibly blue in neutral light; not pitch black. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-azul-marino",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Azul marino",
+      "slug": "azul-marino",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to deep NAVY BLUE #182A4C, visibly blue in neutral light; not pitch black. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su010-lila",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Lila",
+      "slug": "lila",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to soft muted LILAC #B3A0C8, not vivid purple. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-lila",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Lila",
+      "slug": "lila",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to soft muted LILAC #B3A0C8, not vivid purple. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-lila",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Lila",
+      "slug": "lila",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to soft muted LILAC #B3A0C8, not vivid purple. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-lila",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Lila",
+      "slug": "lila",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to soft muted LILAC #B3A0C8, not vivid purple. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su010-negro",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go007-negro",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "gorra",
+      "code": "go007",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "01-duo-vice-gorra.png",
+      "references": [
+        "01-duo-vice-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-negro",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go008-negro",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "gorra",
+      "code": "go008",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "02-vice-city-sunset-gorra.png",
+      "references": [
+        "02-vice-city-sunset-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-negro",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go009-negro",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "gorra",
+      "code": "go009",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "03-leonida-night-drive-gorra.png",
+      "references": [
+        "03-leonida-night-drive-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-negro",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go010-negro",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "gorra",
+      "code": "go010",
+      "color": "Negro",
+      "slug": "negro",
+      "source": "04-palm-club-gorra.png",
+      "references": [
+        "04-palm-club-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to true neutral MATTE BLACK #171717 with visible cotton texture, not gray or blue. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su010-blanco",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go007-blanco",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "gorra",
+      "code": "go007",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "01-duo-vice-gorra.png",
+      "references": [
+        "01-duo-vice-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-blanco",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go008-blanco",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "gorra",
+      "code": "go008",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "02-vice-city-sunset-gorra.png",
+      "references": [
+        "02-vice-city-sunset-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-blanco",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go009-blanco",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "gorra",
+      "code": "go009",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "03-leonida-night-drive-gorra.png",
+      "references": [
+        "03-leonida-night-drive-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-blanco",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go010-blanco",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "gorra",
+      "code": "go010",
+      "color": "Blanco",
+      "slug": "blanco",
+      "source": "04-palm-club-gorra.png",
+      "references": [
+        "04-palm-club-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to clean neutral WHITE #F5F4F1, preserve soft gray folds and avoid clipped highlights. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su010-negro-jaspe",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Negro jaspe",
+      "slug": "negro-jaspe",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to CHARCOAL BLACK HEATHER #34343A with finely interwoven lighter fibers, genuine mottled cotton fleece textile, not a flat dark fill. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-negro-jaspe",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Negro jaspe",
+      "slug": "negro-jaspe",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to CHARCOAL BLACK HEATHER #34343A with finely interwoven lighter fibers, genuine mottled cotton fleece textile, not a flat dark fill. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-negro-jaspe",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Negro jaspe",
+      "slug": "negro-jaspe",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to CHARCOAL BLACK HEATHER #34343A with finely interwoven lighter fibers, genuine mottled cotton fleece textile, not a flat dark fill. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-negro-jaspe",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Negro jaspe",
+      "slug": "negro-jaspe",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to CHARCOAL BLACK HEATHER #34343A with finely interwoven lighter fibers, genuine mottled cotton fleece textile, not a flat dark fill. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su010-gris-jaspe",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Gris jaspe",
+      "slug": "gris-jaspe",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to MEDIUM LIGHT GRAY HEATHER #A7A7AA, finely mottled interwoven textile fibers, not flat gray. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-gris-jaspe",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Gris jaspe",
+      "slug": "gris-jaspe",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to MEDIUM LIGHT GRAY HEATHER #A7A7AA, finely mottled interwoven textile fibers, not flat gray. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-gris-jaspe",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Gris jaspe",
+      "slug": "gris-jaspe",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to MEDIUM LIGHT GRAY HEATHER #A7A7AA, finely mottled interwoven textile fibers, not flat gray. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-gris-jaspe",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Gris jaspe",
+      "slug": "gris-jaspe",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to MEDIUM LIGHT GRAY HEATHER #A7A7AA, finely mottled interwoven textile fibers, not flat gray. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su010-rojo",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "sudadera",
+      "code": "su010",
+      "color": "Rojo",
+      "slug": "rojo",
+      "source": "01-duo-vice-sudadera.png",
+      "references": [
+        "01-duo-vice-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to rich true RED #B62C38, not pink or orange. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su011-rojo",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "sudadera",
+      "code": "su011",
+      "color": "Rojo",
+      "slug": "rojo",
+      "source": "02-vice-city-sunset-sudadera.png",
+      "references": [
+        "02-vice-city-sunset-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to rich true RED #B62C38, not pink or orange. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\", \"WELCOME TO\", \"LEONIDA\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su012-rojo",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "sudadera",
+      "code": "su012",
+      "color": "Rojo",
+      "slug": "rojo",
+      "source": "03-leonida-night-drive-sudadera.png",
+      "references": [
+        "03-leonida-night-drive-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to rich true RED #B62C38, not pink or orange. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\", \"LEONIDA NIGHTS\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "su013-rojo",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "sudadera",
+      "code": "su013",
+      "color": "Rojo",
+      "slug": "rojo",
+      "source": "04-palm-club-sudadera.png",
+      "references": [
+        "04-palm-club-sudadera.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club hoodie photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to rich true RED #B62C38, not pink or orange. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood and black trousers, textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; SQUARE 1:1. Do not change the person, hair, hands, pose or front/back view.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GRAND THEFT AUTO\", \"VI\", \"VICE CITY\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go007-rosa",
+      "design": "01-duo-vice",
+      "name": "Dúo Vice",
+      "type": "gorra",
+      "code": "go007",
+      "color": "Rosa",
+      "slug": "rosa",
+      "source": "01-duo-vice-gorra.png",
+      "references": [
+        "01-duo-vice-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Dúo Vice baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to washed berry ROSE PINK #B7456D like MatrixLab pink caps, distinctly deeper than pale pastel pink. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"grand\", \"theft\", \"auto\", \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go008-rosa",
+      "design": "02-vice-city-sunset",
+      "name": "Vice City Sunset",
+      "type": "gorra",
+      "code": "go008",
+      "color": "Rosa",
+      "slug": "rosa",
+      "source": "02-vice-city-sunset-gorra.png",
+      "references": [
+        "02-vice-city-sunset-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Vice City Sunset baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to washed berry ROSE PINK #B7456D like MatrixLab pink caps, distinctly deeper than pale pastel pink. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\", \"Vice city\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go009-rosa",
+      "design": "03-leonida-night-drive",
+      "name": "Leonida Night Drive",
+      "type": "gorra",
+      "code": "go009",
+      "color": "Rosa",
+      "slug": "rosa",
+      "source": "03-leonida-night-drive-gorra.png",
+      "references": [
+        "03-leonida-night-drive-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final Leonida Night Drive baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to washed berry ROSE PINK #B7456D like MatrixLab pink caps, distinctly deeper than pale pastel pink. Preserve the exact person/pose/back view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"GTA VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    },
+    {
+      "id": "go010-rosa",
+      "design": "04-palm-club",
+      "name": "VI Palm Club",
+      "type": "gorra",
+      "code": "go010",
+      "color": "Rosa",
+      "slug": "rosa",
+      "source": "04-palm-club-gorra.png",
+      "references": [
+        "04-palm-club-gorra.png"
+      ],
+      "prompt": "Use case: precise-object-edit / product-mockup recoloring. Input1 is the EXACT final VI Palm Club baseball cap photograph to edit. \nCHANGE ONLY THE GARMENT FABRIC COLOR from pastel pink to washed berry ROSE PINK #B7456D like MatrixLab pink caps, distinctly deeper than pale pastel pink. Preserve the exact person/pose/front view, garment construction, seams, cuffs and hood (for cap preserve crown, button, eyelets, curved brim and black stand), textile volume and shadows. Keep background and camera EXACTLY the same: dark technology studio, soft cyan left and magenta right, neutral softbox on fabric. Entire complete single product in same frame; PORTRAIT 3:4. No person, full cap and brim on matte black display form.\nKEEP THE PRINTED ARTWORK unchanged: same artwork shapes, exact composition, colors, placement and proportions; main exact text \"VI\". All graphic details must remain recognizable and legible; no redraw, replacement slogan, added technical label, icons, barcode, watermark, UI or new objects. Preserve sunset colors and dark outlines inside the print. If contrast against a dark fabric is low, preserve its existing pale keyline rather than recoloring the design. No tinted filter over whole photograph, no recoloring skin, ink or stand. Photorealistic product catalog variant; ONE final image."
+    }
+  ]
+}

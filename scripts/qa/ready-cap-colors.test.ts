@@ -26,7 +26,7 @@ for (let number = 1; number <= 6; number++) {
     assert.equal(readyWearProductHref(handle, color), `/tienda/producto/${handle}?color=${slug}`);
   }
 }
-for (const invalid of ["wear-gorra-go000", "wear-gorra-go007", "wear-gorra-go01", "gorra-personalizada"]) {
+for (const invalid of ["wear-gorra-go000", "wear-gorra-go011", "wear-gorra-go01", "gorra-personalizada"]) {
   assert.equal(isReadyWearCapHandle(invalid), false);
   assert.equal(readyWearVariantImage(invalid, "Rosa"), null);
 }

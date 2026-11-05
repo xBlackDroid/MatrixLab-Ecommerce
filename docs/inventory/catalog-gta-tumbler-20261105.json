@@ -1,0 +1,1280 @@
+{
+  "batch": "catalog-gta-tumbler-20261105",
+  "date": "2026-11-05",
+  "sourceZip": "gta-rosa-pastel-4-modelos-2026-11-05-v2.zip",
+  "sourceProductionCommit": "300d109feabf5dc93ce0fdfc3b328cc5b7bda98e",
+  "status": "prepared; production evidence recorded separately",
+  "confidence": {
+    "dataAndPaths": "T1, verified by tests and database receipts",
+    "recolorAndMaterial": "T2, visual review of all 56 images; not colorimetric measurement"
+  },
+  "commercial": {
+    "hoodiePriceMXN": 645,
+    "capPriceMXN": 279,
+    "cuts": [
+      "Hombre",
+      "Mujer"
+    ],
+    "sizes": [
+      "Chica",
+      "Mediana",
+      "Grande"
+    ],
+    "hoodieStockPerVariant": 5,
+    "capStockPerVariant": 1,
+    "hoodieColors": [
+      "Rosa pastel",
+      "Azul royal",
+      "Azul marino",
+      "Lila",
+      "Negro",
+      "Blanco",
+      "Negro jaspe",
+      "Gris jaspe",
+      "Rojo"
+    ],
+    "capColors": [
+      "Rosa pastel",
+      "Azul royal",
+      "Rosa",
+      "Negro",
+      "Blanco"
+    ]
+  },
+  "counts": {
+    "wearProducts": 8,
+    "wearVariants": 236,
+    "wearStock": 1100,
+    "newThermos": 1,
+    "newThermosStock": 1,
+    "images": 70
+  },
+  "products": [
+    {
+      "handle": "wear-sudadera-su010",
+      "title": "Sudadera GTA VI Dúo Vice",
+      "description": "Sudadera GTA VI Dúo Vice. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre nueve colores, corte Hombre o Mujer y talla Chica, Mediana o Grande.",
+      "category": "wear-sudaderas",
+      "base_price": 645,
+      "images": [
+        "/images/matrixlab-wear/hoodies/su010-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:sudaderas",
+        "coleccion:gta",
+        "SU010",
+        "catalog-gta-tumbler-20261105",
+        "adulto",
+        "coleccion:sudaderas"
+      ],
+      "max_quantity": 5
+    },
+    {
+      "handle": "wear-gorra-go007",
+      "title": "Gorra GTA VI Dúo Vice",
+      "description": "Gorra GTA VI Dúo Vice. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre cinco colores. Sin selección de corte o talla.",
+      "category": "gorras",
+      "base_price": 279,
+      "images": [
+        "/images/matrixlab-wear/gorras/colors/go007-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:gorras",
+        "coleccion:gta",
+        "GO007",
+        "catalog-gta-tumbler-20261105"
+      ],
+      "max_quantity": 1
+    },
+    {
+      "handle": "wear-sudadera-su011",
+      "title": "Sudadera GTA VI Vice City Sunset",
+      "description": "Sudadera GTA VI Vice City Sunset. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre nueve colores, corte Hombre o Mujer y talla Chica, Mediana o Grande.",
+      "category": "wear-sudaderas",
+      "base_price": 645,
+      "images": [
+        "/images/matrixlab-wear/hoodies/su011-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:sudaderas",
+        "coleccion:gta",
+        "SU011",
+        "catalog-gta-tumbler-20261105",
+        "adulto",
+        "coleccion:sudaderas"
+      ],
+      "max_quantity": 5
+    },
+    {
+      "handle": "wear-gorra-go008",
+      "title": "Gorra GTA VI Vice City Sunset",
+      "description": "Gorra GTA VI Vice City Sunset. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre cinco colores. Sin selección de corte o talla.",
+      "category": "gorras",
+      "base_price": 279,
+      "images": [
+        "/images/matrixlab-wear/gorras/colors/go008-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:gorras",
+        "coleccion:gta",
+        "GO008",
+        "catalog-gta-tumbler-20261105"
+      ],
+      "max_quantity": 1
+    },
+    {
+      "handle": "wear-sudadera-su012",
+      "title": "Sudadera GTA VI Leonida Night Drive",
+      "description": "Sudadera GTA VI Leonida Night Drive. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre nueve colores, corte Hombre o Mujer y talla Chica, Mediana o Grande.",
+      "category": "wear-sudaderas",
+      "base_price": 645,
+      "images": [
+        "/images/matrixlab-wear/hoodies/su012-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:sudaderas",
+        "coleccion:gta",
+        "SU012",
+        "catalog-gta-tumbler-20261105",
+        "adulto",
+        "coleccion:sudaderas"
+      ],
+      "max_quantity": 5
+    },
+    {
+      "handle": "wear-gorra-go009",
+      "title": "Gorra GTA VI Leonida Night Drive",
+      "description": "Gorra GTA VI Leonida Night Drive. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre cinco colores. Sin selección de corte o talla.",
+      "category": "gorras",
+      "base_price": 279,
+      "images": [
+        "/images/matrixlab-wear/gorras/colors/go009-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:gorras",
+        "coleccion:gta",
+        "GO009",
+        "catalog-gta-tumbler-20261105"
+      ],
+      "max_quantity": 1
+    },
+    {
+      "handle": "wear-sudadera-su013",
+      "title": "Sudadera GTA VI VI Palm Club",
+      "description": "Sudadera GTA VI VI Palm Club. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre nueve colores, corte Hombre o Mujer y talla Chica, Mediana o Grande.",
+      "category": "wear-sudaderas",
+      "base_price": 645,
+      "images": [
+        "/images/matrixlab-wear/hoodies/su013-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:sudaderas",
+        "coleccion:gta",
+        "SU013",
+        "catalog-gta-tumbler-20261105",
+        "adulto",
+        "coleccion:sudaderas"
+      ],
+      "max_quantity": 5
+    },
+    {
+      "handle": "wear-gorra-go010",
+      "title": "Gorra GTA VI VI Palm Club",
+      "description": "Gorra GTA VI VI Palm Club. Estética Vice City en una pieza lista para combinar. Rosa pastel y azul royal encabezan la colección. Elige entre cinco colores. Sin selección de corte o talla.",
+      "category": "gorras",
+      "base_price": 279,
+      "images": [
+        "/images/matrixlab-wear/gorras/colors/go010-rosa-pastel.webp"
+      ],
+      "tags": [
+        "matrixlab-wear",
+        "prenda-lista",
+        "tipo:gorras",
+        "coleccion:gta",
+        "GO010",
+        "catalog-gta-tumbler-20261105"
+      ],
+      "max_quantity": 1
+    },
+    {
+      "handle": "vaso-v010",
+      "title": "Termo rosa con asa y tapa deslizante",
+      "description": "Termo rosa con asa lateral y tapa deslizante. Una base lisa para acompañarte cada día o preparar tu siguiente proyecto personalizado. Colección Termos. Ref. V010.",
+      "category": "snowglobe",
+      "base_price": 180,
+      "images": [
+        "/images/tumbler/vasos/aprobadas-20261105/v010.webp"
+      ],
+      "tags": [
+        "matrixlab-tumbler",
+        "vasos",
+        "termos",
+        "V010",
+        "catalog-gta-tumbler-20261105"
+      ],
+      "max_quantity": 1
+    }
+  ],
+  "imageUpdates": {
+    "vaso-v001": [
+      "/images/tumbler/vasos/aprobadas-20261105/v001.webp",
+      "/images/tumbler/vasos/aprobadas-20261105/v001-2.webp"
+    ],
+    "vaso-v002": [
+      "/images/tumbler/vasos/aprobadas-20261105/v002.webp"
+    ],
+    "vaso-v003": [
+      "/images/tumbler/vasos/aprobadas-20261105/v003.webp"
+    ],
+    "vaso-v004": [
+      "/images/tumbler/vasos/aprobadas-20261105/v004.webp"
+    ],
+    "vaso-v005": [
+      "/images/tumbler/vasos/aprobadas-20261105/v005.webp"
+    ],
+    "vaso-v006": [
+      "/images/tumbler/vasos/aprobadas-20261105/v006.webp",
+      "/images/tumbler/vasos/aprobadas-20261105/v006-2.webp",
+      "/images/tumbler/vasos/aprobadas-20261105/v006-3.webp",
+      "/images/tumbler/vasos/aprobadas-20261105/v006-4.webp"
+    ],
+    "vaso-v007": [
+      "/images/tumbler/vasos/aprobadas-20261105/v007.webp"
+    ],
+    "vaso-v008": [
+      "/images/tumbler/vasos/aprobadas-20261105/v008.webp"
+    ],
+    "vaso-v009": [
+      "/images/tumbler/vasos/aprobadas-20261105/v009.webp"
+    ],
+    "vaso-listo-vl001": [
+      "/images/tumbler/listos/vl001-2.webp",
+      "/images/tumbler/listos/vl001.webp",
+      "/images/tumbler/listos/vl001-3.webp"
+    ]
+  },
+  "assets": [
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "rosa-pastel",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-rosa-pastel.webp",
+      "sha256": "e6ee810d14df56baa8b07abad3dc4ceed62b323ee80f93b62a67f8c632309ffa",
+      "sourceFile": "01-duo-vice-sudadera.png"
+    },
+    {
+      "code": "go007",
+      "type": "gorra",
+      "color": "rosa-pastel",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go007-rosa-pastel.webp",
+      "sha256": "7bc74b2c708bb5504d8245bc9394f69a045fe8f5926ce97e55ec8a49d85ad7fa",
+      "sourceFile": "01-duo-vice-gorra.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "rosa-pastel",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-rosa-pastel.webp",
+      "sha256": "1082312f03e5bfd9cb922d8354d1b0457dd82f0f585bd5e5a26e66025e932e24",
+      "sourceFile": "02-vice-city-sunset-sudadera.png"
+    },
+    {
+      "code": "go008",
+      "type": "gorra",
+      "color": "rosa-pastel",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go008-rosa-pastel.webp",
+      "sha256": "b597f301ee0218c8ba71b62175e8b726b7d02ef19569de818e69c4f1548b3ed5",
+      "sourceFile": "02-vice-city-sunset-gorra.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "rosa-pastel",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-rosa-pastel.webp",
+      "sha256": "91f215d16f1116a657736fa56e819e2fe88fcbb569a8023a9daad4ecb40bdb69",
+      "sourceFile": "03-leonida-night-drive-sudadera.png"
+    },
+    {
+      "code": "go009",
+      "type": "gorra",
+      "color": "rosa-pastel",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go009-rosa-pastel.webp",
+      "sha256": "85ddfb0acbf6a14beae3a8879c7801192f45578ebd493601c6ec4f5f992d4e5e",
+      "sourceFile": "03-leonida-night-drive-gorra.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "rosa-pastel",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-rosa-pastel.webp",
+      "sha256": "eaee9b91501244953396b819279da058f49974bddac4f544bf583e69d635cbfd",
+      "sourceFile": "04-palm-club-sudadera.png"
+    },
+    {
+      "code": "go010",
+      "type": "gorra",
+      "color": "rosa-pastel",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go010-rosa-pastel.webp",
+      "sha256": "429aa7296ce1b245e1c539ac75287d9d435d0f9a2d617485cde991b70f02f625",
+      "sourceFile": "04-palm-club-gorra.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "azul-royal",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-azul-royal.webp",
+      "sha256": "834107b93e60c94a4c0931ad8c69a4193f5928724f4865eee057714ac4e0fa7b",
+      "sourceFile": "su010-azul-royal.png"
+    },
+    {
+      "code": "go007",
+      "type": "gorra",
+      "color": "azul-royal",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go007-azul-royal.webp",
+      "sha256": "fdf4117c3ae2b0c4988467204680078940be77617bc5f34b6693b520905bf6be",
+      "sourceFile": "go007-azul-royal.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "azul-royal",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-azul-royal.webp",
+      "sha256": "b9a0797f74ddff6831bc6b99faf4a23cca959d281f38c788e32def856ffb1898",
+      "sourceFile": "su011-azul-royal.png"
+    },
+    {
+      "code": "go008",
+      "type": "gorra",
+      "color": "azul-royal",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go008-azul-royal.webp",
+      "sha256": "0c28f01f1be93964c041efa65f89b019435524bb29d3a6b35909f32b2a6a8dc0",
+      "sourceFile": "go008-azul-royal.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "azul-royal",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-azul-royal.webp",
+      "sha256": "d5e629e5b688a7002a7296bfa03e0d6429897fddeab0b61ce537549bc6161684",
+      "sourceFile": "su012-azul-royal.png"
+    },
+    {
+      "code": "go009",
+      "type": "gorra",
+      "color": "azul-royal",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go009-azul-royal.webp",
+      "sha256": "52fae65b7b75f8f34cf81d41d03a36220d13168adcff300b6e853e18c51de8d5",
+      "sourceFile": "go009-azul-royal.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "azul-royal",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-azul-royal.webp",
+      "sha256": "d6822dff16eaac0e963e31768080203befcc047e0627cc40b81345caf8c55080",
+      "sourceFile": "su013-azul-royal.png"
+    },
+    {
+      "code": "go010",
+      "type": "gorra",
+      "color": "azul-royal",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go010-azul-royal.webp",
+      "sha256": "92f6908c2c6880eee118c272743f90ad70887ebe2563e2c5a9317b983c10f147",
+      "sourceFile": "go010-azul-royal.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "azul-marino",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-azul-marino.webp",
+      "sha256": "1c79e19f2895dc78b860ec7bbeb329b154e703ea5a891b4b2863a5d2daa26fe8",
+      "sourceFile": "su010-azul-marino.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "azul-marino",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-azul-marino.webp",
+      "sha256": "5d6f48fd15048a6cfc76175778c79f84990ffefc1794b7dac41bd76d08cdc70b",
+      "sourceFile": "su011-azul-marino.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "azul-marino",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-azul-marino.webp",
+      "sha256": "058c15b07ad4e96152c7d25bd223869f56ab8ba6ee396fe51c7e8ce7bf8f86eb",
+      "sourceFile": "su012-azul-marino.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "azul-marino",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-azul-marino.webp",
+      "sha256": "843708ef95676a90bfce050bb9970a897a4b1c46200872fde41bbbab8fbebc29",
+      "sourceFile": "su013-azul-marino.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "lila",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-lila.webp",
+      "sha256": "d64f0bac561acac2b2874fe06c5d83df9796672a5bb3510dea547be824dadca2",
+      "sourceFile": "su010-lila.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "lila",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-lila.webp",
+      "sha256": "2f96c4715b293a14acaeba93387d217f62a50885d3f2d25bfb9fa7649f522e92",
+      "sourceFile": "su011-lila.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "lila",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-lila.webp",
+      "sha256": "8aebc013083b4a3f4c132791563799ad45103b49f5374622b2e461f21e192e4d",
+      "sourceFile": "su012-lila.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "lila",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-lila.webp",
+      "sha256": "90a8c9e7e41e1d9461b868dd65937ad86141bdad2423ac38e637287041790066",
+      "sourceFile": "su013-lila.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "negro",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-negro.webp",
+      "sha256": "7cac93998abf4c80727f7d87069e4b93966acb776361fc97cb07d16a42122608",
+      "sourceFile": "su010-negro.png"
+    },
+    {
+      "code": "go007",
+      "type": "gorra",
+      "color": "negro",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go007-negro.webp",
+      "sha256": "a264a8e660891ad755ef8cd03d6a747f81cd831012133c1317f830cfb8b9e8c4",
+      "sourceFile": "go007-negro.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "negro",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-negro.webp",
+      "sha256": "2f801b20199e53635a0570e89ac2931257701d66c39b792c01ee06ff9cb27ee9",
+      "sourceFile": "su011-negro.png"
+    },
+    {
+      "code": "go008",
+      "type": "gorra",
+      "color": "negro",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go008-negro.webp",
+      "sha256": "1644c5347a86d76c68dcb4d023ad698dd5e6b8c0e1a5cb5ca0dd61610177e688",
+      "sourceFile": "go008-negro.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "negro",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-negro.webp",
+      "sha256": "f7e0355a1d26be14c53afdb0d627a597af7e4a41aea47032e0ee29a853abd505",
+      "sourceFile": "su012-negro.png"
+    },
+    {
+      "code": "go009",
+      "type": "gorra",
+      "color": "negro",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go009-negro.webp",
+      "sha256": "bb3bbe693e6dcd1b3d83920d7935580dbec930b4039fde32c6c24d07f350d088",
+      "sourceFile": "go009-negro.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "negro",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-negro.webp",
+      "sha256": "d15a1a85b6f46cdbbedbfa214faccaceb1d3cbb130a9ca29c7b0d18c94d540fa",
+      "sourceFile": "su013-negro.png"
+    },
+    {
+      "code": "go010",
+      "type": "gorra",
+      "color": "negro",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go010-negro.webp",
+      "sha256": "50ee5d9a454504c0fe6ef296e095f405b566e9660e9ad3646d64a60c30b165ca",
+      "sourceFile": "go010-negro.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "blanco",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-blanco.webp",
+      "sha256": "83c3fb4917805ca9b52e6545dff36d13c7c3be22ce8e9d4cf984ec1e6767cc59",
+      "sourceFile": "su010-blanco.png"
+    },
+    {
+      "code": "go007",
+      "type": "gorra",
+      "color": "blanco",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go007-blanco.webp",
+      "sha256": "7c93e5c0f32d3c72106f1d4ef0d4255ae53454550da749d48edd865a8eadc98e",
+      "sourceFile": "go007-blanco.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "blanco",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-blanco.webp",
+      "sha256": "868c9969f90dd51f7b92920d61e0d986af51df22703ed6077c7812efd0f7c788",
+      "sourceFile": "su011-blanco.png"
+    },
+    {
+      "code": "go008",
+      "type": "gorra",
+      "color": "blanco",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go008-blanco.webp",
+      "sha256": "715f13e8634c0c3dd00443fec037721adb07888cc0b7be901930dd2dad3f9657",
+      "sourceFile": "go008-blanco.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "blanco",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-blanco.webp",
+      "sha256": "0b93bcce91bb16245e1b0ad7b19064e7c9593e4145206a29419fd2a06bbc307e",
+      "sourceFile": "su012-blanco.png"
+    },
+    {
+      "code": "go009",
+      "type": "gorra",
+      "color": "blanco",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go009-blanco.webp",
+      "sha256": "f6964c0c2faa1f25fec7378a9e744704e51446dfaec5c44694dac7d70f94f37a",
+      "sourceFile": "go009-blanco.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "blanco",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-blanco.webp",
+      "sha256": "89d41b6f3315adcaac37f143407691029f78743b8b3de6b4bafec40db4ac0b4e",
+      "sourceFile": "su013-blanco.png"
+    },
+    {
+      "code": "go010",
+      "type": "gorra",
+      "color": "blanco",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go010-blanco.webp",
+      "sha256": "d3db9bc8427fccb853f71494671664d49d629e848f99f505e7f90a1d8cfcbd9a",
+      "sourceFile": "go010-blanco.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "negro-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-negro-jaspe.webp",
+      "sha256": "d116a13341b618eab0079ca71591a9e09905f65b4a56383333e2ca6ecf22a6de",
+      "sourceFile": "su010-negro-jaspe.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "negro-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-negro-jaspe.webp",
+      "sha256": "fd2ddc3107f8e88edcd2d6ad98bd969f35017d00978e280b27bbf2c008051b6b",
+      "sourceFile": "su011-negro-jaspe.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "negro-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-negro-jaspe.webp",
+      "sha256": "6cf882e397a6d4a32d6ff1c2a209b7904e37629f367731826bb9cb46aa12a732",
+      "sourceFile": "su012-negro-jaspe.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "negro-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-negro-jaspe.webp",
+      "sha256": "0ff89aa970fb615f281b112287f6cbc21faafef90a9f48750f0f16c2b6f608e9",
+      "sourceFile": "su013-negro-jaspe.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "gris-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-gris-jaspe.webp",
+      "sha256": "d4fcfb89cda9660b4e782a271e4464aa656d364d51163e4af3c2afe54f7f8bff",
+      "sourceFile": "su010-gris-jaspe.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "gris-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-gris-jaspe.webp",
+      "sha256": "33c465e482172f7a3d383ee9737c4e5d8d57222ff7bc384159badb1764913d37",
+      "sourceFile": "su011-gris-jaspe.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "gris-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-gris-jaspe.webp",
+      "sha256": "d84939893ba6e87cd6064113988f8ac0d5970b3f9d478fd7f91fe7fe70e36fa1",
+      "sourceFile": "su012-gris-jaspe.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "gris-jaspe",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-gris-jaspe.webp",
+      "sha256": "e35aa46ee3530988eec2cd4d93281b479379a26a539625eb5278e7b48f4702cd",
+      "sourceFile": "su013-gris-jaspe.png"
+    },
+    {
+      "code": "su010",
+      "type": "sudadera",
+      "color": "rojo",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su010-rojo.webp",
+      "sha256": "4b9fba8e95e3d648d1d099617e5adcb1c52c71f58ae09f66108ed8dcf986d78f",
+      "sourceFile": "su010-rojo.png"
+    },
+    {
+      "code": "su011",
+      "type": "sudadera",
+      "color": "rojo",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su011-rojo.webp",
+      "sha256": "d0892d8b7714a9bc3c2fbca655b6947e89786f9175c7dabc216431f893041d49",
+      "sourceFile": "su011-rojo.png"
+    },
+    {
+      "code": "su012",
+      "type": "sudadera",
+      "color": "rojo",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su012-rojo.webp",
+      "sha256": "97255a8a63e82fcf338a838301d7a73ace58a1ef96545849cb300e5812adb876",
+      "sourceFile": "su012-rojo.png"
+    },
+    {
+      "code": "su013",
+      "type": "sudadera",
+      "color": "rojo",
+      "native": [
+        1254,
+        1254
+      ],
+      "pixels": [
+        724,
+        724
+      ],
+      "image": "/images/matrixlab-wear/hoodies/su013-rojo.webp",
+      "sha256": "1201c89ba7fb1ff3fd68fcee16611157e0e52a5065ca97ceaedde78031451870",
+      "sourceFile": "su013-rojo.png"
+    },
+    {
+      "code": "go007",
+      "type": "gorra",
+      "color": "rosa",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go007-rosa.webp",
+      "sha256": "ca118104f29527d3f638353ff536cd1855f309552c496e7ae0a143dbf02fa7d3",
+      "sourceFile": "go007-rosa.png"
+    },
+    {
+      "code": "go008",
+      "type": "gorra",
+      "color": "rosa",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go008-rosa.webp",
+      "sha256": "db929e98fc5f33e113cb10d257c99c1f9234b4e703962de6a39d98a5e3c0bc25",
+      "sourceFile": "go008-rosa.png"
+    },
+    {
+      "code": "go009",
+      "type": "gorra",
+      "color": "rosa",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go009-rosa.webp",
+      "sha256": "13b66c210f08a2bdf5ef45b050b4c52d715ab6f5b6ba163e55466b5b1414b06e",
+      "sourceFile": "go009-rosa.png"
+    },
+    {
+      "code": "go010",
+      "type": "gorra",
+      "color": "rosa",
+      "native": [
+        1086,
+        1448
+      ],
+      "pixels": [
+        543,
+        724
+      ],
+      "image": "/images/matrixlab-wear/gorras/colors/go010-rosa.webp",
+      "sha256": "529c71c4745f500e21b422549d68b041e47c91ea877f0afbcfd3ca2e5ecf8221",
+      "sourceFile": "go010-rosa.png"
+    },
+    {
+      "code": "v001",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v001.webp",
+      "sha256": "4a3e7f8b8218dd0057856af3ce01fddcd2db624a8a4a171723a2e6841e51c76f",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_2655_master.png"
+    },
+    {
+      "code": "v001-2",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v001-2.webp",
+      "sha256": "9c49aa8abb555de293db5cb14868a86fbbd83fa2266ffd4720c297313a200c1d",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_2653_master.png"
+    },
+    {
+      "code": "v002",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v002.webp",
+      "sha256": "764b17bea5f85196922895795ab87a691a340b72880e0302dbf5ef6c5a200c03",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_2652_master.png"
+    },
+    {
+      "code": "v003",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v003.webp",
+      "sha256": "c0f0a7c3cf2ea0980e49bb75ccbd85e92803ba4f406bc6526ce09b653d58bc5c",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_2656_master.png"
+    },
+    {
+      "code": "v004",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v004.webp",
+      "sha256": "76ab8bec817b5f4998362bc8a6189671df99dc0f0705d0acf30fc1e72561e41a",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_2654_master.png"
+    },
+    {
+      "code": "v005",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v005.webp",
+      "sha256": "4987602a8d4d7212a286f897d2834baa9bf520b945fad37612d9be32ec6a1ae8",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_2657_master.png"
+    },
+    {
+      "code": "v006",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v006.webp",
+      "sha256": "ae1dc27d83998a5f2e4fa1867bbbc9831f632c86479d67969a62694ef8c4e404",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4781_master.png"
+    },
+    {
+      "code": "v006-2",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v006-2.webp",
+      "sha256": "562b214582c5f000aed56974478fad4ee232664cd3e7eea51e1ccdff9fdfd9bd",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4777_master.png"
+    },
+    {
+      "code": "v006-3",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v006-3.webp",
+      "sha256": "6b4046abc23b69dbd31375d71213d7d9ecfd20f01139e17ea130db892996bd93",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4778_master.png"
+    },
+    {
+      "code": "v006-4",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v006-4.webp",
+      "sha256": "b5933e92c58a35401414f6b48e1c530c2223639eae0c0dd4c30e1f559c8ad0f5",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4780_master.png"
+    },
+    {
+      "code": "v007",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v007.webp",
+      "sha256": "49ec1e23e57a66b19253ae89fe34bcb621a9e157bcf059af0b9844a21d1dcc9e",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4274_master.png"
+    },
+    {
+      "code": "v008",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v008.webp",
+      "sha256": "25b73b7d72bded9a1bd0e8d93565b71355d0bf9e38af3cfa1083b4423bc58bd1",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4275_master.png"
+    },
+    {
+      "code": "v009",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v009.webp",
+      "sha256": "7c81018dfbe9b6aac7f8b09c8d908cd8dbd3937cc337a16e79bf597ebb844fa2",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4782_master.png"
+    },
+    {
+      "code": "v010",
+      "image": "/images/tumbler/vasos/aprobadas-20261105/v010.webp",
+      "sha256": "6ef375cbbab5b7a17b484dd1c77d8751654516182a9b670413f97e1d8fb985d3",
+      "operation": "approved master composited over white, encoded/resized only; no new retouch",
+      "visualConfidence": "T2 inherited, reviewed as batch",
+      "sourceFile": "IMG_4161_master.png"
+    }
+  ]
+}

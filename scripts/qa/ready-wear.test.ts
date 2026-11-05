@@ -164,7 +164,7 @@ async function main() {
     [...SHIRTS, ...HOODIES].every(colors.isReadyWearGarmentHandle) &&
       ![
         "wear-sudadera-su000",
-        "wear-sudadera-su010",
+        "wear-sudadera-su014",
         "wear-sudadera-su01",
         TOTE,
         "sudadera-personalizada",
@@ -485,8 +485,8 @@ async function main() {
   );
   check(
     "ficha: rama de prenda lista generalizada; color validado por prenda",
-    read("src/app/tienda/producto/[handle]/page.tsx").includes("isReadyWearGarmentHandle(product.handle) ?") &&
-      read("src/app/tienda/producto/[handle]/page.tsx").includes("parseReadyWearColorFor("),
+    read("src/app/tienda/producto/[handle]/page.tsx").includes("hasReadyGarmentColorPreviews(product.handle)") &&
+      read("src/app/tienda/producto/[handle]/page.tsx").includes("parseReadyGarmentColor("),
   );
 
   console.log(failures === 0 ? "\nTodo OK." : `\n${failures} fallo(s).`);

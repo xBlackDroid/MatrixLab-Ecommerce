@@ -3,33 +3,63 @@
 import { useState } from "react";
 import Image from "@/components/store/StoreImage";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import AddToCartButton from "@/components/store/AddToCartButton";
 import type { CupCatalogEntry } from "@/lib/store/products";
-import { cupRefLabel } from "@/lib/store/tumbler-cups";
+import { cupCatalogKind, cupRefLabel, type CupCatalogKind } from "@/lib/store/tumbler-cups";
 import { cn, formatPrice } from "@/lib/utils";
 
 /**
  * Catálogo de vasos de MatrixLab Tumbler.
  *
- * Son 5 productos y caben completos en pantalla, así que —a diferencia de
- * Sparkles (46) y UV Stickers (209)— NO lleva buscador ni filtros: con este
- * volumen sólo añadirían ruido, sobre todo en móvil. El orden es el del Excel
- * (V001 → V005) y no se reordena.
+ * Conserva el orden del catálogo y permite encontrar por separado vasos
+ * y termos, también mediante un enlace con ?tipo=termos.
  */
 export default function TumblerCupsCatalog({
   entries,
 }: {
   entries: CupCatalogEntry[];
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const rawKind = searchParams.get("tipo");
+  const selectedKind: CupCatalogKind | null =
+    rawKind === "vasos" || rawKind === "termos" ? rawKind : null;
+  const visibleEntries = selectedKind
+    ? entries.filter((entry) => cupCatalogKind(entry.item) === selectedKind)
+    : entries;
+  const filters: { kind: CupCatalogKind | null; label: string; count: number }[] = [
+    { kind: null, label: "Todos", count: entries.length },
+    { kind: "vasos", label: "Vasos", count: entries.filter((entry) => cupCatalogKind(entry.item) === "vasos").length },
+    { kind: "termos", label: "Termos", count: entries.filter((entry) => cupCatalogKind(entry.item) === "termos").length },
+  ];
+  function selectKind(kind: CupCatalogKind | null) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (kind) params.set("tipo", kind);
+    else params.delete("tipo");
+    router.replace(`${pathname}${params.size ? `?${params.toString()}` : ""}`, { scroll: false });
+  }
   return (
     <div className="mt-10">
+      <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Filtrar vasos y termos">
+        {filters.map((filter) => (
+          <button key={filter.kind ?? "todos"} type="button"
+            aria-pressed={selectedKind === filter.kind}
+            onClick={() => selectKind(filter.kind)}
+            className={cn("min-h-11 rounded-full border px-4 py-2 text-sm font-semibold transition",
+              selectedKind === filter.kind ? "border-ml-cyan bg-ml-cyan/15 text-ml-cyan" : "border-ui-border text-ui-text-muted hover:border-ml-cyan/50")}>
+            {filter.label} <span className="ml-1 text-xs opacity-70">{filter.count}</span>
+          </button>
+        ))}
+      </div>
       <p className="text-sm text-ui-text-muted">
-        {entries.length} {entries.length === 1 ? "vaso" : "vasos"} disponibles
+        {visibleEntries.length} {visibleEntries.length === 1 ? "producto" : "productos"} disponibles
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-        {entries.map((entry) => (
+        {visibleEntries.map((entry) => (
           <CupCard key={entry.productId} entry={entry} />
         ))}
       </div>
